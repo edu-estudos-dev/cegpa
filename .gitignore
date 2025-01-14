@@ -1,0 +1,20 @@
+# Dependências do node
+node_modules/
+
+# Arquivo de variáveis de ambiente
+.env
+
+# Logs
+logs/
+*.log
+
+# Diretórios de build
+dist/
+build/
+coverage/
+
+# Configurações locais
+.DS_Store
+.vscode/
+.idea/
+
