@@ -41,9 +41,16 @@
   animation: spinner-border 0.75s linear infinite;
 }
 
+
 main {
   padding: 1rem;
 }
+
+.main-relatorios {
+  padding: 1rem;
+  margin-top: 5rem; /* Adiciona margem superior para descolar do navbar */
+}
+
 
 .navbar {
   position: fixed;
@@ -87,7 +94,7 @@ input::placeholder {
   background-color: #fff;
   padding: 10px;
   border-radius: 5px;
-  height: 65vh !important;
+  height: 60vh;
 }
 
 #selected-tombos-container {
@@ -96,7 +103,7 @@ input::placeholder {
   background-color: #fff;
   padding: 0px;
   border-radius: 5px;
-  height: 24vh !important;
+  height: 220px;
   margin-bottom: 2rem;
 }
 

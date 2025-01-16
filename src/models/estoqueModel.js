@@ -251,8 +251,8 @@ class EstoqueModel {
   };
 
   // Método para obter o histórico de movimentação
-getHistoricoMovimentacao = async () => {
-  const query = `
+  getHistoricoMovimentacao = async () => {
+    const query = `
     SELECT 
       'entrada' AS tipo, 
       data_de_entrada AS data, 
@@ -269,18 +269,18 @@ getHistoricoMovimentacao = async () => {
     FROM itenspagos
     ORDER BY data DESC;
   `;
-  try {
-    const [results] = await connection.execute(query);
-    return results;
-  } catch (error) {
-    console.error("Erro ao buscar histórico de movimentação:", error);
-    throw error;
-  }
-};
+    try {
+      const [results] = await connection.execute(query);
+      return results;
+    } catch (error) {
+      console.error("Erro ao buscar histórico de movimentação:", error);
+      throw error;
+    }
+  };
 
-// Método para obter o histórico de movimentação
-getHistoricoMovimentacao = async () => {
-  const query = `
+  // Método para obter o histórico de movimentação
+  getHistoricoMovimentacao = async () => {
+    const query = `
     SELECT 
       'entrada' AS tipo, 
       data_de_entrada AS data, 
@@ -297,54 +297,50 @@ getHistoricoMovimentacao = async () => {
     FROM itenspagos
     ORDER BY data DESC;
   `;
-  try {
-    const [results] = await connection.execute(query);
-    return results;
-  } catch (error) {
-    console.error("Erro ao buscar histórico de movimentação:", error);
-    throw error;
-  }
-};
+    try {
+      const [results] = await connection.execute(query);
+      return results;
+    } catch (error) {
+      console.error("Erro ao buscar histórico de movimentação:", error);
+      throw error;
+    }
+  };
 
-// Método para pesquisa avançada no estoque
-pesquisaAvancada = async (filtros) => {
-  const { descricao, categoria, subgrupo, data_inicio, data_fim } = filtros;
-  let query = `SELECT * FROM estoqueatual WHERE pago = FALSE `;
-  const params = [];
+  // Método para pesquisa avançada no estoque
+  pesquisaAvancada = async (filtros) => {
+    const { descricao, categoria, subgrupo, data_inicio, data_fim } = filtros;
+    let query = `SELECT * FROM estoqueatual WHERE pago = FALSE `;
+    const params = [];
 
-  if (descricao) {
-    query += `AND descricao LIKE ? `;
-    params.push(`%${descricao}%`);
-  }
-  if (categoria) {
-    query += `AND categoria = ? `;
-    params.push(categoria);
-  }
-  if (subgrupo) {
-    query += `AND subgrupo = ? `;
-    params.push(subgrupo);
-  }
-  if (data_inicio) {
-    query += `AND data_de_entrada >= ? `;
-    params.push(data_inicio);
-  }
-  if (data_fim) {
-    query += `AND data_de_entrada <= ? `;
-    params.push(data_fim);
-  }
+    if (descricao) {
+      query += `AND descricao LIKE ? `;
+      params.push(`%${descricao}%`);
+    }
+    if (categoria) {
+      query += `AND categoria = ? `;
+      params.push(categoria);
+    }
+    if (subgrupo) {
+      query += `AND subgrupo = ? `;
+      params.push(subgrupo);
+    }
+    if (data_inicio) {
+      query += `AND data_de_entrada >= ? `;
+      params.push(data_inicio);
+    }
+    if (data_fim) {
+      query += `AND data_de_entrada <= ? `;
+      params.push(data_fim);
+    }
 
-  try {
-    const [results] = await connection.execute(query, params);
-    return results;
-  } catch (error) {
-    console.error("Erro na pesquisa avançada:", error);
-    throw error;
-  }
-};
-
-
-
-
+    try {
+      const [results] = await connection.execute(query, params);
+      return results;
+    } catch (error) {
+      console.error("Erro na pesquisa avançada:", error);
+      throw error;
+    }
+  };
 }
 
 export default new EstoqueModel();
