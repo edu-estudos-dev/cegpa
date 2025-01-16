@@ -5,7 +5,7 @@ class LoginLogoutController {
     res.render("login", { erro: "" }); // Renderiza a view de login com erro vazio
   };
 
-  authenticate = async (req, res) => {
+  login = async (req, res) => {
     const { user, senha } = req.body;
     console.log(`Tentativa de autenticação para usuário: ${user}`);
     try {
@@ -24,6 +24,7 @@ class LoginLogoutController {
     }
   };
 
+  
   logout = (req, res) => {
     req.session.destroy((err) => {
       if (err) {
@@ -31,6 +32,7 @@ class LoginLogoutController {
         res.status(500).send("Erro ao fazer logout.");
       } else {
         console.log("Usuário deslogado com sucesso");
+        res.clearCookie('connect.sid'); // Limpa o cookie da sessão
         res.redirect("/login"); // Redireciona para a página de login após logout
       }
     });

@@ -5,6 +5,6 @@ dotenv.config();
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, (err) => {
    if (err) throw err;
-   console.log(`Running at address http://localhost:${PORT}/entrada`);
+   console.log(`Running at address http://localhost:${PORT}/login`);
 });
 

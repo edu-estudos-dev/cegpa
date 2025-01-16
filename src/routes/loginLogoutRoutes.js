@@ -12,7 +12,7 @@ router.get("/login", (req, res) => {
 // Rota para autenticar o usuário
 router.post("/login", (req, res) => {
   console.log("Acessando rota /login com POST");
-  loginLogoutController.authenticate(req, res);
+  loginLogoutController.login(req, res);
 });
 
 // Rota para fazer logout

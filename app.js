@@ -38,7 +38,7 @@ app.use((req, res, next) => {
 // Rotas de login e logout, sem verificação de autenticação
 app.use('/', loginLogoutRoutes);
 
-// Aplicando o middleware de autenticação a todas as outras rotas
+// Aplicando o middleware de autenticação às rotas protegidas
 app.use(isAuthenticated);
 
 // Rotas protegidas
@@ -51,8 +51,8 @@ app.use((req, res, next) => {
 
 // Tratamento de erros
 app.use((req, res, next) => {
+  console.log(`Página 404 renderizada para URL: ${req.url}`);
   res.status(404).render('404'); // Certifique-se de que o nome do template está correto
-  console.log('Página 404 renderizada');
 });
 
 app.use((err, req, res, next) => {
