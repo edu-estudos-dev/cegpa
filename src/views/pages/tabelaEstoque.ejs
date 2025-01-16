@@ -10,12 +10,23 @@
     <link rel="stylesheet" href="/css/styles.css">
     <style>
         .table-container {
-            max-height: 78vh; /* Defina a altura máxima do contêiner */
-            overflow-y: auto; /* Habilitar scroll vertical */
+            max-height: 80vh;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
+
         .table-container table {
             width: 100%;
         }
+
+        .table-container th,
+        .table-container td {
+            word-wrap: break-word;
+            /* Quebrar palavras longas para caber na célula */
+            white-space: nowrap;
+            /* Evita quebras de linha dentro das células */
+        }
+
         .table-container thead th {
             position: sticky;
             top: 0;
@@ -32,16 +43,16 @@
         <div class="container-fluid">
             <main>
                 <div class="table-container">
-                    <div class="row">
+                    <div class="row mt-3">
                         <div class="mt-5 mb-3">
-                            <h1 class="text-center text-success mb-3 fw-bold">Tabela com o Estoque Atual</h1>
+                            <h2 class="text-center text-success mb-3 mt-4 fw-bold">Tabela com o Estoque Atual</h2>
                         </div>
                     </div>
                 </div>
                 <div class="table-container">
                     <table class="table table-striped table-hover mb-0">
                         <thead>
-                            <tr >
+                            <tr>
                                 <th class="text-center">ID</th>
                                 <th class="text-center">Entrada</th>
                                 <th>Descrição</th>
@@ -52,42 +63,23 @@
                                 <th class="text-center">Estoque</th>
                                 <th class="text-center">Valor</th>
                                 <th class="text-center">Situação</th>
-                                <th class="text-center">Ações</th> <!-- Nova coluna de Ações -->
+                                <th class="text-center">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% if (estoque.length > 0) { %>
+                            <% if (estoque.length> 0) { %>
                                 <% estoque.forEach(function(item) { %>
-                                    <tr>
-                                        <td class="py-1 text-center">
-                                            <%= item.id %>
+                                    <tr> <td class="py-1 text-center"> <%= item.id %>
                                         </td>
-                                        <td class="py-1 text-center">
-                                            <%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %>
-                                        </td>
-                                        <td class="py-1">
-                                            <%= item.descricao %>
-                                        </td>
-                                        <td class="py-1 text-center">
-                                            <%= item.tombo %>
-                                        </td>
-                                        <td class="py-1 text-center">
-                                            <%= item.categoria %>
-                                        </td>
-                                        <td class="py-1 text-center">
-                                            <%= item.conta_contabil %>
-                                        </td>
-                                        <td class="py-1 text-center">
-                                            <%= item.doc_origem %>
-                                        </td>
-                                        <td class="py-1 text-center">
-                                            <%= item.estoque %>
-                                        </td>
-                                        <td class="py-1 text-center">R$ <%= Number(item.valor).toFixed(2) %>
-                                        </td>
-                                        <td class="py-1 text-center">
-                                            <%= item.situacao %>
-                                        </td>
+                                        <td class="py-1 text-center"> <%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %> </td>
+                                        <td class="py-1"> <%= item.descricao %> </td>
+                                        <td class="py-1 text-center"> <%= item.tombo %> </td>
+                                        <td class="py-1 text-center"> <%= item.categoria %> </td>
+                                        <td class="py-1 text-center"> <%= item.conta_contabil %> </td>
+                                        <td class="py-1 text-center"> <%= item.doc_origem %> </td>
+                                        <td class="py-1 text-center"> <%= item.estoque %> </td>
+                                        <td class="py-1 text-center">R$ <%= Number(item.valor).toFixed(2) %> </td>
+                                        <td class="py-1 text-center"> <%= item.situacao %> </td>
                                         <td class="py-1 text-center">
                                             <a href="/estoque/edit/<%= item.id %>"
                                                 class="btn btn-warning btn-sm">Editar</a>
@@ -97,10 +89,8 @@
                                     </tr>
                                 <% }); %>
                             <% } else { %>
-                                <tr>
-                                    <td colspan="11" class="text-center">Ainda não há itens cadastrados</td>
-                                </tr>
-                            <% } %>
+                                <tr> <td colspan="11" class="text-center">Ainda não há itens cadastrados</td> </tr>
+                                <% } %>
                         </tbody>
                     </table>
                 </div>

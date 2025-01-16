@@ -87,7 +87,7 @@ input::placeholder {
   background-color: #fff;
   padding: 10px;
   border-radius: 5px;
-  height: 500px !important;
+  height: 65vh !important;
 }
 
 #selected-tombos-container {
