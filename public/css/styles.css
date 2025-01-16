@@ -6,6 +6,10 @@
   --font-size-large: 1.5rem;
 }
 
+*{
+  font-size: 0.9rem;
+}
+
 .centralize-wrapper {
   display: flex;
   justify-content: center;
@@ -38,7 +42,7 @@
 }
 
 main {
-  padding: 2rem;
+  padding: 1rem;
 }
 
 .navbar {
@@ -83,7 +87,7 @@ input::placeholder {
   background-color: #fff;
   padding: 10px;
   border-radius: 5px;
-  height: 80% !important;
+  height: 500px !important;
 }
 
 #selected-tombos-container {
@@ -92,5 +96,7 @@ input::placeholder {
   background-color: #fff;
   padding: 0px;
   border-radius: 5px;
-  height: 125px !important;
+  height: 24vh !important;
+  margin-bottom: 2rem;
 }
+

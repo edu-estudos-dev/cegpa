@@ -1,8 +1,9 @@
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs'; import estoqueModel from '../models/estoqueModel.js';
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
+import estoqueModel from "../models/estoqueModel.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -197,10 +198,11 @@ class EstoqueController {
     }
   };
 
+  
   // Método para registrar a saída de itens e gerar o PDF
   registrarSaida = async (req, res) => {
     console.log("FUNÇÃO REGISTRARSAIDA CHAMADA");
-  
+
     const {
       tombos,
       doc_saida,
@@ -212,31 +214,70 @@ class EstoqueController {
       nome_do_recebedor,
       observacao,
     } = req.body;
-  
+
     console.log("DADOS RECEBIDOS NO CONTROLADOR:", req.body);
-  
+
+    // Verificações de campos obrigatórios
     if (!tombos || !tombos.length) {
-      console.log("ERRO: NENHUM TOMBO SELECIONADO.");
-      return res.status(400).json({ error: "NENHUM TOMBO SELECIONADO." });
+      console.log("Erro: Nenhum tombo selecionado.");
+      return res.status(400).json({ error: "Nenhum tombo selecionado." });
     }
-  
+    if (!doc_saida) {
+      console.log("Erro: O termo de responsabilidade é obrigatório.");
+      return res
+        .status(400)
+        .json({ error: "O termo de responsabilidade é obrigatório." });
+    }
+    if (!referencia) {
+      console.log("Erro: A referência é obrigatória.");
+      return res.status(400).json({ error: "A referência é obrigatória." });
+    }
+    if (!destino) {
+      console.log("Erro: O destino é obrigatório.");
+      return res.status(400).json({ error: "O destino é obrigatório." });
+    }
+    if (!postoGrad || postoGrad === "Selecione") {
+      console.log("Erro: O posto/graduação é obrigatório.");
+      return res
+        .status(400)
+        .json({ error: "O posto/graduação é obrigatório." });
+    }
+    if (!mf_recebedor) {
+      console.log("Erro: A matrícula funcional é obrigatória.");
+      return res
+        .status(400)
+        .json({ error: "A matrícula funcional é obrigatória." });
+    }
+    if (!tel_recebedor) {
+      console.log("Erro: O telefone é obrigatório.");
+      return res.status(400).json({ error: "O telefone é obrigatório." });
+    }
+    if (!nome_do_recebedor) {
+      console.log("Erro: O nome do recebedor é obrigatório.");
+      return res
+        .status(400)
+        .json({ error: "O nome do recebedor é obrigatório." });
+    }
+
+    console.log("Todos os campos obrigatórios foram preenchidos");
+
     try {
-      console.log("REGISTRANDO SAÍDA E MARCANDO ITENS COMO 'SAÍDO'...");
+      console.log("Registrando saída e marcando itens como 'saído'...");
       await estoqueModel.markItensAsOut(tombos); // Marca os itens como "saído"
-  
+
       // Criar documento PDF
       const doc = new jsPDF();
-      doc.setFont('helvetica');  // Usar fonte com suporte UTF-8
-  
+      doc.setFont("helvetica"); // Usar fonte com suporte UTF-8
+
       const dataDeSaida = new Date();
-      const dataFormatada = dataDeSaida.toLocaleString('pt-BR', { timeZone: 'America/Fortaleza' });
-  
-      const header = [
-        ['Ord.', 'Tombo', 'Descricao']
-      ];
-  
+      const dataFormatada = dataDeSaida.toLocaleString("pt-BR", {
+        timeZone: "America/Fortaleza",
+      });
+
+      const header = [["Ord.", "Tombo", "Descricao"]];
+
       const rows = [];
-  
+
       for (let i = 0; i < tombos.length; i++) {
         const tombo = tombos[i];
         const itemEstoque = await estoqueModel.getItemByTombo(tombo);
@@ -253,13 +294,17 @@ class EstoqueController {
           nome_do_recebedor,
           observacao
         );
-  
-        rows.push([(i + 1).toString(), tombo, itemEstoque.descricao.toUpperCase()]);
+
+        rows.push([
+          (i + 1).toString(),
+          tombo,
+          itemEstoque.descricao.toUpperCase(),
+        ]);
       }
-  
+
       // Ajuste do título centralizado
       doc.setFontSize(18);
-      doc.text('Termo de Entrega', 105, 15, { align: 'center' });
+      doc.text("Termo de Entrega", 105, 15, { align: "center" });
       doc.setFontSize(12);
       doc.text(`Termo de Responsabilidade: ${doc_saida}`, 14, 25);
       doc.text(`Referencia: ${referencia}`, 14, 32);
@@ -271,37 +316,39 @@ class EstoqueController {
       doc.text(`Data da Saida: ${dataFormatada}`, 14, 74);
       doc.text(`Observacao: ${observacao}`, 14, 81);
       doc.setFontSize(14);
-      doc.text('Itens entregues', 105, 90, { align: 'center' }); // Título centralizado e com destaque com margem superior de 2rem (32 pixels)
-  
+      doc.text("Itens entregues", 105, 90, { align: "center" });
+
       doc.autoTable({
-        startY: 95, // Ajustar a posição da tabela para corresponder à nova margem superior
+        startY: 95,
         head: header,
         body: rows,
-        styles: { fontSize: 8, halign: 'center' },
+        styles: { fontSize: 8, halign: "center" },
         headStyles: { fillColor: [53, 110, 0] },
         footStyles: { fillColor: [20, 128, 185] },
-        theme: 'grid',
+        theme: "grid",
         columnStyles: {
           0: { cellWidth: 10 }, // Largura da coluna "Ord."
           1: { cellWidth: 30 }, // Largura da coluna "Tombo"
-          2: { cellWidth: 'auto' } // Largura da coluna "Descricao" ajustada automaticamente
-        }
+          2: { cellWidth: "auto" }, // Largura da coluna "Descricao" ajustada automaticamente
+        },
       });
-      
-      
-      const pdfPath = path.join(__dirname, '../../pdfs/saida_estoque.pdf');
+
+      const pdfPath = path.join(__dirname, "../../pdfs/saida_estoque.pdf");
       fs.writeFileSync(pdfPath, doc.output());
-  
+
       console.log("SAÍDA REGISTRADA COM SUCESSO.");
-      res.status(200).json({ message: "SAÍDA REGISTRADA COM SUCESSO!", pdfPath: `/pdfs/saida_estoque.pdf` });
-  
+      res
+        .status(200)
+        .json({
+          message: "SAÍDA REGISTRADA COM SUCESSO!",
+          pdfPath: `/pdfs/saida_estoque.pdf`,
+        });
     } catch (error) {
-      console.error("ERRO AO REGISTRAR SAÍDA:", error);
-      res.status(500).json({ error: "ERRO AO REGISTRAR SAÍDA." });
+      console.error("Erro ao registrar saída:", error);
+      res.status(500).json({ error: "Erro ao registrar saída." });
     }
   };
-  
-  
+
   markItensAsOut = async (tombos) => {
     const query = `UPDATE estoqueAtual SET pago = TRUE WHERE tombo IN (${tombos
       .map(() => "?")
