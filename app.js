@@ -44,6 +44,7 @@ app.use(isAuthenticated);
 // Rotas protegidas
 app.use('/', estoqueRoutes);
 
+
 app.use((req, res, next) => {
   console.log(`URL solicitada: ${req.url}`);
   next();

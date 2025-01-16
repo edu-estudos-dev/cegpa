@@ -27,7 +27,6 @@ class EstoqueController {
   renderEntradaForm = (_, res) => {
     res.render("cadastrarEstoque"); // Renderiza a view de cadastro de estoque
   };
-  
 
   // Método para criar um novo item no estoque
   create = async (req, res) => {
@@ -199,7 +198,6 @@ class EstoqueController {
     }
   };
 
-  
   // Método para registrar a saída de itens e gerar o PDF
   registrarSaida = async (req, res) => {
     console.log("FUNÇÃO REGISTRARSAIDA CHAMADA");
@@ -338,12 +336,10 @@ class EstoqueController {
       fs.writeFileSync(pdfPath, doc.output());
 
       console.log("SAÍDA REGISTRADA COM SUCESSO.");
-      res
-        .status(200)
-        .json({
-          message: "SAÍDA REGISTRADA COM SUCESSO!",
-          pdfPath: `/pdfs/saida_estoque.pdf`,
-        });
+      res.status(200).json({
+        message: "SAÍDA REGISTRADA COM SUCESSO!",
+        pdfPath: `/pdfs/saida_estoque.pdf`,
+      });
     } catch (error) {
       console.error("Erro ao registrar saída:", error);
       res.status(500).json({ error: "Erro ao registrar saída." });
@@ -360,6 +356,104 @@ class EstoqueController {
       console.error("Erro ao marcar itens como saído:", error);
       throw error;
     }
+  };
+
+  /* ********************************************************************************
+                  Métodos para a Pesquisa
+  *********************************************************************************/
+
+  // Método para buscar a quantidade de itens saídos em um determinado ano
+  fetchItensSaidosPorAno = async (req, res) => {
+    const { ano } = req.query;
+
+    try {
+      const quantidade = await estoqueModel.getItensSaidosPorAno(ano);
+      res.json({ quantidade }); // Retorna a quantidade de itens saídos como JSON
+    } catch (error) {
+      console.error("Erro ao buscar itens saídos por ano:", error);
+      res.status(500).json({ error: "Erro ao buscar itens saídos por ano." });
+    }
+  };
+
+  // Método para renderizar o formulário de pesquisa de itens saídos
+  renderPesquisaForm = (_, res) => {
+    res.render("pesquisaItensSaidos");
+  };
+
+  // Método para obter o relatório de entradas
+  fetchRelatorioEntradas = async (_, res) => {
+    try {
+      const relatorio = await estoqueModel.getRelatorioEntradas();
+      res.json(relatorio);
+    } catch (error) {
+      console.error("Erro ao buscar relatório de entradas:", error);
+      res.status(500).json({ error: "Erro ao buscar relatório de entradas." });
+    }
+  };
+
+  // Método para obter o relatório de saídas
+  fetchRelatorioSaidas = async (_, res) => {
+    try {
+      const relatorio = await estoqueModel.getRelatorioSaidas();
+      res.json(relatorio);
+    } catch (error) {
+      console.error("Erro ao buscar relatório de saídas:", error);
+      res.status(500).json({ error: "Erro ao buscar relatório de saídas." });
+    }
+  };
+
+  // Método para obter o histórico de movimentação
+  fetchHistoricoMovimentacao = async (_, res) => {
+    try {
+      const historico = await estoqueModel.getHistoricoMovimentacao();
+      res.json(historico);
+    } catch (error) {
+      console.error("Erro ao buscar histórico de movimentação:", error);
+      res
+        .status(500)
+        .json({ error: "Erro ao buscar histórico de movimentação." });
+    }
+  };
+
+  // Método para pesquisa avançada no estoque
+  pesquisaAvancada = async (req, res) => {
+    const filtros = req.query;
+
+    try {
+      const resultados = await estoqueModel.pesquisaAvancada(filtros);
+      res.json(resultados);
+    } catch (error) {
+      console.error("Erro na pesquisa avançada:", error);
+      res.status(500).json({ error: "Erro na pesquisa avançada." });
+    }
+  };
+
+  // Método para renderizar a página de relatórios
+  renderRelatorios = (_, res) => {
+    res.render("relatorios");
+  };
+
+  // Método para renderizar a página de histórico de movimentação
+  renderHistoricoMovimentacao = (_, res) => {
+    res.render("historicoMovimentacao");
+  };
+
+  // Método para pesquisa avançada no estoque
+  pesquisaAvancada = async (req, res) => {
+    const filtros = req.query;
+
+    try {
+      const resultados = await estoqueModel.pesquisaAvancada(filtros);
+      res.json(resultados);
+    } catch (error) {
+      console.error("Erro na pesquisa avançada:", error);
+      res.status(500).json({ error: "Erro na pesquisa avançada." });
+    }
+  };
+
+  // Método para renderizar a página de pesquisa avançada
+  renderPesquisaAvancada = (_, res) => {
+    res.render("pesquisaAvancada");
   };
 }
 

@@ -16,7 +16,6 @@ class EstoqueModel {
       throw error;
     }
   };
-  
 
   // Método para criar um novo item no estoque
   createEstoque = async (
@@ -145,7 +144,7 @@ class EstoqueModel {
       throw error;
     }
   };
-  
+
   getItemByTombo = async (tombo) => {
     const query = `SELECT * FROM estoqueAtual WHERE tombo = ?`;
     try {
@@ -156,7 +155,196 @@ class EstoqueModel {
       throw error;
     }
   };
-  
+
+  //   /* ********************************************************************************
+  //                   Métodos para a Pesquisa
+  //   *********************************************************************************/
+
+  // Método para obter a quantidade de itens saídos em um determinado ano
+  getItensSaidosPorAno = async (ano) => {
+    const query = `
+    SELECT COUNT(*) AS quantidade
+    FROM itensPagos
+    WHERE YEAR(data_de_saida) = ?
+  `;
+    try {
+      const [results] = await connection.execute(query, [ano]);
+      return results[0]?.quantidade || 0; // Retorna a quantidade de itens saídos ou 0 se não houver resultados
+    } catch (error) {
+      console.error("Erro ao buscar itens saídos por ano:", error);
+      throw error;
+    }
+  };
+
+  // Método para obter o relatório de entradas por mês e ano
+  getRelatorioEntradas = async () => {
+    const query = `
+    SELECT 
+      DATE_FORMAT(data_de_entrada, '%Y-%m') AS mes_ano, 
+      COUNT(*) AS total_entradas 
+    FROM estoqueatual 
+    GROUP BY mes_ano
+    ORDER BY mes_ano;
+  `;
+    try {
+      const [results] = await connection.execute(query);
+      return results;
+    } catch (error) {
+      console.error("Erro ao buscar relatório de entradas:", error);
+      throw error;
+    }
+  };
+
+  // Método para obter o relatório de saídas por mês e ano
+  getRelatorioSaidas = async () => {
+    const query = `
+    SELECT 
+      DATE_FORMAT(data_de_saida, '%Y-%m') AS mes_ano, 
+      COUNT(*) AS total_saidas 
+    FROM itenspagos 
+    GROUP BY mes_ano
+    ORDER BY mes_ano;
+  `;
+    try {
+      const [results] = await connection.execute(query);
+      return results;
+    } catch (error) {
+      console.error("Erro ao buscar relatório de saídas:", error);
+      throw error;
+    }
+  };
+
+  // Método para pesquisa avançada no estoque
+  pesquisaAvancada = async (filtros) => {
+    const { descricao, categoria, subgrupo, data_inicio, data_fim } = filtros;
+    let query = `SELECT * FROM estoqueatual WHERE pago = FALSE `;
+    const params = [];
+
+    if (descricao) {
+      query += `AND descricao LIKE ? `;
+      params.push(`%${descricao}%`);
+    }
+    if (categoria) {
+      query += `AND categoria = ? `;
+      params.push(categoria);
+    }
+    if (subgrupo) {
+      query += `AND subgrupo = ? `;
+      params.push(subgrupo);
+    }
+    if (data_inicio) {
+      query += `AND data_de_entrada >= ? `;
+      params.push(data_inicio);
+    }
+    if (data_fim) {
+      query += `AND data_de_entrada <= ? `;
+      params.push(data_fim);
+    }
+
+    try {
+      const [results] = await connection.execute(query, params);
+      return results;
+    } catch (error) {
+      console.error("Erro na pesquisa avançada:", error);
+      throw error;
+    }
+  };
+
+  // Método para obter o histórico de movimentação
+getHistoricoMovimentacao = async () => {
+  const query = `
+    SELECT 
+      'entrada' AS tipo, 
+      data_de_entrada AS data, 
+      descricao, 
+      quantidade 
+    FROM estoqueatual 
+    WHERE pago = FALSE
+    UNION ALL
+    SELECT 
+      'saida' AS tipo, 
+      data_de_saida AS data, 
+      descricao, 
+      quantidade 
+    FROM itenspagos
+    ORDER BY data DESC;
+  `;
+  try {
+    const [results] = await connection.execute(query);
+    return results;
+  } catch (error) {
+    console.error("Erro ao buscar histórico de movimentação:", error);
+    throw error;
+  }
+};
+
+// Método para obter o histórico de movimentação
+getHistoricoMovimentacao = async () => {
+  const query = `
+    SELECT 
+      'entrada' AS tipo, 
+      data_de_entrada AS data, 
+      descricao, 
+      quantidade 
+    FROM estoqueatual 
+    WHERE pago = FALSE
+    UNION ALL
+    SELECT 
+      'saida' AS tipo, 
+      data_de_saida AS data, 
+      'Item Saído' AS descricao,
+      quantidade 
+    FROM itenspagos
+    ORDER BY data DESC;
+  `;
+  try {
+    const [results] = await connection.execute(query);
+    return results;
+  } catch (error) {
+    console.error("Erro ao buscar histórico de movimentação:", error);
+    throw error;
+  }
+};
+
+// Método para pesquisa avançada no estoque
+pesquisaAvancada = async (filtros) => {
+  const { descricao, categoria, subgrupo, data_inicio, data_fim } = filtros;
+  let query = `SELECT * FROM estoqueatual WHERE pago = FALSE `;
+  const params = [];
+
+  if (descricao) {
+    query += `AND descricao LIKE ? `;
+    params.push(`%${descricao}%`);
+  }
+  if (categoria) {
+    query += `AND categoria = ? `;
+    params.push(categoria);
+  }
+  if (subgrupo) {
+    query += `AND subgrupo = ? `;
+    params.push(subgrupo);
+  }
+  if (data_inicio) {
+    query += `AND data_de_entrada >= ? `;
+    params.push(data_inicio);
+  }
+  if (data_fim) {
+    query += `AND data_de_entrada <= ? `;
+    params.push(data_fim);
+  }
+
+  try {
+    const [results] = await connection.execute(query, params);
+    return results;
+  } catch (error) {
+    console.error("Erro na pesquisa avançada:", error);
+    throw error;
+  }
+};
+
+
+
+
 }
 
 export default new EstoqueModel();
