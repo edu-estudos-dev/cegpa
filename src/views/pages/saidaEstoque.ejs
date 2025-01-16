@@ -140,7 +140,6 @@
       </div>
     </div>
 
-
     <!-- Modal de Alerta -->
     <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -158,6 +157,7 @@
         </div>
       </div>
     </div>
+
     <!-- Scripts necessários para o modal -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
       integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
@@ -170,7 +170,7 @@
     <script>
       document.addEventListener("DOMContentLoaded", async () => {
         try {
-          const response = await fetch("http://localhost:3030/api/itens-disponiveis"); // Certifique-se de usar a porta correta
+          const response = await fetch("http://localhost:3030/api/itens-disponiveis");
           console.log("Resposta da API:", response);
 
           if (response.ok) {
@@ -418,5 +418,4 @@
 
     </script>
 </body>
-
 </html>
