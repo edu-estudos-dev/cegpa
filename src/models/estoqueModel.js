@@ -16,6 +16,7 @@ class EstoqueModel {
       throw error;
     }
   };
+  
 
   // Método para criar um novo item no estoque
   createEstoque = async (

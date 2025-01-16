@@ -27,6 +27,7 @@ class EstoqueController {
   renderEntradaForm = (_, res) => {
     res.render("cadastrarEstoque"); // Renderiza a view de cadastro de estoque
   };
+  
 
   // Método para criar um novo item no estoque
   create = async (req, res) => {

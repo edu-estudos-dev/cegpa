@@ -26,7 +26,6 @@ router.get("/tabela", estoqueController.getAllEstoque);
                   Rotas para a SAÍDA de itens no Estoque
   *********************************************************************************/
 
-                  
 // Rota para renderizar o formulário de SAÍDA
 router.get("/saida", estoqueController.renderSaidaForm);
 

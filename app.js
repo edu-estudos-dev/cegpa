@@ -2,7 +2,10 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import methodOverride from 'method-override';
+import session from 'express-session'; // Adicionar express-session para gerenciar sessões
 import estoqueRoutes from './src/routes/estoqueRoutes.js';
+import loginLogoutRoutes from './src/routes/loginLogoutRoutes.js'; // Atualização da rota de login e logout
+import isAuthenticated from './src/middleware/auth.js'; // Importação do middleware de autenticação
 
 const app = express();
 
@@ -19,12 +22,26 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
+// Configuração da sessão
+app.use(session({
+  secret: 'sua_chave_secreta', // Use uma chave secreta segura e aleatória
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Defina como true se estiver usando HTTPS
+}));
+
 app.use((req, res, next) => {
   console.log(`Requisição recebida: ${req.method} ${req.url}`);
   next();
 });
 
-// Uso das rotas do estoque
+// Rotas de login e logout, sem verificação de autenticação
+app.use('/', loginLogoutRoutes);
+
+// Aplicando o middleware de autenticação a todas as outras rotas
+app.use(isAuthenticated);
+
+// Rotas protegidas
 app.use('/', estoqueRoutes);
 
 app.use((req, res, next) => {
