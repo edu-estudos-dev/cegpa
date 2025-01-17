@@ -9,14 +9,14 @@
   <link rel="stylesheet" href="/css/styles.css">
   <style>
     .table-container {
-      max-height: 600px; /* Define a altura máxima da tabela */
-      overflow-y: auto;  /* Adiciona um scroll vertical à tabela */
-      overflow-x: hidden; /* Remove o scroll horizontal */
+      max-height: 600px;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .table-container table {
       width: 100%;
-      table-layout: fixed; /* Ajusta a tabela para evitar scroll horizontal */
+      table-layout: fixed;
     }
 
     .table-container th,
@@ -33,16 +33,19 @@
     }
 
     .table-container th.tipo {
-      width: 6%; /* Ajusta a largura da coluna "Tipo" */
+      width: 6%;
     }
 
     .table-container th.data {
-      width: 10%; /* Ajusta a largura da coluna "Data" */
+      width: 10%;
+    }
+
+    .table-container th.quantidade {
+      width: 10%;
     }
   </style>
 </head>
 <body>
-  <!-- Navbar -->
   <%- include('../partials/header') %>
 
   <div class="container-fluid">
@@ -76,6 +79,7 @@
               <th class="tipo text-center">Tipo</th>
               <th class="data text-center">Data</th>
               <th>Descrição</th>
+              <th class="quantidade text-center">Quantidade</th>
             </tr>
           </thead>
           <tbody>
@@ -84,13 +88,13 @@
                 <td class="text-center">${item.tipo}</td>
                 <td class="text-center">${new Date(item.data).toLocaleDateString('pt-BR')}</td>
                 <td>${item.descricao}</td>
+                <td class="text-center">${item.quantidade}</td>
               </tr>`).join('')}
           </tbody>
         </table>
       `;
     }
 
-    // Carregar o histórico ao carregar a página
     window.onload = () => {
       carregarHistoricoMovimentacao();
     };

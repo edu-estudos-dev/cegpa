@@ -251,24 +251,26 @@ class EstoqueModel {
   };
 
   // Método para obter o histórico de movimentação
-  getHistoricoMovimentacao = async () => {
+  async getHistoricoMovimentacao() {
     const query = `
-    SELECT 
-      'entrada' AS tipo, 
-      data_de_entrada AS data, 
-      descricao, 
-      quantidade 
-    FROM estoqueatual 
-    WHERE pago = FALSE
-    UNION ALL
-    SELECT 
-      'saida' AS tipo, 
-      data_de_saida AS data, 
-      descricao, 
-      quantidade 
-    FROM itenspagos
-    ORDER BY data DESC;
-  `;
+      SELECT 
+        'entrada' AS tipo, 
+        data_de_entrada AS data, 
+        descricao, 
+        SUM(quantidade) AS quantidade
+      FROM estoqueatual 
+      WHERE pago = FALSE
+      GROUP BY data_de_entrada, descricao
+      UNION ALL
+      SELECT 
+        'saida' AS tipo, 
+        data_de_saida AS data, 
+        'Item Saído' AS descricao,
+        SUM(quantidade) AS quantidade
+      FROM itenspagos
+      GROUP BY data_de_saida, descricao
+      ORDER BY data DESC;
+    `;
     try {
       const [results] = await connection.execute(query);
       return results;
@@ -276,36 +278,9 @@ class EstoqueModel {
       console.error("Erro ao buscar histórico de movimentação:", error);
       throw error;
     }
-  };
-
-  // Método para obter o histórico de movimentação
-  getHistoricoMovimentacao = async () => {
-    const query = `
-    SELECT 
-      'entrada' AS tipo, 
-      data_de_entrada AS data, 
-      descricao, 
-      quantidade 
-    FROM estoqueatual 
-    WHERE pago = FALSE
-    UNION ALL
-    SELECT 
-      'saida' AS tipo, 
-      data_de_saida AS data, 
-      'Item Saído' AS descricao,
-      quantidade 
-    FROM itenspagos
-    ORDER BY data DESC;
-  `;
-    try {
-      const [results] = await connection.execute(query);
-      return results;
-    } catch (error) {
-      console.error("Erro ao buscar histórico de movimentação:", error);
-      throw error;
-    }
-  };
-
+  }
+  
+  
   // Método para pesquisa avançada no estoque
   pesquisaAvancada = async (filtros) => {
     const { descricao, categoria, subgrupo, data_inicio, data_fim } = filtros;

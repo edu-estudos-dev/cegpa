@@ -403,7 +403,7 @@ class EstoqueController {
   };
 
   // Método para obter o histórico de movimentação
-  fetchHistoricoMovimentacao = async (_, res) => {
+  async fetchHistoricoMovimentacao(_, res) {
     try {
       const historico = await estoqueModel.getHistoricoMovimentacao();
       res.json(historico);
@@ -413,7 +413,7 @@ class EstoqueController {
         .status(500)
         .json({ error: "Erro ao buscar histórico de movimentação." });
     }
-  };
+  }
 
   // Método para pesquisa avançada no estoque
   pesquisaAvancada = async (req, res) => {
