@@ -199,10 +199,10 @@ class EstoqueController {
   };
 
   // Método para registrar a saída de itens e gerar o PDF
-  
+
   registrarSaida = async (req, res) => {
     console.log("FUNÇÃO REGISTRARSAIDA CHAMADA");
-  
+
     const {
       tombos,
       doc_saida,
@@ -214,9 +214,9 @@ class EstoqueController {
       nome_do_recebedor,
       observacao,
     } = req.body;
-  
+
     console.log("DADOS RECEBIDOS NO CONTROLADOR:", req.body);
-  
+
     // Verificações de campos obrigatórios
     if (!tombos || !tombos.length) {
       console.log("Erro: Nenhum tombo selecionado.");
@@ -258,30 +258,30 @@ class EstoqueController {
         .status(400)
         .json({ error: "O nome do recebedor é obrigatório." });
     }
-  
+
     console.log("Todos os campos obrigatórios foram preenchidos");
-  
+
     try {
       console.log("Registrando saída e marcando itens como 'saído'...");
-  
+
       const dataDeSaida = new Date();
       const dataFormatada = dataDeSaida.toLocaleString("pt-BR", {
         timeZone: "America/Fortaleza",
       });
-  
+
       // Definindo a variável doc para criar o PDF
       const doc = new jsPDF();
       doc.setFont("helvetica"); // Usar fonte com suporte UTF-8
-  
+
       const header = [["Ord.", "Tombo", "Descricao"]];
-  
+
       const rows = [];
-  
+
       for (let i = 0; i < tombos.length; i++) {
         const tombo = tombos[i];
         const itemEstoque = await estoqueModel.getItemByTombo(tombo);
         console.log("Item obtido do estoque:", itemEstoque);
-  
+
         await estoqueModel.createSaida(
           itemEstoque.id,
           doc_saida,
@@ -296,17 +296,17 @@ class EstoqueController {
           observacao,
           itemEstoque.descricao // Passa a descrição do item ao criar a saída
         );
-  
+
         // Atualiza a coluna "pago" na tabela estoqueatual
         await estoqueModel.markAsPaid(itemEstoque.id);
-  
+
         rows.push([
           (i + 1).toString(),
           tombo,
           itemEstoque.descricao.toUpperCase(),
         ]);
       }
-  
+
       // Ajuste do título centralizado
       doc.setFontSize(18);
       doc.text("Termo de Entrega", 105, 15, { align: "center" });
@@ -322,7 +322,7 @@ class EstoqueController {
       doc.text(`Observacao: ${observacao}`, 14, 81);
       doc.setFontSize(14);
       doc.text("Itens entregues", 105, 90, { align: "center" });
-  
+
       doc.autoTable({
         startY: 95,
         head: header,
@@ -337,10 +337,10 @@ class EstoqueController {
           2: { cellWidth: "auto" }, // Largura da coluna "Descricao" ajustada automaticamente
         },
       });
-  
+
       const pdfPath = path.join(__dirname, "../../pdfs/saida_estoque.pdf");
       fs.writeFileSync(pdfPath, doc.output());
-  
+
       console.log("SAÍDA REGISTRADA COM SUCESSO.");
       res.status(200).json({
         message: "SAÍDA REGISTRADA COM SUCESSO!",
@@ -351,7 +351,7 @@ class EstoqueController {
       res.status(500).json({ error: "Erro ao registrar saída." });
     }
   };
-  
+
   /* ********************************************************************************
                   Métodos para a Pesquisa
   *********************************************************************************/
@@ -402,14 +402,14 @@ class EstoqueController {
     try {
       const movimentacaoBruta = await estoqueModel.getMovimentacaoBruta();
       console.log("Movimentação bruta obtida:", movimentacaoBruta);
-  
+
       const consolidado = {};
-  
+
       movimentacaoBruta.forEach((item) => {
         // Ajuste para garantir que a data seja interpretada corretamente
         const dataAjustada = new Date(item.data);
         dataAjustada.setDate(dataAjustada.getDate() + 1);
-  
+
         const key = `${item.tipo}_${dataAjustada.toISOString().split("T")[0]}_${
           item.descricao
         }`;
@@ -424,18 +424,19 @@ class EstoqueController {
         }
         consolidado[key].quantidade += item.quantidade;
       });
-  
+
       const historico = Object.values(consolidado);
-  
+
       console.log("Histórico final:", historico);
       res.json(historico);
     } catch (error) {
       console.error("Erro ao buscar histórico de movimentação:", error);
-      res.status(500).json({ error: "Erro ao buscar histórico de movimentação." });
+      res
+        .status(500)
+        .json({ error: "Erro ao buscar histórico de movimentação." });
     }
   }
 
-  
   // Método para pesquisa avançada no estoque
   pesquisaAvancada = async (req, res) => {
     const filtros = req.query;

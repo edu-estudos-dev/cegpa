@@ -99,19 +99,7 @@ class EstoqueModel {
     }
   };
 
-  markItensAsOut = async (tombos) => {
-    const query = `UPDATE estoqueAtual SET pago = TRUE WHERE tombo IN (${tombos
-      .map(() => "?")
-      .join(", ")})`;
-    try {
-      await connection.execute(query, tombos);
-    } catch (error) {
-      console.error("Erro ao marcar itens como saído:", error);
-      throw error;
-    }
-  };
-
-
+  // Método para adicionar a saida no banco de dados
   createSaida = async (
     tombo,
     doc_saida,
@@ -124,11 +112,11 @@ class EstoqueModel {
     telefone,
     nome_completo,
     observacao,
-    descricao // Adiciona a descrição como parâmetro
+    descricao
   ) => {
     const query = `INSERT INTO itensPagos (tombo, doc_saida, data_de_saida, quantidade, referencia, destino, posto_graduacao, mat_funcional, telefone, nome_completo, observacao, descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     try {
-      console.log('Inserindo na tabela itensPagos com os seguintes dados:', {
+      console.log("Inserindo na tabela itensPagos com os seguintes dados:", {
         tombo,
         doc_saida,
         data_de_saida,
@@ -140,9 +128,9 @@ class EstoqueModel {
         telefone,
         nome_completo,
         observacao,
-        descricao
+        descricao,
       });
-  
+
       await connection.execute(query, [
         tombo,
         doc_saida,
@@ -155,33 +143,33 @@ class EstoqueModel {
         telefone,
         nome_completo,
         observacao,
-        descricao, // Inclui a descrição no array de valores
+        descricao,
       ]);
-  
-      console.log('Atualizando a coluna pago para o tombo:', tombo);
-      // Apenas atualizar a coluna "pago" na tabela estoqueatual
+
+      console.log("Atualizando a coluna pago para o tombo:", tombo);
+
       const updateQuery = `UPDATE estoqueatual SET pago = 1 WHERE tombo = ?`;
       await connection.execute(updateQuery, [tombo]);
-  
-      console.log('Atualização concluída para o tombo:', tombo);
+
+      console.log("Atualização concluída para o tombo:", tombo);
     } catch (error) {
       console.error("Erro ao inserir dados na tabela itensPagos:", error);
       throw error;
     }
   };
-  
 
   markAsPaid = async (id) => {
     const query = `UPDATE estoqueatual SET pago = 1 WHERE id = ?`;
     try {
       await connection.execute(query, [id]);
     } catch (error) {
-      console.error("Erro ao atualizar a coluna pago na tabela estoqueatual:", error);
+      console.error(
+        "Erro ao atualizar a coluna pago na tabela estoqueatual:",
+        error
+      );
       throw error;
     }
   };
-  
-  
 
   getItemByTombo = async (tombo) => {
     const query = `SELECT * FROM estoqueAtual WHERE tombo = ?`;
@@ -217,13 +205,13 @@ class EstoqueModel {
   // Método para obter o relatório de entradas por mês e ano
   getRelatorioEntradas = async () => {
     const query = `
-    SELECT 
-      DATE_FORMAT(data_de_entrada, '%Y-%m') AS mes_ano, 
-      COUNT(*) AS total_entradas 
-    FROM estoqueatual 
-    GROUP BY mes_ano
-    ORDER BY mes_ano;
-  `;
+  SELECT 
+    DATE_FORMAT(data_de_entrada, '%m-%Y') AS mes_ano, 
+    COUNT(*) AS total_entradas 
+  FROM estoqueatual 
+  GROUP BY mes_ano
+  ORDER BY mes_ano;
+`;
     try {
       const [results] = await connection.execute(query);
       return results;
@@ -236,13 +224,13 @@ class EstoqueModel {
   // Método para obter o relatório de saídas por mês e ano
   getRelatorioSaidas = async () => {
     const query = `
-    SELECT 
-      DATE_FORMAT(data_de_saida, '%Y-%m') AS mes_ano, 
-      COUNT(*) AS total_saidas 
-    FROM itenspagos 
-    GROUP BY mes_ano
-    ORDER BY mes_ano;
-  `;
+  SELECT 
+    DATE_FORMAT(data_de_saida, '%m-%Y') AS mes_ano, 
+    COUNT(*) AS total_saidas 
+  FROM itenspagos 
+  GROUP BY mes_ano
+  ORDER BY mes_ano;
+`;
     try {
       const [results] = await connection.execute(query);
       return results;
@@ -288,8 +276,6 @@ class EstoqueModel {
     }
   };
 
-
-
   // Método para obter o histórico de movimentação
   async getMovimentacaoBruta() {
     const query = `
@@ -316,8 +302,6 @@ class EstoqueModel {
       throw error;
     }
   }
-  
-
 
   // Método para pesquisa avançada no estoque
   pesquisaAvancada = async (filtros) => {
