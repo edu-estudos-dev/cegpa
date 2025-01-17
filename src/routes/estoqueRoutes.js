@@ -42,9 +42,6 @@ router.post("/saida", estoqueController.registrarSaida);
 // Nova rota para buscar a quantidade de itens saídos em um determinado ano
 router.get("/itens-saidos-ano", estoqueController.fetchItensSaidosPorAno);
 
-// Nova rota para renderizar o formulário de pesquisa de itens saídos
-router.get("/pesquisa-itens-saidos", estoqueController.renderPesquisaForm);
-
 // Rota para obter o relatório de entradas
 router.get("/relatorio-entradas", estoqueController.fetchRelatorioEntradas);
 

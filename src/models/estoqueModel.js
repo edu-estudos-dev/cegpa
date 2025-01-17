@@ -189,16 +189,15 @@ class EstoqueModel {
 
   // Método para pesquisa avançada no estoque
   pesquisaAvancada = async (filtros) => {
-    const { descricao, categoria, subgrupo, data_inicio, data_fim, ano } =
-      filtros;
+    const { descricao, categoria, subgrupo, data_inicio, data_fim, ano } = filtros;
     let query = `SELECT * FROM estoqueatual WHERE pago = FALSE `;
     const params = [];
-
+  
     if (descricao) {
       query += `AND descricao LIKE ? `;
       params.push(`%${descricao}%`);
     }
-    if (categoria) {
+    if (categoria && categoria !== 'Selecione...') {
       query += `AND categoria = ? `;
       params.push(categoria);
     }
@@ -214,7 +213,7 @@ class EstoqueModel {
       query += `AND data_de_entrada <= ? `;
       params.push(data_fim);
     }
-
+  
     try {
       const [resultados] = await connection.execute(query, params);
       let quantidadeSaidos;
@@ -227,6 +226,7 @@ class EstoqueModel {
       throw error;
     }
   };
+  
 
   // Método para obter a quantidade de itens saídos por ano
   getItensSaidosPorAno = async (ano) => {

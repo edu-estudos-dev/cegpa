@@ -33,7 +33,7 @@
                 </div>
 
                 <div class="row">
-                  <div class="col-md-3 mb-4">
+                  <div class="col-md-4 mb-3">
                     <div class="form-group">
                       <label class="form-label fw-bold" for="categoria">Categoria</label>
                       <select id="categoria" class="form-select" name="categoria">
@@ -56,7 +56,7 @@
                     </div>
                   </div>
 
-                  <div class="col-md-3">
+                  <div class="col-md-2">
                     <div class="form-group fw-bold">
                       <label class="form-label fw-bold" for="subgrupo">Subgrupo</label>
                       <select id="subgrupo" class="form-select" name="subgrupo">
@@ -68,14 +68,21 @@
                     </div>
                   </div>
 
-                  <div class="col-md-3">
+                  <div class="col-md-2">
+                    <div class="form-group fw-bold">
+                      <label for="tombo">Tombo:</label>
+                      <input type="text" id="tombo" name="tombo" class="form-control">
+                    </div>
+                  </div>
+
+                  <div class="col-md-2">
                     <div class="form-group fw-bold">
                       <label for="qtd_itens_entraram">Entrada:</label>
                       <input type="number" id="qtd_itens_entraram" name="qtd_itens_entraram" class="form-control">
                     </div>
                   </div>
 
-                  <div class="col-md-3">
+                  <div class="col-md-2">
                     <div class="form-group fw-bold">
                       <label for="qtd_itens_sairam">Saída:</label>
                       <input type="number" id="qtd_itens_sairam" name="qtd_itens_sairam" class="form-control">
@@ -132,7 +139,7 @@
           mensagem = `Quantidade de Itens que Saíram no Ano ${formData.get('qtd_itens_sairam')}: ${data.quantidadeSaidosAno}`;
         }
 
-        resultadosDiv.innerHTML = `<h5 class="text-primary mt-2">${mensagem}</h5>`;
+        resultadosDiv.innerHTML = `<h5 class="text-success mt-2">${mensagem}</h5>`;
       } catch (error) {
         console.error("Erro ao buscar resultados:", error);
       }
