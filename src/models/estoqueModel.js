@@ -111,6 +111,7 @@ class EstoqueModel {
     }
   };
 
+
   createSaida = async (
     tombo,
     doc_saida,
@@ -122,10 +123,26 @@ class EstoqueModel {
     mat_funcional,
     telefone,
     nome_completo,
-    observacao
+    observacao,
+    descricao // Adiciona a descrição como parâmetro
   ) => {
-    const query = `INSERT INTO itensPagos (tombo, doc_saida, data_de_saida, quantidade, referencia, destino, posto_graduacao, mat_funcional, telefone, nome_completo, observacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const query = `INSERT INTO itensPagos (tombo, doc_saida, data_de_saida, quantidade, referencia, destino, posto_graduacao, mat_funcional, telefone, nome_completo, observacao, descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     try {
+      console.log('Inserindo na tabela itensPagos com os seguintes dados:', {
+        tombo,
+        doc_saida,
+        data_de_saida,
+        quantidade,
+        referencia,
+        destino,
+        posto_graduacao,
+        mat_funcional,
+        telefone,
+        nome_completo,
+        observacao,
+        descricao
+      });
+  
       await connection.execute(query, [
         tombo,
         doc_saida,
@@ -138,12 +155,33 @@ class EstoqueModel {
         telefone,
         nome_completo,
         observacao,
+        descricao, // Inclui a descrição no array de valores
       ]);
+  
+      console.log('Atualizando a coluna pago para o tombo:', tombo);
+      // Apenas atualizar a coluna "pago" na tabela estoqueatual
+      const updateQuery = `UPDATE estoqueatual SET pago = 1 WHERE tombo = ?`;
+      await connection.execute(updateQuery, [tombo]);
+  
+      console.log('Atualização concluída para o tombo:', tombo);
     } catch (error) {
       console.error("Erro ao inserir dados na tabela itensPagos:", error);
       throw error;
     }
   };
+  
+
+  markAsPaid = async (id) => {
+    const query = `UPDATE estoqueatual SET pago = 1 WHERE id = ?`;
+    try {
+      await connection.execute(query, [id]);
+    } catch (error) {
+      console.error("Erro ao atualizar a coluna pago na tabela estoqueatual:", error);
+      throw error;
+    }
+  };
+  
+  
 
   getItemByTombo = async (tombo) => {
     const query = `SELECT * FROM estoqueAtual WHERE tombo = ?`;
@@ -250,37 +288,37 @@ class EstoqueModel {
     }
   };
 
+
+
   // Método para obter o histórico de movimentação
-  async getHistoricoMovimentacao() {
+  async getMovimentacaoBruta() {
     const query = `
       SELECT 
         'entrada' AS tipo, 
         data_de_entrada AS data, 
         descricao, 
-        SUM(quantidade) AS quantidade
-      FROM estoqueatual 
-      WHERE pago = FALSE
-      GROUP BY data_de_entrada, descricao
+        quantidade 
+      FROM estoqueatual
       UNION ALL
       SELECT 
         'saida' AS tipo, 
         data_de_saida AS data, 
-        'Item Saído' AS descricao,
-        SUM(quantidade) AS quantidade
+        descricao, 
+        quantidade 
       FROM itenspagos
-      GROUP BY data_de_saida, descricao
-      ORDER BY data DESC;
+      ORDER BY data;
     `;
     try {
       const [results] = await connection.execute(query);
       return results;
     } catch (error) {
-      console.error("Erro ao buscar histórico de movimentação:", error);
+      console.error("Erro ao buscar movimentação bruta:", error);
       throw error;
     }
   }
   
-  
+
+
   // Método para pesquisa avançada no estoque
   pesquisaAvancada = async (filtros) => {
     const { descricao, categoria, subgrupo, data_inicio, data_fim } = filtros;
