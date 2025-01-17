@@ -182,25 +182,106 @@ class EstoqueModel {
     }
   };
 
+  
   //   /* ********************************************************************************
   //                   Métodos para a Pesquisa
   //   *********************************************************************************/
 
-  // Método para obter a quantidade de itens saídos em um determinado ano
+  // Método para pesquisa avançada no estoque
+  pesquisaAvancada = async (filtros) => {
+    const { descricao, categoria, subgrupo, data_inicio, data_fim, ano } =
+      filtros;
+    let query = `SELECT * FROM estoqueatual WHERE pago = FALSE `;
+    const params = [];
+
+    if (descricao) {
+      query += `AND descricao LIKE ? `;
+      params.push(`%${descricao}%`);
+    }
+    if (categoria) {
+      query += `AND categoria = ? `;
+      params.push(categoria);
+    }
+    if (subgrupo) {
+      query += `AND subgrupo = ? `;
+      params.push(subgrupo);
+    }
+    if (data_inicio) {
+      query += `AND data_de_entrada >= ? `;
+      params.push(data_inicio);
+    }
+    if (data_fim) {
+      query += `AND data_de_entrada <= ? `;
+      params.push(data_fim);
+    }
+
+    try {
+      const [resultados] = await connection.execute(query, params);
+      let quantidadeSaidos;
+      if (ano) {
+        quantidadeSaidos = await this.getItensSaidosPorAno(ano);
+      }
+      return { resultados, quantidadeSaidos };
+    } catch (error) {
+      console.error("Erro na pesquisa avançada:", error);
+      throw error;
+    }
+  };
+
+  // Método para obter a quantidade de itens saídos por ano
   getItensSaidosPorAno = async (ano) => {
     const query = `
-    SELECT COUNT(*) AS quantidade
-    FROM itensPagos
-    WHERE YEAR(data_de_saida) = ?
-  `;
+      SELECT 
+        COUNT(*) AS quantidade_saidos 
+      FROM 
+        itenspagos 
+      WHERE 
+        YEAR(data_de_saida) = ?
+    `;
+    console.log("Executando query para obter itens saídos por ano:", ano);
+  
     try {
       const [results] = await connection.execute(query, [ano]);
-      return results[0]?.quantidade || 0; // Retorna a quantidade de itens saídos ou 0 se não houver resultados
+      console.log("Resultados da query:", results);
+      if (results.length === 0) {
+        console.error("Nenhum resultado encontrado para o ano:", ano);
+        return 0;
+      }
+      console.log("Quantidade de itens que saíram no ano:", results[0].quantidade_saidos);
+      return results[0].quantidade_saidos;
     } catch (error) {
       console.error("Erro ao buscar itens saídos por ano:", error);
       throw error;
     }
   };
+  
+  // Método para obter a quantidade de itens entrou por ano
+  getItensEntradaPorAno = async (ano) => {
+    const query = `
+      SELECT 
+        COUNT(*) AS quantidade_entraram 
+      FROM 
+        estoqueatual 
+      WHERE 
+        YEAR(data_de_entrada) = ?
+    `;
+    console.log("Executando query para obter itens de entrada por ano:", ano);
+  
+    try {
+      const [results] = await connection.execute(query, [ano]);
+      console.log("Resultados da query:", results);
+      if (results.length === 0) {
+        console.error("Nenhum resultado encontrado para o ano:", ano);
+        return 0;
+      }
+      console.log("Quantidade de itens que entraram no ano:", results[0].quantidade_entraram);
+      return results[0].quantidade_entraram;
+    } catch (error) {
+      console.error("Erro ao buscar itens entraram por ano:", error);
+      throw error;
+    }
+  };
+  
 
   // Método para obter o relatório de entradas por mês e ano
   getRelatorioEntradas = async () => {
@@ -240,42 +321,6 @@ class EstoqueModel {
     }
   };
 
-  // Método para pesquisa avançada no estoque
-  pesquisaAvancada = async (filtros) => {
-    const { descricao, categoria, subgrupo, data_inicio, data_fim } = filtros;
-    let query = `SELECT * FROM estoqueatual WHERE pago = FALSE `;
-    const params = [];
-
-    if (descricao) {
-      query += `AND descricao LIKE ? `;
-      params.push(`%${descricao}%`);
-    }
-    if (categoria) {
-      query += `AND categoria = ? `;
-      params.push(categoria);
-    }
-    if (subgrupo) {
-      query += `AND subgrupo = ? `;
-      params.push(subgrupo);
-    }
-    if (data_inicio) {
-      query += `AND data_de_entrada >= ? `;
-      params.push(data_inicio);
-    }
-    if (data_fim) {
-      query += `AND data_de_entrada <= ? `;
-      params.push(data_fim);
-    }
-
-    try {
-      const [results] = await connection.execute(query, params);
-      return results;
-    } catch (error) {
-      console.error("Erro na pesquisa avançada:", error);
-      throw error;
-    }
-  };
-
   // Método para obter o histórico de movimentação
   async getMovimentacaoBruta() {
     const query = `
@@ -302,42 +347,6 @@ class EstoqueModel {
       throw error;
     }
   }
-
-  // Método para pesquisa avançada no estoque
-  pesquisaAvancada = async (filtros) => {
-    const { descricao, categoria, subgrupo, data_inicio, data_fim } = filtros;
-    let query = `SELECT * FROM estoqueatual WHERE pago = FALSE `;
-    const params = [];
-
-    if (descricao) {
-      query += `AND descricao LIKE ? `;
-      params.push(`%${descricao}%`);
-    }
-    if (categoria) {
-      query += `AND categoria = ? `;
-      params.push(categoria);
-    }
-    if (subgrupo) {
-      query += `AND subgrupo = ? `;
-      params.push(subgrupo);
-    }
-    if (data_inicio) {
-      query += `AND data_de_entrada >= ? `;
-      params.push(data_inicio);
-    }
-    if (data_fim) {
-      query += `AND data_de_entrada <= ? `;
-      params.push(data_fim);
-    }
-
-    try {
-      const [results] = await connection.execute(query, params);
-      return results;
-    } catch (error) {
-      console.error("Erro na pesquisa avançada:", error);
-      throw error;
-    }
-  };
 }
 
 export default new EstoqueModel();

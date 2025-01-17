@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,84 +9,144 @@
   <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
+
 <body>
   <!-- Navbar -->
   <%- include('../partials/header') %>
 
-  <div class="container-fluid">
-    <main>
-      <div class="table-container">
-        <div class="row mt-3">
-          <div class="mt-5 mb-3">
-            <h2 class="text-center text-success mb-3 mt-4 fw-bold">Pesquisa Avançada de Estoque</h2>
+  <div class="container">
+
+    <div id="centralize-wrapper" class="centralize-wrapper">
+      <div style="width: 80%;" id="container" class="container secondary-color mt-5 border shadow-sm">
+        <main>
+          <div class="row mt-5">
+            <div class="col-md-12">
+              <h2 class="text-center text-success mb-4">Pesquisa Avançada de Estoque</h2>
+              <form id="pesquisa-form">
+                <div class="row">
+                  <div class="col-md-12 mb-3">
+                    <div class="form-group fw-bold">
+                      <label for="descricao">Descrição:</label>
+                      <input type="text" id="descricao" name="descricao" class="form-control">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-3 mb-4">
+                    <div class="form-group">
+                      <label class="form-label fw-bold" for="categoria">Categoria</label>
+                      <select id="categoria" class="form-select" name="categoria">
+                        <option selected>Selecione...</option>
+                        <option value="mesa">MESA</option>
+                        <option value="ar-condicionado">AR-CONDICIONADO</option>
+                        <option value="automovel">AUTOMÓVEL</option>
+                        <option value="bicicleta">BICICLETA</option>
+                        <option value="tv">TV</option>
+                        <option value="cadeira">CADEIRA</option>
+                        <option value="gaveteiro">GAVETEIRO</option>
+                        <option value="armario">ARMÁRIO</option>
+                        <option value="estante">ESTANTE</option>
+                        <option value="desktop">DESKTOP</option>
+                        <option value="arquivo">ARQUIVO</option>
+                        <option value="beliche">BELICHE</option>
+                        <option value="lousa">LOUSA</option>
+                        <option value="monitor">MONITOR</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3">
+                    <div class="form-group fw-bold">
+                      <label class="form-label fw-bold" for="subgrupo">Subgrupo</label>
+                      <select id="subgrupo" class="form-select" name="subgrupo">
+                        <option value=""></option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3">
+                    <div class="form-group fw-bold">
+                      <label for="qtd_itens_entraram">Entrada:</label>
+                      <input type="number" id="qtd_itens_entraram" name="qtd_itens_entraram" class="form-control">
+                    </div>
+                  </div>
+
+                  <div class="col-md-3">
+                    <div class="form-group fw-bold">
+                      <label for="qtd_itens_sairam">Saída:</label>
+                      <input type="number" id="qtd_itens_sairam" name="qtd_itens_sairam" class="form-control">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-12 d-flex justify-content-center">
+                    <button type="button" class="btn btn-warning mx-1" id="btn-limpar">Limpar</button>
+                    <button type="submit" class="btn btn-primary mx-1">Pesquisar</button>
+                  </div>
+                </div>
+              </form>
+
+              <div class="row">
+                <div class="col-md-12 d-flex justify-content-center">
+                  <div id="resultados" class="mt-2"></div>
+                </div>
+              </div>
+
+            </div>
           </div>
-        </div>
+        </main>
       </div>
-      <div class="table-container">
-        <form id="pesquisa-form" class="mb-4">
-          <div class="form-group">
-            <label for="descricao">Descrição:</label>
-            <input type="text" id="descricao" name="descricao" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label for="categoria">Categoria:</label>
-            <input type="text" id="categoria" name="categoria" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label for="subgrupo">Subgrupo:</label>
-            <input type="text" id="subgrupo" name="subgrupo" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label for="data_inicio">Data de Início:</label>
-            <input type="date" id="data_inicio" name="data_inicio" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label for="data_fim">Data de Fim:</label>
-            <input type="date" id="data_fim" name="data_fim" class="form-control">
-          </div>
-
-          <button type="submit" class="btn btn-primary">Pesquisar</button>
-        </form>
-        <div id="resultados" class="mt-3"></div>
-      </div>
-    </main>
+    </div>
   </div>
 
   <script>
     document.getElementById('pesquisa-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const params = new URLSearchParams(new FormData(e.target)).toString();
-      const response = await fetch(`/pesquisa-avancada?${params}`);
-      const data = await response.json();
-      const resultadosDiv = document.getElementById('resultados');
-      resultadosDiv.innerHTML = `
-        <table class="table table-striped table-hover mb-0">
-          <thead>
-            <tr>
-              <th>Descrição</th>
-              <th>Categoria</th>
-              <th>Subgrupo</th>
-              <th>Data de Entrada</th>
-              <th>Quantidade</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${data.map(item => `
-              <tr>
-                <td>${item.descricao}</td>
-                <td>${item.categoria}</td>
-                <td>${item.subgrupo}</td>
-                <td>${new Date(item.data_de_entrada).toLocaleDateString()}</td>
-                <td>${item.quantidade}</td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-      `;
+      const formData = new FormData(e.target);
+      const params = new URLSearchParams(formData).toString();
+      console.log("Parâmetros da URL gerados:", params);
+
+      try {
+        const response = await fetch(`/pesquisa-avancada?${params}`);
+        const data = await response.json();
+        console.log("Dados recebidos do backend:", data);
+
+        const resultadosDiv = document.getElementById('resultados');
+
+        // Renderizando a mensagem de resultados da pesquisa avançada
+        let mensagem = '';
+        if (formData.get('qtd_itens_entraram')) {
+          mensagem = `Quantidade de Itens que Entraram no Ano ${formData.get('qtd_itens_entraram')}: ${data.quantidadeEntraram}`;
+        } else if (formData.get('descricao')) {
+          mensagem = `Existem ${data.resultados.length} itens com a descrição "${formData.get('descricao')}" no estoque atual.`;
+        } else if (formData.get('categoria') && formData.get('categoria') !== 'Selecione...') {
+          mensagem = `Existem ${data.resultados.length} ${formData.get('categoria').toLowerCase()}s no estoque atual.`;
+        } else if (formData.get('subgrupo')) {
+          mensagem = `Existem ${data.resultados.length} itens do subgrupo ${formData.get('subgrupo')} no estoque atual.`;
+        } else if (formData.get('qtd_itens_sairam')) {
+          mensagem = `Quantidade de Itens que Saíram no Ano ${formData.get('qtd_itens_sairam')}: ${data.quantidadeSaidosAno}`;
+        }
+
+        resultadosDiv.innerHTML = `<h5 class="text-primary mt-2">${mensagem}</h5>`;
+      } catch (error) {
+        console.error("Erro ao buscar resultados:", error);
+      }
+    });
+
+    document.getElementById('btn-limpar').addEventListener('click', () => {
+      document.getElementById('descricao').value = '';
+      document.getElementById('categoria').value = 'Selecione...';
+      document.getElementById('subgrupo').value = '';
+      document.getElementById('qtd_itens_entraram').value = '';
+      document.getElementById('qtd_itens_sairam').value = '';
+      document.getElementById('resultados').innerHTML = '';
     });
   </script>
 </body>
+
 </html>
