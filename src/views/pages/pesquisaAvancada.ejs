@@ -11,149 +11,255 @@
 </head>
 
 <body>
+
   <!-- Navbar -->
   <%- include('../partials/header') %>
 
-  <div class="container">
-
-    <div id="centralize-wrapper" class="centralize-wrapper">
-      <div style="width: 80%;" id="container" class="container secondary-color mt-5 border shadow-sm">
-        <main>
-          <div class="row mt-5">
-            <div class="col-md-12">
-              <h2 class="text-center text-success mb-4">Pesquisa Avançada de Estoque</h2>
-              <form id="pesquisa-form">
-                <div class="row">
-                  <div class="col-md-12 mb-3">
-                    <div class="form-group fw-bold">
-                      <label for="descricao">Descrição:</label>
-                      <input type="text" id="descricao" name="descricao" class="form-control">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-4 mb-3">
-                    <div class="form-group">
-                      <label class="form-label fw-bold" for="categoria">Categoria</label>
-                      <select id="categoria" class="form-select" name="categoria">
-                        <option selected>Selecione...</option>
-                        <option value="mesa">MESA</option>
-                        <option value="ar-condicionado">AR-CONDICIONADO</option>
-                        <option value="automovel">AUTOMÓVEL</option>
-                        <option value="bicicleta">BICICLETA</option>
-                        <option value="tv">TV</option>
-                        <option value="cadeira">CADEIRA</option>
-                        <option value="gaveteiro">GAVETEIRO</option>
-                        <option value="armario">ARMÁRIO</option>
-                        <option value="estante">ESTANTE</option>
-                        <option value="desktop">DESKTOP</option>
-                        <option value="arquivo">ARQUIVO</option>
-                        <option value="beliche">BELICHE</option>
-                        <option value="lousa">LOUSA</option>
-                        <option value="monitor">MONITOR</option>
-                      </select>
+    <div class="container">
+      <div id="centralize-wrapper" class="centralize-wrapper">
+        <div style="width: 80%;" id="container" class="container secondary-color mt-5 border shadow-sm">
+          <main>
+            <div class="row mt-5">
+              <div class="col-md-12">
+                <h2 class="text-center text-success mb-4">Pesquisa Avançada de Estoque</h2>
+                <form id="pesquisa-form">
+                  <div class="row">
+                    <div class="col-md-12 mb-3">
+                      <div class="form-group fw-bold">
+                        <label for="descricao">Descrição:</label>
+                        <input type="text" id="descricao" name="descricao" class="form-control my-2">
+                      </div>
                     </div>
                   </div>
 
-                  <div class="col-md-2">
-                    <div class="form-group fw-bold">
-                      <label class="form-label fw-bold" for="subgrupo">Subgrupo</label>
-                      <select id="subgrupo" class="form-select" name="subgrupo">
-                        <option value=""></option>
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                        <option value="C">C</option>
-                      </select>
+                  <div class="row">
+                    <div class="col-md-4 mb-3">
+                      <div class="form-group">
+                        <label class="form-label fw-bold" for="categoria">Categoria</label>
+                        <select id="categoria" class="form-select" name="categoria">
+                          <option selected>Selecione...</option>
+                          <option value="mesa">MESA</option>
+                          <option value="ar-condicionado">AR-CONDICIONADO</option>
+                          <option value="automovel">AUTOMÓVEL</option>
+                          <option value="bicicleta">BICICLETA</option>
+                          <option value="tv">TV</option>
+                          <option value="cadeira">CADEIRA</option>
+                          <option value="gaveteiro">GAVETEIRO</option>
+                          <option value="armario">ARMÁRIO</option>
+                          <option value="estante">ESTANTE</option>
+                          <option value="desktop">DESKTOP</option>
+                          <option value="arquivo">ARQUIVO</option>
+                          <option value="beliche">BELICHE</option>
+                          <option value="lousa">LOUSA</option>
+                          <option value="monitor">MONITOR</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="col-md-2">
+                      <div class="form-group fw-bold">
+                        <label class="form-label fw-bold" for="subgrupo">Subgrupo</label>
+                        <select id="subgrupo" class="form-select" name="subgrupo">
+                          <option value=""></option>
+                          <option value="A">A</option>
+                          <option value="B">B</option>
+                          <option value="C">C</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="col-md-2">
+                      <div class="form-group fw-bold">
+                        <label for="tombo">Tombo:</label>
+                        <input type="text" id="tombo" name="tombo" class="form-control mt-2">
+                      </div>
+                    </div>
+
+                    <div class="col-md-2">
+                      <div class="form-group fw-bold">
+                        <label for="qtd_itens_entraram">Entrada:</label>
+                        <input type="number" id="qtd_itens_entraram" name="qtd_itens_entraram"
+                          class="form-control mt-2">
+                      </div>
+                    </div>
+
+                    <div class="col-md-2">
+                      <div class="form-group fw-bold">
+                        <label for="qtd_itens_sairam">Saída:</label>
+                        <input type="number" id="qtd_itens_sairam" name="qtd_itens_sairam" class="form-control mt-2">
+                      </div>
                     </div>
                   </div>
 
-                  <div class="col-md-2">
-                    <div class="form-group fw-bold">
-                      <label for="tombo">Tombo:</label>
-                      <input type="text" id="tombo" name="tombo" class="form-control">
+                  <div class="row">
+                    <div class="col-md-12 d-flex justify-content-center my-3">
+                      <button type="button" class="btn btn-warning mx-1" id="btn-limpar">Limpar</button>
+                      <button type="submit" class="btn btn-primary mx-1" id="btn-pesquisar">Pesquisar</button>
                     </div>
                   </div>
-
-                  <div class="col-md-2">
-                    <div class="form-group fw-bold">
-                      <label for="qtd_itens_entraram">Entrada:</label>
-                      <input type="number" id="qtd_itens_entraram" name="qtd_itens_entraram" class="form-control">
-                    </div>
-                  </div>
-
-                  <div class="col-md-2">
-                    <div class="form-group fw-bold">
-                      <label for="qtd_itens_sairam">Saída:</label>
-                      <input type="number" id="qtd_itens_sairam" name="qtd_itens_sairam" class="form-control">
-                    </div>
-                  </div>
-                </div>
-
+                </form>
                 <div class="row">
                   <div class="col-md-12 d-flex justify-content-center">
-                    <button type="button" class="btn btn-warning mx-1" id="btn-limpar">Limpar</button>
-                    <button type="submit" class="btn btn-primary mx-1">Pesquisar</button>
+                    <div id="resultados" class="mt-2"></div>
                   </div>
                 </div>
-              </form>
-
-              <div class="row">
-                <div class="col-md-12 d-flex justify-content-center">
-                  <div id="resultados" class="mt-2"></div>
-                </div>
               </div>
-
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    document.getElementById('pesquisa-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const params = new URLSearchParams(formData).toString();
-      console.log("Parâmetros da URL gerados:", params);
-
-      try {
-        const response = await fetch(`/pesquisa-avancada?${params}`);
-        const data = await response.json();
-        console.log("Dados recebidos do backend:", data);
-
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const pesquisaForm = document.getElementById('pesquisa-form');
+        const btnLimpar = document.getElementById('btn-limpar');
+        const btnPesquisar = document.getElementById('btn-pesquisar');
         const resultadosDiv = document.getElementById('resultados');
 
-        // Renderizando a mensagem de resultados da pesquisa avançada
-        let mensagem = '';
-        if (formData.get('qtd_itens_entraram')) {
-          mensagem = `Quantidade de Itens que Entraram no Ano ${formData.get('qtd_itens_entraram')}: ${data.quantidadeEntraram}`;
-        } else if (formData.get('descricao')) {
-          mensagem = `Existem ${data.resultados.length} itens com a descrição "${formData.get('descricao')}" no estoque atual.`;
-        } else if (formData.get('categoria') && formData.get('categoria') !== 'Selecione...') {
-          mensagem = `Existem ${data.resultados.length} ${formData.get('categoria').toLowerCase()}s no estoque atual.`;
-        } else if (formData.get('subgrupo')) {
-          mensagem = `Existem ${data.resultados.length} itens do subgrupo ${formData.get('subgrupo')} no estoque atual.`;
-        } else if (formData.get('qtd_itens_sairam')) {
-          mensagem = `Quantidade de Itens que Saíram no Ano ${formData.get('qtd_itens_sairam')}: ${data.quantidadeSaidosAno}`;
+        // Verifique se os elementos existem antes de adicionar os "event listeners"
+        if (pesquisaForm) {
+          pesquisaForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const params = new URLSearchParams(formData).toString();
+            console.log("Parâmetros da URL gerados:", params);
+
+            try {
+              const response = await fetch(`/pesquisa-avancada?${params}`);
+              const data = await response.json();
+              console.log("Dados recebidos do backend:", data);
+
+              // Renderizando a mensagem de resultados da pesquisa avançada
+              let mensagem = '';
+              if (formData.get('qtd_itens_entraram')) {
+                mensagem = `Quantidade de Itens que Entraram no Ano ${formData.get('qtd_itens_entraram')}: ${data.quantidadeEntraram}`;
+              } else if (formData.get('descricao')) {
+                mensagem = `Existem ${data.resultados.length} itens com a descrição "${formData.get('descricao')}" no estoque atual.`;
+              } else if (formData.get('categoria') && formData.get('categoria') !== 'Selecione...') {
+                mensagem = `Existem ${data.resultados.length} ${formData.get('categoria').toLowerCase()}s no estoque atual.`;
+              } else if (formData.get('subgrupo')) {
+                mensagem = `Existem ${data.resultados.length} itens do subgrupo ${formData.get('subgrupo')} no estoque atual.`;
+              } else if (formData.get('qtd_itens_sairam')) {
+                mensagem = `Quantidade de Itens que Saíram no Ano ${formData.get('qtd_itens_sairam')}: ${data.quantidadeSaidosAno}`;
+              }
+
+              resultadosDiv.innerHTML = `<h5 class="text-success mt-2">${mensagem}</h5>`;
+
+              // Nova funcionalidade: buscar e exibir informações do tombo
+              const tombo = formData.get('tombo');
+              if (tombo) {
+                try {
+                  const responseTombo = await fetch(`/fetch-info-tombo?tombo=${tombo}`);
+                  const dataTombo = await responseTombo.json();
+                  console.log("Dados do tombo recebidos do backend:", dataTombo);
+
+                  if (dataTombo.infoTombo) {
+                    const entrada = dataTombo.infoTombo;
+                    const saida = entrada.saida;
+
+                    const dataEntradaFormatada = new Date(entrada.data_de_entrada).toLocaleDateString('pt-BR');
+                    const dataSaidaFormatada = saida ? new Date(saida.data_de_saida).toLocaleDateString('pt-BR') : '';
+
+                    // Criando e exibindo o modal com as informações do tombo
+                    const modalHtml = `
+                                      <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
+                                          <div class="modal-dialog">
+                                              <div class="modal-content">
+                                                  <div class="modal-header">
+                                                      <h5 class="modal-title" id="infoTomboModalLabel">Informações do Tombo</h5>
+                                                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                  </div>
+                                                  <div class="modal-body">
+                                                      <div class="card">
+                                                          <div class="card-body">
+                                                              <h5 class="card-title">${entrada.descricao}</h5>
+                                                              <p class="card-text">
+                                                                  <strong>Tombo:</strong> ${entrada.tombo} <br/>
+                                                                  <strong>Categoria:</strong> ${entrada.categoria} <br/>
+                                                                  <strong>Doc Origem:</strong> ${entrada.doc_origem} <br/>
+                                                                  <strong>Estoque:</strong> ${entrada.estoque} <br/>
+                                                                  <strong>Valor:</strong> ${entrada.valor} <br/>
+                                                                  <strong>Situação:</strong> ${entrada.situacao} <br/>
+                                                                  <strong>Observação:</strong> ${entrada.observacao} <br/>
+                                                                  <strong>Data de Entrada:</strong> ${dataEntradaFormatada} <br/>
+                                                                  ${saida ? `
+                                                                      <strong>Data de Saída:</strong> ${dataSaidaFormatada} <br/>
+                                                                      <strong>Doc Saída:</strong> ${saida.doc_saida} <br/>
+                                                                      <strong>Referência:</strong> ${saida.referencia} <br/>
+                                                                      <strong>Destino:</strong> ${saida.destino} <br/>
+                                                                      <strong>Posto/Graduação:</strong> ${saida.posto_graduacao} <br/>
+                                                                      <strong>Matrícula Funcional:</strong> ${saida.mat_funcional} <br/>
+                                                                      <strong>Telefone:</strong> ${saida.telefone} <br/>
+                                                                      <strong>Nome Completo:</strong> ${saida.nome_completo} <br/>
+                                                                      <strong>Observação de Saída:</strong> ${saida.observacao_saida} <br/>
+                                                                  ` : ''}
+                                                              </p>
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                                  <div class="modal-footer">
+                                                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  `;
+                    const modalDiv = document.createElement('div');
+                    modalDiv.innerHTML = modalHtml;
+                    document.body.appendChild(modalDiv);
+                    const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
+                      backdrop: true,
+                      focus: true
+                    });
+                    infoTomboModal.show();
+                    infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
+                      document.getElementById('pesquisa-form').reset();
+                      resultadosDiv.innerHTML = ''; // Limpa os resultados
+                      modalDiv.remove(); // Remove o modal da DOM
+                    });
+                  } else {
+                    resultadosDiv.innerHTML += '<h5 class="text-danger text-center mt-2">Tombo não encontrado ou não pago.</h5>';
+                  }
+                } catch (error) {
+                  console.error("Erro ao buscar informações do tombo:", error);
+                  resultadosDiv.innerHTML += '<h5 class="text-danger mt-2">Erro ao buscar informações do tombo.</h5>';
+                }
+              }
+            } catch (error) {
+              console.error("Erro ao buscar resultados:", error);
+              resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar resultados.</h5>';
+            }
+          });
         }
 
-        resultadosDiv.innerHTML = `<h5 class="text-success mt-2">${mensagem}</h5>`;
-      } catch (error) {
-        console.error("Erro ao buscar resultados:", error);
-      }
-    });
+        if (btnLimpar) {
+          btnLimpar.addEventListener('click', () => {
+            document.getElementById('pesquisa-form').reset();
+            resultadosDiv.innerHTML = ''; // Limpa os resultados
+          });
+        }
 
-    document.getElementById('btn-limpar').addEventListener('click', () => {
-      document.getElementById('descricao').value = '';
-      document.getElementById('categoria').value = 'Selecione...';
-      document.getElementById('subgrupo').value = '';
-      document.getElementById('qtd_itens_entraram').value = '';
-      document.getElementById('qtd_itens_sairam').value = '';
-      document.getElementById('resultados').innerHTML = '';
-    });
-  </script>
+        if (btnPesquisar) {
+          btnPesquisar.addEventListener('click', () => {
+            let descricao = document.getElementById('descricao').value;
+            let categoria = document.getElementById('categoria').value;
+            let subgrupo = document.getElementById('subgrupo').value;
+            let qtd_itens_entraram = document.getElementById('qtd_itens_entraram').value;
+            let qtd_itens_sairam = document.getElementById('qtd_itens_sairam').value;
+
+            console.log(descricao, categoria, subgrupo, qtd_itens_entraram, qtd_itens_sairam);
+
+            if (!descricao && !categoria && !subgrupo && !qtd_itens_entraram && !qtd_itens_sairam) {
+              alert('Selecione algum parâmetro para a pesquisa.');
+            }
+          });
+        }
+      });
+    </script>
+    F
+
+
 </body>
 
 </html>

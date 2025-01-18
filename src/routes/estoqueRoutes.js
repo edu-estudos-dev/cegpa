@@ -67,5 +67,9 @@ router.get("/pesquisa-avancada", estoqueController.pesquisaAvancada);
 // Rota para renderizar a página de pesquisa avançada
 router.get("/pesquisa-avancada-page", estoqueController.renderPesquisaAvancada);
 
+// Nova rota para buscar informações do tombo
+router.get("/fetch-info-tombo", estoqueController.fetchInfoPorTombo);
+
+
 
 export default router;

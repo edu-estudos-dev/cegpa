@@ -536,6 +536,67 @@ class EstoqueController {
   renderPesquisaAvancada = (_, res) => {
     res.render("pesquisaAvancada");
   };
+
+  // Método para buscar informações de saída do tombo
+  getSaidaPorTombo = async (tombo) => {
+    const query = `
+    SELECT
+      data_de_saida, doc_saida, referencia, destino, posto_graduacao,
+      mat_funcional, telefone, nome_completo, observacao AS observacao_saida
+    FROM itenspagos
+    WHERE tombo = ?
+  `;
+    console.log(
+      "Executando query para obter informações de saída do tombo:",
+      tombo
+    );
+
+    try {
+      const [results] = await connection.execute(query, [tombo]);
+      console.log("Resultados da query de saída:", results);
+      if (results.length === 0) {
+        return null;
+      }
+      return results[0];
+    } catch (error) {
+      console.error("Erro ao buscar informações de saída do tombo:", error);
+      throw error;
+    }
+  };
+
+// Método para buscar e exibir informações do tombo com logs adicionais
+fetchInfoPorTombo = async (req, res) => {
+  const { tombo } = req.query;
+  console.log("Tombo recebido na requisição:", tombo);
+
+  if (!tombo) {
+    console.error("Tombo não fornecido na requisição.");
+    return res.status(400).json({ error: "Tombo não fornecido." });
+  }
+
+  try {
+    const infoTombo = await estoqueModel.getInfoPorTombo(tombo);
+    console.log("Informações de entrada do tombo:", infoTombo);
+
+    const saidaTombo = await estoqueModel.getSaidaPorTombo(tombo);
+    console.log("Informações de saída do tombo:", saidaTombo);
+
+    if (!infoTombo && !saidaTombo) {
+      console.log("Nenhuma informação encontrada para o tombo:", tombo);
+      return res
+        .status(404)
+        .json({ error: "Tombo não encontrado ou não pago." });
+    }
+
+    const fullInfoTombo = { ...infoTombo, saida: saidaTombo };
+    console.log("Informações completas do tombo encontradas:", fullInfoTombo);
+    res.json({ infoTombo: fullInfoTombo });
+  } catch (error) {
+    console.error("Erro ao buscar informações do tombo:", error);
+    res.status(500).json({ error: "Erro ao buscar informações do tombo." });
+  }
+};
+
 }
 
 export default new EstoqueController();
