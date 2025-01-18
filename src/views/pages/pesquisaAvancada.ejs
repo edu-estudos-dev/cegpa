@@ -8,6 +8,23 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="/css/styles.css">
+
+  <!-- Adicione este estilo para a animação de zoom-in -->
+  <style>
+    .modal.fade .modal-dialog {
+      transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+      transform: translateY(-25%);
+      opacity: 0;
+    }
+
+    .modal.show .modal-dialog {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+
+
+
 </head>
 
 <body>
@@ -111,153 +128,164 @@
     </div>
 
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const pesquisaForm = document.getElementById('pesquisa-form');
-        const btnLimpar = document.getElementById('btn-limpar');
-        const btnPesquisar = document.getElementById('btn-pesquisar');
-        const resultadosDiv = document.getElementById('resultados');
 
-        // Verifique se os elementos existem antes de adicionar os "event listeners"
-        if (pesquisaForm) {
-          pesquisaForm.addEventListener('submit', async (e) => {
+document.addEventListener('DOMContentLoaded', () => {
+    const pesquisaForm = document.getElementById('pesquisa-form');
+    const btnLimpar = document.getElementById('btn-limpar');
+    const btnPesquisar = document.getElementById('btn-pesquisar');
+    const resultadosDiv = document.getElementById('resultados');
+
+    if (pesquisaForm) {
+        pesquisaForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
             const params = new URLSearchParams(formData).toString();
-            console.log("Parâmetros da URL gerados:", params);
 
             try {
-              const response = await fetch(`/pesquisa-avancada?${params}`);
-              const data = await response.json();
-              console.log("Dados recebidos do backend:", data);
+                const response = await fetch(`/pesquisa-avancada?${params}`);
+                const data = await response.json();
+                console.log("Dados recebidos do backend:", data);
 
-              // Renderizando a mensagem de resultados da pesquisa avançada
-              let mensagem = '';
-              if (formData.get('qtd_itens_entraram')) {
-                mensagem = `Quantidade de Itens que Entraram no Ano ${formData.get('qtd_itens_entraram')}: ${data.quantidadeEntraram}`;
-              } else if (formData.get('descricao')) {
-                mensagem = `Existem ${data.resultados.length} itens com a descrição "${formData.get('descricao')}" no estoque atual.`;
-              } else if (formData.get('categoria') && formData.get('categoria') !== 'Selecione...') {
-                mensagem = `Existem ${data.resultados.length} ${formData.get('categoria').toLowerCase()}s no estoque atual.`;
-              } else if (formData.get('subgrupo')) {
-                mensagem = `Existem ${data.resultados.length} itens do subgrupo ${formData.get('subgrupo')} no estoque atual.`;
-              } else if (formData.get('qtd_itens_sairam')) {
-                mensagem = `Quantidade de Itens que Saíram no Ano ${formData.get('qtd_itens_sairam')}: ${data.quantidadeSaidosAno}`;
-              }
-
-              resultadosDiv.innerHTML = `<h5 class="text-success mt-2">${mensagem}</h5>`;
-
-              // Nova funcionalidade: buscar e exibir informações do tombo
-              const tombo = formData.get('tombo');
-              if (tombo) {
-                try {
-                  const responseTombo = await fetch(`/fetch-info-tombo?tombo=${tombo}`);
-                  const dataTombo = await responseTombo.json();
-                  console.log("Dados do tombo recebidos do backend:", dataTombo);
-
-                  if (dataTombo.infoTombo) {
-                    const entrada = dataTombo.infoTombo;
-                    const saida = entrada.saida;
-
-                    const dataEntradaFormatada = new Date(entrada.data_de_entrada).toLocaleDateString('pt-BR');
-                    const dataSaidaFormatada = saida ? new Date(saida.data_de_saida).toLocaleDateString('pt-BR') : '';
-
-                    // Criando e exibindo o modal com as informações do tombo
-                    const modalHtml = `
-                                      <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
-                                          <div class="modal-dialog">
-                                              <div class="modal-content">
-                                                  <div class="modal-header">
-                                                      <h5 class="modal-title" id="infoTomboModalLabel">Informações do Tombo</h5>
-                                                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                  </div>
-                                                  <div class="modal-body">
-                                                      <div class="card">
-                                                          <div class="card-body">
-                                                              <h5 class="card-title">${entrada.descricao}</h5>
-                                                              <p class="card-text">
-                                                                  <strong>Tombo:</strong> ${entrada.tombo} <br/>
-                                                                  <strong>Categoria:</strong> ${entrada.categoria} <br/>
-                                                                  <strong>Doc Origem:</strong> ${entrada.doc_origem} <br/>
-                                                                  <strong>Estoque:</strong> ${entrada.estoque} <br/>
-                                                                  <strong>Valor:</strong> ${entrada.valor} <br/>
-                                                                  <strong>Situação:</strong> ${entrada.situacao} <br/>
-                                                                  <strong>Observação:</strong> ${entrada.observacao} <br/>
-                                                                  <strong>Data de Entrada:</strong> ${dataEntradaFormatada} <br/>
-                                                                  ${saida ? `
-                                                                      <strong>Data de Saída:</strong> ${dataSaidaFormatada} <br/>
-                                                                      <strong>Doc Saída:</strong> ${saida.doc_saida} <br/>
-                                                                      <strong>Referência:</strong> ${saida.referencia} <br/>
-                                                                      <strong>Destino:</strong> ${saida.destino} <br/>
-                                                                      <strong>Posto/Graduação:</strong> ${saida.posto_graduacao} <br/>
-                                                                      <strong>Matrícula Funcional:</strong> ${saida.mat_funcional} <br/>
-                                                                      <strong>Telefone:</strong> ${saida.telefone} <br/>
-                                                                      <strong>Nome Completo:</strong> ${saida.nome_completo} <br/>
-                                                                      <strong>Observação de Saída:</strong> ${saida.observacao_saida} <br/>
-                                                                  ` : ''}
-                                                              </p>
-                                                          </div>
-                                                      </div>
-                                                  </div>
-                                                  <div class="modal-footer">
-                                                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                                                  </div>
-                                              </div>
-                                          </div>
-                                      </div>
-                                  `;
-                    const modalDiv = document.createElement('div');
-                    modalDiv.innerHTML = modalHtml;
-                    document.body.appendChild(modalDiv);
-                    const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
-                      backdrop: true,
-                      focus: true
-                    });
-                    infoTomboModal.show();
-                    infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
-                      document.getElementById('pesquisa-form').reset();
-                      resultadosDiv.innerHTML = ''; // Limpa os resultados
-                      modalDiv.remove(); // Remove o modal da DOM
-                    });
-                  } else {
-                    resultadosDiv.innerHTML += '<h5 class="text-danger text-center mt-2">Tombo não encontrado ou não pago.</h5>';
-                  }
-                } catch (error) {
-                  console.error("Erro ao buscar informações do tombo:", error);
-                  resultadosDiv.innerHTML += '<h5 class="text-danger mt-2">Erro ao buscar informações do tombo.</h5>';
+                let mensagem = '';
+                if (formData.get('qtd_itens_entraram')) {
+                    mensagem = `Quantidade de Itens que Entraram no Ano ${formData.get('qtd_itens_entraram')}: ${data.quantidadeEntraram}`;
+                } else {
+                    const descricao = formData.get('descricao');
+                    const categoria = formData.get('categoria');
+                    const subgrupo = formData.get('subgrupo');
+                    
+                    mensagem = descricao ? 
+                         `Existem ${data.resultados.length} itens com a descrição "${descricao}" no estoque atual.` :
+                         categoria && categoria !== 'Selecione...' ? 
+                         `Existem ${data.resultados.length} ${categoria.toLowerCase()}s no estoque atual.` :
+                         subgrupo ? 
+                         `Existem ${data.resultados.length} itens do subgrupo ${subgrupo} no estoque atual.` : 
+                         `Quantidade de Itens que Saíram no Ano ${formData.get('qtd_itens_sairam')}: ${data.quantidadeSaidosAno}`;
                 }
-              }
+
+                resultadosDiv.innerHTML = `<h5 class="text-success mt-2">${mensagem}</h5>`;
+
+                const tombo = formData.get('tombo');
+                if (tombo) {
+                    try {
+                        const responseTombo = await fetch(`/fetch-info-tombo?tombo=${tombo}`);
+                        const dataTombo = await responseTombo.json();
+                        console.log("Dados do tombo recebidos do backend:", dataTombo);
+
+                        if (dataTombo.infoTombo) {
+                            const entrada = dataTombo.infoTombo;
+                            const saida = entrada.saida;
+
+                            const dataEntradaFormatada = new Date(entrada.data_de_entrada).toLocaleDateString('pt-BR');
+                            const dataSaidaFormatada = saida ? new Date(saida.data_de_saida).toLocaleDateString('pt-BR') : '';
+                            const getObservacao = (data) => data && data.observacao ? data.observacao : "N/A";
+                            const valorReal = (valor) => parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                            const modalHtml = `
+                                <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
+                                        <div class="modal-content ">
+                                            <div class="modal-header bg-success text-white">
+                                                <h3 class="modal-title ms-auto" id="infoTomboModalLabel">Informações do Tombo</h3>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="card">
+                                                    <div class="card-body pb-0">
+                                                        <h5 class="card-title">${entrada.descricao}</h5>
+                                                        <p class="card-text">
+                                                          <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
+                                                            <strong>Tombo:</strong> ${entrada.tombo} <br/>
+                                                            <strong>Data de Entrada:</strong> ${dataEntradaFormatada} <br/>
+                                                            <strong>Categoria:</strong> ${entrada.categoria} <br/>
+                                                            <strong>Doc Origem:</strong> ${entrada.doc_origem} <br/>
+                                                            <strong>Estoque:</strong> ${entrada.estoque} <br/>
+                                                            <strong>Valor:</strong> ${valorReal(entrada.valor)} <br/>
+                                                            <strong>Situação:</strong> ${entrada.situacao} <br/>
+                                                            <strong>Observação:</strong> ${getObservacao(entrada)} <br/>
+                                                            <hr>
+                                                            ${saida ? `
+                                                            <h5 class="bg-danger text-white p-2">Dados da Saída</h5>
+                                                                <strong>Data de Saída:</strong> ${dataSaidaFormatada} <br/>
+                                                                <strong>Doc Saída:</strong> ${saida.doc_saida} <br/>
+                                                                <strong>Referência:</strong> ${saida.referencia} <br/>
+                                                                <strong>Destino:</strong> ${saida.destino.toUpperCase()} <br/>
+                                                                <strong>Posto/Graduação:</strong> ${saida.posto_graduacao.toUpperCase()} <br/>
+                                                                <strong>Matrícula Funcional:</strong> ${saida.mat_funcional} <br/>
+                                                                <strong>Telefone:</strong> ${saida.telefone} <br/>
+                                                                <strong>Nome Completo:</strong> ${saida.nome_completo} <br/>
+                                                                <strong>Observação de Saída:</strong> ${getObservacao(saida)} <br/>
+                                                            ` : ''}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer d-flex justify-content-center ">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+
+                            const modalDiv = document.createElement('div');
+                            modalDiv.innerHTML = modalHtml;
+                            document.body.appendChild(modalDiv);
+
+                            const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
+                                backdrop: true,
+                                focus: true
+                            });
+
+                            const modalDialog = document.querySelector('.modal-dialog');
+                            modalDialog.classList.add('modal-zoom-in');
+
+                            infoTomboModal.show();
+                            infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
+                                document.getElementById('pesquisa-form').reset();
+                                resultadosDiv.innerHTML = ''; 
+                                modalDiv.remove(); 
+                            });
+                        } else {
+                            resultadosDiv.innerHTML += '<h5 class="text-danger mt-2">Tombo não encontrado ou não pago.</h5>';
+                        }
+                    } catch (error) {
+                        console.error("Erro ao buscar informações do tombo:", error);
+                        resultadosDiv.innerHTML += '<h5 class="text-danger mt-2">Erro ao buscar informações do tombo.</h5>';
+                    }
+                }
             } catch (error) {
-              console.error("Erro ao buscar resultados:", error);
-              resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar resultados.</h5>';
+                console.error("Erro ao buscar resultados:", error);
+                resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar resultados.</h5>';
             }
-          });
-        }
+        });
+    }
 
-        if (btnLimpar) {
-          btnLimpar.addEventListener('click', () => {
+    if (btnLimpar) {
+        btnLimpar.addEventListener('click', () => {
             document.getElementById('pesquisa-form').reset();
-            resultadosDiv.innerHTML = ''; // Limpa os resultados
-          });
-        }
+            resultadosDiv.innerHTML = ''; 
+        });
+    }
 
-        if (btnPesquisar) {
-          btnPesquisar.addEventListener('click', () => {
+    if (btnPesquisar) {
+        btnPesquisar.addEventListener('click', () => {
             let descricao = document.getElementById('descricao').value;
             let categoria = document.getElementById('categoria').value;
             let subgrupo = document.getElementById('subgrupo').value;
             let qtd_itens_entraram = document.getElementById('qtd_itens_entraram').value;
             let qtd_itens_sairam = document.getElementById('qtd_itens_sairam').value;
 
-            console.log(descricao, categoria, subgrupo, qtd_itens_entraram, qtd_itens_sairam);
-
             if (!descricao && !categoria && !subgrupo && !qtd_itens_entraram && !qtd_itens_sairam) {
-              alert('Selecione algum parâmetro para a pesquisa.');
+                alert('Selecione algum parâmetro para a pesquisa.');
             }
-          });
-        }
-      });
+        });
+    }
+});
+
+
     </script>
-    F
+
 
 
 </body>
