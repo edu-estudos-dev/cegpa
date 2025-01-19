@@ -451,11 +451,8 @@ class EstoqueController {
 
   // Método para obter o histórico de movimentação
   async fetchHistoricoMovimentacao(_, res) {
-    console.log("Iniciando fetchHistoricoMovimentacao");
     try {
       const movimentacaoBruta = await estoqueModel.getMovimentacaoBruta();
-      console.log("Movimentação bruta obtida:", movimentacaoBruta);
-
       const consolidado = {};
 
       movimentacaoBruta.forEach((item) => {
@@ -479,7 +476,6 @@ class EstoqueController {
 
       const historico = Object.values(consolidado);
 
-      console.log("Histórico final:", historico);
       res.json(historico);
     } catch (error) {
       console.error("Erro ao buscar histórico de movimentação:", error);
@@ -502,66 +498,27 @@ class EstoqueController {
   // Método para pesquisa avançada no estoque, incluindo itens saídos por ano
   pesquisaAvancada = async (req, res) => {
     const filtros = req.query;
+    const ano = filtros.data;
+    console.log("Ano recebido na requisição:", ano); // Adicionado log aqui
     console.log("Filtros recebidos na requisição:", filtros);
-
+  
     try {
-      const { resultados, quantidadeSaidos } =
-        await estoqueModel.pesquisaAvancada(filtros);
+      const { resultados, quantidadeEntraram, quantidadeSaidos } = await estoqueModel.pesquisaAvancada(ano);
       console.log("Resultados da pesquisa avançada:", resultados);
-      console.log("Quantidade de itens saídos:", quantidadeSaidos);
-
-      const quantidadeEntraram = await estoqueModel.getItensEntradaPorAno(
-        filtros.qtd_itens_entraram
-      );
       console.log("Quantidade de itens que entraram:", quantidadeEntraram);
-
-      const quantidadeSaidosAno = await estoqueModel.getItensSaidosPorAno(
-        filtros.qtd_itens_sairam
-      );
-      console.log("Quantidade de itens que saíram:", quantidadeSaidosAno);
-
-      res.json({
-        resultados,
-        quantidadeSaidos,
-        quantidadeEntraram,
-        quantidadeSaidosAno,
-      });
+      console.log("Quantidade de itens que saíram:", quantidadeSaidos);
+    
+      res.json({ resultados, quantidadeEntraram, quantidadeSaidos });
     } catch (error) {
       console.error("Erro na pesquisa avançada:", error);
       res.status(500).json({ error: "Erro na pesquisa avançada." });
     }
   };
-
+  
+  
   // Método para renderizar a página de pesquisa avançada
   renderPesquisaAvancada = (_, res) => {
     res.render("pesquisaAvancada");
-  };
-
-  // Método para buscar informações de saída do tombo
-  getSaidaPorTombo = async (tombo) => {
-    const query = `
-    SELECT
-      data_de_saida, doc_saida, referencia, destino, posto_graduacao,
-      mat_funcional, telefone, nome_completo, observacao AS observacao_saida
-    FROM itenspagos
-    WHERE tombo = ?
-  `;
-    console.log(
-      "Executando query para obter informações de saída do tombo:",
-      tombo
-    );
-
-    try {
-      const [results] = await connection.execute(query, [tombo]);
-      console.log("Resultados da query de saída:", results);
-      if (results.length === 0) {
-        return null;
-      }
-      return results[0];
-    } catch (error) {
-      console.error("Erro ao buscar informações de saída do tombo:", error);
-      throw error;
-    }
   };
 
   // Método para buscar e exibir informações do tombo com logs adicionais

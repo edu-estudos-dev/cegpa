@@ -186,63 +186,84 @@ class EstoqueModel {
   //                   Métodos para a Pesquisa
   //   *********************************************************************************/
 
-  // Método para pesquisa avançada no estoque
-  pesquisaAvancada = async (filtros) => {
-    const { descricao, categoria, subgrupo, data_inicio, data_fim, ano } =
-      filtros;
-    let query = `SELECT * FROM estoqueatual WHERE pago = FALSE `;
-    const params = [];
-
-    if (descricao) {
-      query += `AND descricao LIKE ? `;
-      params.push(`%${descricao}%`);
-    }
-    if (categoria && categoria !== "Selecione...") {
-      query += `AND categoria = ? `;
-      params.push(categoria);
-    }
-    if (subgrupo) {
-      query += `AND subgrupo = ? `;
-      params.push(subgrupo);
-    }
-    if (data_inicio) {
-      query += `AND data_de_entrada >= ? `;
-      params.push(data_inicio);
-    }
-    if (data_fim) {
-      query += `AND data_de_entrada <= ? `;
-      params.push(data_fim);
-    }
-
+  // Método para obter o histórico de movimentação
+  async getMovimentacaoBruta() {
+    const query = `
+      SELECT 
+        'entrada' AS tipo, 
+        data_de_entrada AS data, 
+        descricao, 
+        quantidade 
+      FROM estoqueatual
+      UNION ALL
+      SELECT 
+        'saida' AS tipo, 
+        data_de_saida AS data, 
+        descricao, 
+        quantidade 
+      FROM itenspagos
+      ORDER BY data;
+    `;
     try {
-      const [resultados] = await connection.execute(query, params);
-      let quantidadeSaidos;
-      if (ano) {
-        quantidadeSaidos = await this.getItensSaidosPorAno(ano);
-      }
-      return { resultados, quantidadeSaidos };
+      const [results] = await connection.execute(query);
+      return results;
+    } catch (error) {
+      console.error("Erro ao buscar movimentação bruta:", error);
+      throw error;
+    }
+  }
+
+  // Método para pesquisa avançada no estoque
+  pesquisaAvancada = async (ano) => {
+    console.log("Ano recebido no método pesquisaAvancada:", ano); // Adicionado log aqui
+  
+    const queryEntraram = `SELECT SUM(quantidade) AS quantidadeEntraram FROM estoqueatual WHERE YEAR(data_de_entrada) = ?`;
+    const querySaidos = `SELECT SUM(quantidade) AS quantidadeSaidos FROM itenspagos WHERE YEAR(data_de_saida) = ?`;
+  
+    try {
+      const [resultados] = await connection.execute(
+        `SELECT * FROM estoqueatual WHERE pago = FALSE`
+      );
+      console.log("Resultados da query SELECT * FROM estoqueatual:", resultados); // Adicionado log aqui
+  
+      const [quantidadeEntraram] = await connection.execute(
+        queryEntraram,
+        ano ? [ano] : [null]
+      );
+      console.log("Quantidade de itens que entraram - queryEntraram:", quantidadeEntraram); // Adicionado log aqui
+  
+      const [quantidadeSaidos] = await connection.execute(
+        querySaidos,
+        ano ? [ano] : [null]
+      );
+      console.log("Quantidade de itens que saíram - querySaidos:", quantidadeSaidos); // Adicionado log aqui
+  
+      return {
+        resultados,
+        quantidadeEntraram: quantidadeEntraram[0].quantidadeEntraram || 0,
+        quantidadeSaidos: quantidadeSaidos[0].quantidadeSaidos || 0,
+      };
     } catch (error) {
       console.error("Erro na pesquisa avançada:", error);
       throw error;
     }
   };
-
+  
   // Método para obter a quantidade de itens saídos por ano
-  getSaidaPorTombo = async (tombo) => {
-    // Primeiro, precisamos buscar pelo ID correspondente ao tombo na tabela estoqueatual
+  async getSaidaPorTombo(tombo) {
     const queryEstoque = `
-      SELECT id 
-      FROM estoqueatual 
+      SELECT id
+      FROM estoqueatual
       WHERE tombo = ?
     `;
 
     const querySaida = `
       SELECT
-        data_de_saida, doc_saida, referencia, destino,
-        posto_graduacao, mat_funcional, telefone, nome_completo, observacao AS observacao_saida
+        data_de_saida, doc_saida, referencia, destino, 
+        posto_graduacao, mat_funcional, telefone, nome_completo, observacao AS observacao_saida 
       FROM itenspagos
-      WHERE tombo = ?
-    `;
+      WHERE id_estoque = ?
+    `; // Alteração aqui, mudando tombo para id_estoque
 
     try {
       const [resultsEstoque] = await connection.execute(queryEstoque, [tombo]);
@@ -260,7 +281,7 @@ class EstoqueModel {
       console.log("ID encontrado na tabela estoqueatual:", idEstoque);
 
       const [resultsSaida] = await connection.execute(querySaida, [idEstoque]);
-      console.log("Resultados da query de saída:", resultsSaida);
+      console.log("Resultados da query de saída do tombo:", resultsSaida);
 
       if (resultsSaida.length === 0) {
         console.log(
@@ -274,44 +295,81 @@ class EstoqueModel {
       console.error("Erro ao buscar informações de saída do tombo:", error);
       throw error;
     }
-  };
+  }
 
   // Método para obter a quantidade de itens entrou por ano
-  getItensEntradaPorAno = async (ano) => {
+  async getItensEntradaPorAno(ano) {
+    console.log("Ano recebido no método getItensEntradaPorAno:", ano); // Logar dados recebidos
+  
+    if (!ano || isNaN(ano)) {
+      throw new Error(`Ano inválido: ${ano}`); // Verificar se os argumentos são válidos
+    }
+  
     const query = `
-      SELECT 
-        COUNT(*) AS quantidade_entraram 
-      FROM 
-        estoqueatual 
-      WHERE 
-        YEAR(data_de_entrada) = ?
+      SELECT SUM(quantidade) AS quantidade_entraram 
+      FROM estoqueatual 
+      WHERE YEAR(data_de_entrada) = ?
     `;
-
+  
     try {
       const [results] = await connection.execute(query, [ano]);
-
-      if (results.length === 0) {
+      console.log("Resultados da query getItensEntradaPorAno:", results); // Logar resultados da query
+  
+      if (!results.length || results[0].quantidade_entraram === null) {
         console.error("Nenhum resultado encontrado para o ano:", ano);
         return 0;
       }
-
-      return results[0].quantidade_entraram;
+  
+      return results[0].quantidade_entraram || 0;
     } catch (error) {
       console.error("Erro ao buscar itens entraram por ano:", error);
       throw error;
     }
-  };
+  }
+  
+  
+  // Método para obter a quantidade de itens saiu por ano
+  async getItensSaidosPorAno(ano) {
+    console.log("Ano recebido no método getItensSaidosPorAno:", ano); // Logar dados recebidos
+  
+    if (!ano || isNaN(ano)) {
+      throw new Error(`Ano inválido: ${ano}`); // Verificar se os argumentos são válidos
+    }
+  
+    const query = `
+      SELECT SUM(quantidade) AS quantidade_saidos 
+      FROM itenspagos 
+      WHERE YEAR(data_de_saida) = ?
+    `;
+  
+    try {
+      const [results] = await connection.execute(query, [ano]);
+      console.log("Resultados da query getItensSaidosPorAno:", results); // Logar resultados da query
+  
+      if (!results.length || results[0].quantidade_saidos === null) {
+        console.error("Nenhum resultado encontrado para o ano:", ano);
+        return 0;
+      }
+  
+      return results[0].quantidade_saidos || 0;
+    } catch (error) {
+      console.error("Erro ao buscar itens saídos por ano:", error);
+      throw error;
+    }
+  }
+  
+  
 
   // Método para obter o relatório de entradas por mês e ano
   getRelatorioEntradas = async () => {
     const query = `
-  SELECT 
-    DATE_FORMAT(data_de_entrada, '%m-%Y') AS mes_ano, 
-    COUNT(*) AS total_entradas 
-  FROM estoqueatual 
-  GROUP BY mes_ano
-  ORDER BY mes_ano;
-`;
+    SELECT 
+      DATE_FORMAT(data_de_entrada, '%m-%Y') AS mes_ano, 
+      COUNT(*) AS total_entradas 
+    FROM estoqueatual 
+    GROUP BY mes_ano
+    ORDER BY mes_ano;
+  `;
     try {
       const [results] = await connection.execute(query);
       return results;
@@ -324,13 +382,13 @@ class EstoqueModel {
   // Método para obter o relatório de saídas por mês e ano
   getRelatorioSaidas = async () => {
     const query = `
-  SELECT 
-    DATE_FORMAT(data_de_saida, '%m-%Y') AS mes_ano, 
-    COUNT(*) AS total_saidas 
-  FROM itenspagos 
-  GROUP BY mes_ano
-  ORDER BY mes_ano;
-`;
+      SELECT 
+        DATE_FORMAT(data_de_saida, '%m-%Y') AS mes_ano, 
+        COUNT(*) AS total_saidas 
+      FROM itenspagos 
+      GROUP BY mes_ano
+      ORDER BY mes_ano;
+    `;
     try {
       const [results] = await connection.execute(query);
       return results;
@@ -402,24 +460,6 @@ class EstoqueModel {
       return resultsSaida[0];
     } catch (error) {
       console.error("Erro ao buscar informações de saída do tombo:", error);
-      throw error;
-    }
-  };
-
-  getItensSaidosPorAno = async (ano) => {
-    const query = `
-        SELECT
-          COUNT(*) AS quantidade_saidos
-        FROM
-          itenspagos
-        WHERE
-          YEAR(data_de_saida) = ?
-      `;
-    try {
-      const [results] = await connection.execute(query, [ano]);
-      return results.length ? results[0].quantidade_saidos : 0;
-    } catch (error) {
-      console.error("Erro ao buscar itens saídos por ano:", error);
       throw error;
     }
   };
