@@ -20,3 +20,29 @@
     </div>
   </div>
 </nav>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.navbar a:not(.navbar-brand)'); // Excluir o link com a classe 'navbar-brand'
+
+    navLinks.forEach(link => {
+      const linkPath = new URL(link.href).pathname;
+
+      if (linkPath === currentPath) {
+        link.classList.add('active');
+      }
+    });
+  });
+
+</script>
+
+
+<style>
+  .navbar a.active {
+    background-color: #fffefc;
+    /* Cor de fundo para o botão ativo */
+    color: green;
+    /* Cor do texto */
+  }
+</style>
