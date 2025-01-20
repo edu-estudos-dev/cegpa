@@ -30,11 +30,6 @@ app.use(session({
   cookie: { secure: false } // Defina como true se estiver usando HTTPS
 }));
 
-app.use((req, res, next) => {
-  console.log(`Requisição recebida: ${req.method} ${req.url}`);
-  next();
-});
-
 // Rotas de login e logout, sem verificação de autenticação
 app.use('/', loginLogoutRoutes);
 

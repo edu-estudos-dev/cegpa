@@ -358,35 +358,24 @@ class EstoqueController {
 
   // Método para buscar a quantidade de itens saídos em um determinado ano
   fetchItensSaidosPorAno = async (req, res) => {
-    const { qtd_itens_sairam } = req.query;
-    console.log(
-      "Quantidade de itens saídos recebida na requisição:",
-      qtd_itens_sairam
-    );
-
+    const { qtd_itens_sairam, categoria } = req.query;
+    console.log("Requisição recebida com parâmetros:", req.query);
+  
     if (!qtd_itens_sairam) {
-      console.error("Quantidade de itens saídos não fornecida na requisição.");
-      return res
-        .status(400)
-        .json({ error: "Quantidade de itens saídos não fornecida." });
+      return res.status(400).json({ error: "Quantidade de itens saídos não fornecida." });
     }
-
+  
     try {
-      const quantidadeSaidos = await estoqueModel.getItensSaidosPorAno(
-        qtd_itens_sairam
-      );
-      console.log(
-        "Quantidade de itens que saíram no ano",
-        qtd_itens_sairam,
-        ":",
-        quantidadeSaidos
-      );
-      res.json({ quantidadeSaidos }); // Retorna a quantidade de itens que saíram como JSON
+      const quantidadeSaidos = await estoqueModel.getItensSaidosPorAno(qtd_itens_sairam);
+      const quantidadeNoEstoque = await estoqueModel.getQuantidadeNoEstoque(categoria || ""); // Corrige para buscar quantidade no estoque
+      res.json({ quantidadeSaidos, quantidadeNoEstoque });
     } catch (error) {
-      console.error("Erro ao buscar itens saídos por ano:", error);
+      console.log("Erro ao buscar itens saídos por ano:", error);
       res.status(500).json({ error: "Erro ao buscar itens saídos por ano." });
     }
   };
+  
+
 
   // Método para buscar a quantidade de itens entrada em um determinado ano
   fetchItensEntradaPorAno = async (req, res) => {
@@ -497,25 +486,32 @@ class EstoqueController {
 
   // Método para pesquisa avançada no estoque, incluindo itens saídos por ano
   pesquisaAvancada = async (req, res) => {
-    const filtros = req.query;
-    const ano = filtros.data;
-    console.log("Ano recebido na requisição:", ano); // Adicionado log aqui
-    console.log("Filtros recebidos na requisição:", filtros);
-  
+    const { data: ano, categoria, subgrupo } = req.query;
+    console.log(
+      "Ano, categoria e subgrupo recebidos na requisição:",
+      ano,
+      categoria,
+      subgrupo
+    );
+
     try {
-      const { resultados, quantidadeEntraram, quantidadeSaidos } = await estoqueModel.pesquisaAvancada(ano);
-      console.log("Resultados da pesquisa avançada:", resultados);
+      const { quantidadeNoEstoque, quantidadeEntraram, quantidadeSaidos } =
+        await estoqueModel.pesquisaAvancada(ano, categoria, subgrupo);
       console.log("Quantidade de itens que entraram:", quantidadeEntraram);
       console.log("Quantidade de itens que saíram:", quantidadeSaidos);
-    
-      res.json({ resultados, quantidadeEntraram, quantidadeSaidos });
+      console.log("Quantidade de itens no estoque:", quantidadeNoEstoque);
+
+      const mensagemCategoria = categoria ? `da categoria "${categoria}"` : "";
+      const mensagemSubgrupo = subgrupo ? `e subgrupo "${subgrupo}"` : "";
+      const mensagemEstoque = `Existem atualmente ${quantidadeNoEstoque} itens ${mensagemCategoria} ${mensagemSubgrupo} que não foram pagos (pago = 0).`;
+
+      res.json({ quantidadeEntraram, quantidadeSaidos, mensagemEstoque });
     } catch (error) {
       console.error("Erro na pesquisa avançada:", error);
       res.status(500).json({ error: "Erro na pesquisa avançada." });
     }
   };
-  
-  
+
   // Método para renderizar a página de pesquisa avançada
   renderPesquisaAvancada = (_, res) => {
     res.render("pesquisaAvancada");

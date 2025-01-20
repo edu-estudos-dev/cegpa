@@ -11,12 +11,15 @@
 
   <!-- Adicione este estilo para a animação de zoom-in -->
   <style>
+    /* Antes de ser mostrado, o modal vai estar com a opacidade 0 e um pequeno deslocamento */
     .modal.fade .modal-dialog {
-      transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+      transition: transform 1s ease-in-out, opacity 5s ease-in-out;
+      /* Duração aumentada para 1s */
       transform: translateY(-25%);
       opacity: 0;
     }
 
+    /* Quando o modal estiver visível (classe .show), ele deve estar na posição original e com opacidade 1 */
     .modal.show .modal-dialog {
       transform: translateY(0);
       opacity: 1;
@@ -50,7 +53,7 @@
                     <div class="col-md-4 mb-1">
                       <div class="form-group"> <label class="form-label fw-bold" for="categoria">Categoria</label>
                         <select id="categoria" class="form-select" name="categoria">
-                          <option selected>Selecione...</option>
+                          <option selected></option>
                           <option value="mesa">MESA</option>
                           <option value="ar-condicionado">AR-CONDICIONADO</option>
                           <option value="automovel">AUTOMÓVEL</option>
@@ -112,53 +115,84 @@
 
         if (pesquisaForm) {
           pesquisaForm.addEventListener('submit', async (e) => {
-            console.log("Formulário de pesquisa enviado!"); // Adicionado log aqui
-
             e.preventDefault();
-
             const formData = new FormData(e.target);
             const params = new URLSearchParams(formData).toString();
-            console.log("Parâmetros da URL:", params); // Adicionado log aqui
+            console.log("Parâmetros da URL:", params);
 
             try {
               const response = await fetch(`/pesquisa-avancada?${params}`);
               const data = await response.json();
-              console.log("Dados recebidos do backend:", data); // Já existia
+              console.log("Dados recebidos do backend:", data);
 
-              // Lógica para exibir os resultados de entradas e saídas por ano
               const ano = formData.get('data');
-              console.log("Ano selecionado no formulário:", ano); // Adicionado log aqui
+              const categoria = formData.get('categoria');
+              const subgrupo = formData.get('subgrupo');
+              console.log("Ano:", ano, "Categoria:", categoria, "Subgrupo:", subgrupo);
 
               let mensagem = '';
 
               if (ano) {
-                mensagem += `Quantidade de Itens que Entraram no Ano ${ano}: ${data.quantidadeEntraram}<br/>`;
-                mensagem += `Quantidade de Itens que Saíram no Ano ${ano}: ${data.quantidadeSaidos}<br/>`;
-                console.log("Mensagem de resultados de pesquisa:", mensagem); // Adicionado log aqui
-              } else {
-                mensagem = 'Por favor, selecione um ano.';
+                mensagem += `<h5 class="text-primary text-center">Quantidade de Itens que Entraram - Ano ${ano}: ${data.quantidadeEntraram}<br/> Quantidade de Itens que Saíram - Ano ${ano}: ${data.quantidadeSaidos}</h5>`;
+              }
+              if (categoria) {
+                const quantidadeCategoria = data.quantidadeNoEstoque || 0;
+                console.log('Quantidade no estoque para a categoria:', categoria, 'é', quantidadeCategoria);
+                mensagem += `<h5 class="text-primary text-center">Itens no estoque da Categoria ${categoria}: ${quantidadeCategoria}</h5>`;
+              }
+              if (subgrupo) {
+                const quantidadeSubgrupo = data.quantidadeNoEstoque || 0;
+                console.log('Quantidade no estoque para o subgrupo:', subgrupo, 'é', quantidadeSubgrupo);
+                mensagem += `<h5 class="text-primary text-center">Itens no estoque do Subgrupo ${subgrupo}: ${quantidadeSubgrupo}</h5>`;
               }
 
-              resultadosDiv.innerHTML = `<h5 class="text-success mt-2">${mensagem}</h5>`;
+              resultadosDiv.innerHTML = mensagem;
+
+            } catch (error) {
+              console.error("Erro ao buscar resultados:", error);
+              resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar resultados.</h5>';
+            }
+          });
+        }
+
+        const btnLimpar = document.getElementById('btn-limpar');
+        if (btnLimpar) {
+          btnLimpar.addEventListener('click', () => {
+            document.getElementById('pesquisa-form').reset();
+            resultadosDiv.innerHTML = '';
+          });
+        }
+      });
+    </script>
 
 
-              const tombo = formData.get('tombo');
-              if (tombo) {
-                try {
-                  const responseTombo = await fetch(`/fetch-info-tombo?tombo=${tombo}`);
-                  const dataTombo = await responseTombo.json();
-                  console.log("Dados do tombo recebidos do backend:", dataTombo);
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const pesquisaForm = document.getElementById('pesquisa-form');
+        const resultadosDiv = document.getElementById('resultados');
 
-                  if (dataTombo.infoTombo) {
-                    const entrada = dataTombo.infoTombo;
-                    const saida = entrada.saida;
+        if (pesquisaForm) {
+          pesquisaForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const tombo = formData.get('tombo');
 
-                    const dataEntradaFormatada = new Date(entrada.data_de_entrada).toLocaleDateString('pt-BR');
-                    const dataSaidaFormatada = saida ? new Date(saida.data_de_saida).toLocaleDateString('pt-BR') : '';
-                    const getObservacao = (data) => data && data.observacao ? data.observacao : "N/A";
-                    const valorReal = (valor) => parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            if (tombo) {
+              try {
+                const responseTombo = await fetch(`/fetch-info-tombo?tombo=${tombo}`);
+                const dataTombo = await responseTombo.json();
+                console.log("Dados do tombo recebidos do backend:", dataTombo);
 
-                    const modalHtml = `
+                if (dataTombo.infoTombo) {
+                  const entrada = dataTombo.infoTombo;
+                  const saida = entrada.saida;
+
+                  const dataEntradaFormatada = new Date(entrada.data_de_entrada).toLocaleDateString('pt-BR');
+                  const dataSaidaFormatada = saida ? new Date(saida.data_de_saida).toLocaleDateString('pt-BR') : '';
+                  const getObservacao = (data) => data && data.observacao ? data.observacao : "N/A";
+                  const valorReal = (valor) => parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                  const modalHtml = `
                 <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
                   <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
                     <div class="modal-content">
@@ -197,73 +231,45 @@
                           </div>
                         </div>
                       </div>
-                      <div class="modal-footer d-flex justify-content-center ">
+                      <div class="modal-footer d-flex justify-content-center">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                       </div>
                     </div>
                   </div>
                 </div>
-                `;
+              `;
 
-                    const modalDiv = document.createElement('div');
-                    modalDiv.innerHTML = modalHtml;
-                    document.body.appendChild(modalDiv);
+                  const modalDiv = document.createElement('div');
+                  modalDiv.innerHTML = modalHtml;
+                  document.body.appendChild(modalDiv);
 
-                    const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
-                      backdrop: true,
-                      focus: true
-                    });
+                  const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
+                    backdrop: true,
+                    focus: true
+                  });
 
-                    const modalDialog = document.querySelector('.modal-dialog');
-                    modalDialog.classList.add('modal-zoom-in');
+                  const modalDialog = document.querySelector('.modal-dialog');
+                  modalDialog.classList.add('modal-zoom-in');
 
-                    infoTomboModal.show();
-                    infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
-                      document.getElementById('pesquisa-form').reset();
-                      resultadosDiv.innerHTML = '';
-                      modalDiv.remove();
-                    });
-                  } else {
-                    resultadosDiv.innerHTML += '<h5 class="text-danger mt-2">Tombo não encontrado.</h5>';
-                  }
-                } catch (error) {
-                  console.error("Erro ao buscar informações do tombo:", error);
-                  resultadosDiv.innerHTML += '<h5 class="text-danger mt-2">Erro ao buscar informações do tombo.</h5>';
+                  infoTomboModal.show();
+                  infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
+                    document.getElementById('pesquisa-form').reset();
+                    resultadosDiv.innerHTML = '';
+                    modalDiv.remove();
+                  });
+                } else {
+                  resultadosDiv.innerHTML += '<h5 class="text-danger mt-2">Tombo não encontrado.</h5>';
                 }
+              } catch (error) {
+                console.error("Erro ao buscar informações do tombo:", error);
+                resultadosDiv.innerHTML += '<h5 class="text-danger mt-2">Erro ao buscar informações do tombo.</h5>';
               }
-            } catch (error) {
-              console.error("Erro ao buscar resultados:", error);
-              resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar resultados.</h5>';
-            }
-          });
-        }
-
-        const btnLimpar = document.getElementById('btn-limpar');
-        if (btnLimpar) {
-          btnLimpar.addEventListener('click', () => {
-            document.getElementById('pesquisa-form').reset();
-            resultadosDiv.innerHTML = '';
-          });
-        }
-
-        const btnPesquisar = document.getElementById('btn-pesquisar');
-        if (btnPesquisar) {
-          btnPesquisar.addEventListener('click', () => {
-            const descricao = document.getElementById('descricao')?.value || '';
-            const categoria = document.getElementById('categoria')?.value || '';
-            const subgrupo = document.getElementById('subgrupo')?.value || '';
-            const qtd_itens_entraram = document.getElementById('qtd_itens_entraram')?.value || '';
-            const qtd_itens_sairam = document.getElementById('qtd_itens_sairam')?.value || '';
-
-
-            if (!descricao && !categoria && !subgrupo && !qtd_itens_entraram && !qtd_itens_sairam) {
-              alert('Selecione algum parâmetro para a pesquisa.');
             }
           });
         }
       });
-
     </script>
+
 
 </body>
 
