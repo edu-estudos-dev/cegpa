@@ -188,6 +188,27 @@ class EstoqueController {
     res.render("saidaEstoque");
   };
 
+    // Método para Renderizar a tabela de itens pagos
+    renderTabelaSaida = (_, res) => {
+      res.render("tabelaSaidaEstoque", { itensPagos: [] }); // Render padrão com valor vazio
+    };
+  
+    // Método para mostrar todos os itens pagos
+    getAllItensPagos = async (_, res) => {
+      try {
+        const itensPagos = await estoqueModel.getItensPagos();
+        console.log("Itens Pagos Obtidos: ", itensPagos);
+        res.render("tabelaSaidaEstoque", { itensPagos });
+      } catch (error) {
+        console.error("Erro ao carregar o estoque:", error);
+        res.status(500).send("Erro ao carregar os itens pagos.");
+      }
+    };
+    
+    
+
+  
+  // Método para mostrar os itens que foram pagos na tabela
   fetchItensDisponiveis = async (_, res) => {
     try {
       const itens = await estoqueModel.getItensDisponiveis();
@@ -197,9 +218,8 @@ class EstoqueController {
       res.status(500).json({ error: "Erro ao buscar itens disponíveis." });
     }
   };
-
+  
   // Método para registrar a saída de itens e gerar o PDF
-
   registrarSaida = async (req, res) => {
     console.log("FUNÇÃO REGISTRARSAIDA CHAMADA");
 
@@ -352,6 +372,5 @@ class EstoqueController {
     }
   };
 }
-
 
 export default new EstoqueController();

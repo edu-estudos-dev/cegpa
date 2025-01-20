@@ -16,11 +16,12 @@ router.get("/entrada", estoqueController.renderEntradaForm);
 // Rota para inserir dados no estoque
 router.post("/entrada", estoqueController.create);
 
-// Nova rota para obter o último tombo
+// rota para obter o último tombo
 router.get("/ultimo-tombo", estoqueController.fetchUltimoTombo);
 
-// Nova rota para mostrar tabela com estoque atual
+// rota para mostrar tabela com estoque atual
 router.get("/tabela", estoqueController.getAllEstoque);
+
 
 /* ********************************************************************************
                   Rotas para a SAÍDA de itens no Estoque
@@ -28,6 +29,9 @@ router.get("/tabela", estoqueController.getAllEstoque);
 
 // Rota para renderizar o formulário de SAÍDA
 router.get("/saida", estoqueController.renderSaidaForm);
+
+// rota para mostrar tabela com itens pagos
+router.get("/estoque/itenspagos", estoqueController.getAllItensPagos);
 
 // Rota para buscar itens disponíveis
 router.get("/api/itens-disponiveis", estoqueController.fetchItensDisponiveis);
