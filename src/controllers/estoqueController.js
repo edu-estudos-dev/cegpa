@@ -356,26 +356,87 @@ class EstoqueController {
                   Métodos para a Pesquisa
   *********************************************************************************/
 
+  // Método para obter a quantidade de itens no estoque para a categoria selecionda
+  async fetchItensNaoPagosPorCategoria(req, res) {
+    const { categoria } = req.query;
+    console.log("Categoria recebida na requisição:", categoria);
+
+    if (!categoria) {
+      console.error("Categoria não fornecida na requisição.");
+      return res.status(400).json({ error: "Categoria não fornecida." });
+    }
+
+    try {
+      const quantidadeNaoPagos =
+        await estoqueModel.getItensNaoPagosPorCategoria(categoria);
+      console.log(
+        "Quantidade de itens não pagos na categoria",
+        categoria,
+        ":",
+        quantidadeNaoPagos
+      );
+      res.json({ quantidadeNaoPagos }); // Retorna a quantidade de itens não pagos como JSON
+    } catch (error) {
+      console.error("Erro ao buscar itens não pagos por categoria:", error);
+      res
+        .status(500)
+        .json({ error: "Erro ao buscar itens não pagos por categoria." });
+    }
+  }
+
+  // Método para obter a quantidade de itens no estoque para pelo subgrupo seleciondo.
+  async fetchItensNaoPagosPorSubgrupo(req, res) {
+    const { subgrupo } = req.query;
+    console.log("Subgrupo recebido na requisição:", subgrupo);
+
+    if (!subgrupo) {
+      console.error("Subgrupo não fornecido na requisição.");
+      return res.status(400).json({ error: "Subgrupo não fornecido." });
+    }
+
+    try {
+      const quantidadeNaoPagos = await estoqueModel.getItensNaoPagosPorSubgrupo(
+        subgrupo
+      );
+      console.log(
+        "Quantidade de itens não pagos no subgrupo",
+        subgrupo,
+        ":",
+        quantidadeNaoPagos
+      );
+      res.json({ quantidadeNaoPagos }); // Retorna a quantidade de itens não pagos como JSON
+    } catch (error) {
+      console.error("Erro ao buscar itens não pagos por subgrupo:", error);
+      res
+        .status(500)
+        .json({ error: "Erro ao buscar itens não pagos por subgrupo." });
+    }
+  }
+
   // Método para buscar a quantidade de itens saídos em um determinado ano
   fetchItensSaidosPorAno = async (req, res) => {
     const { qtd_itens_sairam, categoria } = req.query;
     console.log("Requisição recebida com parâmetros:", req.query);
-  
+
     if (!qtd_itens_sairam) {
-      return res.status(400).json({ error: "Quantidade de itens saídos não fornecida." });
+      return res
+        .status(400)
+        .json({ error: "Quantidade de itens saídos não fornecida." });
     }
-  
+
     try {
-      const quantidadeSaidos = await estoqueModel.getItensSaidosPorAno(qtd_itens_sairam);
-      const quantidadeNoEstoque = await estoqueModel.getQuantidadeNoEstoque(categoria || ""); // Corrige para buscar quantidade no estoque
+      const quantidadeSaidos = await estoqueModel.getItensSaidosPorAno(
+        qtd_itens_sairam
+      );
+      const quantidadeNoEstoque = await estoqueModel.getQuantidadeNoEstoque(
+        categoria || ""
+      ); // Corrige para buscar quantidade no estoque
       res.json({ quantidadeSaidos, quantidadeNoEstoque });
     } catch (error) {
       console.log("Erro ao buscar itens saídos por ano:", error);
       res.status(500).json({ error: "Erro ao buscar itens saídos por ano." });
     }
   };
-  
-
 
   // Método para buscar a quantidade de itens entrada em um determinado ano
   fetchItensEntradaPorAno = async (req, res) => {

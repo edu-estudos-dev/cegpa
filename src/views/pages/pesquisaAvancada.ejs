@@ -110,6 +110,65 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', () => {
+        const subgrupoSelect = document.getElementById('subgrupo');
+
+        if (subgrupoSelect) {
+          subgrupoSelect.addEventListener('change', async (e) => {
+            const subgrupo = e.target.value;
+            console.log("Subgrupo selecionado pelo usuário:", subgrupo);
+
+            if (!subgrupo) {
+              return;
+            }
+
+            try {
+              const response = await fetch(`/fetch-itens-nao-pagos-subgrupo?subgrupo=${subgrupo}`);
+              const data = await response.json();
+              console.log("Dados recebidos do backend para itens não pagos por subgrupo:", data);
+
+              const resultadosDiv = document.getElementById('resultados');
+              resultadosDiv.innerHTML = `<h5 class="text-primary text-center">Quantidade de Itens Não Pagos no Subgrupo ${subgrupo}: ${data.quantidadeNaoPagos}</h5>`;
+            } catch (error) {
+              console.error("Erro ao buscar itens não pagos por subgrupo:", error);
+              const resultadosDiv = document.getElementById('resultados');
+              resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar itens não pagos.</h5>';
+            }
+          });
+        }
+
+        const categoriaSelect = document.getElementById('categoria');
+
+        if (categoriaSelect) {
+          categoriaSelect.addEventListener('change', async (e) => {
+            const categoria = e.target.value;
+            console.log("Categoria selecionada pelo usuário:", categoria);
+
+            if (!categoria) {
+              return;
+            }
+
+            try {
+              const response = await fetch(`/fetch-itens-nao-pagos?categoria=${categoria}`);
+              const data = await response.json();
+              console.log("Dados recebidos do backend para itens não pagos:", data);
+
+              const resultadosDiv = document.getElementById('resultados');
+              resultadosDiv.innerHTML = `<h5 class="text-primary text-center">Quantidade de Itens Não Pagos na Categoria ${categoria}: ${data.quantidadeNaoPagos}</h5>`;
+            } catch (error) {
+              console.error("Erro ao buscar itens não pagos por categoria:", error);
+              const resultadosDiv = document.getElementById('resultados');
+              resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar itens não pagos.</h5>';
+            }
+          });
+        }
+      });
+
+
+    </script>
+
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
         const pesquisaForm = document.getElementById('pesquisa-form');
         const resultadosDiv = document.getElementById('resultados');
 
@@ -180,6 +239,9 @@
             if (tombo) {
               try {
                 const responseTombo = await fetch(`/fetch-info-tombo?tombo=${tombo}`);
+                if (!responseTombo.ok) {
+                  throw new Error("Tombo inválido ou não cadastrado.");
+                }
                 const dataTombo = await responseTombo.json();
                 console.log("Dados do tombo recebidos do backend:", dataTombo);
 
@@ -193,51 +255,51 @@
                   const valorReal = (valor) => parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
                   const modalHtml = `
-                <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
-                    <div class="modal-content">
-                      <div class="modal-header bg-success text-white">
-                        <h3 class="modal-title ms-auto" id="infoTomboModalLabel">Informações do Tombo</h3>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <div class="modal-body">
-                        <div class="card">
-                          <div class="card-body pb-0">
-                            <h5 class="card-title">${entrada.descricao}</h5>
-                            <p class="card-text">
-                              <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
-                              <strong>Tombo:</strong> ${entrada.tombo} <br/>
-                              <strong>Data de Entrada:</strong> ${dataEntradaFormatada} <br/>
-                              <strong>Categoria:</strong> ${entrada.categoria} <br/>
-                              <strong>Doc Origem:</strong> ${entrada.doc_origem} <br/>
-                              <strong>Estoque:</strong> ${entrada.estoque} <br/>
-                              <strong>Valor:</strong> ${valorReal(entrada.valor)} <br/>
-                              <strong>Situação:</strong> ${entrada.situacao} <br/>
-                              <strong>Observação:</strong> ${getObservacao(entrada)} <br/>
-                              <hr>
-                              ${saida ? `
-                              <h5 class="bg-danger text-white p-2">Dados da Saída</h5>
-                              <strong>Data de Saída:</strong> ${dataSaidaFormatada} <br/>
-                              <strong>Doc Saída:</strong> ${saida.doc_saida} <br/>
-                              <strong>Referência:</strong> ${saida.referencia} <br/>
-                              <strong>Destino:</strong> ${saida.destino.toUpperCase()} <br/>
-                              <strong>Posto/Graduação:</strong> ${saida.posto_graduacao.toUpperCase()} <br/>
-                              <strong>Matrícula Funcional:</strong> ${saida.mat_funcional} <br/>
-                              <strong>Telefone:</strong> ${saida.telefone} <br/>
-                              <strong>Nome Completo:</strong> ${saida.nome_completo} <br/>
-                              <strong>Observação de Saída:</strong> ${getObservacao(saida)} <br/> ` : `
-                              <h5 class="bg-warning text-white p-2">Item consta no estoque, não foi pago.</h5>`}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="modal-footer d-flex justify-content-center">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
+                <div class="modal-content">
+                  <div class="modal-header bg-success text-white">
+                    <h3 class="modal-title ms-auto" id="infoTomboModalLabel">Informações do Tombo</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="card">
+                      <div class="card-body pb-0">
+                        <h5 class="card-title">${entrada.descricao}</h5>
+                        <p class="card-text">
+                          <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
+                          <strong>Tombo:</strong> ${entrada.tombo} <br/>
+                          <strong>Data de Entrada:</strong> ${dataEntradaFormatada} <br/>
+                          <strong>Categoria:</strong> ${entrada.categoria} <br/>
+                          <strong>Doc Origem:</strong> ${entrada.doc_origem} <br/>
+                          <strong>Estoque:</strong> ${entrada.estoque} <br/>
+                          <strong>Valor:</strong> ${valorReal(entrada.valor)} <br/>
+                          <strong>Situação:</strong> ${entrada.situacao} <br/>
+                          <strong>Observação:</strong> ${getObservacao(entrada)} <br/>
+                          <hr>
+                          ${saida ? `
+                          <h5 class="bg-danger text-white p-2">Dados da Saída</h5>
+                          <strong>Data de Saída:</strong> ${dataSaidaFormatada} <br/>
+                          <strong>Doc Saída:</strong> ${saida.doc_saida} <br/>
+                          <strong>Referência:</strong> ${saida.referencia} <br/>
+                          <strong>Destino:</strong> ${saida.destino.toUpperCase()} <br/>
+                          <strong>Posto/Graduação:</strong> ${saida.posto_graduacao.toUpperCase()} <br/>
+                          <strong>Matrícula Funcional:</strong> ${saida.mat_funcional} <br/>
+                          <strong>Telefone:</strong> ${saida.telefone} <br/>
+                          <strong>Nome Completo:</strong> ${saida.nome_completo} <br/>
+                          <strong>Observação de Saída:</strong> ${getObservacao(saida)} <br/> ` : `
+                          <h5 class="bg-warning text-white p-2">Item consta no estoque, não foi pago.</h5>`}
+                        </p>
                       </div>
                     </div>
                   </div>
+                  <div class="modal-footer d-flex justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                  </div>
                 </div>
-              `;
+              </div>
+            </div>
+          `
 
                   const modalDiv = document.createElement('div');
                   modalDiv.innerHTML = modalHtml;
@@ -261,13 +323,14 @@
                   resultadosDiv.innerHTML += '<h5 class="text-danger mt-2">Tombo não encontrado.</h5>';
                 }
               } catch (error) {
-                console.error("Erro ao buscar informações do tombo:", error);
-                resultadosDiv.innerHTML += '<h5 class="text-danger mt-2">Erro ao buscar informações do tombo.</h5>';
+                const resultadosDiv = document.getElementById('resultados');
+                resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro: Tombo inválido ou ainda não cadastrado.</h5>';
               }
             }
           });
         }
       });
+
     </script>
 
 

@@ -63,13 +63,17 @@ router.get("/historico-movimentacao-page", estoqueController.renderHistoricoMovi
 // Rota para pesquisa avançada no estoque
 router.get("/pesquisa-avancada", estoqueController.pesquisaAvancada);
 
-
 // Rota para renderizar a página de pesquisa avançada
 router.get("/pesquisa-avancada-page", estoqueController.renderPesquisaAvancada);
 
 // Nova rota para buscar informações do tombo
 router.get("/fetch-info-tombo", estoqueController.fetchInfoPorTombo);
 
+// Rota para buscar itens não pagos por categoria
+router.get("/fetch-itens-nao-pagos", estoqueController.fetchItensNaoPagosPorCategoria);
+
+// Rota para buscar itens não pagos por subgrupo
+router.get("/fetch-itens-nao-pagos-subgrupo", estoqueController.fetchItensNaoPagosPorSubgrupo);
 
 
 export default router;
