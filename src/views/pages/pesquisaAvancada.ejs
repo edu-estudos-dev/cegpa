@@ -150,7 +150,7 @@
               console.log("Dados recebidos do backend para itens não pagos:", data);
 
               const resultadosDiv = document.getElementById('resultados');
-              resultadosDiv.innerHTML = `<h5 class="text-primary text-center">Quantidade de Itens Não Pagos na Categoria ${categoria}: ${data.quantidadeNaoPagos}</h5>`;
+              resultadosDiv.innerHTML = `<h5 class="text-primary text-center">Quantidade de Itens em estoque na Categoria ${categoria}: ${data.quantidadeNaoPagos}</h5>`;
             } catch (error) {
               console.error("Erro ao buscar itens não pagos por categoria:", error);
               const resultadosDiv = document.getElementById('resultados');
@@ -315,7 +315,7 @@
                                   <strong>Telefone:</strong> ${saida.telefone} <br/>
                                   <strong>Nome Completo:</strong> ${saida.nome_completo} <br/>
                                   <strong>Observação de Saída:</strong> ${getObservacao(saida)} <br/> ` : `
-                                  <h5 class="bg-warning text-white p-2">Item consta no estoque, não foi pago.</h5>`}
+                                  <h5 class="bg-warning text-white p-2">Item consta no estoque, ainda não foi pago.</h5>`}
                                   </p>
                               </div>
                               </div>

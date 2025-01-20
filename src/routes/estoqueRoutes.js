@@ -35,49 +35,5 @@ router.get("/api/itens-disponiveis", estoqueController.fetchItensDisponiveis);
 // Rota para registrar a saída de itens
 router.post("/saida", estoqueController.registrarSaida);
 
-/* ********************************************************************************
-                  Rotas para a Pesquisa
-  *********************************************************************************/
-
-// Nova rota para buscar a quantidade de itens saídos em um determinado ano
-router.get("/itens-saidos-ano", estoqueController.fetchItensSaidosPorAno);
-
-// Rota para obter o relatório de entradas
-router.get("/relatorio-entradas", estoqueController.fetchRelatorioEntradas);
-
-// Rota para obter o relatório de saídas
-router.get("/relatorio-saidas", estoqueController.fetchRelatorioSaidas);
-
-// Rota para obter o histórico de movimentação
-router.get("/historico-movimentacao", estoqueController.fetchHistoricoMovimentacao);
-
-// Rota para pesquisa avançada no estoque
-router.get("/pesquisa-avancada", estoqueController.pesquisaAvancada);
-
-// Rota para renderizar a página de relatórios
-router.get("/relatorios", estoqueController.renderRelatorios);
-
-// Rota para renderizar a página de histórico de movimentação
-router.get("/historico-movimentacao-page", estoqueController.renderHistoricoMovimentacao);
-
-// Rota para pesquisa avançada no estoque
-router.get("/pesquisa-avancada", estoqueController.pesquisaAvancada);
-
-// Rota para renderizar a página de pesquisa avançada
-router.get("/pesquisa-avancada-page", estoqueController.renderPesquisaAvancada);
-
-// Nova rota para buscar informações do tombo
-router.get("/fetch-info-tombo", estoqueController.fetchInfoPorTombo);
-
-// Rota para buscar itens não pagos por categoria
-router.get("/fetch-itens-nao-pagos", estoqueController.fetchItensNaoPagosPorCategoria);
-
-// Rota para buscar itens não pagos por subgrupo
-router.get("/fetch-itens-nao-pagos-subgrupo", estoqueController.fetchItensNaoPagosPorSubgrupo);
-
-// Rota para pesquisa por similaridade na descrição
-router.get("/pesquisa-similaridade", estoqueController.pesquisaPorSimilaridade);
-
-
 
 export default router;

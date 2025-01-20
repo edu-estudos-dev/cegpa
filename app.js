@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import methodOverride from 'method-override';
 import session from 'express-session'; // Adicionar express-session para gerenciar sessões
 import estoqueRoutes from './src/routes/estoqueRoutes.js';
+import pesquisaRoutes from './src/routes/pesquisaRoutes.js';
 import loginLogoutRoutes from './src/routes/loginLogoutRoutes.js'; // Atualização da rota de login e logout
 import isAuthenticated from './src/middleware/auth.js'; // Importação do middleware de autenticação
 
@@ -38,6 +39,9 @@ app.use(isAuthenticated);
 
 // Rotas protegidas
 app.use('/', estoqueRoutes);
+
+// Rotas protegidas
+app.use('/', pesquisaRoutes);
 
 
 app.use((req, res, next) => {
