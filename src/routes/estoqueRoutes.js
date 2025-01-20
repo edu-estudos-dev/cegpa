@@ -75,5 +75,9 @@ router.get("/fetch-itens-nao-pagos", estoqueController.fetchItensNaoPagosPorCate
 // Rota para buscar itens não pagos por subgrupo
 router.get("/fetch-itens-nao-pagos-subgrupo", estoqueController.fetchItensNaoPagosPorSubgrupo);
 
+// Rota para pesquisa por similaridade na descrição
+router.get("/pesquisa-similaridade", estoqueController.pesquisaPorSimilaridade);
+
+
 
 export default router;

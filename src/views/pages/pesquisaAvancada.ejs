@@ -162,6 +162,40 @@
           });
         }
       });
+
+
+      document.addEventListener('DOMContentLoaded', () => {
+
+        // Função para tratar o campo de pesquisa por descrição
+        const descricaoInput = document.getElementById('descricao');
+        if (descricaoInput) {
+          descricaoInput.addEventListener('input', async (e) => {
+            const valor = e.target.value;
+            console.log("Valor de pesquisa digitado:", valor);
+
+            if (!valor) {
+              return;
+            }
+
+            try {
+              const response = await fetch(`/pesquisa-similaridade?valor=${valor}`);
+              const data = await response.json();
+              console.log("Dados recebidos do backend para pesquisa por similaridade:", data);
+
+              const resultadosDiv = document.getElementById('resultados');
+              resultadosDiv.innerHTML = `
+            <h5 class="text-primary text-center">Quantidade de Itens no Estoque com Descrição Similar: ${data.quantidadeNoEstoque}</h5>
+            <h5 class="text-primary text-center">Quantidade de Itens Pagos com Descrição Similar: ${data.quantidadePagos}</h5>
+          `;
+            } catch (error) {
+              console.error("Erro na pesquisa por similaridade:", error);
+              const resultadosDiv = document.getElementById('resultados');
+              resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar itens por similaridade.</h5>';
+            }
+          });
+        }
+      });
+
     </script>
 
 

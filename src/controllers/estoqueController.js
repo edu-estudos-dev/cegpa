@@ -356,6 +356,31 @@ class EstoqueController {
                   Métodos para a Pesquisa
   *********************************************************************************/
 
+  // Método para pesquisa por similaridade na descrição
+  async pesquisaPorSimilaridade(req, res) {
+    const { valor } = req.query;
+    console.log(
+      "Valor recebido na requisição de pesquisa por similaridade:",
+      valor
+    );
+
+    if (!valor) {
+      console.error("Valor de pesquisa não fornecido na requisição.");
+      return res
+        .status(400)
+        .json({ error: "Valor de pesquisa não fornecido." });
+    }
+
+    try {
+      const { quantidadeNoEstoque, quantidadePagos } =
+        await estoqueModel.pesquisaPorSimilaridade(valor);
+      res.json({ quantidadeNoEstoque, quantidadePagos });
+    } catch (error) {
+      console.error("Erro na pesquisa por similaridade:", error);
+      res.status(500).json({ error: "Erro na pesquisa por similaridade." });
+    }
+  }
+
   // Método para obter a quantidade de itens no estoque para a categoria selecionda
   async fetchItensNaoPagosPorCategoria(req, res) {
     const { categoria } = req.query;
@@ -546,32 +571,22 @@ class EstoqueController {
   };
 
   // Método para pesquisa avançada no estoque, incluindo itens saídos por ano
-  pesquisaAvancada = async (req, res) => {
-    const { data: ano, categoria, subgrupo } = req.query;
-    console.log(
-      "Ano, categoria e subgrupo recebidos na requisição:",
-      ano,
-      categoria,
-      subgrupo
-    );
+  async pesquisaAvancada(req, res) {
+    const { data: ano } = req.query;
+    console.log("Ano recebido na requisição:", ano);
 
     try {
-      const { quantidadeNoEstoque, quantidadeEntraram, quantidadeSaidos } =
-        await estoqueModel.pesquisaAvancada(ano, categoria, subgrupo);
+      const { quantidadeEntraram, quantidadeSaidos } =
+        await estoqueModel.pesquisaAvancada(ano);
       console.log("Quantidade de itens que entraram:", quantidadeEntraram);
       console.log("Quantidade de itens que saíram:", quantidadeSaidos);
-      console.log("Quantidade de itens no estoque:", quantidadeNoEstoque);
 
-      const mensagemCategoria = categoria ? `da categoria "${categoria}"` : "";
-      const mensagemSubgrupo = subgrupo ? `e subgrupo "${subgrupo}"` : "";
-      const mensagemEstoque = `Existem atualmente ${quantidadeNoEstoque} itens ${mensagemCategoria} ${mensagemSubgrupo} que não foram pagos (pago = 0).`;
-
-      res.json({ quantidadeEntraram, quantidadeSaidos, mensagemEstoque });
+      res.json({ quantidadeEntraram, quantidadeSaidos });
     } catch (error) {
       console.error("Erro na pesquisa avançada:", error);
       res.status(500).json({ error: "Erro na pesquisa avançada." });
     }
-  };
+  }
 
   // Método para renderizar a página de pesquisa avançada
   renderPesquisaAvancada = (_, res) => {
@@ -579,28 +594,28 @@ class EstoqueController {
   };
 
   // Método para buscar e exibir informações do tombo com logs adicionais
-fetchInfoPorTombo = async (req, res) => {
-  const { tombo } = req.query;
-  console.log("Tombo recebido na requisição:", tombo);
+  fetchInfoPorTombo = async (req, res) => {
+    const { tombo } = req.query;
+    console.log("Tombo recebido na requisição:", tombo);
 
-  if (!tombo) {
+    if (!tombo) {
       console.error("Tombo não fornecido na requisição.");
       return res.status(400).json({ error: "Tombo não fornecido." });
-  }
+    }
 
-  try {
+    try {
       // Verificar se o tombo está na tabela estoqueatual
       const infoTombo = await estoqueModel.getItemByTombo(tombo);
       if (infoTombo) {
-          console.log("Informações de entrada do tombo:", infoTombo);
+        console.log("Informações de entrada do tombo:", infoTombo);
 
-          // Verificar se o item ainda não foi pago
-          if (!infoTombo.pago) {
-              return res.json({
-                  infoTombo,
-                  message: "Item consta no estoque, não foi pago.",
-              });
-          }
+        // Verificar se o item ainda não foi pago
+        if (!infoTombo.pago) {
+          return res.json({
+            infoTombo,
+            message: "Item consta no estoque, não foi pago.",
+          });
+        }
       }
 
       // Buscar na tabela itenspagos
@@ -609,22 +624,21 @@ fetchInfoPorTombo = async (req, res) => {
 
       // Se não houver registros em nenhuma das tabelas
       if (!infoTombo && !saidaTombo) {
-          console.log("Nenhuma informação encontrada para o tombo:", tombo);
-          return res
-              .status(404)
-              .json({ error: "Tombo não encontrado ou não pago." });
+        console.log("Nenhuma informação encontrada para o tombo:", tombo);
+        return res
+          .status(404)
+          .json({ error: "Tombo não encontrado ou não pago." });
       }
 
       // Se houver registros em ambas as tabelas (item pago)
       const fullInfoTombo = { ...infoTombo, saida: saidaTombo };
       console.log("Informações completas do tombo encontradas:", fullInfoTombo);
       res.json({ infoTombo: fullInfoTombo });
-  } catch (error) {
+    } catch (error) {
       console.error("Erro ao buscar informações do tombo:", error);
       res.status(500).json({ error: "Erro ao buscar informações do tombo." });
-  }
-};
-
+    }
+  };
 }
 
 export default new EstoqueController();
