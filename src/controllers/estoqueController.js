@@ -579,28 +579,28 @@ class EstoqueController {
   };
 
   // Método para buscar e exibir informações do tombo com logs adicionais
-  fetchInfoPorTombo = async (req, res) => {
-    const { tombo } = req.query;
-    console.log("Tombo recebido na requisição:", tombo);
+fetchInfoPorTombo = async (req, res) => {
+  const { tombo } = req.query;
+  console.log("Tombo recebido na requisição:", tombo);
 
-    if (!tombo) {
+  if (!tombo) {
       console.error("Tombo não fornecido na requisição.");
       return res.status(400).json({ error: "Tombo não fornecido." });
-    }
+  }
 
-    try {
+  try {
       // Verificar se o tombo está na tabela estoqueatual
       const infoTombo = await estoqueModel.getItemByTombo(tombo);
       if (infoTombo) {
-        console.log("Informações de entrada do tombo:", infoTombo);
+          console.log("Informações de entrada do tombo:", infoTombo);
 
-        // Verificar se o item ainda não foi pago
-        if (!infoTombo.pago) {
-          return res.json({
-            infoTombo,
-            message: "Item consta no estoque, não foi pago.",
-          });
-        }
+          // Verificar se o item ainda não foi pago
+          if (!infoTombo.pago) {
+              return res.json({
+                  infoTombo,
+                  message: "Item consta no estoque, não foi pago.",
+              });
+          }
       }
 
       // Buscar na tabela itenspagos
@@ -609,21 +609,22 @@ class EstoqueController {
 
       // Se não houver registros em nenhuma das tabelas
       if (!infoTombo && !saidaTombo) {
-        console.log("Nenhuma informação encontrada para o tombo:", tombo);
-        return res
-          .status(404)
-          .json({ error: "Tombo não encontrado ou não pago." });
+          console.log("Nenhuma informação encontrada para o tombo:", tombo);
+          return res
+              .status(404)
+              .json({ error: "Tombo não encontrado ou não pago." });
       }
 
       // Se houver registros em ambas as tabelas (item pago)
       const fullInfoTombo = { ...infoTombo, saida: saidaTombo };
       console.log("Informações completas do tombo encontradas:", fullInfoTombo);
       res.json({ infoTombo: fullInfoTombo });
-    } catch (error) {
+  } catch (error) {
       console.error("Erro ao buscar informações do tombo:", error);
       res.status(500).json({ error: "Erro ao buscar informações do tombo." });
-    }
-  };
+  }
+};
+
 }
 
 export default new EstoqueController();

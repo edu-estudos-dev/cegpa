@@ -175,7 +175,7 @@ class EstoqueModel {
     const query = `SELECT * FROM estoqueAtual WHERE tombo = ?`;
     try {
       const [results] = await connection.execute(query, [tombo]);
-      return results[0];
+      return results.length > 0 ? results[0] : null;
     } catch (error) {
       console.error("Erro ao buscar item pelo tombo:", error);
       throw error;
@@ -186,10 +186,8 @@ class EstoqueModel {
   //                   Métodos para a Pesquisa
   //   *********************************************************************************/
 
-
   // Método para obter a quantidade de itens no estoque para a categoria selecionda
   async getItensNaoPagosPorCategoria(categoria) {
-
     const query = `
       SELECT COUNT(*) AS quantidadeNaoPagos 
       FROM estoqueatual 
@@ -216,34 +214,35 @@ class EstoqueModel {
     }
   }
 
-
   // Método para obter a quantidade de itens no estoque para pelo subgrupo seleciondo.
   async getItensNaoPagosPorSubgrupo(subgrupo) {
-    console.log("Subgrupo recebido no método getItensNaoPagosPorSubgrupo:", subgrupo); // Logar dados recebidos
-  
+    console.log(
+      "Subgrupo recebido no método getItensNaoPagosPorSubgrupo:",
+      subgrupo
+    ); // Logar dados recebidos
+
     const query = `
       SELECT COUNT(*) AS quantidadeNaoPagos 
       FROM estoqueatual 
       WHERE pago = 0 
       AND subgrupo = ?;
     `;
-  
+
     try {
       const [results] = await connection.execute(query, [subgrupo]);
       console.log("Resultados da query getItensNaoPagosPorSubgrupo:", results); // Logar resultados da query
-  
+
       if (results.length === 0) {
-        console.error("Nenhum resultado encontrado para o subgrupo:", subgrupo); 
+        console.error("Nenhum resultado encontrado para o subgrupo:", subgrupo);
         return 0;
       }
-  
+
       return results[0].quantidadeNaoPagos || 0;
     } catch (error) {
       console.error("Erro ao buscar itens não pagos por subgrupo:", error);
       throw error;
     }
   }
-  
 
   // Método para obter o histórico de movimentação
   async getMovimentacaoBruta() {
@@ -360,18 +359,18 @@ class EstoqueModel {
   // Método para obter a quantidade de itens saídos por ano
   async getSaidaPorTombo(tombo) {
     const queryEstoque = `
-      SELECT id
-      FROM estoqueatual
-      WHERE tombo = ?
+        SELECT id
+        FROM estoqueatual
+        WHERE tombo = ?
     `;
 
     const querySaida = `
-      SELECT
-        data_de_saida, doc_saida, referencia, destino, 
-        posto_graduacao, mat_funcional, telefone, nome_completo, observacao AS observacao_saida 
-      FROM itenspagos
-      WHERE id_estoque = ?
-    `; // Alteração aqui, mudando tombo para id_estoque
+        SELECT
+            data_de_saida, doc_saida, referencia, destino, 
+            posto_graduacao, mat_funcional, telefone, nome_completo, observacao AS observacao_saida 
+        FROM itenspagos
+        WHERE id_estoque = ?
+    `;
 
     try {
       const [resultsEstoque] = await connection.execute(queryEstoque, [tombo]);

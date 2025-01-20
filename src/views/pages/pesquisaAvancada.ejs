@@ -162,8 +162,6 @@
           });
         }
       });
-
-
     </script>
 
 
@@ -224,8 +222,8 @@
       });
     </script>
 
-
     <script>
+      // Manipulação de Tombo e Modal /////////////////////////////////////////////
       document.addEventListener('DOMContentLoaded', () => {
         const pesquisaForm = document.getElementById('pesquisa-form');
         const resultadosDiv = document.getElementById('resultados');
@@ -239,9 +237,6 @@
             if (tombo) {
               try {
                 const responseTombo = await fetch(`/fetch-info-tombo?tombo=${tombo}`);
-                if (!responseTombo.ok) {
-                  throw new Error("Tombo inválido ou não cadastrado.");
-                }
                 const dataTombo = await responseTombo.json();
                 console.log("Dados do tombo recebidos do backend:", dataTombo);
 
@@ -251,55 +246,56 @@
 
                   const dataEntradaFormatada = new Date(entrada.data_de_entrada).toLocaleDateString('pt-BR');
                   const dataSaidaFormatada = saida ? new Date(saida.data_de_saida).toLocaleDateString('pt-BR') : '';
+
                   const getObservacao = (data) => data && data.observacao ? data.observacao : "N/A";
                   const valorReal = (valor) => parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
                   const modalHtml = `
-            <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
-                <div class="modal-content">
-                  <div class="modal-header bg-success text-white">
-                    <h3 class="modal-title ms-auto" id="infoTomboModalLabel">Informações do Tombo</h3>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    <div class="card">
-                      <div class="card-body pb-0">
-                        <h5 class="card-title">${entrada.descricao}</h5>
-                        <p class="card-text">
-                          <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
-                          <strong>Tombo:</strong> ${entrada.tombo} <br/>
-                          <strong>Data de Entrada:</strong> ${dataEntradaFormatada} <br/>
-                          <strong>Categoria:</strong> ${entrada.categoria} <br/>
-                          <strong>Doc Origem:</strong> ${entrada.doc_origem} <br/>
-                          <strong>Estoque:</strong> ${entrada.estoque} <br/>
-                          <strong>Valor:</strong> ${valorReal(entrada.valor)} <br/>
-                          <strong>Situação:</strong> ${entrada.situacao} <br/>
-                          <strong>Observação:</strong> ${getObservacao(entrada)} <br/>
-                          <hr>
-                          ${saida ? `
-                          <h5 class="bg-danger text-white p-2">Dados da Saída</h5>
-                          <strong>Data de Saída:</strong> ${dataSaidaFormatada} <br/>
-                          <strong>Doc Saída:</strong> ${saida.doc_saida} <br/>
-                          <strong>Referência:</strong> ${saida.referencia} <br/>
-                          <strong>Destino:</strong> ${saida.destino.toUpperCase()} <br/>
-                          <strong>Posto/Graduação:</strong> ${saida.posto_graduacao.toUpperCase()} <br/>
-                          <strong>Matrícula Funcional:</strong> ${saida.mat_funcional} <br/>
-                          <strong>Telefone:</strong> ${saida.telefone} <br/>
-                          <strong>Nome Completo:</strong> ${saida.nome_completo} <br/>
-                          <strong>Observação de Saída:</strong> ${getObservacao(saida)} <br/> ` : `
-                          <h5 class="bg-warning text-white p-2">Item consta no estoque, não foi pago.</h5>`}
-                        </p>
+                      <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
+                          <div class="modal-content">
+                          <div class="modal-header bg-success text-white">
+                              <h3 class="modal-title ms-auto" id="infoTomboModalLabel">Informações do Tombo</h3>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                              <div class="card">
+                              <div class="card-body pb-0">
+                                  <h5 class="card-title">${entrada.descricao}</h5>
+                                  <p class="card-text">
+                                  <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
+                                  <strong>Tombo:</strong> ${entrada.tombo} <br/>
+                                  <strong>Data de Entrada:</strong> ${dataEntradaFormatada} <br/>
+                                  <strong>Categoria:</strong> ${entrada.categoria} <br/>
+                                  <strong>Doc Origem:</strong> ${entrada.doc_origem} <br/>
+                                  <strong>Estoque:</strong> ${entrada.estoque} <br/>
+                                  <strong>Valor:</strong> ${valorReal(entrada.valor)} <br/>
+                                  <strong>Situação:</strong> ${entrada.situacao} <br/>
+                                  <strong>Observação:</strong> ${getObservacao(entrada)} <br/>
+                                  <hr>
+                                  ${saida ? `
+                                  <h5 class="bg-danger text-white p-2">Dados da Saída</h5>
+                                  <strong>Data de Saída:</strong> ${dataSaidaFormatada} <br/>
+                                  <strong>Doc Saída:</strong> ${saida.doc_saida} <br/>
+                                  <strong>Referência:</strong> ${saida.referencia} <br/>
+                                  <strong>Destino:</strong> ${saida.destino.toUpperCase()} <br/>
+                                  <strong>Posto/Graduação:</strong> ${saida.posto_graduacao.toUpperCase()} <br/>
+                                  <strong>Matrícula Funcional:</strong> ${saida.mat_funcional} <br/>
+                                  <strong>Telefone:</strong> ${saida.telefone} <br/>
+                                  <strong>Nome Completo:</strong> ${saida.nome_completo} <br/>
+                                  <strong>Observação de Saída:</strong> ${getObservacao(saida)} <br/> ` : `
+                                  <h5 class="bg-warning text-white p-2">Item consta no estoque, não foi pago.</h5>`}
+                                  </p>
+                              </div>
+                              </div>
+                          </div>
+                          <div class="modal-footer d-flex justify-content-center">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                          </div>
+                          </div>
                       </div>
-                    </div>
-                  </div>
-                  <div class="modal-footer d-flex justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `
+                      </div>
+                  `;
 
                   const modalDiv = document.createElement('div');
                   modalDiv.innerHTML = modalHtml;
@@ -320,18 +316,27 @@
                     modalDiv.remove();
                   });
                 } else {
-                  resultadosDiv.innerHTML += '<h5 class="text-danger mt-2">Tombo não encontrado.</h5>';
+                  alert('Desculpe, mas esse tombo é inválido ou ainda não foi cadastrado, tente novamente.');
+                  document.getElementById('pesquisa-form').reset();
+                  resultadosDiv.innerHTML = '';
                 }
               } catch (error) {
-                const resultadosDiv = document.getElementById('resultados');
-                resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro: Tombo inválido ou ainda não cadastrado.</h5>';
+                console.error("Erro ao buscar informações do tombo:", error);
+                alert('Erro ao buscar informações do tombo.');
+                document.getElementById('pesquisa-form').reset();
+                resultadosDiv.innerHTML = '';
               }
             }
           });
         }
       });
-
     </script>
+
+</html>
+
+
+</html>
+
 
 
 </body>
