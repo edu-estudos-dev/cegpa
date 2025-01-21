@@ -91,15 +91,12 @@ class EstoqueModel {
     const query = `SELECT * FROM itenspagos`;
     try {
       const [results] = await connection.execute(query);
-      console.log("Resultados da Query: ", results);
       return results;
     } catch (error) {
       console.error("Erro ao trazer itens pagos:", error);
       throw error;
     }
   };
-  
-  
 
   // Método para adicionar a saida no banco de dados
   createSaida = async (

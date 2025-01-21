@@ -6,6 +6,7 @@ import session from 'express-session';
 import estoqueRoutes from './src/routes/estoqueRoutes.js';
 import pesquisaRoutes from './src/routes/pesquisaRoutes.js';
 import loginLogoutRoutes from './src/routes/loginLogoutRoutes.js';
+import painelRoutes from './src/routes/painelRoutes.js';
 import isAuthenticated from './src/middleware/auth.js';
 
 const app = express();
@@ -32,6 +33,7 @@ app.use('/', loginLogoutRoutes);
 app.use(isAuthenticated);
 app.use('/', estoqueRoutes);
 app.use('/', pesquisaRoutes);
+app.use('/painel', painelRoutes);
 
 app.use((req, res, next) => {
   console.log(`URL solicitada: ${req.url}`);

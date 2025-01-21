@@ -13,7 +13,7 @@ class LoginLogoutController {
       if (isAuthenticated) {
         req.session.user = user; // Define a sessão de usuário
         console.log(`Usuário autenticado com sucesso: ${user}`);
-        res.redirect("/tabela"); // Redireciona para a página inicial após login bem-sucedido
+        res.redirect("painel"); // Redireciona para a página inicial após login bem-sucedido
       } else {
         console.log(`Autenticação falhou para usuário: ${user}`);
         res.render("login", { erro: "Usuário ou senha inválidos" });

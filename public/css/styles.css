@@ -79,8 +79,8 @@ main {
   margin-left: 10px; 
 }
 
-.btn {
-  min-width: 100px;
+.btn-header {
+  min-width: 120px;
 }
 
 input::placeholder {
@@ -106,4 +106,10 @@ input::placeholder {
   height: 220px;
   margin-bottom: 2rem;
 }
+
+
+
+
+
+
 

@@ -20,7 +20,7 @@ router.post("/entrada", estoqueController.create);
 router.get("/ultimo-tombo", estoqueController.fetchUltimoTombo);
 
 // rota para mostrar tabela com estoque atual
-router.get("/tabela", estoqueController.getAllEstoque);
+router.get("/tabela/estoqueatual", estoqueController.getAllEstoque);
 
 
 /* ********************************************************************************
