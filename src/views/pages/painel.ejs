@@ -50,7 +50,7 @@
 
         .container-painel h1 {
             color: #e1e1e1;
-            font-size: 2.5rem;
+      
         }
 
         .area-painel {
@@ -58,6 +58,10 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             width: 100%;
+            box-shadow: 0 0 15px rgba(0, 255, 127, 0.3);
+            padding: 1rem;
+            border-radius: 10px;
+          
         }
 
         .btn-painel,
@@ -74,52 +78,44 @@
             height: 70px;
             margin: 0;
             font-size: 1.2rem;
+            color: #ffffff;
+     
         }
 
         .btn-painel {
             background-color: #2c2c2c;
-            border-color: #3b82f6;
-            color: #ffffff;
+            border-radius: 10px;
+            border-color: #333232;
             transition: all 300ms ease-in-out;
         }
 
         .btn-painel:hover {
-            background-color: #2c2c2c;
-            color: #3b82f6;
-            border-color: #fff;
+            color: #10b981;
+            border-color: rgba(0, 255, 127, 0.6);
             transition: 300ms;
         }
 
         .btn-op {
             background-color: #2c2c2c;
-            border-color: #10b981;
+            border-color: #333232;
             color: #ffffff;
             transition: all 300ms ease-in-out;
         }
 
         .btn-op:hover {
-            background-color: #2c2c2c;
-            border-color: #fff;
+            border-color: rgba(0, 255, 127, 0.6);
             color: #10b981;
             transition: 300ms;
         }
 
-
-        .painel,
-        .painel {
+        .painel{
             background-color: #262626;
-            padding: 20px;
-            border-radius: 8px;
-        }
-
-        .painel {
+            border-radius: 10px;
             grid-column: span 2;
+            padding: 1rem;
+            
         }
-
-        .painel {
-            grid-column: span 2;
-        }
-
+      
         .button-formularios {
             display: flex;
             flex-wrap: wrap;

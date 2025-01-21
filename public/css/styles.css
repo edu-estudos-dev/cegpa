@@ -10,35 +10,8 @@
   font-size: 0.9rem;
 }
 
-.centralize-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-
-.centralize {
-  background-color: var(--secondary-color);
-  width: 100%;
-  max-width: 1600px;
-  margin: 5rem 0 0 0;
-  border-radius: 10px;
-}
-
-.no-outline:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.spinner-border {
-  display: inline-block;
-  width: 3rem;
-  height: 3rem;
-  vertical-align: text-bottom;
-  border: 0.25em solid currentColor;
-  border-right-color: transparent;
-  border-radius: 50%;
-  animation: spinner-border 0.75s linear infinite;
+body{
+margin-top: 2rem;
 }
 
 
@@ -46,11 +19,9 @@ main {
   padding: 1rem;
 }
 
-.main-relatorios {
-  padding: 1rem;
-  margin-top: 5rem; /* Adiciona margem superior para descolar do navbar */
+.caixa{
+  margin-top: 5rem;
 }
-
 
 .navbar {
   position: fixed;
@@ -58,6 +29,7 @@ main {
   top: 0;
   left: 0;
   z-index: 1000;
+  margin-bottom: 5rem;
 }
 
 .navbar-brand {
@@ -87,27 +59,10 @@ input::placeholder {
   font-size: 14px; 
 }
 
-
-#tombos-container {
-  overflow-y: scroll;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  padding: 10px;
-  border-radius: 5px;
-  height: 60vh;
+.container{
+  height: auto;
+  /* margin: auto 0; */
 }
-
-#selected-tombos-container {
-  overflow-y: scroll;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  padding: 0px;
-  border-radius: 5px;
-  height: 220px;
-  margin-bottom: 2rem;
-}
-
-
 
 
 

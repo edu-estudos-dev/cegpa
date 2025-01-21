@@ -30,19 +30,19 @@
   </style>
 </head>
 <body>
+  <%- include('../partials/header') %>
 
-<!-- Navbar -->
-<%- include('../partials/header') %>
-  <div class="container">
-    <main>
-      <div class="table-container">
-        <div class="row mt-3">
-          <div class="mt-5 mb-3">
-            <h2 class="text-center text-success mb-3 mt-5 fw-bold">Tabela de itens que saíram do estoque</h2>
-          </div>
-        </div>
+    <div class="caixa container p-4">
+      <!-- breadcrumb -->
+      <div class="pb-3 mt-3">
+        <%- include('../partials/breadcrumb', { pageTitle: 'Itens Pagos' }) %>
       </div>
-      <div class="table-container">
+
+      <div class=" border bg-light p-4 shadow-sm rounded">
+        <div class="row align-items-center mb-3">
+          <h2 class="text-center text-success mb-3 mt-3 fw-bold">Itens que saíram do estoque</h2>
+        </div>
+        <div class="table-container">
         <table class="table table-striped table-hover mb-0">
           <thead>
             <tr>
@@ -75,8 +75,8 @@
             <% } %>
           </tbody>
         </table>
+        </div>
       </div>
-    </main>
   </div>
 </body>
 </html>

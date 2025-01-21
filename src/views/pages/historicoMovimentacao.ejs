@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,34 +46,36 @@
     }
   </style>
 </head>
+
 <body>
   <%- include('../partials/header') %>
 
-  <div class="container-fluid">
-    <div id="centralize-wrapper" class="centralize-wrapper">
-      <div style="width: 75%;" id="container" class="container secondary-color mt-5 border shadow-sm">
-        <main>
-          <div class="table-container">
-            <div class="row mt-3">
-              <div class="mb-3">
-                <h2 class="text-center text-success mb-3 fw-bold">Histórico de Movimentação</h2>
-              </div>
+    <div class="caixa container p-4">
+      <!-- breadcrumb -->
+      <div class="pb-3 mt-3">
+        <%- include('../partials/breadcrumb', { pageTitle: 'Histórico' }) %>
+      </div>
+
+      <div class=" border bg-light p-4 shadow-sm rounded">
+        <div class="table-container">
+          <div class="row">
+            <div class="mb-3">
+              <h2 class="text-center text-success mt-3 mb-3 fw-bold"> Histórico de Movimentações </h2>
             </div>
           </div>
-          <div class="table-container">
-            <div id="historico-movimentacao" class="mt-3"></div>
-          </div>
-        </main>
+        </div>
+        <div class="table-container">
+          <div id="historico-movimentacao" class="mt-3"></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    async function carregarHistoricoMovimentacao() {
-      const response = await fetch('/historico-movimentacao');
-      const data = await response.json();
-      const historicoDiv = document.getElementById('historico-movimentacao');
-      historicoDiv.innerHTML = `
+    <script>
+      async function carregarHistoricoMovimentacao() {
+        const response = await fetch('/historico-movimentacao');
+        const data = await response.json();
+        const historicoDiv = document.getElementById('historico-movimentacao');
+        historicoDiv.innerHTML = `
         <table class="table table-striped table-hover mb-0">
           <thead>
             <tr>
@@ -93,11 +96,12 @@
           </tbody>
         </table>
       `;
-    }
+      }
 
-    window.onload = () => {
-      carregarHistoricoMovimentacao();
-    };
-  </script>
+      window.onload = () => {
+        carregarHistoricoMovimentacao();
+      };
+    </script>
 </body>
+
 </html>

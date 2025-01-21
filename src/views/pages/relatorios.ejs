@@ -11,37 +11,37 @@
 </head>
 
 <body>
-
-  <!-- Navbar -->
   <%- include('../partials/header') %>
 
-    <div class="container-fluid">
-      <div id="centralize-wrapper" class="centralize-wrapper relatorio-margin">
-        <div id="container" class="container secondary-color mt-5 border shadow-sm">
-          <main class="mt-3">
-            <div class="table-container">
-              <div class="row">
-                <div class="mb-3">
-                  <h2 class="text-center text-success mb-3 fw-bold">Relatórios de Estoque</h2>
-                </div>
-              </div>
+    <div class="caixa container p-4">
+      <!-- breadcrumb -->
+      <div class="pb-3 mt-3">
+        <%- include('../partials/breadcrumb', { pageTitle: 'Relatórios de Estoque' }) %>
+      </div>
+
+      <div class=" border bg-light p-4 shadow-sm rounded">
+        <div class="table-container">
+          <div class="row">
+            <div class="mb-3">
+              <h2 class="text-center text-success mt-3 mb-3 fw-bold"> Relatório de Entradas e Saidas </h2>
             </div>
-            <div class="table-container">
-              <div class="row">
-                <div class="col-md-6 mb-4 text-center">
-                  <h3>Entradas</h3>
-                  <hr>
-                  <div id="relatorio-entradas" class="mt-3"></div>
-                </div>
-                <div class="col-md-6 mb-4 text-center">
-                  <h3>Saídas</h3>
-                  <hr>
-                  <div id="relatorio-saidas" class="mt-3"></div>
-                </div>
-              </div>
-            </div>
-          </main>
+          </div>
         </div>
+        <div class="table-container">
+          <div class="row">
+            <div class="col-md-6 mb-4 text-center">
+              <h3>Entradas</h3>
+              <hr>
+              <div id="relatorio-entradas" class="mt-3"></div>
+            </div>
+            <div class="col-md-6 mb-4 text-center">
+              <h3>Saídas</h3>
+              <hr>
+              <div id="relatorio-saidas" class="mt-3"></div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 

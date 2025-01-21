@@ -12,218 +12,221 @@
 
 <body>
 
-  <!-- Navbar -->
   <%- include('../partials/header') %>
 
-    <div id="centralize-wrapper" class="centralize-wrapper">
-      <div style="max-width: 70%; min-width: 70%;" id="container" class="container secondary-color centralize border shadow-sm">
-        <main>
-          <form id="formulario-entrada" action="/entrada" method="post">
-
-            <input id="id" type="hidden">
-
-            <div class="row align-items-center mb-3">
-              <h2 class="text-center text-success mb-3 mt-3 fw-bold">Formulário de Entrada</h2>
-            </div>
-
-            <div id="row1" class="row">
-              <div class="col-md-2">
-                <div id="data_de_entrada-div" class="mb-3 text-center">
-                  <label class="form-label fw-bold">Entrada</label>
-                  <input id="data_de_entrada" type="date" class="form-control" name="data_de_entrada"
-                    onchange="atualizarTomboInicial()">
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div id="qtd-div" class="mb-3 text-center">
-                  <label class="form-label text-center fw-bold">Qtde.</label>
-                  <input id="qtd" type="number" class="form-control" name="quantidade"
-                    onchange="atualizarTomboInicial()" min="1">
-
-                </div>
-              </div>
-
-              <div class="col-md-1">
-                <div id="subgrupo-div" class="mb-3 text-center">
-                  <label class="form-label fw-bold">Subgrupo</label>
-                  <select id="subgrupo" class="form-select" name="subgrupo" placeholder="Selecione"
-                    onchange="atualizarTomboInicial()">
-                    <option value=""></option>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div id="tombo_inicial-div" class="mb-3 text-center">
-                  <label class="form-label fw-bold">Tombo Inicial</label>
-                  <input id="tombo_inicial" type="text" class="form-control" name="tombo" readonly>
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div id="categoria-div" class="mb-3 text-center">
-                  <label class="form-label fw-bold">Categoria</label>
-                  <select id="categoria" class="form-select" name="categoria">
-                    <option selected>Selecione...</option>
-                    <option value="mesa">MESA</option>
-                    <option value="ar-condicionado">AR-CONDICIONADO</option>
-                    <option value="automovel">AUTOMÓVEL</option>
-                    <option value="bicicleta">BICICLETA</option>
-                    <option value="tv">TV</option>
-                    <option value="cadeira">CADEIRA</option>
-                    <option value="gaveteiro">GAVETEIRO</option>
-                    <option value="armario">ARMÁRIO</option>
-                    <option value="estante">ESTANTE</option>
-                    <option value="desktop">DESKTOP</option>
-                    <option value="arquivo">ARQUIVO</option>
-                    <option value="beliche">BELICHE</option>
-                    <option value="lousa">LOUSA</option>
-                    <option value="monitor">MONITOR</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div id="doc_origem-div" class="mb-3 text-center">
-                  <label class="form-label fw-bold">Doc. de Origem</label>
-                  <input id="doc_origem" type="text" class="form-control" placeholder="Nota Fiscal, etc..."
-                    name="doc_origem">
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div class="mb-3 text-center">
-                  <label class="form-label fw-bold">Valor</label>
-                  <div class="input-group">
-                    <span class="input-group-text">R$</span>
-                    <input id="valor" type="number" class="form-control" name="valor">
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div id="row2" class="row">
-              <div class="col-md-10">
-                <div id="observacao-div" class="mb-3">
-                  <label class="form-label fw-bold">Descrição</label>
-                  <input placeholder="Descreva o item em detalhes." id="descricao" name="descricao" type="text"
-                    class="form-control">
-                </div>
-              </div>
-
-              <div class="col-md-2">
-                <div id="situacao-div" class="mb-3">
-                  <label class="form-label fw-bold">Situação</label>
-                  <select id="situacao" class="form-select" name="situacao">
-                    <option selected>Escolha uma opção...</option>
-                    <option value="novo">Novo</option>
-                    <option value="otimo">Ótimo</option>
-                    <option value="bom">Bom</option>
-                    <option value="regular">Regular</option>
-                    <option value="ruim">Ruim</option>
-                    <option value="inservivel">Inservível</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div id="row3" class="row">
-              <div class="col-md-9">
-                <div id="conta_contabil-div" class="mb-3">
-                  <label class="form-label fw-bold">Conta Contábil</label>
-                  <select id="conta_contabil" class="form-select" name="conta_contabil">
-                    <option selected>Escolha uma opção...</option>
-                    <option value="medicao">APARELHOS DE MEDIÇÃO E ORIENTAÇÃO</option>
-                    <option value="aeronaves">AERONAVES</option>
-                    <option value="almoxarifado">ALMOXARIFADO DE MATERIAIS A SEREM APLICADOS EM BENS EM ANDAMENTO
-                    </option>
-                    <option value="comunicacao">APARELHOS E EQUIPAMENTOS DE COMUNICAÇÃO</option>
-                    <option value="esportes">APARELHOS E EQUIPAMENTOS PARA ESPORTES E DIVERSÕES</option>
-                    <option value="domesticos">APARELHOS E UTENSÍLIOS DOMÉSTICOS</option>
-                    <option value="medicos">APARELHOS, EQUIPAMENTOS E UTENSÍLIOS MÉDICOS, ODONTOLÓGICOS, LABORATORIAIS E
-                      HOSPITALARES</option>
-                    <option value="armamentos">ARMAMENTOS</option>
-                    <option value="poder_outro">BENS EM PODER DE OUTRA UNIDADE OU TERCEIROS</option>
-                    <option value="alienar">BENS MÓVEIS A ALIENAR</option>
-                    <option value="classificar">BENS MÓVEIS A CLASSIFICAR</option>
-                    <option value="reparar">BENS MÓVEIS A REPARAR</option>
-                    <option value="movel_elaboracao">BENS MÓVEIS EM ELABORACÃO</option>
-                    <option value="inserviveis">BENS MÓVEIS INSERVÍVEIS</option>
-                    <option value="combate">CARROS DE COMBATE</option>
-                    <option value="colecoes">COLEÇÕES E MATERIAIS BIBLIOGRÁFICOS</option>
-                    <option value="discotecas">DISCOTECAS E FILMOTECAS</option>
-                    <option value="embarcacoes">EMBARCAÇÕES</option>
-                    <option value="protecao">EQUIPAMENTO DE PROTEÇÃO, SEGURANÇA E SOCORRO</option>
-                    <option value="manobras">EQUIPAMENTOS DE MANOBRAS E PATRULHAMENTO</option>
-                    <option value="mergulho">EQUIPAMENTOS DE MERGULHO E SALVAMENTO</option>
-                    <option value="montaria">EQUIPAMENTOS DE MONTARIA</option>
-                    <option value="dados">EQUIPAMENTOS DE PROCESSAMENTO DE DADOS</option>
-                    <option value="vigilancia">EQUIPAMENTOS DE PROTEÇÃO E VIGILÂNCIA AMBIENTAL</option>
-                    <option value="tecnologia">EQUIPAMENTOS DE TECNOLOGIA DA INFORMAÇÃO</option>
-                    <option value="sigiloso">EQUIPAMENTOS E MATERIAL SIGILOSO E RESERVADO</option>
-                    <option value="hidraulicos">EQUIPAMENTOS HIDRÁULICOS E ELÉTRICOS</option>
-                    <option value="audio_video">EQUIPAMENTOS PARA ÁUDIO, VÍDEO E FOTO</option>
-                    <option value="aeronauticos">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS AERONÁUTICOS</option>
-                    <option value="protecao_voo">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS DE PROTEÇÃO AO VOO</option>
-                    <option value="maritimos">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS MARÍTIMOS</option>
-                    <option value="automoveis">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS PARA AUTOMÓVEIS</option>
-                    <option value="estoque_interno">ESTOQUE INTERNO</option>
-                    <option value="importacoes">IMPORTAÇÕES EM ANDAMENTO</option>
-                    <option value="instrumentos">INSTRUMENTOS MUSICAIS E ARTÍSTICOS</option>
-                    <option value="energeticos">MÁQUINAS E EQUIPAMENTOS ENERGÉTICOS</option>
-                    <option value="graficos">MÁQUINAS E EQUIPAMENTOS GRÁFICOS</option>
-                    <option value="industriais">MÁQUINAS E EQUIPAMENTOS INDUSTRIAIS</option>
-                    <option value="escritorio">MÁQUINAS E UTENSÍLIOS DE ESCRITÓRIO</option>
-                    <option value="agropecuarios">MÁQUINAS, EQUIPAMENTOS E UTENSÍLIOS AGROPECUÁRIOS</option>
-                    <option value="rodoviarios">MÁQUINAS, EQUIPAMENTOS E UTENSÍLIOS RODOVIÁRIOS</option>
-                    <option value="oficina">MÁQUINAS, FERRAMENTAS E UTENSÍLIOS DE OFICINA</option>
-                    <option value="mobiliario">MOBILIÁRIO EM GERAL</option>
-                    <option value="obras_arte">OBRAS DE ARTE E PEÇAS PARA EXPOSIÇÃO</option>
-                    <option value="outras_maquinas">OUTRAS MÁQUINAS, APARELHOS, EQUIPAMENTOS E FERRAMENTAS</option>
-                    <option value="outros_bens">OUTROS BENS MÓVEIS</option>
-                    <option value="outros_culturais">OUTROS MATERIAIS CULTURAIS, EDUCACIONAIS E DE COMUNICAÇÃO</option>
-                    <option value="pecas_reposicao">PEÇAS E CONJUNTOS DE REPOSIÇÃO</option>
-                    <option value="semoventes">SEMOVENTES</option>
-                    <option value="utensilios">UTENSÍLIOS EM GERAL</option>
-                    <option value="mecanica">VEÍCULOS DE TRAÇÃO MECÂNICA</option>
-                    <option value="veiculos_geral">VEÍCULOS EM GERAL</option>
-                    <option value="ferroviarios">VEÍCULOS FERROVIÁRIOS</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div id="estoque-div" class="mb-3">
-                  <label class="form-label fw-bold">Estoque</label>
-                  <select id="estoque" class="form-select" name="estoque">
-                    <option selected>Escolha uma opção...</option>
-                    <option value="galpao">ESTOQUE COLOG - GALPÃO</option>
-                    <option value="sala">ESTOQUE COLOG - SALA</option>
-                    <option value="cabence">ESTOQUE COLOG - CABEMCE</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div id="row4" class="row">
-              <div class="col-md-12">
-                <div id="observacao-div" class="mb-3">
-                  <label class="form-label fw-bold">Observação</label>
-                  <textarea id="observacao" type="text" class="form-control" name="observacao"></textarea>
-                </div>
-              </div>
-            </div>
-
-            <div class="d-flex justify-content-around m-3">
-              <button id="btnRegistrar" type="submit" class="btn btn-success w-10">Registrar Entrada</button>
-            </div>
-          </form>
-        </main>
+    <div class="caixa container p-4">
+      <!-- breadcrumb -->
+      <div class="pb-3 mt-3">
+        <%- include('../partials/breadcrumb', { pageTitle: 'Cadastrar Entrada' }) %>
       </div>
+
+      <div class=" border bg-light p-4 shadow-sm rounded">
+        <form id="formulario-entrada" action="/entrada" method="post">
+
+          <input id="id" type="hidden">
+
+          <div class="row align-items-center mb-3">
+            <h2 class="text-center text-success mb-3 mt-3 fw-bold">Formulário de Entrada</h2>
+          </div>
+
+          <div id="row1" class="row">
+            <div class="col-md-2">
+              <div id="data_de_entrada-div" class="mb-3 text-center">
+                <label class="form-label fw-bold">Entrada</label>
+                <input id="data_de_entrada" type="date" class="form-control" name="data_de_entrada"
+                  onchange="atualizarTomboInicial()">
+              </div>
+            </div>
+
+            <div class="col-md-1">
+              <div id="qtd-div" class="mb-3 text-center">
+                <label class="form-label text-center fw-bold">Qtde.</label>
+                <input id="qtd" type="number" class="form-control" name="quantidade" onchange="atualizarTomboInicial()"
+                  min="1">
+
+              </div>
+            </div>
+
+            <div class="col-md-1">
+              <div id="subgrupo-div" class="mb-3 text-center">
+                <label class="form-label fw-bold">Subgrupo</label>
+                <select id="subgrupo" class="form-select" name="subgrupo" placeholder="Selecione"
+                  onchange="atualizarTomboInicial()">
+                  <option value=""></option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <div id="tombo_inicial-div" class="mb-3 text-center">
+                <label class="form-label fw-bold">Tombo Inicial</label>
+                <input id="tombo_inicial" type="text" class="form-control" name="tombo" readonly>
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <div id="categoria-div" class="mb-3 text-center">
+                <label class="form-label fw-bold">Categoria</label>
+                <select id="categoria" class="form-select" name="categoria">
+                  <option selected>Selecione...</option>
+                  <option value="mesa">MESA</option>
+                  <option value="ar-condicionado">AR-CONDICIONADO</option>
+                  <option value="automovel">AUTOMÓVEL</option>
+                  <option value="bicicleta">BICICLETA</option>
+                  <option value="tv">TV</option>
+                  <option value="cadeira">CADEIRA</option>
+                  <option value="gaveteiro">GAVETEIRO</option>
+                  <option value="armario">ARMÁRIO</option>
+                  <option value="estante">ESTANTE</option>
+                  <option value="desktop">DESKTOP</option>
+                  <option value="arquivo">ARQUIVO</option>
+                  <option value="beliche">BELICHE</option>
+                  <option value="lousa">LOUSA</option>
+                  <option value="monitor">MONITOR</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <div id="doc_origem-div" class="mb-3 text-center">
+                <label class="form-label fw-bold">Doc. de Origem</label>
+                <input id="doc_origem" type="text" class="form-control" placeholder="Nota Fiscal, etc..."
+                  name="doc_origem">
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <div class="mb-3 text-center">
+                <label class="form-label fw-bold">Valor</label>
+                <div class="input-group">
+                  <span class="input-group-text">R$</span>
+                  <input id="valor" type="number" class="form-control" name="valor">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="row2" class="row">
+            <div class="col-md-10">
+              <div id="observacao-div" class="mb-3">
+                <label class="form-label fw-bold">Descrição</label>
+                <input placeholder="Descreva o item em detalhes." id="descricao" name="descricao" type="text"
+                  class="form-control">
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <div id="situacao-div" class="mb-3">
+                <label class="form-label fw-bold">Situação</label>
+                <select id="situacao" class="form-select" name="situacao">
+                  <option selected>Escolha uma opção...</option>
+                  <option value="novo">Novo</option>
+                  <option value="otimo">Ótimo</option>
+                  <option value="bom">Bom</option>
+                  <option value="regular">Regular</option>
+                  <option value="ruim">Ruim</option>
+                  <option value="inservivel">Inservível</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="row3" class="row">
+            <div class="col-md-9">
+              <div id="conta_contabil-div" class="mb-3">
+                <label class="form-label fw-bold">Conta Contábil</label>
+                <select id="conta_contabil" class="form-select" name="conta_contabil">
+                  <option selected>Escolha uma opção...</option>
+                  <option value="medicao">APARELHOS DE MEDIÇÃO E ORIENTAÇÃO</option>
+                  <option value="aeronaves">AERONAVES</option>
+                  <option value="almoxarifado">ALMOXARIFADO DE MATERIAIS A SEREM APLICADOS EM BENS EM ANDAMENTO
+                  </option>
+                  <option value="comunicacao">APARELHOS E EQUIPAMENTOS DE COMUNICAÇÃO</option>
+                  <option value="esportes">APARELHOS E EQUIPAMENTOS PARA ESPORTES E DIVERSÕES</option>
+                  <option value="domesticos">APARELHOS E UTENSÍLIOS DOMÉSTICOS</option>
+                  <option value="medicos">APARELHOS, EQUIPAMENTOS E UTENSÍLIOS MÉDICOS, ODONTOLÓGICOS, LABORATORIAIS E
+                    HOSPITALARES</option>
+                  <option value="armamentos">ARMAMENTOS</option>
+                  <option value="poder_outro">BENS EM PODER DE OUTRA UNIDADE OU TERCEIROS</option>
+                  <option value="alienar">BENS MÓVEIS A ALIENAR</option>
+                  <option value="classificar">BENS MÓVEIS A CLASSIFICAR</option>
+                  <option value="reparar">BENS MÓVEIS A REPARAR</option>
+                  <option value="movel_elaboracao">BENS MÓVEIS EM ELABORACÃO</option>
+                  <option value="inserviveis">BENS MÓVEIS INSERVÍVEIS</option>
+                  <option value="combate">CARROS DE COMBATE</option>
+                  <option value="colecoes">COLEÇÕES E MATERIAIS BIBLIOGRÁFICOS</option>
+                  <option value="discotecas">DISCOTECAS E FILMOTECAS</option>
+                  <option value="embarcacoes">EMBARCAÇÕES</option>
+                  <option value="protecao">EQUIPAMENTO DE PROTEÇÃO, SEGURANÇA E SOCORRO</option>
+                  <option value="manobras">EQUIPAMENTOS DE MANOBRAS E PATRULHAMENTO</option>
+                  <option value="mergulho">EQUIPAMENTOS DE MERGULHO E SALVAMENTO</option>
+                  <option value="montaria">EQUIPAMENTOS DE MONTARIA</option>
+                  <option value="dados">EQUIPAMENTOS DE PROCESSAMENTO DE DADOS</option>
+                  <option value="vigilancia">EQUIPAMENTOS DE PROTEÇÃO E VIGILÂNCIA AMBIENTAL</option>
+                  <option value="tecnologia">EQUIPAMENTOS DE TECNOLOGIA DA INFORMAÇÃO</option>
+                  <option value="sigiloso">EQUIPAMENTOS E MATERIAL SIGILOSO E RESERVADO</option>
+                  <option value="hidraulicos">EQUIPAMENTOS HIDRÁULICOS E ELÉTRICOS</option>
+                  <option value="audio_video">EQUIPAMENTOS PARA ÁUDIO, VÍDEO E FOTO</option>
+                  <option value="aeronauticos">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS AERONÁUTICOS</option>
+                  <option value="protecao_voo">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS DE PROTEÇÃO AO VOO</option>
+                  <option value="maritimos">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS MARÍTIMOS</option>
+                  <option value="automoveis">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS PARA AUTOMÓVEIS</option>
+                  <option value="estoque_interno">ESTOQUE INTERNO</option>
+                  <option value="importacoes">IMPORTAÇÕES EM ANDAMENTO</option>
+                  <option value="instrumentos">INSTRUMENTOS MUSICAIS E ARTÍSTICOS</option>
+                  <option value="energeticos">MÁQUINAS E EQUIPAMENTOS ENERGÉTICOS</option>
+                  <option value="graficos">MÁQUINAS E EQUIPAMENTOS GRÁFICOS</option>
+                  <option value="industriais">MÁQUINAS E EQUIPAMENTOS INDUSTRIAIS</option>
+                  <option value="escritorio">MÁQUINAS E UTENSÍLIOS DE ESCRITÓRIO</option>
+                  <option value="agropecuarios">MÁQUINAS, EQUIPAMENTOS E UTENSÍLIOS AGROPECUÁRIOS</option>
+                  <option value="rodoviarios">MÁQUINAS, EQUIPAMENTOS E UTENSÍLIOS RODOVIÁRIOS</option>
+                  <option value="oficina">MÁQUINAS, FERRAMENTAS E UTENSÍLIOS DE OFICINA</option>
+                  <option value="mobiliario">MOBILIÁRIO EM GERAL</option>
+                  <option value="obras_arte">OBRAS DE ARTE E PEÇAS PARA EXPOSIÇÃO</option>
+                  <option value="outras_maquinas">OUTRAS MÁQUINAS, APARELHOS, EQUIPAMENTOS E FERRAMENTAS</option>
+                  <option value="outros_bens">OUTROS BENS MÓVEIS</option>
+                  <option value="outros_culturais">OUTROS MATERIAIS CULTURAIS, EDUCACIONAIS E DE COMUNICAÇÃO</option>
+                  <option value="pecas_reposicao">PEÇAS E CONJUNTOS DE REPOSIÇÃO</option>
+                  <option value="semoventes">SEMOVENTES</option>
+                  <option value="utensilios">UTENSÍLIOS EM GERAL</option>
+                  <option value="mecanica">VEÍCULOS DE TRAÇÃO MECÂNICA</option>
+                  <option value="veiculos_geral">VEÍCULOS EM GERAL</option>
+                  <option value="ferroviarios">VEÍCULOS FERROVIÁRIOS</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div id="estoque-div" class="mb-3">
+                <label class="form-label fw-bold">Estoque</label>
+                <select id="estoque" class="form-select" name="estoque">
+                  <option selected>Escolha uma opção...</option>
+                  <option value="galpao">ESTOQUE COLOG - GALPÃO</option>
+                  <option value="sala">ESTOQUE COLOG - SALA</option>
+                  <option value="cabence">ESTOQUE COLOG - CABEMCE</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="row4" class="row">
+            <div class="col-md-12">
+              <div id="observacao-div" class="mb-3">
+                <label class="form-label fw-bold">Observação</label>
+                <textarea id="observacao" type="text" class="form-control" name="observacao"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-around m-3">
+            <button id="btnRegistrar" type="submit" class="btn btn-success w-10">Registrar Entrada</button>
+          </div>
+        </form>
+      </div>
+    </div>
     </div>
 
     <!-- Modal de Alerta -->
@@ -282,7 +285,6 @@
         }
       };
 
-
       document.addEventListener('DOMContentLoaded', (event) => {
         document.getElementById('data_de_entrada').addEventListener('input', atualizarTomboInicial);
         document.getElementById('subgrupo').addEventListener('input', atualizarTomboInicial);
@@ -313,7 +315,7 @@
             return response.text(); // Altere para `text()` para lidar com HTML
           })
           .then(() => {
-            window.location.href = '/tabela'; // Redireciona para a rota da tabela
+            window.location.href = '/tabela/estoqueatual'; // Redireciona para a rota da tabela
           })
           .catch(error => {
             document.getElementById('errorMessage').innerText = error.message;
@@ -324,4 +326,5 @@
 
     </script>
 </body>
+
 </html>

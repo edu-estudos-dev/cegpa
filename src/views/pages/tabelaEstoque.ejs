@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/css/styles.css">
     <style>
         .table-container {
-            max-height: 78vh;
+            max-height: 65vh;
             overflow-y: auto;
             overflow-x: hidden;
         }
@@ -22,9 +22,7 @@
         .table-container th,
         .table-container td {
             word-wrap: break-word;
-            /* Quebrar palavras longas para caber na célula */
             white-space: nowrap;
-            /* Evita quebras de linha dentro das células */
         }
 
         .table-container thead th {
@@ -37,20 +35,20 @@
 </head>
 
 <body>
-
-    <!-- Navbar -->
     <%- include('../partials/header') %>
-        <div class="container-fluid">
-            <main>
-                <div class="table-container">
-                    <div class="row mt-3">
-                        <div class="mt-5 mb-3">
-                            <h2 class="text-center text-success mb-3 mt-5 fw-bold">Tabela com o Estoque Atual</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="table-container">
-                    <table class="table table-striped table-hover mb-0">
+
+    <div class="caixa container-fluid p-4">
+      <!-- breadcrumb -->
+      <div class="pb-3 mt-3">
+        <%- include('../partials/breadcrumb', { pageTitle: 'Estoque Atual' }) %>
+      </div>
+
+      <div class=" border bg-light p-4 shadow-sm rounded">
+        <div class="row align-items-center mb-3">
+          <h2 class="text-center text-success mb-3 mt-3 fw-bold">Estoque Atual</h2>
+        </div>
+        <div class="table-container">
+        <table class="table table-striped table-hover mb-0">
                         <thead>
                             <tr>
                                 <th class="text-center">ID</th>
@@ -80,10 +78,9 @@
                                         <td class="py-1 text-center">R$ <%= Number(item.valor).toFixed(2) %> </td>
                                         <td class="py-1 text-center"> <%= item.situacao %> </td>
                                         <td class="py-1 text-center">
-                                            <a href="/estoque/edit/<%= item.id %>"
-                                                class="btn btn-warning btn-sm">Editar</a>
-                                            <button type="button" class="btn btn-danger btn-sm delete-btn"
-                                                data-id="<%= item.id %>">Excluir</button>
+                                            <a href="/estoque/edit/<%= item.id %>" class="btn btn-secondary btn-sm delete-btn">Vizuaizar</a>
+                                            <a href="/estoque/edit/<%= item.id %>" class="btn btn-warning btn-sm">Editar</a>
+                                            <a href="/estoque/edit/<%= item.id %>" class="btn btn-danger btn-sm">Excluir</a>
                                         </td>
                                     </tr>
                                 <% }); %>
@@ -93,8 +90,7 @@
                         </tbody>
                     </table>
                 </div>
-            </main>
-        </div>
+    
 </body>
 
 </html>
