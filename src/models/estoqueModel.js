@@ -70,6 +70,26 @@ class EstoqueModel {
     }
   };
 
+  // Método para obter quantidade de itens únicos com base na descrição
+  getQtdeUnicaEstoque = async () => {
+    const query = `
+    SELECT descricao, COUNT(*) AS quantidade
+    FROM estoqueAtual
+    WHERE pago = FALSE
+    GROUP BY descricao;
+  `;
+    try {
+      const [results] = await connection.execute(query);
+      return results; // Retorna a quantidade de itens únicos com base na descrição
+    } catch (error) {
+      console.error(
+        "Erro ao buscar quantidade única de itens no estoque:",
+        error
+      );
+      throw error;
+    }
+  };
+
   /* ********************************************************************************
                   Métodos para a SAÍDA de itens no Estoque
   *********************************************************************************/

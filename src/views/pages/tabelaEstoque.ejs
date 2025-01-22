@@ -48,48 +48,49 @@
           <h2 class="text-center text-success mb-3 mt-3 fw-bold">Estoque Atual</h2>
         </div>
         <div class="table-container">
-        <table class="table table-striped table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-center">ID</th>
-                                <th class="text-center">Entrada</th>
-                                <th>Descrição</th>
-                                <th class="text-center">Tombo</th>
-                                <th class="text-center">Categoria</th>
-                                <th class="text-center">Conta Contábil</th>
-                                <th class="text-center">Documento de Origem</th>
-                                <th class="text-center">Estoque</th>
-                                <th class="text-center">Valor</th>
-                                <th class="text-center">Situação</th>
-                                <th class="text-center">Ações</th>
+            <table class="table table-striped table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center">ID</th>
+                        <th class="text-center">Entrada</th>
+                        <th>Descrição</th>
+                        <th class="text-center">Tombo</th>
+                        <th class="text-center">Categoria</th>
+                        <th class="text-center">Conta Contábil</th>
+                        <th class="text-center">Documento de Origem</th>
+                        <th class="text-center">Estoque</th>
+                        <th class="text-center">Valor</th>
+                        <th class="text-center">Situação</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (estoque.length> 0) { %>
+                        <% estoque.forEach(function(item) { %>
+                            <tr> <td class="py-1 text-center"> <%= item.id %> </td>
+                                <td class="py-1 text-center"> <%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %> </td>
+                                <td class="py-1"> <%= item.descricao %> </td>
+                                <td class="py-1 text-center"> <%= item.tombo %> </td>
+                                <td class="py-1 text-center"> <%= item.categoria %> </td>
+                                <td class="py-1 text-center"> <%= item.conta_contabil %> </td>
+                                <td class="py-1 text-center"> <%= item.doc_origem %> </td>
+                                <td class="py-1 text-center"> <%= item.estoque %> </td>
+                                <td class="py-1 text-center">R$ <%= Number(item.valor).toFixed(2) %> </td>
+                                <td class="py-1 text-center"> <%= item.situacao %> </td>
+                                <td class="py-1 text-center">
+                                    <a href="/estoque/edit/<%= item.id %>" class="btn btn-secondary btn-sm delete-btn">Vizuaizar</a>
+                                    <a href="/estoque/edit/<%= item.id %>" class="btn btn-warning btn-sm">Editar</a>
+                                    <a href="/estoque/edit/<%= item.id %>" class="btn btn-danger btn-sm">Excluir</a>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <% if (estoque.length> 0) { %>
-                                <% estoque.forEach(function(item) { %>
-                                    <tr> <td class="py-1 text-center"> <%= item.id %> </td>
-                                        <td class="py-1 text-center"> <%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %> </td>
-                                        <td class="py-1"> <%= item.descricao %> </td>
-                                        <td class="py-1 text-center"> <%= item.tombo %> </td>
-                                        <td class="py-1 text-center"> <%= item.categoria %> </td>
-                                        <td class="py-1 text-center"> <%= item.conta_contabil %> </td>
-                                        <td class="py-1 text-center"> <%= item.doc_origem %> </td>
-                                        <td class="py-1 text-center"> <%= item.estoque %> </td>
-                                        <td class="py-1 text-center">R$ <%= Number(item.valor).toFixed(2) %> </td>
-                                        <td class="py-1 text-center"> <%= item.situacao %> </td>
-                                        <td class="py-1 text-center">
-                                            <a href="/estoque/edit/<%= item.id %>" class="btn btn-secondary btn-sm delete-btn">Vizuaizar</a>
-                                            <a href="/estoque/edit/<%= item.id %>" class="btn btn-warning btn-sm">Editar</a>
-                                            <a href="/estoque/edit/<%= item.id %>" class="btn btn-danger btn-sm">Excluir</a>
-                                        </td>
-                                    </tr>
-                                <% }); %>
-                            <% } else { %>
-                                <tr> <td colspan="11" class="text-center">Ainda não há itens cadastrados</td> </tr>
-                                <% } %>
-                        </tbody>
-                    </table>
-                </div>
+                        <% }); %>
+                    <% } else { %>
+                        <tr> <td colspan="11" class="text-center">Ainda não há itens cadastrados</td> </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
     
 </body>
 

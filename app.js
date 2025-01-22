@@ -35,11 +35,6 @@ app.use('/', estoqueRoutes);
 app.use('/', pesquisaRoutes);
 app.use('/painel', painelRoutes);
 
-app.use((req, res, next) => {
-  console.log(`URL solicitada: ${req.url}`);
-  next();
-});
-
 // Tratamento de erros
 app.use((req, res, next) => {
   console.log(`Página 404 renderizada para URL: ${req.url}`);

@@ -179,6 +179,22 @@ class EstoqueController {
     }
   };
 
+  // Método para mostrar quantidade de itens únicos no estoque
+  getQtdeUnicaEstoque = async (_, res) => {
+    try {
+      const estoque = await estoqueModel.getQtdeUnicaEstoque();
+      res.render("qtde_disponivel_por_item", { estoque }); // Renderiza a view com a quantidade de itens únicos
+    } catch (error) {
+      console.error(
+        "Erro ao carregar quantidade única de itens no estoque:",
+        error
+      );
+      res
+        .status(500)
+        .send("Erro ao carregar quantidade única de itens no estoque.");
+    }
+  };
+
   /* ********************************************************************************
                   Métodos para a SAÍDA de itens no Estoque
   *********************************************************************************/

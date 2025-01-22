@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <title>Sistema de Controle de Estoque - COLOG</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -58,8 +59,20 @@
             height: 150px;
             transition: transform 0.2s, box-shadow 0.2s;
             text-decoration: none;
-            color: inherit;
+            color: inheri;
         }
+
+        .system-box i {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .system-box div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
 
         .system-box:hover {
             transform: translateY(-2px);
@@ -105,7 +118,6 @@
 
         .container-white {
             margin-top: -30px;
-
         }
 
         h3 {
@@ -120,21 +132,20 @@
             margin: 0;
         }
 
-        footer h4{
-            font-size: 1.4rem;
+        footer h4 {
+            font-size: 1.1rem;
             padding-top: 1rem;
             margin-bottom: 0.3rem;
         }
 
-        /* footer p:last-child {
-            margin-top: 0.2rem;
-        } */
+        footer p {
+            font-size: 0.7rem;
+        }
 
-        h5{
-            font-size: 1.2rem;
+        h5 {
+            font-size: 0.9rem;
             font-weight: 500;
-            margin: 0;
-            
+            margin-bottom: 30px;
         }
 
         main {
@@ -157,57 +168,75 @@
 
     </header>
 
-    <main class="container bg-light border ">
+    <main class="container bg-light border">
         <div class="systems-grid">
             <a href="/entrada" class="system-box link">
                 <div>
-                    <h4>Formulário de Entrada</h4>
-                    <p>Formulário de Entrada</p>
+                    <i class="fas fa-sign-in-alt text-success fa-2x"></i>
+                    <h4 class="text-success">Formulário de Entrada</h4>
+                    <p class="text-success">Formulário de Entrada</p>
                 </div>
             </a>
             <a href="/saida" class="system-box link">
                 <div>
-                    <h4>Formulário de Saída</h4>
-                    <p>Formulário de Saída</p>
+                    <i class="fas fa-sign-out-alt text-success fa-2x"></i>
+                    <h4 class="text-success">Formulário de Saída</h4>
+                    <p class="text-success">Formulário de Saída</p>
                 </div>
             </a>
             <a href="/tabela/estoqueatual" class="system-box link">
                 <div>
-                    <h4>Tabela do Estoque Atual</h4>
-                    <p>Estoque Atual</p>
+                    <i class="fas fa-box-open text-success fa-2x"></i>
+                    <h4 class="text-success">Tabela do Estoque Atual</h4>
+                    <p class="text-success">Estoque Atual</p>
+                </div>
+            </a>
+            <a href="/qtde-unica" class="system-box link">
+                <div>
+                    <i class="fas fa-list-ol text-success fa-2x"></i>
+                    <h4 class="text-success">Quantidade De itens</h4>
+                    <p class="text-success">Descrição e quantidade de itens disponíveis</p>
                 </div>
             </a>
             <a href="/estoque/itenspagos" class="system-box link">
                 <div>
-                    <h4>Tabela dos Itens que Sairam do estoque</h4>
-                    <p>Itens Pagos</p>
+                    <i class="fas fa-boxes text-success fa-2x"></i>
+                    <h4 class="text-success">Tabela dos Itens que Sairam do estoque</h4>
+                    <p class="text-success">Itens Pagos</p>
                 </div>
             </a>
             <a href="/relatorios" class="system-box link">
                 <div>
-                    <h4>Relatório de quantidade</h4>
-                    <p>Relatórios</p>
+                    <i class="fas fa-chart-line text-success fa-2x"></i>
+                    <h4 class="text-success">Relatório de quantidade</h4>
+                    <p class="text-success">Relatórios</p>
                 </div>
             </a>
             <a href="/pesquisa-avancada-page" class="system-box link">
                 <div>
-                    <h4>Pesquisas</h4>
-                    <p>Pesquisa Avançada</p>
+                    <i class="fas fa-search text-success fa-2x"></i>
+                    <h4 class="text-success">Pesquisas</h4>
+                    <p class="text-success">Pesquisa Avançada</p>
                 </div>
             </a>
             <a href="/historico-movimentacao-page" class="system-box link">
                 <div>
-                    <h4>Histórico Geral</h4>
-                    <p>Histórico de Entradas / Saídas</p>
+                    <i class="fas fa-history text-success fa-2x"></i>
+                    <h4 class="text-success">Histórico Geral</h4>
+                    <p class="text-success">Histórico de Entradas / Saídas</p>
                 </div>
             </a>
         </div>
     </main>
-
+    
     <footer>
-        <div class="footer-content">
-            <h4 class=" mt-3">COLOG - Comando Logistico da PMCE</h4>
+        <div class="footer-content ">
+            <h4>COLOG - Comando Logistico da PMCE</h4>
             <h5 class="mb-0 fw-bold">CEGPA / NUCPA</h5>
+            <div class="hr-div d-flex justify-content-center">
+                <hr class="w-25 m-1 ">
+
+            </div>
             <p class="m-0">R. Carlos Araújo, S/N - Olavo Oliveira</p>
             <p class="">Fone: 85 3101.3570 / 3101.3571 - E-mail: informatica@policiamilitar.ce.gov.br <br>
                 Horário de funcionamento: <br>De segunda a sexta de 8h às 12h e de 13h às 16:30hs</p>
