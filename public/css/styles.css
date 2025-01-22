@@ -1,25 +1,25 @@
 :root {
-  --color-primary: rgb(53, 110, 0);
-  /* verde escuro */
-  --secondary-color: #f2ffe6;
-  /* verde claro */
+  --color-primary: rgb(53, 110, 0); /* verde escuro */
+  --secondary-color: #f2ffe6; /* verde claro */
   --font-size-large: 1.5rem;
 }
 
-*{
+* {
   font-size: 0.9rem;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-body{
-margin-top: 2rem;
+body {
+  margin-top: 2rem;
 }
-
 
 main {
   padding: 1rem;
 }
 
-.caixa{
+.caixa {
   margin-top: 5rem;
 }
 
@@ -43,12 +43,12 @@ main {
 }
 
 .navbar input {
-  flex-grow: 1; 
-  margin-right: 10px; 
+  flex-grow: 1;
+  margin-right: 10px;
 }
 
 .navbar .btn {
-  margin-left: 10px; 
+  margin-left: 10px;
 }
 
 .btn-header {
@@ -56,15 +56,10 @@ main {
 }
 
 input::placeholder {
-  font-size: 14px; 
+  font-size: 14px;
 }
 
-.container{
+.container {
   height: auto;
   /* margin: auto 0; */
 }
-
-
-
-
-
