@@ -32,9 +32,9 @@
             color: white;
         }
 
-
         .logo {
-            width: 500px;
+            width: 100%;
+            max-width: 500px;
             margin-bottom: 10px;
         }
 
@@ -59,7 +59,7 @@
             height: 150px;
             transition: transform 0.2s, box-shadow 0.2s;
             text-decoration: none;
-            color: inheri;
+            color: inherit;
         }
 
         .system-box i {
@@ -72,7 +72,6 @@
             flex-direction: column;
             align-items: center;
         }
-
 
         .system-box:hover {
             transform: translateY(-2px);
@@ -124,22 +123,30 @@
             font-size: 1.5rem;
             font-weight: 700;
             margin: 0;
+            text-align: center;
+            /* Center align for better view on notebooks */
         }
 
         h4 {
             font-size: 1.1rem;
             font-weight: 600;
             margin: 0;
+            text-align: center;
+            /* Center align for better view on notebooks */
         }
 
         footer h4 {
             font-size: 1.1rem;
             padding-top: 1rem;
             margin-bottom: 0.3rem;
+            text-align: center;
+            /* Center align for better view on notebooks */
         }
 
         footer p {
             font-size: 0.7rem;
+            text-align: center;
+            /* Center align for better view on notebooks */
         }
 
         h5 {
@@ -150,6 +157,8 @@
 
         main {
             margin-top: 30px;
+            padding: 0 10px;
+            /* Add some padding for better presentation on larger screens */
         }
     </style>
 </head>
@@ -165,7 +174,6 @@
         <div class="container-white container">
             <h3>Painel de Controle</h3>
         </div>
-
     </header>
 
     <main class="container bg-light border">
@@ -228,14 +236,13 @@
             </a>
         </div>
     </main>
-    
+
     <footer>
-        <div class="footer-content ">
-            <h4>COLOG - Comando Logistico da PMCE</h4>
+        <div class="footer-content">
+            <h4>COLOG - Comando Logístico da PMCE</h4>
             <h5 class="mb-0 fw-bold">CEGPA / NUCPA</h5>
             <div class="hr-div d-flex justify-content-center">
-                <hr class="w-25 m-1 ">
-
+                <hr class="w-25 m-1">
             </div>
             <p class="m-0">R. Carlos Araújo, S/N - Olavo Oliveira</p>
             <p class="">Fone: 85 3101.3570 / 3101.3571 - E-mail: informatica@policiamilitar.ce.gov.br <br>
