@@ -9,179 +9,202 @@
     <title>Sistema de Controle de Estoque - COLOG</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-    * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-html, body {
-    height: 100%;
-    overflow: auto; /* Garanta que a rolagem funcione no corpo e no html */
-}
+        html,
+        body {
+            height: 100%;
+            overflow: auto;
+            overflow-x: hidden;
+        }
 
-body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    margin: 0;
-    padding: 0;
-    background-color: #f5f5f5;
-}
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
 
-.header-content {
-    background: linear-gradient(to right, #00621D, #0BA23D);
-    padding: 20px 0 30px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: white;
-}
+        .header-content {
+            background: linear-gradient(to right, #00621D, #0BA23D);
+            padding: 20px 0 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            position: relative;
+        }
 
-.logo {
-    width: 100%;
-    max-width: 500px;
-    margin-bottom: 10px;
-}
+        .container-white {
+            display: flex;
+            justify-content: center;
+            background-color: #fff;
+            top: 0;
+            width: 100%;
+            z-index: 10;
+            padding: .5rem;
+            border-bottom: 4px solid orange;
+            transform: translateY(-30px);
+        }
 
-.container-white {
-    display: flex;
-    justify-content: center;
-    position: sticky;
-    background-color: #fff;
-    top: 0;
-    width: 100%;
-    z-index: 10;
-    padding: .5rem;
-    border-bottom: 4px solid orange;
-}
 
-h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-}
+        .logo {
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 10px;
+        }
 
-main {
-    flex: 1;
-    margin-top: 30px;
-    padding-bottom: 80px; /* Para evitar sobreposição com o rodapé */
-    overflow: auto; /* Permitir rolagem no conteúdo principal */
-}
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+        }
 
-.systems-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
-    padding: 30px;
-    cursor: pointer;
-}
+        main {
+            flex: 1;
+            margin-top: 30px;
+            padding-bottom: 80px;
+        }
 
-.system-box {
-    padding: 15px;
-    background-color: white;
-    border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    height: 150px;
-    transition: transform 0.2s, box-shadow 0.2s;
-    text-decoration: none;
-    color: inherit;
-    outline: none;
-}
+        .systems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            padding: 30px;
+            cursor: pointer;
+        }
 
-.system-box i {
-    font-size: 2em;
-    margin-bottom: 10px;
-}
+        .system-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            height: 150px;
+            min-width: 150px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+            outline: none;
+        }
 
-.system-box:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
+        .system-box i {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
 
-.system-box div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+        .system-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
 
-.system-box h4,
-.system-box p {
-    margin: 0;
-    color: inherit;
-}
+        .system-box div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-.system-box:focus,
-.system-box:active {
-    outline: none;
-    border: none;
-}
+        .system-box h4,
+        .system-box p {
+            margin: 0;
+            color: inherit;
+        }
 
-.footer-content {
-    border-top: 4px solid #00621D;
-    color: #00621D;
-    text-align: center;
-    padding: 10px 0;
-    width: 100%;
-    position: relative;
-    background-color: #f8f9fa;
-}
+        .system-box:focus,
+        .system-box:active {
+            outline: none;
+            border: none;
+        }
 
-footer h4 {
-    font-size: 1.1rem;
-    padding-top: 1rem;
-    margin-bottom: 0.3rem;
-}
+        .footer-content {
+            border-top: 4px solid #00621D;
+            color: #00621D;
+            text-align: center;
+            padding: 10px 0;
+            background-color: #f8f9fa;
+            width: 100%;
+            position: relative;
+        }
 
-footer p {
-    font-size: 0.7rem;
-    margin: 0;
-}
+        footer h4 {
+            font-size: 1.2rem;
+            padding-top: 1rem;
+            margin-bottom: 0.3rem;
+            text-align: center;
+            font-weight: 700;
+        }
 
-/* Media Query para notebooks */
-@media (max-width: 1280px) {
-    .logo {
-        width: 100%;
-        max-width: 400px;
-    }
+        footer h5 {
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 700;
+        }
 
-    .systems-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        padding: 20px;
-        gap: 10px;
-    }
+        footer p {
+            font-size: 0.7rem;
+            text-align: center;
+        }
 
-    .system-box {
-        min-height: 130px;
-        padding: 10px;
-        font-size: 0.9rem;
-    }
+        /* Media Query para notebooks */
+        @media (max-width: 1920px) {
+            .logo {
+                max-width: 400px;
+            }
 
-    .container-white {
-        margin-top: 0;
-        padding: 0.5rem 1rem;
-    }
+            .systems-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                padding: 20px;
+                gap: 10px;
+            }
 
-    h3 {
-        font-size: 1.2rem;
-    }
+            .system-box {
+                min-height: 130px;
+                padding: 10px;
+                font-size: 0.9rem;
+            }
 
-    h4 {
-        font-size: 1rem;
-    }
+            .system-box i {
+                font-size: 1.5em;
+                margin-bottom: 8px;
+            }
 
-    .footer-content {
-        height: auto;
-        position: fixed;
-        bottom: 0;
-    }
-}
 
+            .container-white {
+                padding: 1rem 0 0.5rem 0;
+                transform: translateY(-25px);
+            }
+
+            h3 {
+                font-size: 1.2rem;
+            }
+
+            h4 {
+                font-size: 0.9rem;
+            }
+
+            footer h4 {
+                font-size: 1rem;
+                font-weight: 700;
+            }
+
+            footer h5 {
+                font-size: 0.8rem;
+                font-weight: 700;
+            }
+
+            .footer-content {
+                position: relative;
+            }
+        }
     </style>
 </head>
 
@@ -196,11 +219,11 @@ footer p {
         <div class="container-white container">
             <h3>Painel de Controle</h3>
         </div>
-
     </header>
 
     <main class="container bg-light border">
         <div class="systems-grid">
+            <!-- Conteúdo dos botões aqui -->
             <a href="/entrada" class="system-box link">
                 <div>
                     <i class="fas fa-sign-in-alt text-success fa-2x"></i>
@@ -261,15 +284,14 @@ footer p {
     </main>
 
     <footer>
-        <div class="footer-content ">
+        <div class="footer-content">
             <h4>COLOG - Comando Logistico da PMCE</h4>
             <h5 class="mb-0 fw-bold">CEGPA / NUCPA</h5>
             <div class="hr-div d-flex justify-content-center">
-                <hr class="w-25 m-1 ">
-
+                <hr class="w-25 m-1">
             </div>
             <p class="m-0">R. Carlos Araújo, S/N - Olavo Oliveira</p>
-            <p class="">Fone: 85 3101.3570 / 3101.3571 - E-mail: informatica@policiamilitar.ce.gov.br <br>
+            <p>Fone: 85 3101.3570 / 3101.3571 - E-mail: informatica@policiamilitar.ce.gov.br <br>
                 Horário de funcionamento: <br>De segunda a sexta de 8h às 12h e de 13h às 16:30hs</p>
         </div>
     </footer>
