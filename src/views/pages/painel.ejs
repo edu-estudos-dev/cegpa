@@ -13,11 +13,11 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    overflow: hidden;
 }
 
 html, body {
     height: 100%;
+    overflow: auto; /* Garanta que a rolagem funcione no corpo e no html */
 }
 
 body {
@@ -65,7 +65,8 @@ h3 {
 main {
     flex: 1;
     margin-top: 30px;
-    padding-bottom: 80px; /* this helps ensure that the footer stays in place */
+    padding-bottom: 80px; /* Para evitar sobreposição com o rodapé */
+    overflow: auto; /* Permitir rolagem no conteúdo principal */
 }
 
 .systems-grid {
@@ -176,7 +177,7 @@ footer p {
 
     .footer-content {
         height: auto;
-        position: fixed; 
+        position: fixed;
         bottom: 0;
     }
 }
