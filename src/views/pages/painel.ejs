@@ -9,201 +9,178 @@
     <title>Sistema de Controle de Estoque - COLOG</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        /* Estilo padrão para desktops */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
+    * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
 
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-        }
+html, body {
+    height: 100%;
+}
 
-        .header-content {
-            background: linear-gradient(to right, #00621D, #0BA23D);
-            padding: 20px 0 30px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: white;
-        }
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
 
-        .logo {
-            width: 500px;
-            margin-bottom: 10px;
-        }
+.header-content {
+    background: linear-gradient(to right, #00621D, #0BA23D);
+    padding: 20px 0 30px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+}
 
-        /* .systems-grid {
+.logo {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 10px;
+}
+
+.container-white {
+    display: flex;
+    justify-content: center;
+    position: sticky;
+    background-color: #fff;
+    top: 0;
+    width: 100%;
+    z-index: 10;
+    padding: .5rem;
+    border-bottom: 4px solid orange;
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+main {
+    flex: 1;
+    margin-top: 30px;
+    padding-bottom: 80px; /* this helps ensure that the footer stays in place */
+}
+
+.systems-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 15px;
     padding: 30px;
     cursor: pointer;
-} */
+}
 
+.system-box {
+    padding: 15px;
+    background-color: white;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    height: 150px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    color: inherit;
+    outline: none;
+}
 
-        .systems-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            /* Responsividade para diferentes tamanhos de tela */
-            gap: 15px;
-            padding: 30px;
-            cursor: pointer;
-        }
+.system-box i {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
 
-        .system-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: white;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            min-height: 150px;
-            /* Altura mínima */
-            min-width: 150px;
-            /* Largura mínima */
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-decoration: none;
-            color: inherit;
-        }
+.system-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
 
-        .system-box i {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
+.system-box div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-        .system-box div {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+.system-box h4,
+.system-box p {
+    margin: 0;
+    color: inherit;
+}
 
-        .system-box:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
+.system-box:focus,
+.system-box:active {
+    outline: none;
+    border: none;
+}
 
+.footer-content {
+    border-top: 4px solid #00621D;
+    color: #00621D;
+    text-align: center;
+    padding: 10px 0;
+    width: 100%;
+    position: relative;
+    background-color: #f8f9fa;
+}
 
+footer h4 {
+    font-size: 1.1rem;
+    padding-top: 1rem;
+    margin-bottom: 0.3rem;
+}
 
+footer p {
+    font-size: 0.7rem;
+    margin: 0;
+}
 
-        .system-box h4,
-        .system-box p {
-            margin: 0;
-            color: inherit;
-        }
+/* Media Query para notebooks */
+@media (max-width: 1280px) {
+    .logo {
+        width: 100%;
+        max-width: 400px;
+    }
 
-        .system-box p {
-            margin: 0;
-        }
+    .systems-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        padding: 20px;
+        gap: 10px;
+    }
 
-        .footer-content {
-            border-top: 4px solid #00621D;
-            color: #00621D;
-            text-align: center;
-            padding: 10px 0;
-            width: 100%;
-            position: fixed;
-            bottom: 0;
-        }
+    .system-box {
+        min-height: 130px;
+        padding: 10px;
+        font-size: 0.9rem;
+    }
 
-        .footer-content a {
-            color: #FFFFF0;
-            text-decoration: none;
-        }
+    .container-white {
+        margin-top: 0;
+        padding: 0.5rem 1rem;
+    }
 
-        .container-white {
-            border-bottom: 4px solid orange;
-            display: flex;
-            justify-content: center;
-            position: sticky;
-            background-color: #fff;
-            top: 0;
-            width: 100%;
-            z-index: 10;
-            padding: .5rem;
-        }
+    h3 {
+        font-size: 1.2rem;
+    }
 
-        .container-white {
-            margin-top: -30px;
-        }
+    h4 {
+        font-size: 1rem;
+    }
 
-        h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0;
-        }
+    .footer-content {
+        height: auto;
+        position: fixed; 
+        bottom: 0;
+    }
+}
 
-        h4 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        footer h4 {
-            font-size: 1.1rem;
-            padding-top: 1rem;
-            margin-bottom: 0.3rem;
-        }
-
-        footer p {
-            font-size: 0.7rem;
-        }
-
-        h5 {
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin-bottom: 30px;
-        }
-
-        main {
-            margin-top: 30px;
-        }
-
-        /* Media Query para notebooks */
-        @media (max-width: 1280px) {
-            .logo {
-                width: 100%;
-                max-width: 400px;
-            }
-
-            .systems-grid {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 10px;
-                padding: 20px;
-            }
-
-            .system-box {
-                min-height: 130px;
-                padding: 10px;
-                font-size: 0.9rem;
-            }
-
-            .container-white {
-                margin-top: 0;
-                padding: 0.5rem 1rem;
-            }
-
-            h3 {
-                font-size: 1.2rem;
-            }
-
-            h4 {
-                font-size: 1rem;
-            }
-
-            .footer-content {
-                height: auto;
-                position: relative;
-            }
-        }
     </style>
 </head>
 
