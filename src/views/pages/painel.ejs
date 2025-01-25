@@ -9,6 +9,7 @@
     <title>Sistema de Controle de Estoque - COLOG</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
+        /* Estilo padrão para desktops */
         * {
             margin: 0;
             padding: 0;
@@ -33,14 +34,23 @@
         }
 
         .logo {
-            width: 100%;
-            max-width: 500px;
+            width: 500px;
             margin-bottom: 10px;
         }
+
+        /* .systems-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    padding: 30px;
+    cursor: pointer;
+} */
+
 
         .systems-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            /* Responsividade para diferentes tamanhos de tela */
             gap: 15px;
             padding: 30px;
             cursor: pointer;
@@ -56,7 +66,10 @@
             border-radius: 5px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
-            height: 150px;
+            min-height: 150px;
+            /* Altura mínima */
+            min-width: 150px;
+            /* Largura mínima */
             transition: transform 0.2s, box-shadow 0.2s;
             text-decoration: none;
             color: inherit;
@@ -77,6 +90,9 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
+
+
+
 
         .system-box h4,
         .system-box p {
@@ -123,30 +139,22 @@
             font-size: 1.5rem;
             font-weight: 700;
             margin: 0;
-            text-align: center;
-            /* Center align for better view on notebooks */
         }
 
         h4 {
             font-size: 1.1rem;
             font-weight: 600;
             margin: 0;
-            text-align: center;
-            /* Center align for better view on notebooks */
         }
 
         footer h4 {
             font-size: 1.1rem;
             padding-top: 1rem;
             margin-bottom: 0.3rem;
-            text-align: center;
-            /* Center align for better view on notebooks */
         }
 
         footer p {
             font-size: 0.7rem;
-            text-align: center;
-            /* Center align for better view on notebooks */
         }
 
         h5 {
@@ -157,99 +165,136 @@
 
         main {
             margin-top: 30px;
-            padding: 0 10px;
-            /* Add some padding for better presentation on larger screens */
+        }
+
+        /* Media Query para notebooks */
+        @media (max-width: 1280px) {
+            .logo {
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .systems-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 10px;
+                padding: 20px;
+            }
+
+            .system-box {
+                min-height: 130px;
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .container-white {
+                margin-top: 0;
+                padding: 0.5rem 1rem;
+            }
+
+            h3 {
+                font-size: 1.2rem;
+            }
+
+            h4 {
+                font-size: 1rem;
+            }
+
+            .footer-content {
+                height: auto;
+                position: relative;
+            }
         }
     </style>
 </head>
 
 <body>
     <header>
-      <div class="row">
-        <div class="header-content container-fluid me-auto">
-          <img src="https://sistemas.pm.ce.gov.br/img/PM-SSPDSclara.png" alt="Polícia Militar Logo" class="logo">
+        <div class="row">
+            <div class="header-content container-fluid me-auto">
+                <img src="https://sistemas.pm.ce.gov.br/img/PM-SSPDSclara.png" alt="Polícia Militar Logo" class="logo">
+            </div>
         </div>
-      </div>
-  
-      <div class="container-white container">
-        <h3>Painel de Controle</h3>
-      </div>
+
+        <div class="container-white container">
+            <h3>Painel de Controle</h3>
+        </div>
+
     </header>
-  
+
     <main class="container bg-light border">
-      <div class="systems-grid">
-        <a href="/entrada" class="system-box link">
-          <div>
-            <i class="fas fa-sign-in-alt text-success fa-2x"></i>
-            <h4 class="text-success">Formulário de Entrada</h4>
-            <p class="text-success">Formulário de Entrada</p>
-          </div>
-        </a>
-        <a href="/saida" class="system-box link">
-          <div>
-            <i class="fas fa-sign-out-alt text-success fa-2x"></i>
-            <h4 class="text-success">Formulário de Saída</h4>
-            <p class="text-success">Formulário de Saída</p>
-          </div>
-        </a>
-        <a href="/tabela/estoqueatual" class="system-box link">
-          <div>
-            <i class="fas fa-box-open text-success fa-2x"></i>
-            <h4 class="text-success">Tabela do Estoque Atual</h4>
-            <p class="text-success">Estoque Atual</p>
-          </div>
-        </a>
-        <a href="/qtde-unica" class="system-box link">
-          <div>
-            <i class="fas fa-list-ol text-success fa-2x"></i>
-            <h4 class="text-success">Quantidade De itens</h4>
-            <p class="text-success">Descrição e quantidade de itens disponíveis</p>
-          </div>
-        </a>
-        <a href="/estoque/itenspagos" class="system-box link">
-          <div>
-            <i class="fas fa-boxes text-success fa-2x"></i>
-            <h4 class="text-success">Itens que Sairam do estoque</h4>
-            <p class="text-success">Itens Pagos</p>
-          </div>
-        </a>
-        <a href="/relatorios" class="system-box link">
-          <div>
-            <i class="fas fa-chart-line text-success fa-2x"></i>
-            <h4 class="text-success">Relatório de quantidade</h4>
-            <p class="text-success">Relatórios</p>
-          </div>
-        </a>
-        <a href="/pesquisa-avancada-page" class="system-box link">
-          <div>
-            <i class="fas fa-search text-success fa-2x"></i>
-            <h4 class="text-success">Pesquisas</h4>
-            <p class="text-success">Pesquisa Avançada</p>
-          </div>
-        </a>
-        <a href="/historico-movimentacao-page" class="system-box link">
-          <div>
-            <i class="fas fa-history text-success fa-2x"></i>
-            <h4 class="text-success">Histórico Geral</h4>
-            <p class="text-success">Histórico de Entradas / Saídas</p>
-          </div>
-        </a>
-      </div>
-    </main>
-    
-    <footer>
-      <div class="footer-content">
-        <h4>COLOG - Comando Logistico da PMCE</h4>
-        <h5 class="mb-0 fw-bold">CEGPA / NUCPA</h5>
-        <div class="hr-div d-flex justify-content-center">
-          <hr class="w-25 m-1">
+        <div class="systems-grid">
+            <a href="/entrada" class="system-box link">
+                <div>
+                    <i class="fas fa-sign-in-alt text-success fa-2x"></i>
+                    <h4 class="text-success">Formulário de Entrada</h4>
+                    <p class="text-success">Formulário de Entrada</p>
+                </div>
+            </a>
+            <a href="/saida" class="system-box link">
+                <div>
+                    <i class="fas fa-sign-out-alt text-success fa-2x"></i>
+                    <h4 class="text-success">Formulário de Saída</h4>
+                    <p class="text-success">Formulário de Saída</p>
+                </div>
+            </a>
+            <a href="/tabela/estoqueatual" class="system-box link">
+                <div>
+                    <i class="fas fa-box-open text-success fa-2x"></i>
+                    <h4 class="text-success">Tabela do Estoque Atual</h4>
+                    <p class="text-success">Estoque Atual</p>
+                </div>
+            </a>
+            <a href="/qtde-unica" class="system-box link">
+                <div>
+                    <i class="fas fa-list-ol text-success fa-2x"></i>
+                    <h4 class="text-success">Quantidade De itens</h4>
+                    <p class="text-success">Descrição e quantidade de itens disponíveis</p>
+                </div>
+            </a>
+            <a href="/estoque/itenspagos" class="system-box link">
+                <div>
+                    <i class="fas fa-boxes text-success fa-2x"></i>
+                    <h4 class="text-success">Itens que Sairam do estoque</h4>
+                    <p class="text-success">Itens Pagos</p>
+                </div>
+            </a>
+            <a href="/relatorios" class="system-box link">
+                <div>
+                    <i class="fas fa-chart-line text-success fa-2x"></i>
+                    <h4 class="text-success">Relatório de quantidade</h4>
+                    <p class="text-success">Relatórios</p>
+                </div>
+            </a>
+            <a href="/pesquisa-avancada-page" class="system-box link">
+                <div>
+                    <i class="fas fa-search text-success fa-2x"></i>
+                    <h4 class="text-success">Pesquisas</h4>
+                    <p class="text-success">Pesquisa Avançada</p>
+                </div>
+            </a>
+            <a href="/historico-movimentacao-page" class="system-box link">
+                <div>
+                    <i class="fas fa-history text-success fa-2x"></i>
+                    <h4 class="text-success">Histórico Geral</h4>
+                    <p class="text-success">Histórico de Entradas / Saídas</p>
+                </div>
+            </a>
         </div>
-        <p class="m-0">R. Carlos Araújo, S/N - Olavo Oliveira</p>
-        <p>Fone: 85 3101.3570 / 3101.3571 - E-mail: informatica@policiamilitar.ce.gov.br <br>
-           Horário de funcionamento: <br>De segunda a sexta de 8h às 12h e de 13h às 16:30hs</p>
-      </div>
+    </main>
+
+    <footer>
+        <div class="footer-content ">
+            <h4>COLOG - Comando Logistico da PMCE</h4>
+            <h5 class="mb-0 fw-bold">CEGPA / NUCPA</h5>
+            <div class="hr-div d-flex justify-content-center">
+                <hr class="w-25 m-1 ">
+
+            </div>
+            <p class="m-0">R. Carlos Araújo, S/N - Olavo Oliveira</p>
+            <p class="">Fone: 85 3101.3570 / 3101.3571 - E-mail: informatica@policiamilitar.ce.gov.br <br>
+                Horário de funcionamento: <br>De segunda a sexta de 8h às 12h e de 13h às 16:30hs</p>
+        </div>
     </footer>
-  </body>
-  
+</body>
 
 </html>
