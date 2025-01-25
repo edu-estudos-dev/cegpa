@@ -124,10 +124,7 @@ class EstoqueController {
       console.log("Sequência inicial:", sequencia);
 
       for (let i = 0; i < safeData.quantidade; i++) {
-        const tomboUnico = `37${ano}${safeData.subgrupo}${sequencia}`.substring(
-          0,
-          13
-        ); // Garantir 13 caracteres
+        const tomboUnico = `37${ano}${safeData.subgrupo}${sequencia}`.substring(0, 13); // Garantir 13 caracteres
 
         await estoqueModel.createEstoque(
           safeData.data_de_entrada,
@@ -168,14 +165,31 @@ class EstoqueController {
     }
   };
 
-  // Método para mostrar todo o estoque atual
+ // Método para trazer toso os itens do estoque
   getAllEstoque = async (req, res) => {
     try {
       const estoque = await estoqueModel.getAllEstoque();
-      res.render("tabelaEstoque", { estoque }); // Renderiza a view de tabela de estoque com itens não pagos
+      res.render("tabelaEstoque", { estoque });
     } catch (error) {
       console.error("Erro ao carregar o estoque:", error);
       res.status(500).send("Erro ao carregar o estoque.");
+    }
+  };
+
+
+ // Método para vizuaçizar um item
+  visualizarItem = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const item = await estoqueModel.getInfoByID(id);
+      if (item) {
+        res.json(item); // Retorne JSON
+      } else {
+        res.status(404).send({ msg: "Item não encontrado" });
+      }
+    } catch (error) {
+      console.error("Erro ao buscar informações do item:", error);
+      res.status(500).send({ msg: "Erro ao buscar informações do item" });
     }
   };
 
@@ -246,8 +260,6 @@ class EstoqueController {
       nome_do_recebedor,
       observacao,
     } = req.body;
-
-    console.log("DADOS RECEBIDOS NO CONTROLADOR:", req.body);
 
     // Verificações de campos obrigatórios
     if (!tombos || !tombos.length) {

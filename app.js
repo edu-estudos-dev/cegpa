@@ -34,6 +34,7 @@ app.use(isAuthenticated);
 app.use('/', estoqueRoutes);
 app.use('/', pesquisaRoutes);
 app.use('/painel', painelRoutes);
+app.use('/estoque', estoqueRoutes);
 
 // Tratamento de erros
 app.use((req, res, next) => {
@@ -47,3 +48,4 @@ app.use((err, req, res, next) => {
 });
 
 export default app;
+

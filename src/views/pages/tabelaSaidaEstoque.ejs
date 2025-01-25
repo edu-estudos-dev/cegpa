@@ -27,6 +27,9 @@
       background-color: #fff;
       z-index: 1;
     }
+    .btn-action{
+      width: 70px;
+    }
   </style>
 </head>
 <body>
@@ -64,7 +67,7 @@
                   <td class="py-1 text-center"><%= item.destino %></td>
                   <td class="py-1 text-center"><%= item.referencia %></td>
                   <td class="py-1 text-center">
-                    <button type="button" class="btn btn-secondary btn-sm delete-btn" data-id="<%= item.id %>">Visualizar</button>
+                    <button type="button" class="btn btn-secondary btn-sm btn-action" data-id="<%= item.id %>">Visualizar</button>
                   </td>
                 </tr>
               <% }); %>

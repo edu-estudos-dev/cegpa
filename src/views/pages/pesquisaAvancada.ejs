@@ -104,271 +104,263 @@
           </div>
         </div>
       </div>
+    </div>
 
-      <script>
-        document.addEventListener('DOMContentLoaded', () => {
-          const subgrupoSelect = document.getElementById('subgrupo');
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const subgrupoSelect = document.getElementById('subgrupo');
 
-          if (subgrupoSelect) {
-            subgrupoSelect.addEventListener('change', async (e) => {
-              const subgrupo = e.target.value;
-              console.log("Subgrupo selecionado pelo usuário:", subgrupo);
+      if (subgrupoSelect) {
+        subgrupoSelect.addEventListener('change', async (e) => {
+          const subgrupo = e.target.value;
+          console.log("Subgrupo selecionado pelo usuário:", subgrupo);
 
-              if (!subgrupo) {
-                return;
-              }
-
-              try {
-                const response = await fetch(`/fetch-itens-nao-pagos-subgrupo?subgrupo=${subgrupo}`);
-                const data = await response.json();
-                console.log("Dados recebidos do backend para itens não pagos por subgrupo:", data);
-
-                const resultadosDiv = document.getElementById('resultados');
-                resultadosDiv.innerHTML = `<h5 class="text-primary text-center">Quantidade de Itens Não Pagos no Subgrupo ${subgrupo}: ${data.quantidadeNaoPagos}</h5>`;
-              } catch (error) {
-                console.error("Erro ao buscar itens não pagos por subgrupo:", error);
-                const resultadosDiv = document.getElementById('resultados');
-                resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar itens não pagos.</h5>';
-              }
-            });
+          if (!subgrupo) {
+            return;
           }
 
-          const categoriaSelect = document.getElementById('categoria');
+          try {
+            const response = await fetch(`/fetch-itens-nao-pagos-subgrupo?subgrupo=${subgrupo}`);
+            const data = await response.json();
+            console.log("Dados recebidos do backend para itens não pagos por subgrupo:", data);
 
-          if (categoriaSelect) {
-            categoriaSelect.addEventListener('change', async (e) => {
-              const categoria = e.target.value;
-              console.log("Categoria selecionada pelo usuário:", categoria);
-
-              if (!categoria) {
-                return;
-              }
-
-              try {
-                const response = await fetch(`/fetch-itens-nao-pagos?categoria=${categoria}`);
-                const data = await response.json();
-                console.log("Dados recebidos do backend para itens não pagos:", data);
-
-                const resultadosDiv = document.getElementById('resultados');
-                resultadosDiv.innerHTML = `<h5 class="text-primary text-center">Quantidade de Itens em estoque na Categoria ${categoria}: ${data.quantidadeNaoPagos}</h5>`;
-              } catch (error) {
-                console.error("Erro ao buscar itens não pagos por categoria:", error);
-                const resultadosDiv = document.getElementById('resultados');
-                resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar itens não pagos.</h5>';
-              }
-            });
+            const resultadosDiv = document.getElementById('resultados');
+            resultadosDiv.innerHTML = `<h5 class="text-primary text-center">Quantidade de Itens Não Pagos no Subgrupo ${subgrupo}: ${data.quantidadeNaoPagos}</h5>`;
+          } catch (error) {
+            console.error("Erro ao buscar itens não pagos por subgrupo:", error);
+            const resultadosDiv = document.getElementById('resultados');
+            resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar itens não pagos.</h5>';
           }
         });
+      }
 
+      const categoriaSelect = document.getElementById('categoria');
 
-        document.addEventListener('DOMContentLoaded', () => {
+      if (categoriaSelect) {
+        categoriaSelect.addEventListener('change', async (e) => {
+          const categoria = e.target.value;
+          console.log("Categoria selecionada pelo usuário:", categoria);
 
-          // Função para tratar o campo de pesquisa por descrição
-          const descricaoInput = document.getElementById('descricao');
-          if (descricaoInput) {
-            descricaoInput.addEventListener('input', async (e) => {
-              const valor = e.target.value;
-              console.log("Valor de pesquisa digitado:", valor);
+          if (!categoria) {
+            return;
+          }
 
-              if (!valor) {
-                return;
-              }
+          try {
+            const response = await fetch(`/fetch-itens-nao-pagos?categoria=${categoria}`);
+            const data = await response.json();
+            console.log("Dados recebidos do backend para itens não pagos:", data);
 
-              try {
-                const response = await fetch(`/pesquisa-similaridade?valor=${valor}`);
-                const data = await response.json();
-                console.log("Dados recebidos do backend para pesquisa por similaridade:", data);
-
-                const resultadosDiv = document.getElementById('resultados');
-                resultadosDiv.innerHTML = `
-            <h5 class="text-primary text-center">Quantidade de Itens no Estoque com Descrição Similar: ${data.quantidadeNoEstoque}</h5>
-            <h5 class="text-primary text-center">Quantidade de Itens Pagos com Descrição Similar: ${data.quantidadePagos}</h5>
-          `;
-              } catch (error) {
-                console.error("Erro na pesquisa por similaridade:", error);
-                const resultadosDiv = document.getElementById('resultados');
-                resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar itens por similaridade.</h5>';
-              }
-            });
+            const resultadosDiv = document.getElementById('resultados');
+            resultadosDiv.innerHTML = `<h5 class="text-primary text-center">Quantidade de Itens em estoque na Categoria ${categoria}: ${data.quantidadeNaoPagos}</h5>`;
+          } catch (error) {
+            console.error("Erro ao buscar itens não pagos por categoria:", error);
+            const resultadosDiv = document.getElementById('resultados');
+            resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar itens não pagos.</h5>';
           }
         });
+      }
+    });
 
-      </script>
+    document.addEventListener('DOMContentLoaded', () => {
 
+      // Função para tratar o campo de pesquisa por descrição
+      const descricaoInput = document.getElementById('descricao');
+      if (descricaoInput) {
+        descricaoInput.addEventListener('input', async (e) => {
+          const valor = e.target.value;
+          console.log("Valor de pesquisa digitado:", valor);
 
-      <script>
-        document.addEventListener('DOMContentLoaded', () => {
-          const pesquisaForm = document.getElementById('pesquisa-form');
-          const resultadosDiv = document.getElementById('resultados');
-
-          if (pesquisaForm) {
-            pesquisaForm.addEventListener('submit', async (e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target);
-              const params = new URLSearchParams(formData).toString();
-              console.log("Parâmetros da URL:", params);
-
-              try {
-                const response = await fetch(`/pesquisa-avancada?${params}`);
-                const data = await response.json();
-                console.log("Dados recebidos do backend:", data);
-
-                const ano = formData.get('data');
-                const categoria = formData.get('categoria');
-                const subgrupo = formData.get('subgrupo');
-                console.log("Ano:", ano, "Categoria:", categoria, "Subgrupo:", subgrupo);
-
-                let mensagem = '';
-
-                if (ano) {
-                  mensagem += `<h5 class="text-primary text-center">Quantidade de Itens que Entraram - Ano ${ano}: ${data.quantidadeEntraram}<br/> Quantidade de Itens que Saíram - Ano ${ano}: ${data.quantidadeSaidos}</h5>`;
-                }
-                if (categoria) {
-                  const quantidadeCategoria = data.quantidadeNoEstoque || 0;
-                  console.log('Quantidade no estoque para a categoria:', categoria, 'é', quantidadeCategoria);
-                  mensagem += `<h5 class="text-primary text-center">Itens no estoque da Categoria ${categoria}: ${quantidadeCategoria}</h5>`;
-                }
-                if (subgrupo) {
-                  const quantidadeSubgrupo = data.quantidadeNoEstoque || 0;
-                  console.log('Quantidade no estoque para o subgrupo:', subgrupo, 'é', quantidadeSubgrupo);
-                  mensagem += `<h5 class="text-primary text-center">Itens no estoque do Subgrupo ${subgrupo}: ${quantidadeSubgrupo}</h5>`;
-                }
-
-                resultadosDiv.innerHTML = mensagem;
-
-              } catch (error) {
-                console.error("Erro ao buscar resultados:", error);
-                resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar resultados.</h5>';
-              }
-            });
+          if (!valor) {
+            return;
           }
 
-          const btnLimpar = document.getElementById('btn-limpar');
-          if (btnLimpar) {
-            btnLimpar.addEventListener('click', () => {
-              document.getElementById('pesquisa-form').reset();
-              resultadosDiv.innerHTML = '';
-            });
+          try {
+            const response = await fetch(`/pesquisa-similaridade?valor=${valor}`);
+            const data = await response.json();
+            console.log("Dados recebidos do backend para pesquisa por similaridade:", data);
+
+            const resultadosDiv = document.getElementById('resultados');
+            resultadosDiv.innerHTML = `
+        <h5 class="text-primary text-center">Quantidade de Itens no Estoque com Descrição Similar: ${data.quantidadeNoEstoque}</h5>
+        <h5 class="text-primary text-center">Quantidade de Itens Pagos com Descrição Similar: ${data.quantidadePagos}</h5>
+      `;
+          } catch (error) {
+            console.error("Erro na pesquisa por similaridade:", error);
+            const resultadosDiv = document.getElementById('resultados');
+            resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar itens por similaridade.</h5>';
           }
         });
-      </script>
+      }
+    });
 
-      <script>
-        // Manipulação de Tombo e Modal /////////////////////////////////////////////
-        document.addEventListener('DOMContentLoaded', () => {
-          const pesquisaForm = document.getElementById('pesquisa-form');
-          const resultadosDiv = document.getElementById('resultados');
+  </script>
 
-          if (pesquisaForm) {
-            pesquisaForm.addEventListener('submit', async (e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target);
-              const tombo = formData.get('tombo');
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const pesquisaForm = document.getElementById('pesquisa-form');
+      const resultadosDiv = document.getElementById('resultados');
 
-              if (tombo) {
-                try {
-                  const responseTombo = await fetch(`/fetch-info-tombo?tombo=${tombo}`);
-                  const dataTombo = await responseTombo.json();
-                  console.log("Dados do tombo recebidos do backend:", dataTombo);
+      if (pesquisaForm) {
+        pesquisaForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          const params = new URLSearchParams(formData).toString();
+          console.log("Parâmetros da URL:", params);
 
-                  if (dataTombo.infoTombo) {
-                    const entrada = dataTombo.infoTombo;
-                    const saida = entrada.saida;
+          try {
+            const response = await fetch(`/pesquisa-avancada?${params}`);
+            const data = await response.json();
+            console.log("Dados recebidos do backend:", data);
 
-                    const dataEntradaFormatada = new Date(entrada.data_de_entrada).toLocaleDateString('pt-BR');
-                    const dataSaidaFormatada = saida ? new Date(saida.data_de_saida).toLocaleDateString('pt-BR') : '';
+            const ano = formData.get('data');
+            const categoria = formData.get('categoria');
+            const subgrupo = formData.get('subgrupo');
+            console.log("Ano:", ano, "Categoria:", categoria, "Subgrupo:", subgrupo);
 
-                    const getObservacao = (data) => data && data.observacao ? data.observacao : "N/A";
-                    const valorReal = (valor) => parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            let mensagem = '';
 
-                    const modalHtml = `
-                      <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
-                      <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
-                          <div class="modal-content">
-                          <div class="modal-header bg-success text-white">
-                              <h3 class="modal-title ms-auto" id="infoTomboModalLabel">Informações do Tombo</h3>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body">
-                              <div class="card">
-                              <div class="card-body pb-0">
-                                  <h5 class="card-title">${entrada.descricao}</h5>
-                                  <p class="card-text">
-                                  <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
-                                  <strong>Tombo:</strong> ${entrada.tombo} <br/>
-                                  <strong>Data de Entrada:</strong> ${dataEntradaFormatada} <br/>
-                                  <strong>Categoria:</strong> ${entrada.categoria} <br/>
-                                  <strong>Doc Origem:</strong> ${entrada.doc_origem} <br/>
-                                  <strong>Estoque:</strong> ${entrada.estoque} <br/>
-                                  <strong>Valor:</strong> ${valorReal(entrada.valor)} <br/>
-                                  <strong>Situação:</strong> ${entrada.situacao} <br/>
-                                  <strong>Observação:</strong> ${getObservacao(entrada)} <br/>
-                                  <hr>
-                                  ${saida ? `
-                                  <h5 class="bg-danger text-white p-2">Dados da Saída</h5>
-                                  <strong>Data de Saída:</strong> ${dataSaidaFormatada} <br/>
-                                  <strong>Doc Saída:</strong> ${saida.doc_saida} <br/>
-                                  <strong>Referência:</strong> ${saida.referencia} <br/>
-                                  <strong>Destino:</strong> ${saida.destino.toUpperCase()} <br/>
-                                  <strong>Posto/Graduação:</strong> ${saida.posto_graduacao.toUpperCase()} <br/>
-                                  <strong>Matrícula Funcional:</strong> ${saida.mat_funcional} <br/>
-                                  <strong>Telefone:</strong> ${saida.telefone} <br/>
-                                  <strong>Nome Completo:</strong> ${saida.nome_completo} <br/>
-                                  <strong>Observação de Saída:</strong> ${getObservacao(saida)} <br/> ` : `
-                                  <h5 class="bg-warning text-white p-2">Item consta no estoque, ainda não foi pago.</h5>`}
-                                  </p>
-                              </div>
-                              </div>
-                          </div>
-                          <div class="modal-footer d-flex justify-content-center">
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            if (ano) {
+              mensagem += `<h5 class="text-primary text-center">Quantidade de Itens que Entraram - Ano ${ano}: ${data.quantidadeEntraram}<br/> Quantidade de Itens que Saíram - Ano ${ano}: ${data.quantidadeSaidos}</h5>`;
+            }
+            if (categoria) {
+              const quantidadeCategoria = data.quantidadeNoEstoque || 0;
+              console.log('Quantidade no estoque para a categoria:', categoria, 'é', quantidadeCategoria);
+              mensagem += `<h5 class="text-primary text-center">Itens no estoque da Categoria ${categoria}: ${quantidadeCategoria}</h5>`;
+            }
+            if (subgrupo) {
+              const quantidadeSubgrupo = data.quantidadeNoEstoque || 0;
+              console.log('Quantidade no estoque para o subgrupo:', subgrupo, 'é', quantidadeSubgrupo);
+              mensagem += `<h5 class="text-primary text-center">Itens no estoque do Subgrupo ${subgrupo}: ${quantidadeSubgrupo}</h5>`;
+            }
+
+            resultadosDiv.innerHTML = mensagem;
+
+          } catch (error) {
+            console.error("Erro ao buscar resultados:", error);
+            resultadosDiv.innerHTML = '<h5 class="text-danger mt-2">Erro ao buscar resultados.</h5>';
+          }
+        });
+      }
+
+      const btnLimpar = document.getElementById('btn-limpar');
+      if (btnLimpar) {
+        btnLimpar.addEventListener('click', () => {
+          document.getElementById('pesquisa-form').reset();
+          resultadosDiv.innerHTML = '';
+        });
+      }
+    });
+  </script>
+
+  <script>
+    // Manipulação de Tombo e Modal /////////////////////////////////////////////
+    document.addEventListener('DOMContentLoaded', () => {
+      const pesquisaForm = document.getElementById('pesquisa-form');
+      const resultadosDiv = document.getElementById('resultados');
+
+      if (pesquisaForm) {
+        pesquisaForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          const tombo = formData.get('tombo');
+
+          if (tombo) {
+            try {
+              const responseTombo = await fetch(`/fetch-info-tombo?tombo=${tombo}`);
+              const dataTombo = await responseTombo.json();
+              console.log("Dados do tombo recebidos do backend:", dataTombo);
+
+              if (dataTombo.infoTombo) {
+                const entrada = dataTombo.infoTombo;
+                const saida = entrada.saida;
+
+                const dataEntradaFormatada = new Date(entrada.data_de_entrada).toLocaleDateString('pt-BR');
+                const dataSaidaFormatada = saida ? new Date(saida.data_de_saida).toLocaleDateString('pt-BR') : '';
+
+                const getObservacao = (data) => data && data.observacao ? data.observacao : "N/A";
+                const valorReal = (valor) => parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                const modalHtml = `
+                  <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
+                      <div class="modal-content">
+                      <div class="modal-header bg-success text-white">
+                          <h3 class="modal-title ms-auto" id="infoTomboModalLabel">Informações do Tombo</h3>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                          <div class="card">
+                          <div class="card-body pb-0">
+                              <h5 class="card-title">${entrada.descricao}</h5>
+                              <p class="card-text">
+                              <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
+                              <strong>Tombo:</strong> ${entrada.tombo} <br/>
+                              <strong>Data de Entrada:</strong> ${dataEntradaFormatada} <br/>
+                              <strong>Categoria:</strong> ${entrada.categoria} <br/>
+                              <strong>Doc Origem:</strong> ${entrada.doc_origem} <br/>
+                              <strong>Estoque:</strong> ${entrada.estoque} <br/>
+                              <strong>Valor:</strong> ${valorReal(entrada.valor)} <br/>
+                              <strong>Situação:</strong> ${entrada.situacao} <br/>
+                              <strong>Observação:</strong> ${getObservacao(entrada)} <br/>
+                              <hr>
+                              ${saida ? `
+                              <h5 class="bg-danger text-white p-2">Dados da Saída</h5>
+                              <strong>Data de Saída:</strong> ${dataSaidaFormatada} <br/>
+                              <strong>Doc Saída:</strong> ${saida.doc_saida} <br/>
+                              <strong>Referência:</strong> ${saida.referencia} <br/>
+                              <strong>Destino:</strong> ${saida.destino.toUpperCase()} <br/>
+                              <strong>Posto/Graduação:</strong> ${saida.posto_graduacao.toUpperCase()} <br/>
+                              <strong>Matrícula Funcional:</strong> ${saida.mat_funcional} <br/>
+                              <strong>Telefone:</strong> ${saida.telefone} <br/>
+                              <strong>Nome Completo:</strong> ${saida.nome_completo} <br/>
+                              <strong>Observação de Saída:</strong> ${getObservacao(saida)} <br/> ` : `
+                              <h5 class="bg-warning text-white p-2">Item consta no estoque, ainda não foi pago.</h5>`}
+                              </p>
                           </div>
                           </div>
                       </div>
+                      <div class="modal-footer d-flex justify-content-center">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                       </div>
-                  `;
+                      </div>
+                  </div>
+                  </div>
+              `;
 
-                    const modalDiv = document.createElement('div');
-                    modalDiv.innerHTML = modalHtml;
-                    document.body.appendChild(modalDiv);
+                const modalDiv = document.createElement('div');
+                modalDiv.innerHTML = modalHtml;
+                document.body.appendChild(modalDiv);
 
-                    const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
-                      backdrop: true,
-                      focus: true
-                    });
+                const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
+                  backdrop: true,
+                  focus: true
+                });
 
-                    const modalDialog = document.querySelector('.modal-dialog');
-                    modalDialog.classList.add('modal-zoom-in');
+                const modalDialog = document.querySelector('.modal-dialog');
+                modalDialog.classList.add('modal-zoom-in');
 
-                    infoTomboModal.show();
-                    infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
-                      document.getElementById('pesquisa-form').reset();
-                      resultadosDiv.innerHTML = '';
-                      modalDiv.remove();
-                    });
-                  } else {
-                    alert('Desculpe, mas esse tombo é inválido ou ainda não foi cadastrado, tente novamente.');
-                    document.getElementById('pesquisa-form').reset();
-                    resultadosDiv.innerHTML = '';
-                  }
-                } catch (error) {
-                  console.error("Erro ao buscar informações do tombo:", error);
-                  alert('Erro ao buscar informações do tombo.');
+                infoTomboModal.show();
+                infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
                   document.getElementById('pesquisa-form').reset();
                   resultadosDiv.innerHTML = '';
-                }
+                  modalDiv.remove();
+                });
+              } else {
+                  alert('Desculpe, mas esse tombo é inválido ou ainda não foi cadastrado, tente novamente.');
+                  document.getElementById('pesquisa-form').reset();
+                  resultadosDiv.innerHTML = '';
               }
-            });
+            } catch (error) {
+                console.error("Erro ao buscar informações do tombo:", error);
+                alert('Erro ao buscar informações do tombo.');
+                document.getElementById('pesquisa-form').reset();
+                resultadosDiv.innerHTML = '';
+            }
           }
         });
-      </script>
-
-</html>
-
-
-</html>
-
-
+      }
+    });
+  </script>
 
 </body>
 

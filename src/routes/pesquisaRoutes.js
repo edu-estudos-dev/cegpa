@@ -42,5 +42,4 @@ router.get("/fetch-itens-nao-pagos-subgrupo", pesquisaController.fetchItensNaoPa
 // Rota para pesquisa por similaridade na descrição
 router.get("/pesquisa-similaridade", pesquisaController.pesquisaPorSimilaridade);
 
-
 export default router;

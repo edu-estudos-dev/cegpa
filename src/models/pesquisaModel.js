@@ -201,8 +201,6 @@ class PesquisaModel {
 
     try {
       const [resultsEstoque] = await connection.execute(queryEstoque, [tombo]);
-      console.log("Resultados da query de estoque:", resultsEstoque);
-
       if (resultsEstoque.length === 0) {
         console.log(
           "Nenhum registro encontrado na tabela estoqueatual para o tombo:",
@@ -340,7 +338,6 @@ class PesquisaModel {
       `;
     try {
       const [resultsEstoque] = await connection.execute(queryEstoque, [tombo]);
-      console.log("Resultados da query de estoque:", resultsEstoque);
       return resultsEstoque.length > 0 ? resultsEstoque[0] : null;
     } catch (error) {
       console.error("Erro ao buscar informações do estoque:", error);
@@ -366,7 +363,7 @@ class PesquisaModel {
 
     try {
       const [resultsEstoque] = await connection.execute(queryEstoque, [tombo]);
-      console.log("Resultados da query de estoque:", resultsEstoque);
+      
 
       if (resultsEstoque.length === 0) {
         console.log(
@@ -405,6 +402,19 @@ class PesquisaModel {
       throw error;
     }
   };
+
+  // Método para trazer as informaçoes de um item por ID
+  getInfoTombo = async (id) => {
+    const query = `SELECT * FROM estoqueAtual WHERE id = ?`;
+    try {
+      const [results] = await connection.execute(query, [id]);
+      return results[0]; // Retorna apenas o item correspondente ao id
+    } catch (error) {
+      console.error("Erro ao buscar informações do tombo:", error);
+      throw error;
+    }
+  };
+  
 }
 
 export default new PesquisaModel();

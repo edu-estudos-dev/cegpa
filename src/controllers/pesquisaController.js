@@ -242,8 +242,7 @@ class PesquisaController {
   // Método para buscar e exibir informações do tombo com logs adicionais
   fetchInfoPorTombo = async (req, res) => {
     const { tombo } = req.query;
-    console.log("Tombo recebido na requisição:", tombo);
-
+   
     if (!tombo) {
       console.error("Tombo não fornecido na requisição.");
       return res.status(400).json({ error: "Tombo não fornecido." });
@@ -253,8 +252,7 @@ class PesquisaController {
       // Verificar se o tombo está na tabela estoqueatual
       const infoTombo = await PesquisaModel.getItemByTombo(tombo);
       if (infoTombo) {
-        console.log("Informações de entrada do tombo:", infoTombo);
-
+       
         // Verificar se o item ainda não foi pago
         if (!infoTombo.pago) {
           return res.json({

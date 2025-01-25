@@ -89,7 +89,8 @@ class EstoqueModel {
       throw error;
     }
   };
-
+  
+  
   /* ********************************************************************************
                   Métodos para a SAÍDA de itens no Estoque
   *********************************************************************************/
@@ -199,6 +200,18 @@ class EstoqueModel {
       return results.length > 0 ? results[0] : null;
     } catch (error) {
       console.error("Erro ao buscar item pelo tombo:", error);
+      throw error;
+    }
+  };
+
+  // Método para obter informações do tombo pelo ID
+  getInfoByID = async (id) => {
+    const query = `SELECT * FROM estoqueAtual WHERE id = ?`;
+    try {
+      const [results] = await connection.execute(query, [id]);
+      return results[0]; // Retorna apenas o item correspondente ao id
+    } catch (error) {
+      console.error("Erro ao buscar informações do tombo:", error);
       throw error;
     }
   };

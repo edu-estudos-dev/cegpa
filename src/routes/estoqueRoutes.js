@@ -22,8 +22,15 @@ router.get("/ultimo-tombo", estoqueController.fetchUltimoTombo);
 // rota para mostrar tabela com estoque atual
 router.get("/tabela/estoqueatual", estoqueController.getAllEstoque);
 
+// Nova rota para visualizar item específico
+router.get('/visualizar/:id', estoqueController.visualizarItem);
+
 // Nova rota para mostrar quantidade única de itens no estoque
 router.get("/qtde-unica", estoqueController.getQtdeUnicaEstoque);
+
+
+router.get('/tabela/estoqueatual', estoqueController.getAllEstoque); 
+
 
 
 /* ********************************************************************************
