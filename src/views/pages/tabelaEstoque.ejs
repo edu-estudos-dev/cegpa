@@ -54,7 +54,7 @@
 <body>
     <%- include('../partials/header') %>
 
-    <div class="caixa container-fluid p-4">
+    <div class="caixa container p-4">
         <!-- breadcrumb -->
         <div class="pb-3 mt-3">
             <%- include('../partials/breadcrumb', { pageTitle: 'Estoque Atual' }) %>
@@ -73,10 +73,10 @@
                             <th>Descrição</th>
                             <th class="text-center">Tombo</th>
                             <th class="text-center">Categoria</th>
-                            <th class="text-center">Conta Contábil</th>
-                            <th class="text-center">Documento de Origem</th>
+                            <!-- <th class="text-center">Conta Contábil</th>
+                            <th class="text-center">Documento de Origem</th> -->
                             <th class="text-center">Estoque</th>
-                            <th class="text-center">Valor</th>
+                            <!-- <th class="text-center">Valor</th> -->
                             <th class="text-center">Situação</th>
                             <th class="text-center">Ações</th>
                         </tr>
@@ -100,23 +100,23 @@
                                     <td class="py-1 text-center">
                                         <%= item.categoria %>
                                     </td>
-                                    <td class="py-1 text-center">
+                                    <!-- <td class="py-1 text-center">
                                         <%= item.conta_contabil %>
                                     </td>
                                     <td class="py-1 text-center">
                                         <%= item.doc_origem %>
-                                    </td>
+                                    </td> -->
                                     <td class="py-1 text-center">
                                         <%= item.estoque %>
                                     </td>
-                                    <td class="py-1 text-center">R$ <%= Number(item.valor).toFixed(2) %>
-                                    </td>
+                                    <!-- <td class="py-1 text-center">R$ <%= Number(item.valor).toFixed(2) %>
+                                    </td> -->
                                     <td class="py-1 text-center">
                                         <%= item.situacao %>
                                     </td>
                                     <td class="py-1 text-center ">
                                         <a href="/estoque/visualizar/<%= item.id %>"
-                                            class="btn btn-secondary btn-sm view-btn btn-action">Visualizar</a>
+                                            class="btn btn-secondary btn-sm view-btn btn-action">Detalhes</a>
                                         <a href="/estoque/edit/<%= item.id %>"
                                             class="btn btn-warning btn-sm btn-action">Editar</a>
                                         <a href="/estoque/edit/<%= item.id %>"

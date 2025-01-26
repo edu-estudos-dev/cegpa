@@ -49,5 +49,14 @@ router.get("/api/itens-disponiveis", estoqueController.fetchItensDisponiveis);
 // Rota para registrar a saída de itens
 router.post("/saida", estoqueController.registrarSaida);
 
+// Rota para visualizar um item pago específico
+router.get('/visualizar/:id', estoqueController.visualizarItemPago);
+
+
+router.get('/visualizar/itempago/:id', estoqueController.visualizarItemPago);
+
+
+
+
 
 export default router;

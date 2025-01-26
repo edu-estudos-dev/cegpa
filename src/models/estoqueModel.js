@@ -89,8 +89,7 @@ class EstoqueModel {
       throw error;
     }
   };
-  
-  
+
   /* ********************************************************************************
                   Métodos para a SAÍDA de itens no Estoque
   *********************************************************************************/
@@ -215,6 +214,23 @@ class EstoqueModel {
       throw error;
     }
   };
+
+  // Método para obter informações do item pago pelo ID
+  getItemPagoByID = async (id) => {
+    const query = `SELECT * FROM itenspagos WHERE id = ?`;
+    try {
+      console.log("Executando query:", query); // log da query
+      const [results] = await connection.execute(query, [id]);
+      console.log("Results from getItemPagoByID:", results); // log dos resultados
+      return results.length > 0 ? results[0] : null;
+    } catch (error) {
+      console.error("Erro ao buscar item pago pelo ID:", error);
+      throw error;
+    }
+  };
+  
+  
+  
 }
 
 export default new EstoqueModel();

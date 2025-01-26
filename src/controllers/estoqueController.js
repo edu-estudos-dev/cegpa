@@ -124,7 +124,10 @@ class EstoqueController {
       console.log("Sequência inicial:", sequencia);
 
       for (let i = 0; i < safeData.quantidade; i++) {
-        const tomboUnico = `37${ano}${safeData.subgrupo}${sequencia}`.substring(0, 13); // Garantir 13 caracteres
+        const tomboUnico = `37${ano}${safeData.subgrupo}${sequencia}`.substring(
+          0,
+          13
+        ); // Garantir 13 caracteres
 
         await estoqueModel.createEstoque(
           safeData.data_de_entrada,
@@ -165,7 +168,7 @@ class EstoqueController {
     }
   };
 
- // Método para trazer toso os itens do estoque
+  // Método para trazer toso os itens do estoque
   getAllEstoque = async (req, res) => {
     try {
       const estoque = await estoqueModel.getAllEstoque();
@@ -176,8 +179,7 @@ class EstoqueController {
     }
   };
 
-
- // Método para vizuaçizar um item
+  // Método para vizuaçizar um item
   visualizarItem = async (req, res) => {
     try {
       const { id } = req.params;
@@ -395,6 +397,26 @@ class EstoqueController {
       res.status(500).json({ error: "Erro ao registrar saída." });
     }
   };
+
+  // Método para visualizar um item pago
+  visualizarItemPago = async (req, res) => {
+    try {
+      const { id } = req.params;
+      console.log("ID recebido:", id); // log do ID recebido
+      const item = await estoqueModel.getItemPagoByID(id);
+      console.log("Item retornado:", item); // log do item retornado
+      if (item) {
+        res.json(item);
+      } else {
+        res.status(404).send({ msg: "Item não encontrado" });
+      }
+    } catch (error) {
+      console.error("Erro ao buscar informações do item pago:", error);
+      res.status(500).send({ msg: "Erro ao buscar informações do item" });
+    }
+  };
+  
+  
 }
 
 export default new EstoqueController();
