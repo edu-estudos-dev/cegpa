@@ -211,6 +211,24 @@ class EstoqueController {
     }
   };
 
+// Método para excluir do estoque
+destroy = async (req, res) => {
+  try {
+      const { id } = req.params;
+      const result = await estoqueModel.delete(id);
+      if (result > 0) {
+          return res.json({ msg: "Item deletado com sucesso!" });
+      } else {
+          return res.status(404).json({ msg: "Item não encontrado" });
+      }
+  } catch (error) {
+      console.error("Erro ao excluir o item:", error);
+      return res.status(500).json({ msg: "Erro ao excluir o item" });
+  }
+};
+
+
+
   /* ********************************************************************************
                   Métodos para a SAÍDA de itens no Estoque
   *********************************************************************************/
@@ -415,8 +433,6 @@ class EstoqueController {
       res.status(500).send({ msg: "Erro ao buscar informações do item" });
     }
   };
-  
-  
 }
 
 export default new EstoqueController();

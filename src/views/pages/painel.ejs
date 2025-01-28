@@ -9,6 +9,15 @@
     <title>Sistema de Controle de Estoque - COLOG</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
+        :root {
+            /* verde escuro */
+            --color-primary: rgb(53, 110, 0);
+            /* verde claro */
+            --secondary-color: #f8fff291;
+            /* vermelho claro */
+            --terceary-color: #f7d6d691;
+         }
+
         * {
             margin: 0;
             padding: 0;
@@ -47,21 +56,6 @@
             flex-direction: column;
             justify-content: flex-start;
             box-sizing: border-box;
-            font-size: 1rem;
-        }
-
-        footer {
-            flex: none;
-        }
-
-        .footer-content {
-            flex-shrink: 0;
-            width: 100%;
-            border-top: 4px solid #00621D;
-            color: #00621D;
-            text-align: center;
-            padding: 0 0 1rem 0;
-            background-color: #f8f9fa;
             font-size: 1rem;
         }
 
@@ -131,6 +125,13 @@
         .system-box:hover {
             transform: translateY(-0.125rem);
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+            background-color: var(--secondary-color)
+        }
+
+        .logout:hover{
+            transform: translateY(-0.125rem);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+            background-color: var(--terceary-color)   
         }
 
         .system-box div {
@@ -151,12 +152,27 @@
             border: none;
         }
 
-        
+
         h3 {
             font-size: 1.8rem;
             color: #00621D;
             font-weight: 700;
             padding-top: 0.5rem;
+        }
+
+        footer {
+            flex: none;
+        }
+
+        .footer-content {
+            flex-shrink: 0;
+            width: 100%;
+            border-top: 4px solid #00621D;
+            color: #00621D;
+            text-align: center;
+            padding: 0 0 1rem 0;
+            background-color: #f8f9fa;
+            font-size: 1rem;
         }
 
 
@@ -196,7 +212,7 @@
                 margin-bottom: 0.5rem;
             }
 
-            .system-box h4{
+            .system-box h4 {
 
                 font-size: 1.2rem;
             }
@@ -304,6 +320,13 @@
                     <i class="fas fa-history text-success fa-2x"></i>
                     <h4 class="text-success">Histórico Geral</h4>
                     <p class="text-success">Histórico de Entradas / Saídas</p>
+                </div>
+            </a>
+            <a href="/logout" class="system-box logout link ">
+                <div class="log">
+                    <i class="fas fa-door-open fs-5 me-1 fa-2x text-danger"></i>
+                    <h4 class="text-danger">Sair</h4>
+                    <p class="text-danger">Sair do Sistema</p>
                 </div>
             </a>
         </div>

@@ -16,9 +16,6 @@ class LoginLogoutController {
   login = async (req, res) => {
     const { user, senha } = req.body;
     const lowerCaseUser = user.toLowerCase().trim();
-    console.log(
-      `Tentativa de autenticação: original [${user}], lowercase [${lowerCaseUser}]`
-    );
     try {
       const isAuthenticated = await loginLogoutModel.verifyUser(
         lowerCaseUser,
@@ -26,12 +23,8 @@ class LoginLogoutController {
       );
       if (isAuthenticated) {
         req.session.user = lowerCaseUser;
-        console.log(
-          `Sucesso: sessão do usuário [${lowerCaseUser}] estabelecida`
-        );
         res.redirect("painel");
       } else {
-        console.log(`Falha: usuário [${lowerCaseUser}] ou senha incorretos`);
         res.render("login", { erro: "Usuário ou senha inválidos" });
       }
     } catch (error) {

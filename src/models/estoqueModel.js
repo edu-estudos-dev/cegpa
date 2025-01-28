@@ -228,9 +228,19 @@ class EstoqueModel {
       throw error;
     }
   };
-  
-  
-  
+
+// Método para excluir um item do estoque
+delete = async (id) => {
+  const query = `DELETE FROM estoqueAtual WHERE id = ?`;
+  try {
+      const [results] = await connection.execute(query, [id]);
+      return results.affectedRows; // Retorna o número de linhas deletadas
+  } catch (error) {
+      console.error("Erro ao excluir item:", error);
+      throw error;
+  }
+};
+
 }
 
 export default new EstoqueModel();

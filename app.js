@@ -31,12 +31,14 @@ app.use(
   })
 );
 
+
+
 app.use("/", loginLogoutRoutes); // As rotas de login/logout
 app.use("/", estoqueRoutes); // As rotas públicas de estoque
 app.use("/", pesquisaRoutes); // As rotas públicas de pesquisa
 app.use("/", isAuthenticated); // Autenticação necessária para as rotas após este ponto
 app.use("/painel", painelRoutes);
-app.use("/estoque", estoqueRoutes);
+app.use("/estoque", estoqueRoutes); 
 
 // Tratamento de erros
 app.use((req, res, next) => {

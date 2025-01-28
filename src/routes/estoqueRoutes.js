@@ -29,6 +29,10 @@ router.get('/visualizar/:id', estoqueController.visualizarItem);
 router.get("/qtde-unica", estoqueController.getQtdeUnicaEstoque);
 
 
+router.delete('/excluir/:id', estoqueController.destroy);
+
+
+
 router.get('/tabela/estoqueatual', estoqueController.getAllEstoque); 
 
 
