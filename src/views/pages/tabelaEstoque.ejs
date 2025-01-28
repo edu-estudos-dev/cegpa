@@ -99,7 +99,8 @@
                                     <td class="py-1 text-center"> <%= item.situacao %> </td>
                                     <td class="py-1 text-center ">
                                         <a href="/estoque/visualizar/<%= item.id %>"class="btn btn-secondary btn-sm view-btn btn-action">Detalhes</a>
-                                        <a href="/excluir/<%= item.id %>" class="btn btn-danger btn-sm btn-action">Excluir</a>
+                                        <a href="/excluir/<%= item.id %>" class="btn btn-danger btn-sm btn-action btn-delete">Excluir</a>
+
                                     </td>
                                 </tr>
                             <% }); %>
@@ -187,30 +188,29 @@
             });
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const deleteButtons = document.querySelectorAll('.btn-action');
+    </script>
+
+    <script>
+       document.addEventListener('DOMContentLoaded', () => {
+            const deleteButtons = document.querySelectorAll('.btn-delete');
 
             deleteButtons.forEach(button => {
                 button.addEventListener('click', async (event) => {
-                event.preventDefault();
-                
-                    // Adicionando o prompt de confirmação
-                    const confirmation = confirm("Você tem certeza que deseja excluir este item? Esse processo é irreversível.");
+                    event.preventDefault();
 
+                    const confirmation = confirm("Você tem certeza que deseja excluir este item? Esse processo é irreversível.");
                     if (!confirmation) {
                         return; // Se o usuário cancelar, não faça nada
                     }
-                    
+
                     const url = event.target.href;
                     try {
                         const response = await fetch(url, { method: 'DELETE' });
                         const result = await response.json();
-                        
-                        // Exibir feedback para o usuário
+
                         if (response.ok) {
                             alert('Item deletado com sucesso!');
-                            // Atualizar a página ou remover o item da tabela
-                            location.reload();
+                            location.reload(); // Atualiza a página para refletir a exclusão
                         } else {
                             alert(result.msg);
                         }
@@ -221,7 +221,6 @@
                 });
             });
         });
-
     </script>
 </body>
 

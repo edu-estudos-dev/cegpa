@@ -1,6 +1,5 @@
 const isAuthenticated = (req, res, next) => {
   if (req.session && req.session.user) {
-      console.log("Usuário autenticado:", req.session.user);
     return next(); // O usuário está autenticado, prossegue para a próxima função
   } else {
       console.log("Usuário não autenticado, redirecionando para /login");
