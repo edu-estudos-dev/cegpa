@@ -31,10 +31,10 @@ app.use(
   })
 );
 
-app.use("/", loginLogoutRoutes);
-app.use(isAuthenticated);
-app.use("/", estoqueRoutes);
-app.use("/", pesquisaRoutes);
+app.use("/", loginLogoutRoutes); // As rotas de login/logout
+app.use("/", estoqueRoutes); // As rotas públicas de estoque
+app.use("/", pesquisaRoutes); // As rotas públicas de pesquisa
+app.use("/", isAuthenticated); // Autenticação necessária para as rotas após este ponto
 app.use("/painel", painelRoutes);
 app.use("/estoque", estoqueRoutes);
 
