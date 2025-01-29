@@ -23,6 +23,10 @@ main {
   margin-top: 5rem;
 }
 
+.caixa-externa{
+  background-color: #f8fff29a;
+}
+
 .navbar {
   position: fixed;
   width: 100%;

@@ -23,7 +23,7 @@
 
 <body>
     <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
-        <div style="background-color: var(--secondary-light-1);" class="border p-4 py-5 rounded shadow-lg">
+        <div class="border p-4 py-5 rounded shadow-lg caixa-externa">
             <h1 class="text-center display-6 fw-bold mb-4 text-success">Login</h1>
             <hr>
             <% if (erro) { %>
@@ -32,7 +32,7 @@
                 </div>
                 <% } %>
                     <form action="/login" method="POST">
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3 caixa-externa">
                             <label for="user" class="form-label">Usuário</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>

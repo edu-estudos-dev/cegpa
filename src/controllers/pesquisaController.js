@@ -144,9 +144,9 @@ class PesquisaController {
   };
 
   // Método para renderizar o formulário de pesquisa de itens saídos
-  renderPesquisaForm = (_, res) => {
-    res.render("pesquisaItensSaidos");
-  };
+  // renderPesquisaForm = (_, res) => {
+  //   res.render("pesquisaItensSaidos");
+  // };
 
   // Método para obter o relatório de entradas
   fetchRelatorioEntradas = async (_, res) => {
