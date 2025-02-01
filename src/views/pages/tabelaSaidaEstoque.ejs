@@ -40,52 +40,52 @@
 <body>
   <%- include('../partials/header') %>
 
-    <div class="caixa container p-4">
-      <!-- breadcrumb -->
-      <div class="pb-3 mt-3">
-        <%- include('../partials/breadcrumb', { pageTitle: 'Itens Pagos' }) %>
-      </div>
+  <div class="caixa container p-4">
+    <!-- breadcrumb -->
+    <div class="pb-3 mt-2">
+      <%- include('../partials/breadcrumb', { pageTitle: 'Itens Pagos' }) %>
+    </div>
 
-      <div class="border caixa-externa p-4 shadow-sm rounded">
-        <div class="row align-items-center mb-3">
-          <h2 class="text-center text-success mb-3 mt-3 fw-bold">Itens que saíram do estoque</h2>
-        </div>
-        <div class="table-container">
-          <table class="table table-striped table-hover mb-0">
-            <thead>
-              <tr>
-                <th class="text-center">ID</th>
-                <th>Descrição</th>
-                <th class="text-center">Data da Saída</th>
-                <th class="text-center">Destino</th>
-                <th class="text-center">Referência</th>
-                <th class="text-center">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% if (itensPagos.length> 0) { %>
-                <% itensPagos.forEach(function(item) { %>
-                  <tr>
-                    <td class="py-1 text-center"><%= item.id %></td>
-                    <td class="py-1"><%= item.descricao.toUpperCase() %></td> <!-- Descrição transformada para UPPERCASE -->
-                    <td class="py-1 text-center"><%= new Date(item.data_de_saida).toLocaleDateString('pt-BR') %></td>
-                    <td class="py-1 text-center"><%= item.destino.toUpperCase() %></td> <!-- Destino transformado para UPPERCASE -->
-                    <td class="py-1 text-center"><%= item.referencia.toUpperCase() %></td> <!-- Referência transformada para UPPERCASE -->
-                    <td class="py-1 text-center w-10">
-                      <button type="button" class="btn btn-secondary btn-sm btn-action" data-id="<%= item.id %>">Detalhes</button> <!-- Botão transformado para UPPERCASE -->
-                    </td>
-                  </tr>
-                  <% }); %>
-                    <% } else { %>
+    <div class="border caixa-externa p-4 shadow-sm rounded">
+      <div class="row align-items-center mb-3">
+        <h2 class="text-center text-success mb-3 mt-3 fw-bold">Itens que saíram do estoque</h2>
+      </div>
+      <div class="table-container">
+        <table class="table table-striped table-hover mb-0">
+          <thead>
+            <tr>
+              <th class="text-center">ID</th>
+              <th>Descrição</th>
+              <th class="text-center">Data da Saída</th>
+              <th class="text-center">Destino</th>
+              <th class="text-center">Referência</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (itensPagos.length> 0) { %>
+              <% itensPagos.forEach(function(item) { %>
                 <tr>
-                  <td colspan="11" class="text-center">Ainda não há itens Pagos</td>
+                  <td class="py-1 text-center"><%= item.id %></td>
+                  <td class="py-1"><%= item.descricao.toUpperCase() %></td> <!-- Descrição transformada para UPPERCASE -->
+                  <td class="py-1 text-center"><%= new Date(item.data_de_saida).toLocaleDateString('pt-BR') %></td>
+                  <td class="py-1 text-center"><%= item.destino.toUpperCase() %></td> <!-- Destino transformado para UPPERCASE -->
+                  <td class="py-1 text-center"><%= item.referencia.toUpperCase() %></td> <!-- Referência transformada para UPPERCASE -->
+                  <td class="py-1 text-center w-10">
+                    <button type="button" class="btn btn-secondary btn-sm btn-action" data-id="<%= item.id %>">Detalhes</button> <!-- Botão transformado para UPPERCASE -->
+                  </td>
                 </tr>
-                <% } %>
-            </tbody>
-          </table>
-        </div>
+                <% }); %>
+                  <% } else { %>
+              <tr>
+                <td colspan="11" class="text-center">Ainda não há itens Pagos</td>
+              </tr>
+              <% } %>
+          </tbody>
+        </table>
       </div>
     </div>
+  </div>
 
     <!-- JavaScript para exibição do modal -->
     <script>

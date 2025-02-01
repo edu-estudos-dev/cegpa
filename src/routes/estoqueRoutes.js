@@ -7,8 +7,11 @@ const router = express.Router();
                   Rotas para a ENTRADA de itens no Estoque
   *********************************************************************************/
 
-// Rota para listar todo o estoque
-router.get("/", estoqueController.index);
+// Rota para listar apenas os itens novos do estoque
+router.get("/itens-novos", estoqueController.getItensNovos);
+
+// Rota para renderizar a tabela apenas os itens novos do estoque
+router.get("/tabela/itens-novos", estoqueController.showItensNovos);
 
 // Rota para renderizar o formulário de entrada
 router.get("/entrada", estoqueController.renderEntradaForm);
@@ -33,7 +36,6 @@ router.delete('/excluir/:id', estoqueController.destroy);
 
 
 
-router.get('/tabela/estoqueatual', estoqueController.getAllEstoque); 
 
 
 

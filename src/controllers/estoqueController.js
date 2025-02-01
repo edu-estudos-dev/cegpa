@@ -12,11 +12,23 @@ class EstoqueController {
                   Métodos para a ENTRADA de itens no Estoque
   *********************************************************************************/
 
-  // Método para listar todo o estoque
-  index = async (_, res) => {
+  // Método para renderizar a tabela com os itens novos
+  showItensNovos = async (_req, res) => {
     try {
-      const estoque = await estoqueModel.getAllEstoque();
-      res.status(200).json(estoque); // Retorna todos os itens do estoque como JSON
+      const itensNovos = await estoqueModel.getAllItensNovos(); // Obtém os itens novos
+      res.render("tabelaItensNovos", { novos: itensNovos }); // Passa os itens novos para o template
+    } catch (error) {
+      console.error("Erro ao carregar os itens novos:", error);
+      res.status(500).send("Erro ao carregar os itens novos.");
+    }
+  };
+
+  // Método para listar todos os itens NOVOS no estoque
+  getItensNovos = async (req, res) => {
+    try {
+      const itensNovos = await estoqueModel.getAllItensNovos(); // Obtém os itens novos
+      console.log(itensNovos);
+      res.status(200).render("tabelaItensNovos", { novos: itensNovos }); // Renderiza a tabela dos itens novos
     } catch (error) {
       console.error("Erro ao carregar o estoque:", error);
       res.status(500).send("Erro ao carregar o estoque.");
@@ -43,8 +55,6 @@ class EstoqueController {
       situacao,
       observacao,
     } = req.body;
-
-    console.log("Dados recebidos no controller:", req.body);
 
     // Verificações de campos obrigatórios
     if (!data_de_entrada) {
@@ -94,8 +104,6 @@ class EstoqueController {
       return res.status(400).json({ error: "A Situação é obrigatória." });
     }
 
-    console.log("Todos os campos obrigatórios foram preenchidos");
-
     const safeData = {
       data_de_entrada: data_de_entrada || null,
       descricao: descricao ? descricao.toUpperCase() : null,
@@ -109,8 +117,6 @@ class EstoqueController {
       situacao: situacao ? situacao.toUpperCase() : null,
       observacao: observacao ? observacao.toUpperCase() : null,
     };
-
-    console.log("Dados processados para inserção:", safeData);
 
     try {
       const ano = new Date(safeData.data_de_entrada)
@@ -148,7 +154,8 @@ class EstoqueController {
       }
 
       const todosEstoque = await estoqueModel.getAllEstoque(); // Obtém todos os itens do estoque
-      res.render("tabelaEstoque", { estoque: todosEstoque }); // Renderiza a view de tabela de estoque
+      res.status(200).render("tabelaEstoque", { estoque: todosEstoque }); // Renderiza a view de tabela de estoque
+      console.log(todosEstoque);
     } catch (error) {
       console.error("Erro ao inserir dados no estoque:", error);
       res.status(500).json({ error: "Erro ao inserir dados no estoque." });

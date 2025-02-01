@@ -17,6 +17,18 @@ class EstoqueModel {
     }
   };
 
+  // Método para obter apenas os itens NOVOS do estoque
+  getAllItensNovos = async () => {
+    const query = `SELECT * FROM estoqueAtual WHERE pago = FALSE AND situacao = 'NOVO'`;
+    try {
+      const [results] = await connection.execute(query);
+      return results; // Retorna apenas os itens não pagos
+    } catch (error) {
+      console.error("Erro ao buscar itens novos no estoque atual:", error);
+      throw error;
+    }
+  };
+
   // Método para criar um novo item no estoque
   createEstoque = async (
     data_de_entrada,
@@ -165,12 +177,9 @@ class EstoqueModel {
         descricao,
       ]);
 
-      console.log("Atualizando a coluna pago para o tombo:", tombo);
-
       const updateQuery = `UPDATE estoqueatual SET pago = 1 WHERE tombo = ?`;
       await connection.execute(updateQuery, [tombo]);
 
-      console.log("Atualização concluída para o tombo:", tombo);
     } catch (error) {
       console.error("Erro ao inserir dados na tabela itensPagos:", error);
       throw error;
