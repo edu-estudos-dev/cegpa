@@ -7,7 +7,7 @@ class EstoqueModel {
 
   // Método para obter todo o estoque
   getAllEstoque = async () => {
-    const query = `SELECT * FROM estoqueAtual WHERE pago = FALSE`;
+    const query = `SELECT * FROM estoqueAtual WHERE pago = FALSE ORDER BY descricao ASC`;
     try {
       const [results] = await connection.execute(query);
       return results; // Retorna apenas os itens não pagos
@@ -17,14 +17,26 @@ class EstoqueModel {
     }
   };
 
-  // Método para obter apenas os itens NOVOS do estoque
+  // Método para obter apenas os itens Usados do estoque
   getAllItensNovos = async () => {
-    const query = `SELECT * FROM estoqueAtual WHERE pago = FALSE AND situacao = 'NOVO'`;
+    const query = `SELECT * FROM estoqueAtual WHERE pago = FALSE AND situacao = 'NOVO' ORDER BY descricao ASC`;
     try {
       const [results] = await connection.execute(query);
       return results; // Retorna apenas os itens não pagos
     } catch (error) {
       console.error("Erro ao buscar itens novos no estoque atual:", error);
+      throw error;
+    }
+  };
+
+  // Método para obter apenas os itens Usados do estoque
+  getAllItensUsados = async () => {
+    const query = `SELECT * FROM estoqueAtual WHERE pago = FALSE AND (situacao = 'BOM' OR situacao = 'OTIMO' OR situacao = 'REGULAR') ORDER BY descricao ASC`;
+    try {
+      const [results] = await connection.execute(query);
+      return results; // Retorna apenas os itens não pagos
+    } catch (error) {
+      console.error("Erro ao buscar itens Usados no estoque atual:", error);
       throw error;
     }
   };
@@ -88,7 +100,8 @@ class EstoqueModel {
     SELECT descricao, COUNT(*) AS quantidade
     FROM estoqueAtual
     WHERE pago = FALSE
-    GROUP BY descricao;
+    GROUP BY descricao
+    ORDER BY descricao ASC;
   `;
     try {
       const [results] = await connection.execute(query);
@@ -179,7 +192,6 @@ class EstoqueModel {
 
       const updateQuery = `UPDATE estoqueatual SET pago = 1 WHERE tombo = ?`;
       await connection.execute(updateQuery, [tombo]);
-
     } catch (error) {
       console.error("Erro ao inserir dados na tabela itensPagos:", error);
       throw error;
@@ -238,18 +250,17 @@ class EstoqueModel {
     }
   };
 
-// Método para excluir um item do estoque
-delete = async (id) => {
-  const query = `DELETE FROM estoqueAtual WHERE id = ?`;
-  try {
+  // Método para excluir um item do estoque
+  delete = async (id) => {
+    const query = `DELETE FROM estoqueAtual WHERE id = ?`;
+    try {
       const [results] = await connection.execute(query, [id]);
       return results.affectedRows; // Retorna o número de linhas deletadas
-  } catch (error) {
+    } catch (error) {
       console.error("Erro ao excluir item:", error);
       throw error;
-  }
-};
-
+    }
+  };
 }
 
 export default new EstoqueModel();

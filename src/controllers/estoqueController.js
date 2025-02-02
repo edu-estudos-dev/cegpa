@@ -27,8 +27,30 @@ class EstoqueController {
   getItensNovos = async (req, res) => {
     try {
       const itensNovos = await estoqueModel.getAllItensNovos(); // Obtém os itens novos
-      console.log(itensNovos);
       res.status(200).render("tabelaItensNovos", { novos: itensNovos }); // Renderiza a tabela dos itens novos
+    } catch (error) {
+      console.error("Erro ao carregar o estoque:", error);
+      res.status(500).send("Erro ao carregar o estoque.");
+    }
+  };
+
+  
+  // Método para renderizar a tabela com os itens Usados
+  showItensUsados = async (_req, res) => {
+    try {
+      const itensUsados = await estoqueModel.getAllItensUsados(); // Obtém os itens Usados
+      res.render("tabelaItensUsados", { usados: itensUsados }); // Passa os itens Usados para o template
+    } catch (error) {
+      console.error("Erro ao carregar os itens Usados:", error);
+      res.status(500).send("Erro ao carregar os itens Usados.");
+    }
+  };
+
+  // Método para listar todos os itens Usados no estoque
+  getItensUsados = async (req, res) => {
+    try {
+      const itensUsados = await estoqueModel.getAllItensUsados(); // Obtém os itens Usados
+      res.status(200).render("tabelaItensUsados", { usados: itensUsados }); // Renderiza a tabela dos itens Usados
     } catch (error) {
       console.error("Erro ao carregar o estoque:", error);
       res.status(500).send("Erro ao carregar o estoque.");

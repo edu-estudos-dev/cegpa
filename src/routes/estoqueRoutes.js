@@ -13,6 +13,12 @@ router.get("/itens-novos", estoqueController.getItensNovos);
 // Rota para renderizar a tabela apenas os itens novos do estoque
 router.get("/tabela/itens-novos", estoqueController.showItensNovos);
 
+// Rota para listar apenas os itens usados do estoque
+router.get("/itens-usados", estoqueController.getItensUsados);
+
+// Rota para renderizar a tabela apenas os itens usados do estoque
+router.get("/tabela/itens-usados", estoqueController.showItensUsados);
+
 // Rota para renderizar o formulário de entrada
 router.get("/entrada", estoqueController.renderEntradaForm);
 
