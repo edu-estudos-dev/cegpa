@@ -8,8 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="shortcut icon" href="https://www.sspds.ce.gov.br/wp-content/themes/ceara2017/favicon.ico" type="image/x-png" />
     <style>
-        /* Adicionando estilos do modal */
         .table-container {
             max-height: 64vh;
             overflow-y: auto;
@@ -33,8 +33,8 @@
             z-index: 1;
         }
 
-        .btn-action{
-            width:70px;
+        .btn-action {
+            width: 70px;
         }
 
         .modal.fade .modal-dialog {
@@ -48,106 +48,122 @@
             opacity: 1;
         }
 
+        .w-90 {
+            width: 90%;
+        }
     </style>
 </head>
 
 <body>
     <%- include('../partials/header') %>
-    
-    
-    <div class="caixa container p-4">
-     
-        <!-- breadcrumb -->
-        <div class="pb-0 mt-2">
-            <%- include('../partials/breadcrumb', { pageTitle: 'Tabela com os itens Usados' }) %>
-        </div>
 
-        <div class="row d-flex justify-content-center mb-4">
-            <div class="col-md-1 ms-3">
-                <a href="/tabela/estoqueatual" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold">Geral</a>
-            </div>
-            <div class="col-md-1 ms-3">
-                <a href="/tabela/itens-novos" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold">Itens Novo</a>
-            </div>
-            <div class="col-md-1 ms-3">
-                <a href="/tabela/itens-usados" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold nav-link active py-2">Itens Usados</a>
-            </div>
-            <div class="col-md-1 ms-3">
-                <a href="/qtde-unica" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold">Quantitativo</a>
-            </div>
-        </div>
+        <div class="caixa w-90 p-4 mx-auto">
 
-
-        <div class="border caixa-externa p-4 shadow-sm rounded">
-            <div class="row align-items-center mb-3">
-                <h2 class="text-center text-success mb-3 mt-0 fw-bold">Itens Usados</h2>
+            <div class="row d-flex justify-content-center mb-4">
+                <div class="col-md-1 ms-3">
+                    <a href="/tabela/estoqueatual"
+                        class="btn btn-outline-success mx-2 w-100 btn-header fw-bold">Geral</a>
+                </div>
+                <div class="col-md-1 ms-3">
+                    <a href="/tabela/itens-novos" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold">Itens
+                        Novo</a>
+                </div>
+                <div class="col-md-1 ms-3">
+                    <a href="/tabela/itens-usados"
+                        class="btn btn-outline-success mx-2 w-100 btn-header fw-bold nav-link active py-2">Itens
+                        Usados</a>
+                </div>
+                <div class="col-md-1 ms-3">
+                    <a href="/qtde-unica" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold">Quantitativo</a>
+                </div>
             </div>
-            <div class="table-container">
-                <table class="table table-striped table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th class="text-center">ID</th>
-                            <th class="text-center">Entrada</th>
-                            <th>Descrição</th>
-                            <th class="text-center">Tombo</th>
-                            <th class="text-center">Categoria</th>
-                            <!-- <th class="text-center">Conta Contábil</th>
+
+            <div class="border caixa-externa p-4 shadow-sm rounded">
+                <div class="row align-items-center mb-3 px-3">
+                    <h2 style="border-bottom: 4px solid orange;" class="text-center text-white py-2 mt-0 fw-bold bg-success">Itens Usado</h2>
+                </div>
+                <div class="table-container">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center">ID</th>
+                                <th class="text-center">Entrada</th>
+                                <th>Descrição</th>
+                                <th class="text-center">Tombo</th>
+                                <th class="text-center">Categoria</th>
+                                <!-- <th class="text-center">Conta Contábil</th>
                             <th class="text-center">Documento de Origem</th> -->
-                            <th class="text-center">Estoque</th>
-                            <!-- <th class="text-center">Valor</th> -->
-                            <th class="text-center">Situação</th>
-                            <th class="text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if (usados.length > 0) { %>
-                            <% usados.forEach(function(item) { %>
-                                <tr>
-                                    <td class="py-1 text-center"> <%= item.id %> </td>
-                                    <td class="py-1 text-center"> <%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %> </td>
-                                    <td class="py-1"> <%= item.descricao %> </td>
-                                    <td class="py-1 text-center"> <%= item.tombo %> </td>
-                                    <td class="py-1 text-center"> <%= item.categoria %> </td>
-                                    <!-- <td class="py-1 text-center">
+                                <th class="text-center">Estoque</th>
+                                <!-- <th class="text-center">Valor</th> -->
+                                <th class="text-center">Situação</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (usados.length> 0) { %>
+                                <% usados.forEach(function(item) { %>
+                                    <tr>
+                                        <td class="py-1 text-center">
+                                            <%= item.id %>
+                                        </td>
+                                        <td class="py-1 text-center">
+                                            <%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %>
+                                        </td>
+                                        <td class="py-1">
+                                            <%= item.descricao %>
+                                        </td>
+                                        <td class="py-1 text-center">
+                                            <%= item.tombo %>
+                                        </td>
+                                        <td class="py-1 text-center">
+                                            <%= item.categoria %>
+                                        </td>
+                                        <!-- <td class="py-1 text-center">
                                         <%= item.conta_contabil %> </td>
                                     <td class="py-1 text-center">
                                         <%= item.doc_origem %> </td> -->
-                                    <td class="py-1 text-center"> <%= item.estoque %> </td>
-                                    <!-- <td class="py-1 text-center">R$ <%= Number(item.valor).toFixed(2) %> </td> -->
-                                    <td class="py-1 text-center"> <%= item.situacao %> </td>
-                                    <td class="py-1 text-center ">
-                                        <a href="/estoque/visualizar/<%= item.id %>"class="btn btn-secondary btn-sm view-btn btn-action">Detalhes</a>
-                                        <a href="/excluir/<%= item.id %>" class="btn btn-danger btn-sm btn-action btn-delete">Excluir</a>
+                                        <td class="py-1 text-center">
+                                            <%= item.estoque %>
+                                        </td>
+                                        <!-- <td class="py-1 text-center">R$ <%= Number(item.valor).toFixed(2) %> </td> -->
+                                        <td class="py-1 text-center">
+                                            <%= item.situacao %>
+                                        </td>
+                                        <td class="py-1 text-center ">
+                                            <a href="/estoque/visualizar/<%= item.id %>"
+                                                class="btn btn-secondary btn-sm view-btn btn-action">Detalhes</a>
+                                            <a href="/excluir/<%= item.id %>"
+                                                class="btn btn-danger btn-sm btn-action btn-delete">Excluir</a>
 
-                                    </td>
-                                </tr>
-                            <% }); %>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
                                 <% } else { %>
                                     <tr>
                                 <td colspan="11" class="text-center">Ainda não há itens cadastrados</td>
                             </tr>
-                        <% } %>
-                    </tbody>
-                </table>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- JavaScript para exibição do modal -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const viewButtons = document.querySelectorAll('.view-btn');
+        <!-- JavaScript para exibição do modal -->
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const viewButtons = document.querySelectorAll('.view-btn');
 
-            viewButtons.forEach(button => {
-                button.addEventListener('click', async (event) => {
-                    event.preventDefault();
-                    const url = event.target.href;
-                    try {
-                        const response = await fetch(url);
-                        const item = await response.json();
+                viewButtons.forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        event.preventDefault();
+                        const url = event.target.href;
+                        try {
+                            const response = await fetch(url);
+                            const item = await response.json();
 
-                        if (item) {
-                            const modalHtml = `
+                            if (item) {
+                                const modalHtml = `
                             <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
                                 <div class="modal-content">
@@ -184,62 +200,62 @@
                             `;
 
 
-                            const modalDiv = document.createElement('div');
-                            modalDiv.innerHTML = modalHtml;
-                            document.body.appendChild(modalDiv);
+                                const modalDiv = document.createElement('div');
+                                modalDiv.innerHTML = modalHtml;
+                                document.body.appendChild(modalDiv);
 
-                            const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
-                                backdrop: true,
-                                focus: true
-                            });
+                                const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
+                                    backdrop: true,
+                                    focus: true
+                                });
 
-                            infoTomboModal.show();
+                                infoTomboModal.show();
 
-                            infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
-                                modalDiv.remove();
-                            });
+                                infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
+                                    modalDiv.remove();
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Erro ao buscar informações do tombo:', error);
                         }
-                    } catch (error) {
-                        console.error('Erro ao buscar informações do tombo:', error);
-                    }
+                    });
                 });
             });
-        });
 
-    </script>
+        </script>
 
-    <script>
-       document.addEventListener('DOMContentLoaded', () => {
-            const deleteButtons = document.querySelectorAll('.btn-delete');
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const deleteButtons = document.querySelectorAll('.btn-delete');
 
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', async (event) => {
-                    event.preventDefault();
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        event.preventDefault();
 
-                    const confirmation = confirm("Você tem certeza que deseja excluir este item? Esse processo é irreversível.");
-                    if (!confirmation) {
-                        return; // Se o usuário cancelar, não faça nada
-                    }
-
-                    const url = event.target.href;
-                    try {
-                        const response = await fetch(url, { method: 'DELETE' });
-                        const result = await response.json();
-
-                        if (response.ok) {
-                            alert('Item deletado com sucesso!');
-                            location.reload(); // Atualiza a página para refletir a exclusão
-                        } else {
-                            alert(result.msg);
+                        const confirmation = confirm("Você tem certeza que deseja excluir este item? Esse processo é irreversível.");
+                        if (!confirmation) {
+                            return; // Se o usuário cancelar, não faça nada
                         }
-                    } catch (error) {
-                        console.error('Erro ao deletar item:', error);
-                        alert('Erro ao deletar o item');
-                    }
+
+                        const url = event.target.href;
+                        try {
+                            const response = await fetch(url, { method: 'DELETE' });
+                            const result = await response.json();
+
+                            if (response.ok) {
+                                alert('Item deletado com sucesso!');
+                                location.reload(); // Atualiza a página para refletir a exclusão
+                            } else {
+                                alert(result.msg);
+                            }
+                        } catch (error) {
+                            console.error('Erro ao deletar item:', error);
+                            alert('Erro ao deletar o item');
+                        }
+                    });
                 });
             });
-        });
-    </script>
+        </script>
 </body>
 
 </html>

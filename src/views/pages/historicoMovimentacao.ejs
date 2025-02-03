@@ -8,6 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="/css/styles.css">
+  <link rel="shortcut icon" href="https://www.sspds.ce.gov.br/wp-content/themes/ceara2017/favicon.ico" type="image/x-png" />
   <style>
     .table-container {
       max-height: 600px;
@@ -44,23 +45,28 @@
     .table-container th.quantidade {
       width: 10%;
     }
+
+    body {
+      display: flex;
+      align-items: center;
+    }
+
+    .w-90 {
+      width: 90%;
+    }
   </style>
 </head>
 
 <body>
   <%- include('../partials/header') %>
-
-    <div class="caixa container p-4">
-      <!-- breadcrumb -->
-      <div class="pb-3 mt-2">
-        <%- include('../partials/breadcrumb', { pageTitle: 'Histórico' }) %>
-      </div>
+    <div class="caixa w-90 p-4 mx-auto">
 
       <div class=" border caixa-externa p-4 caixa-externa shadow-sm rounded">
         <div class="table-container">
           <div class="row">
             <div class="mb-3">
-              <h2 class="text-center text-success mt-0 mb-3 fw-bold"> Histórico de Movimentações </h2>
+              <h2 style="border-bottom: 4px solid orange;"
+                class="text-center text-white py-2 mt-0 fw-bold bg-success"> Histórico de Movimentações </h2>
             </div>
           </div>
         </div>
@@ -77,8 +83,8 @@
         const historicoDiv = document.getElementById('historico-movimentacao');
         historicoDiv.innerHTML = `
         <table class="table table-striped table-hover mb-0">
-          <thead>
-            <tr>
+          <thead class="teste" >
+            <tr >
               <th class="tipo text-center">Tipo</th>
               <th class="data text-center">Data</th>
               <th>Descrição</th>
