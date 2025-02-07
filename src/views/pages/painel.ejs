@@ -1,330 +1,321 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <title>Sistema de Controle de Estoque - COLOG</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="shortcut icon" href="https://www.sspds.ce.gov.br/wp-content/themes/ceara2017/favicon.ico" type="image/x-png" />
-    <style>
-        :root {
-            /* verde escuro */
-            --color-primary: rgb(53, 110, 0);
-            /* verde claro */
-            --secondary-color: #f8fff244;
-            /* vermelho claro */
-            --terceary-color: #f7d6d642;
+   <%- include('../partials/head', { title: 'Painel de Controle' }) %>
+
+   <style>
+      :root {
+         /* verde escuro */
+         --color-primary: rgb(53, 110, 0);
+         /* verde claro */
+         --secondary-color: #f8fff244;
+         /* vermelho claro */
+         --terceary-color: #f7d6d642;
+      }
+
+      * {
+         margin: 0;
+         padding: 0;
+         box-sizing: border-box;
+      }
+
+      html,
+      body {
+         height: 100%;
+         margin: 0;
+         padding: 0;
+         display: flex;
+         flex-direction: column;
+      }
+
+      body {
+         overflow-x: hidden;
+         background-color: #f5f5f5;
+      }
+
+      main {
+         flex: 1;
+         margin: 3rem auto;
+         padding: 2rem;
+         display: flex;
+         flex-direction: column;
+         justify-content: center;
+         box-sizing: border-box;
+         font-size: 1rem;
+         height: 300px;
+      }
+
+      header {
+         flex: none;
+      }
+
+      .header-content {
+         background: linear-gradient(to right, #00621D, #0BA23D);
+         padding: 1.25rem;
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+         color: white;
+         position: relative;
+         font-size: 1rem;
+
+      }
+
+      .container-white {
+         display: flex;
+         justify-content: center;
+         background-color: #fff;
+         top: 0;
+         width: 100%;
+         z-index: 10;
+
+         border-bottom: 8px solid orange;
+         transform: translateY(-2rem);
+
+      }
+
+      .logo {
+         width: 100%;
+         max-width: 31.25rem;
+         margin-bottom: 1.5rem;
+
+      }
+
+      .systems-grid {
+         display: grid;
+         grid-template-columns: repeat(auto-fit, minmax(15.625rem, 1fr));
+         gap: 1rem;
+         padding: 1.875rem;
+         cursor: pointer;
+      }
+
+      .system-box {
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+         justify-content: center;
+         background-color: white;
+         padding: 0.9375rem;
+         border-radius: 0.3125rem;
+         box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+         text-align: center;
+         height: 9.375rem;
+         min-width: 9.375rem;
+         transition: transform 0.2s, box-shadow 0.2s;
+         text-decoration: none;
+         color: inherit;
+         outline: none;
+      }
+
+      .system-box i {
+         font-size: 1.8rem;
+         margin-bottom: 0.625rem;
+      }
+
+      .system-box:hover {
+         transform: translateY(-0.125rem);
+         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+         background-color: var(--secondary-color)
+      }
+
+      .logout:hover {
+         transform: translateY(-0.125rem);
+         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+         background-color: var(--terceary-color)
+      }
+
+      .system-box div {
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+      }
+
+      .system-box h4,
+      .system-box p {
+         margin: 0;
+         color: inherit;
+      }
+
+      .system-box:focus,
+      .system-box:active {
+         outline: none;
+         border: none;
+      }
+
+
+      h3 {
+         font-size: 1.8rem;
+         color: #00621D;
+         font-weight: 700;
+         padding-top: 0.5rem;
+      }
+
+      footer {
+         flex: none;
+      }
+
+      .footer-content {
+         flex-shrink: 0;
+         width: 100%;
+         border-top: 4px solid #00621D;
+         color: #00621D;
+         text-align: center;
+         padding: 0 0 1rem 0;
+         background-color: #f8f9fa;
+         font-size: 1rem;
+      }
+
+      footer h4 {
+         padding-top: 1rem;
+         margin-bottom: 0.3rem;
+         text-align: center;
+         font-weight: 700;
+      }
+
+      footer p {
+         font-size: 0.7rem;
+         text-align: center;
+      }
+
+      .w-60 {
+         width: 60% !important;
+      }
+
+      /* Media Query para notebooks */
+      @media (max-width: 1920px) {
+         .logo {
+               max-width: 25rem;
+               margin-bottom: 1rem;
          }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+         .systems-grid {
+               grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+               padding: 1.25rem;
+               gap: 0.625rem;
+         }
 
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-        }
+         .system-box {
+               min-height: 8.125rem;
+               padding: 0.625rem;
+               font-size: 0.9rem;
+         }
 
-        body {
-            overflow-x: hidden;
-            background-color: #f5f5f5;
-        }
+         .system-box i {
+               font-size: 1.5rem;
+               margin-bottom: 0.5rem;
+         }
 
-        header,
-        main,
-        footer {
-            width: 100%;
-        }
+         .system-box h4 {
 
-        header {
-            flex: none;
-        }
+               font-size: 1.2rem;
+         }
 
-        main {
-            flex: 1 0 auto;
-            margin: 3rem 0;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
+         .container-white {
+               padding: 0.5rem;
+               transform: translateY(-1.5625rem);
+         }
 
-        .header-content {
-            background: linear-gradient(to right, #00621D, #0BA23D);
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: white;
-            position: relative;
-            font-size: 1rem;
+         h3 {
+               font-size: 1.6rem;
+               color: #00621D;
+               font-weight: 700;
+               padding-top: 0.2rem;
+         }
 
-        }
+         h4 {
+               font-size: 0.9rem;
+         }
 
-        .container-white {
-            display: flex;
-            justify-content: center;
-            background-color: #fff;
-            top: 0;
-            width: 100%;
-            z-index: 10;
-           
-            border-bottom: 8px solid orange;
-            transform: translateY(-2rem);
+         footer h4 {
+               font-size: 1.2rem;
+               font-weight: 700;
+         }
 
-        }
+         footer h5 {
+               font-size: 1rem;
+               font-weight: 700;
+         }
 
-        .logo {
-            width: 100%;
-            max-width: 31.25rem;
-            margin-bottom: 1.5rem;
+         .footer-content {
+               position: relative;
+         }
+      }
+   </style>
 
-        }
+   <body>
+      <header>
+         <div class="row">
+               <div class="header-content container-fluid me-auto">
+                  <img src="https://sistemas.pm.ce.gov.br/img/PM-SSPDSclara.png" alt="Polícia Militar Logo" class="logo">
+               </div>
+         </div>
 
-        .systems-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(15.625rem, 1fr));
-            gap: 1rem;
-            padding: 1.875rem;
-            cursor: pointer;
-        }
+         <div class="container-white container p-1">
+               <h3>Painel de Controle</h3>
+         </div>
+      </header>
 
-        .system-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: white;
-            padding: 0.9375rem;
-            border-radius: 0.3125rem;
-            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
-            text-align: center;
-            height: 9.375rem;
-            min-width: 9.375rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-decoration: none;
-            color: inherit;
-            outline: none;
-        }
+      <main class=" w-60 caixa-externa border">
+         <div class="systems-grid">
+               <!-- Conteúdo dos botões aqui -->
+               <a href="/entrada" class="system-box link">
+                  <div>
+                     <i class="fas fa-sign-in-alt text-success fa-2x"></i>
+                     <h4 class="text-success">Formulário de Entrada</h4>
+                     <p class="text-success">Formulário de Entrada</p>
+                  </div>
+               </a>
+               <a href="/saida" class="system-box link">
+                  <div>
+                     <i class="fas fa-sign-out-alt text-success fa-2x"></i>
+                     <h4 class="text-success">Formulário de Saída</h4>
+                     <p class="text-success">Formulário de Saída</p>
+                  </div>
+               </a>
+               <a href="/tabela/estoqueatual" class="system-box link">
+                  <div>
+                     <i class="fas fa-box-open text-success fa-2x"></i>
+                     <h4 class="text-success">Estoque</h4>
+                     <p class="text-success">Tabelas quantitativa e qualitativa</p>
+                  </div>
+               </a>
 
-        .system-box i {
-            font-size: 1.8rem;
-            margin-bottom: 0.625rem;
-        }
+               <a href="/relatorios" class="system-box link">
+                  <div>
+                     <i class="fas fa-chart-line text-success fa-2x"></i>
+                     <h4 class="text-success">Relatório</h4>
+                     <p class="text-success">Relatórios de entrada e saida | Histórico</p>
+                  </div>
+               </a>
+               <a href="/pesquisa-avancada-page" class="system-box link">
+                  <div>
+                     <i class="fas fa-search text-success fa-2x"></i>
+                     <h4 class="text-success">Pesquisas</h4>
+                     <p class="text-success">Pesquisa Avançada</p>
+                  </div>
+               </a>
+               <a href="/logout" class="system-box logout link ">
+                  <div class="log">
+                     <i class="fas fa-door-open fs-5 me-1 fa-2x text-danger"></i>
+                     <h4 class="text-danger">Sair</h4>
+                     <p class="text-danger">Sair do Sistema</p>
+                  </div>
+               </a>
+         </div>
+      </main>
 
-        .system-box:hover {
-            transform: translateY(-0.125rem);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
-            background-color: var(--secondary-color)
-        }
-
-        .logout:hover{
-            transform: translateY(-0.125rem);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
-            background-color: var(--terceary-color)   
-        }
-
-        .system-box div {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .system-box h4,
-        .system-box p {
-            margin: 0;
-            color: inherit;
-        }
-
-        .system-box:focus,
-        .system-box:active {
-            outline: none;
-            border: none;
-        }
-
-
-        h3 {
-            font-size: 1.8rem;
-            color: #00621D;
-            font-weight: 700;
-            padding-top: 0.5rem;
-        }
-
-        footer {
-            flex: none;
-        }
-
-        .footer-content {
-            flex-shrink: 0;
-            width: 100%;
-            border-top: 4px solid #00621D;
-            color: #00621D;
-            text-align: center;
-            padding: 0 0 1rem 0;
-            background-color: #f8f9fa;
-            font-size: 1rem;
-        }
-
-
-        footer h4 {
-            padding-top: 1rem;
-            margin-bottom: 0.3rem;
-            text-align: center;
-            font-weight: 700;
-        }
-
-        footer p {
-            font-size: 0.7rem;
-            text-align: center;
-        }
-
-        /* Media Query para notebooks */
-        @media (max-width: 1920px) {
-            .logo {
-                max-width: 25rem;
-                margin-bottom: 1rem;
-            }
-
-            .systems-grid {
-                grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
-                padding: 1.25rem;
-                gap: 0.625rem;
-            }
-
-            .system-box {
-                min-height: 8.125rem;
-                padding: 0.625rem;
-                font-size: 0.9rem;
-            }
-
-            .system-box i {
-                font-size: 1.5rem;
-                margin-bottom: 0.5rem;
-            }
-
-            .system-box h4 {
-
-                font-size: 1.2rem;
-            }
-
-            .container-white {
-                padding: 0.5rem;
-                transform: translateY(-1.5625rem);
-            }
-
-            h3 {
-                font-size: 1.6rem;
-                color: #00621D;
-                font-weight: 700;
-                padding-top: 0.2rem;
-            }
-
-            h4 {
-                font-size: 0.9rem;
-            }
-
-            footer h4 {
-                font-size: 1.2rem;
-                font-weight: 700;
-            }
-
-            footer h5 {
-                font-size: 1rem;
-                font-weight: 700;
-            }
-
-            .footer-content {
-                position: relative;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <header>
-        <div class="row">
-            <div class="header-content container-fluid me-auto">
-                <img src="https://sistemas.pm.ce.gov.br/img/PM-SSPDSclara.png" alt="Polícia Militar Logo" class="logo">
-            </div>
-        </div>
-
-        <div class="container-white container p-1">
-            <h3>Painel de Controle</h3>
-        </div>
-    </header>
-
-    <main class="container caixa-externa border">
-        <div class="systems-grid">
-            <!-- Conteúdo dos botões aqui -->
-            <a href="/entrada" class="system-box link">
-                <div>
-                    <i class="fas fa-sign-in-alt text-success fa-2x"></i>
-                    <h4 class="text-success">Formulário de Entrada</h4>
-                    <p class="text-success">Formulário de Entrada</p>
-                </div>
-            </a>
-            <a href="/saida" class="system-box link">
-                <div>
-                    <i class="fas fa-sign-out-alt text-success fa-2x"></i>
-                    <h4 class="text-success">Formulário de Saída</h4>
-                    <p class="text-success">Formulário de Saída</p>
-                </div>
-            </a>
-            <a href="/tabela/estoqueatual" class="system-box link">
-                <div>
-                    <i class="fas fa-box-open text-success fa-2x"></i>
-                    <h4 class="text-success">Estoque</h4>
-                    <p class="text-success">Tabelas quantitativa e qualitativa</p>
-                </div>
-            </a>
-     
-            <a href="/relatorios" class="system-box link">
-                <div>
-                    <i class="fas fa-chart-line text-success fa-2x"></i>
-                    <h4 class="text-success">Relatório</h4>
-                    <p class="text-success">Relatórios de entrada e saida | Histórico</p>
-                </div>
-            </a>
-            <a href="/pesquisa-avancada-page" class="system-box link">
-                <div>
-                    <i class="fas fa-search text-success fa-2x"></i>
-                    <h4 class="text-success">Pesquisas</h4>
-                    <p class="text-success">Pesquisa Avançada</p>
-                </div>
-            </a>
-            <a href="/logout" class="system-box logout link ">
-                <div class="log">
-                    <i class="fas fa-door-open fs-5 me-1 fa-2x text-danger"></i>
-                    <h4 class="text-danger">Sair</h4>
-                    <p class="text-danger">Sair do Sistema</p>
-                </div>
-            </a>
-        </div>
-    </main>
-
-    <footer>
-        <div class="footer-content bg-light my-0">
-            <h4 class="m-0 fs-5">COLOG - Comando Logistico da PMCE</h4>
-            <h5 class="m-1 fw-bold ">CEGPA / NUCPA</h5>
-            <div class="hr-div d-flex justify-content-center">
-                <hr class="w-50 m-1">
-            </div>
-            <p class="m-0">R. Carlos Araújo, S/N - Olavo Oliveira</p>
-            <p class="m-0">Fone: 85 3101.3570 / 3101.3571 - E-mail: informatica@policiamilitar.ce.gov.br <br>
-                Horário de funcionamento: <br>De segunda a sexta de 8h às 12h e de 13h às 16:30hs</p>
-        </div>
-    </footer>
-</body>
+      <footer>
+         <div class="footer-content bg-light my-0">
+               <h4 class="m-0 fs-5">COLOG - Comando Logistico da PMCE</h4>
+               <h5 class="m-1 fw-bold ">CEGPA / NUCPA</h5>
+               <div class="hr-div d-flex justify-content-center">
+                  <hr class="w-50 m-1">
+               </div>
+               <p class="m-0">R. Carlos Araújo, S/N - Olavo Oliveira</p>
+               <p class="m-0">Fone: 85 3101.3570 / 3101.3571 - E-mail: informatica@policiamilitar.ce.gov.br <br>
+                  Horário de funcionamento: <br>De segunda a sexta de 8h às 12h e de 13h às 16:30hs</p>
+         </div>
+      </footer>
+   </body>
 
 </html>

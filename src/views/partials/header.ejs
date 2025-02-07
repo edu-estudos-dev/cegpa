@@ -1,59 +1,57 @@
 <head>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <style>
-    i{
-      font-size: 1rem !important;
-    }
-  </style>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+   <style>
+      i {
+         font-size: 1rem !important;
+      }
+   </style>
 </head>
 
 <nav class="navbar navbar-expand-lg py-3 navbar-light d-flex justify-content-between">
-  <div class="container-fluid ">
-    <div class="d-flex justify-content-between w-100 mx-5">
-      <div class="col-auto my-auto">
-        <a class="navbar-brand text-white" href="/painel">CEGPA / NUCPA</a>
+   <div class="container-fluid ">
+      <div class="d-flex justify-content-between w-100 mx-5">
+         <div class="col-auto my-auto">
+            <a class="navbar-brand text-white" href="/painel">CEGPA / NUCPA</a>
+         </div>
+         <div class="col-auto d-flex align-items-center">
+            <form class="d-flex align-items-center w-100">
+               <a href="/tabela/estoqueatual" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Estoque</a>
+               <a href="/entrada" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Entrada</a>
+               <a href="/saida" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Saída</a>
+               <a href="/relatorios" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Relatórios</a>
+               <a href="/pesquisa-avancada-page" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Pesquisa</a>
+            </form>
+         </div>
+         <div class="col-auto mt-1">
+            <a style="padding: 0.5rem 1.5rem; margin: 0; font-size: 1.2rem; text-decoration: none;" href="/logout"
+               class="text-white mx-2 w-100">Sair</a>
+         </div>
       </div>
-      <div class="col-auto d-flex align-items-center">
-        <form class="d-flex align-items-center w-100">
-          <a href="/tabela/estoqueatual" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Estoque</a>
-          <a href="/entrada" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Entrada</a>
-          <a href="/saida" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Saída</a>
-          <a href="/relatorios" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Relatórios</a>
-          <a href="/pesquisa-avancada-page" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Pesquisa</a>
-        </form>
-      </div>
-      <div class="col-auto mt-1">
-        <a style="border: 1px solid #fff;" href="/logout" class="btn btn-danger mx-2 w-100 btn-header fw-bold">
-          <i class="fas fa-door-open  me-1 fa-2x"></i> Sair
-      </a>
-      </div>
-    </div>
-  </div>
+   </div>
 </nav>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const currentPath = window.location.pathname;
-    const navLinks = document.querySelectorAll('.navbar a:not(.navbar-brand)'); // Excluir o link com a classe 'navbar-brand'
+   document.addEventListener('DOMContentLoaded', () => {
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.navbar a:not(.navbar-brand)');
 
-    navLinks.forEach(link => {
-      const linkPath = new URL(link.href).pathname;
+      navLinks.forEach(link => {
+         const linkPath = new URL(link.href).pathname;
 
-      if (linkPath === currentPath) {
-        link.classList.add('active');
-      }
-    });
-  });
+         if (linkPath === currentPath) {
+            link.classList.add('active');
+         }
+      });
+   });
 </script>
 
-
 <style>
-  .navbar a.active {
-    background-color: #fffefc;
-    color: green;
-  }
+   .navbar a.active {
+      background-color: #fffefc;
+      color: green;
+   }
 
-  .navbar{
-    background: linear-gradient(to right, #00621D, #0BA23D);
-  }
+   .navbar {
+      background: linear-gradient(to right, #00621D, #0BA23D);
+   }
 </style>
