@@ -313,7 +313,6 @@ class EstoqueController {
 
    // Método para registrar a saída de itens e gerar o PDF
    registrarSaida = async (req, res) => {
-      console.log('FUNÇÃO REGISTRARSAIDA CHAMADA');
 
       const {
          tombos,
@@ -369,11 +368,8 @@ class EstoqueController {
          });
       }
 
-      console.log('Todos os campos obrigatórios foram preenchidos');
-
       try {
-         console.log("Registrando saída e marcando itens como 'saído'...");
-
+   
          const dataDeSaida = new Date();
          const dataFormatada = dataDeSaida.toLocaleString('pt-BR', {
             timeZone: 'America/Fortaleza',
@@ -450,13 +446,16 @@ class EstoqueController {
             },
          });
 
-         const pdfPath = path.join(__dirname, '../../pdfs/saida_estoque.pdf');
+         const pdfPath = path.join(
+            __dirname,
+            '../../pdfs/termo_de_entrega.pdf'
+         );
          fs.writeFileSync(pdfPath, doc.output());
 
          console.log('SAÍDA REGISTRADA COM SUCESSO.');
          res.status(200).json({
             message: 'SAÍDA REGISTRADA COM SUCESSO!',
-            pdfPath: `/pdfs/saida_estoque.pdf`,
+            pdfPath: `/pdfs/termo_de_entrega.pdf`,
          });
       } catch (error) {
          console.error('Erro ao registrar saída:', error);
