@@ -65,9 +65,20 @@
       }
 
       /* Media Query para notebooks */
-      @media (max-width: 1920px) {
+      @media (max-width: 1366px) {
+         .caixa-externa {
+            max-height: 74vh;
+         }
+
          .table-container {
-            max-height: 56vh;
+            max-height: 55vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            min-height: 55vh;
+         }
+
+         .botoes {
+            margin-bottom: 1rem;
          }
       }
    </style>
@@ -160,9 +171,9 @@
                               <% }); %>
                                  <% } else { %>
                                     <tr>
-                                 <td colspan="11" class="text-center">Ainda não há itens cadastrados</td>
-                              </tr>
-                           <% } %>
+                                       <td colspan="11" class="text-center">Ainda não há itens cadastrados</td>
+                                    </tr>
+                                    <% } %>
                      </tbody>
                   </table>
                </div>
