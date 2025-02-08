@@ -3,72 +3,94 @@
 
 <%- include('../partials/head', { title: 'Estoque Atual' }) %>
 
-<style>
-   /* Adicionando estilos do modal */
-   .table-container {
-      max-height: 64vh;
-      overflow-y: auto;
-      overflow-x: hidden;
-   }
+   <style>
 
-   .table-container table {
-      width: 100%;
-   }
+      *{
+         margin: 0;
+         padding: 0;
+      }
 
-   .table-container th,
-   .table-container td {
-      word-wrap: break-word;
-      white-space: nowrap;
-   }
+      body{
+         padding-top: 2.5rem;
+      }
 
-   .table-container thead th {
-      position: sticky;
-      top: 0;
-      background-color: #fff;
-      z-index: 1;
-   }
+      .botoes{
+         margin-bottom: 1.9rem;
+      }
 
-   .btn-action {
-      width: 70px;
-   }
+      .table-container {
+         max-height: 67vh;
+         overflow-y: auto;
+         overflow-x: hidden;
+         min-height: 67vh;
+      }
 
-   .modal.fade .modal-dialog {
-      transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
-      transform: translateY(-10%);
-      opacity: 0;
-   }
+      .table-container table {
+         width: 100%;
+      }
 
-   .modal.show .modal-dialog {
-      transform: translateY(0);
-      opacity: 1;
-   }
+      .table-container th,
+      .table-container td {
+         word-wrap: break-word;
+         white-space: nowrap;
+      }
 
-   .w-90 {
-      width: 90% !important;
-   }
+      .table-container thead th {
+         position: sticky;
+         top: 0;
+         background-color: #fff;
+         z-index: 1;
+      }
 
-   .thead-success {
-      background-color: green !important;
-   }
-</style>
+      .btn-action {
+         width: 70px;
+      }
+
+      .modal.fade .modal-dialog {
+         transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
+         transform: translateY(-10%);
+         opacity: 0;
+      }
+
+      .modal.show .modal-dialog {
+         transform: translateY(0);
+         opacity: 1;
+      }
+
+      .w-90 {
+         width: 90% !important;
+      }
+
+      .thead-success {
+         background-color: green !important;
+      }
+
+         /* Media Query para notebooks */
+         @media (max-width: 1920px) {
+            .table-container {
+               max-height: 56vh;
+            }
+         }
+         
+   </style>
 
    <body>
       <%- include('../partials/header') %>
 
       <div class="caixa w-90 p-4 mx-auto">
 
-         <div class="row d-flex justify-content-center mb-4">
-            <div class="col-md-1 ">
-               <a href="/tabela/estoqueatual" class="btn btn-outline-success w-100 btn-header fw-bold nav-link active py-2">Geral</a>
+         <div class="row d-flex justify-content-center botoes">
+            <div class="col-md-1 mx-3">
+               <a href="/tabela/estoqueatual" class="btn btn-outline-success w-100 btn-header fw-bold nav-link active py-2 mx-3">Geral</a>
             </div>
-            <div class="col-md-1 ">
-               <a href="/tabela/itens-novos" class="btn btn-outline-success w-100 btn-header fw-bold">Itens Novo</a>
+            <div class="col-md-1 mx-3">
+               <a href="/tabela/itens-novos" class="btn btn-outline-success w-100 btn-header fw-bold mx-3">Itens Novo</a>
             </div>
-            <div class="col-md-1 ">
-               <a href="/tabela/itens-usados" class="btn btn-outline-success w-100 btn-header fw-bold">Itens Usados</a>
+            <div class="col-md-1 mx-3">
+               <a href="/tabela/itens-usados" class="btn btn-outline-success w-100 btn-header fw-bold mx-3">Itens Usados</a>
             </div>
-            <div class="col-md-1 ">
-               <a href="/qtde-unica" class="btn btn-outline-success w-100 btn-header fw-bold">Quantitativo</a>
+            <div class="col-md-1 mx-3">
+               <a href="/qtde-unica" class="btn btn-outline-success w-100 btn-header fw-bold mx-3">Quantitativo</a>
             </div>
          </div>
 
@@ -85,8 +107,6 @@
                         <th>Descrição</th>
                         <th class="text-center">Tombo</th>
                         <th class="text-center">Categoria</th>
-                        <!-- <th class="text-center">Conta Contábil</th>
-                              <th class="text-center">Documento de Origem</th> -->
                         <th class="text-center">Estoque</th>
                         <!-- <th class="text-center">Valor</th> -->
                         <th class="text-center">Situação</th>
@@ -112,10 +132,6 @@
                               <td class="py-1 text-center">
                                  <%= item.categoria %>
                               </td>
-                              <!-- <td class="py-1 text-center">
-                                          <%= item.conta_contabil %> </td>
-                                    <td class="py-1 text-center">
-                                          <%= item.doc_origem %> </td> -->
                               <td class="py-1 text-center">
                                  <%= item.estoque %>
                               </td>
@@ -124,15 +140,12 @@
                                  <%= item.situacao %>
                               </td>
                               <td class="py-1 text-center ">
-                                 <a href="/estoque/visualizar/<%= item.id %>"
-                                    class="btn btn-secondary btn-sm view-btn btn-action">Detalhes</a>
-                                 <a href="/excluir/<%= item.id %>"
-                                    class="btn btn-danger btn-sm btn-action btn-delete">Excluir</a>
-
+                                 <a href="/estoque/visualizar/<%= item.id %>" class="btn btn-secondary btn-sm view-btn btn-action">Detalhes</a>
+                                 <a href="/excluir/<%= item.id %>" class="btn btn-danger btn-sm btn-action btn-delete">Excluir</a>
                               </td>
                            </tr>
                            <% }); %>
-                           <% } else { %>
+                        <% } else { %>
                         <tr>
                            <td colspan="11" class="text-center">Ainda não há itens cadastrados</td>
                         </tr>
@@ -180,7 +193,6 @@
                                              <strong>Valor:</strong> ${parseFloat(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} <br/>
                                              <strong>Situação:</strong> ${item.situacao} <br/>
                                              <strong>Observação:</strong> ${item.observacao || 'N/A'} <br/>
-                                             <hr>
                                           </p>
                                        </div>
                                     </div>

@@ -4,10 +4,25 @@
 <%- include('../partials/head', { title: 'Tabela com itens usados' }) %>
 
    <style>
+         
+      *{
+         margin: 0;
+         padding: 0;
+      }
+
+      body{
+         padding-top: 2.5rem;
+      }
+
+      .botoes{
+         margin-bottom: 1.9rem;
+      }
+
       .table-container {
-         max-height: 64vh;
+         max-height: 67vh;
          overflow-y: auto;
          overflow-x: hidden;
+         min-height: 67vh;
       }
 
       .table-container table {
@@ -43,8 +58,19 @@
       }
 
       .w-90 {
-         width: 90%;
+         width: 90% !important;
       }
+
+      .thead-success {
+         background-color: green !important;
+      }
+
+         /* Media Query para notebooks */
+         @media (max-width: 1920px) {
+            .table-container {
+               max-height: 56vh;
+            }
+         }
    </style>
 
    <body>
@@ -52,18 +78,18 @@
 
       <div class="caixa w-90 p-4 mx-auto">
 
-         <div class="row d-flex justify-content-center mb-4">
-            <div class="col-md-1 ms-3">
-               <a href="/tabela/estoqueatual" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold">Geral</a>
+         <div class="row d-flex justify-content-center botoes">
+            <div class="col-md-1 mx-3">
+               <a href="/tabela/estoqueatual" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold mx-3">Geral</a>
             </div>
-            <div class="col-md-1 ms-3">
-               <a href="/tabela/itens-novos" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold">Itens Novo</a>
+            <div class="col-md-1 mx-3">
+               <a href="/tabela/itens-novos" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold  mx-3">Itens Novo</a>
             </div>
-            <div class="col-md-1 ms-3">
-               <a href="/tabela/itens-usados" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold nav-link active py-2">Itens Usados</a>
+            <div class="col-md-1 mx-3">
+               <a href="/tabela/itens-usados" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold nav-link active py-2 mx-3">Itens Usados</a>
             </div>
-            <div class="col-md-1 ms-3">
-               <a href="/qtde-unica" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold">Quantitativo</a>
+            <div class="col-md-1 mx-3">
+               <a href="/qtde-unica" class="btn btn-outline-success mx-2 w-100 btn-header fw-bold mx-3">Quantitativo</a>
             </div>
          </div>
 

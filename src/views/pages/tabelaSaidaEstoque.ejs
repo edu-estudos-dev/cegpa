@@ -4,10 +4,25 @@
 <%- include('../partials/head', { title: 'Itens Pagos' }) %>
 
    <style>
+
+      *{
+         margin: 0;
+         padding: 0;
+      }
+
+      body{
+         padding-top: 2.5rem;
+      }
+
+      .botoes{
+         margin-bottom: 1.9rem;
+      }
+
       .table-container {
-         max-height: 78vh;
+         max-height: 67vh;
          overflow-y: auto;
          overflow-x: hidden;
+         min-height: 67vh;
       }
 
       .table-container table {
@@ -16,7 +31,8 @@
 
       .table-container th,
       .table-container td {
-         word-break: break-word;
+         word-wrap: break-word;
+         white-space: nowrap;
       }
 
       .table-container thead th {
@@ -30,28 +46,50 @@
          width: 70px;
       }
 
-      .w-90 {
-         width: 90%;
+      .modal.fade .modal-dialog {
+         transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
+         transform: translateY(-10%);
+         opacity: 0;
       }
+
+      .modal.show .modal-dialog {
+         transform: translateY(0);
+         opacity: 1;
+      }
+
+      .w-90 {
+         width: 90% !important;
+      }
+
+      .thead-success {
+         background-color: green !important;
+      }
+
+         /* Media Query para notebooks */
+         @media (max-width: 1920px) {
+            .table-container {
+               max-height: 56vh;
+            }
+         }
    </style>
 
    <body>
       <%- include('../partials/header') %>
 
       <div class="caixa w-90 p-4 mx-auto">
-         <div class="row d-flex justify-content-center mb-4">
-            <div class="col-md-1 ">
-               <a href="/relatorios" class="btn btn-outline-success w-100 btn-header fw-bold px-0 ">Entradas /
+         <div class="row d-flex justify-content-center botoes">
+            <div class="col-md-1 mx-3">
+               <a href="/relatorios" class="btn btn-outline-success w-100 btn-header fw-bold px-0 mx-3">Entradas /
                   Saida</a>
             </div>
-            <div class="col-md-1 ">
+            <div class="col-md-1 mx-3">
                <a href="/estoque/itenspagos"
-                  class="btn btn-outline-success w-100 btn-header fw-bold nav-link active px-2 py-2">Itens
+                  class="btn btn-outline-success w-100 btn-header fw-bold nav-link active px-2 py-2 mx-3">Itens
                   pagos</a>
             </div>
-            <div class="col-md-1 ">
+            <div class="col-md-1 mx-3">
                <a href="/historico-movimentacao-page"
-                  class="btn btn-outline-success w-100 btn-header fw-bold">Histórico</a>
+                  class="btn btn-outline-success w-100 btn-header fw-bold mx-3">Histórico</a>
             </div>
          </div>
 
