@@ -277,11 +277,17 @@ class EstoqueController {
                   Métodos para a SAÍDA de itens no Estoque
   *********************************************************************************/
 
-   // Método para Renderiza a view de SAÍDA de estoque
-   renderSaidaForm = (_, res) => {
-      res.render('saidaEstoque');
-   };
-
+   // Método para Renderizar a view de SAÍDA de estoque com dados do estoque disponíveis
+   async renderSaidaForm(req, res) {
+      try {
+         const itensDisponiveis = await estoqueModel.getItensDisponiveis();
+         res.render('saidaEstoque', { itensDisponiveis });
+      } catch (error) {
+         console.error('Erro ao obter itens disponíveis:', error);
+         res.status(500).json({ error: 'Erro ao obter itens disponíveis' });
+      }
+   }
+   
    // Método para Renderizar a tabela de itens pagos
    renderTabelaSaida = (_, res) => {
       res.render('tabelaSaidaEstoque', { itensPagos: [] }); // Render padrão com valor vazio
@@ -313,7 +319,6 @@ class EstoqueController {
 
    // Método para registrar a saída de itens e gerar o PDF
    registrarSaida = async (req, res) => {
-
       const {
          tombos,
          doc_saida,
@@ -369,7 +374,6 @@ class EstoqueController {
       }
 
       try {
-   
          const dataDeSaida = new Date();
          const dataFormatada = dataDeSaida.toLocaleString('pt-BR', {
             timeZone: 'America/Fortaleza',

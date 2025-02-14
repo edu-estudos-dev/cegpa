@@ -49,162 +49,170 @@
 
       <%- include('../partials/header') %>
 
-         <div class="caixa w-90 p-4 mx-auto">
+      <div class="caixa w-90 p-4 mx-auto">
 
-            <div class=" border caixa-externa p-4 shadow-sm rounded">
+         <div class=" border caixa-externa p-4 shadow-sm rounded">
 
-               <div class="row align-items-center mb-3 px-3">
-                  <h2 style="border-bottom: 4px solid orange;"
-                     class="text-center text-white py-2 mt-0 fw-bold bg-success"> Formulário de Saída </h2>
-               </div>
+            <div class="row align-items-center mb-3 px-3">
+               <h2 style="border-bottom: 4px solid orange;"
+                  class="text-center text-white py-2 mt-0 fw-bold bg-success"> Formulário de Saída </h2>
+            </div>
 
-               <div class="row">
-                  <!-- Coluna da Esquerda -->
-                  <div class="col-md-6">
-                     <div id="row2" class="row">
-                        <div class="col-md-12">
-                           <div id="tombo_div" class="mb-2">
-                              <label class="form-label fw-bold">Itens em estoque</label>
-                              <div id="tombos-container">
-                                 <div style="font-size: 12px;" id="tombos-list" class="form-check">
-                                    <!-- Checkboxes serão preenchidos via JavaScript -->
-                                 </div>
+            <div class="row">
+               <!-- Coluna da Esquerda -->
+               <div class="col-md-6">
+                  <div id="row2" class="row">
+                     <div class="col-md-12">
+                        <div id="tombo_div" class="mb-2">
+                           <label class="form-label fw-bold">Itens em estoque</label>
+                           <div id="tombos-container">
+                              <div style="font-size: 12px;" id="tombos-list" class="form-check">
+                                 <% itensDisponiveis.forEach(item=> { %>
+                                    <div class="form-check">
+                                       <input type="checkbox" class="form-check-input" value="<%= item.tombo %>"
+                                          id="tombo-<%= item.tombo %>">
+                                       <label class="form-check-label" for="tombo-<%= item.tombo %>">ID: <%= item.id
+                                             %> - <%= item.descricao %> - Tombo: <%= item.tombo %></label>
+                                    </div>
+                                    <% }); %>
                               </div>
                            </div>
                         </div>
                      </div>
                   </div>
+               </div>
 
-                  <!-- Coluna da Direita -->
-                  <div class="col-md-6">
-                     <div id="row4" class="row">
-                        <div class="col-md-4">
-                           <div id="doc_saida-div">
-                              <label class="form-label fw-bold">Termo de Responsabilidade</label>
-                              <input style="background-color: var(secondary-color) !important;" name="doc_saida"
-                                 id="doc_saida" type="text" class="form-control mb-2">
-                           </div>
-
-                        </div>
-                        <div class="col-md-4">
-                           <div id="referencia-div">
-                              <label class="form-label fw-bold">Referência</label>
-                              <input id="referencia" type="text" class="form-control mb-2">
-                           </div>
-
-                        </div>
-                        <div class="col-md-4">
-                           <div id="destino-div" class="mb-1">
-                              <label class="form-label fw-bold">Destino</label>
-                              <input id="destino" type="text" class="form-control mb-2">
-                           </div>
+               <!-- Coluna da Direita -->
+               <div class="col-md-6">
+                  <div id="row4" class="row">
+                     <div class="col-md-4">
+                        <div id="doc_saida-div">
+                           <label class="form-label fw-bold">Termo de Responsabilidade</label>
+                           <input style="background-color: var(secondary-color) !important;" name="doc_saida"
+                              id="doc_saida" type="text" class="form-control mb-2">
                         </div>
 
                      </div>
-                     <div id="row5" class="row">
-                        <div class="col-md-4">
-                           <div id="postoGrad-div" class="mb-1">
-                              <label class="form-label fw-bold">Posto/Graduação</label>
-                              <select class="form-control mb-2" id="postoGrad">
-                                 <option value="">Selecione</option>
-                                 <option value="sd">SD.</option>
-                                 <option value="cb">CB.</option>
-                                 <option value="3sgt">3º SGT.</option>
-                                 <option value="2sgt">2º SGT.</option>
-                                 <option value="1sgt">1º SGT.</option>
-                                 <option value="st">ST.</option>
-                                 <option value="2ten">2º TEN.</option>
-                                 <option value="1ten">1º TEN.</option>
-                                 <option value="cap">CAP.</option>
-                                 <option value="maj">MAJ.</option>
-                                 <option value="tenCel">TEN. CEL.</option>
-                                 <option value="cel">CEL.</option>
-                              </select>
-                           </div>
+                     <div class="col-md-4">
+                        <div id="referencia-div">
+                           <label class="form-label fw-bold">Referência</label>
+                           <input id="referencia" type="text" class="form-control mb-2">
                         </div>
 
-                        <div class="col-md-4">
-                           <div id="mf_recebedor-div" class="mb-1">
-                              <label class="form-label fw-bold">Mat. Funcional</label>
-                              <input id="mf_recebedor" type="text" class="form-control mb-2" maxlength="11">
-                           </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div id="destino-div" class="mb-1">
+                           <label class="form-label fw-bold">Destino</label>
+                           <input id="destino" type="text" class="form-control mb-2">
                         </div>
+                     </div>
 
-                        <div class="col-md-4">
-                           <div id="tel_recebedor-div" class="mb-1">
-                              <label class="form-label fw-bold">Telefone</label>
-                              <input id="tel_recebedor" type="tel" class="form-control mb-2"
-                                 placeholder="somente números">
-                           </div>
+                  </div>
+                  <div id="row5" class="row">
+                     <div class="col-md-4">
+                        <div id="postoGrad-div" class="mb-1">
+                           <label class="form-label fw-bold">Posto/Graduação</label>
+                           <select class="form-control mb-2" id="postoGrad">
+                              <option value="">Selecione</option>
+                              <option value="sd">SD.</option>
+                              <option value="cb">CB.</option>
+                              <option value="3sgt">3º SGT.</option>
+                              <option value="2sgt">2º SGT.</option>
+                              <option value="1sgt">1º SGT.</option>
+                              <option value="st">ST.</option>
+                              <option value="2ten">2º TEN.</option>
+                              <option value="1ten">1º TEN.</option>
+                              <option value="cap">CAP.</option>
+                              <option value="maj">MAJ.</option>
+                              <option value="tenCel">TEN. CEL.</option>
+                              <option value="cel">CEL.</option>
+                           </select>
                         </div>
+                     </div>
 
-                        <div class="col-md-12">
-                           <div id="nome_do_recebedor-div" class="mb-1">
-                              <label class="form-label fw-bold">Nome Completo</label>
-                              <input id="nome_do_recebedor" type="text" class="form-control mb-2">
+                     <div class="col-md-4">
+                        <div id="mf_recebedor-div" class="mb-1">
+                           <label class="form-label fw-bold">Mat. Funcional</label>
+                           <input id="mf_recebedor" type="text" class="form-control mb-2" maxlength="11">
+                        </div>
+                     </div>
+
+                     <div class="col-md-4">
+                        <div id="tel_recebedor-div" class="mb-1">
+                           <label class="form-label fw-bold">Telefone</label>
+                           <input id="tel_recebedor" type="tel" class="form-control mb-2"
+                              placeholder="somente números">
+                        </div>
+                     </div>
+
+                     <div class="col-md-12">
+                        <div id="nome_do_recebedor-div" class="mb-1">
+                           <label class="form-label fw-bold">Nome Completo</label>
+                           <input id="nome_do_recebedor" type="text" class="form-control mb-2">
+                        </div>
+                     </div>
+                  </div>
+
+                  <div id="row6" class="row">
+                     <div class="col-md-12">
+                        <div id="observacao-div" class="mb-1">
+                           <label class="form-label fw-bold">Observação</label>
+                           <textarea id="observacao" type="text" class="form-control mb-2"></textarea>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div id="row3" class="row">
+                     <div class="col-md-12">
+                        <div id="itens_selecionados" class="mb-1">
+                           <label class="form-label mb-2 fw-bold">Itens a sair do estoque</label>
+                           <div id="selected-tombos-container">
+                              <ul id="selected-tombos" class="list-group">
+                                 <!-- Itens selecionados serão listados aqui -->
+                              </ul>
                            </div>
                         </div>
                      </div>
 
-                     <div id="row6" class="row">
-                        <div class="col-md-12">
-                           <div id="observacao-div" class="mb-1">
-                              <label class="form-label fw-bold">Observação</label>
-                              <textarea id="observacao" type="text" class="form-control mb-2"></textarea>
-                           </div>
-                        </div>
-                     </div>
-
-                     <div id="row3" class="row">
-                        <div class="col-md-12">
-                           <div id="itens_selecionados" class="mb-1">
-                              <label class="form-label mb-2 fw-bold">Itens a sair do estoque</label>
-                              <div id="selected-tombos-container">
-                                 <ul id="selected-tombos" class="list-group">
-                                    <!-- Itens selecionados serão listados aqui -->
-                                 </ul>
-                              </div>
-                           </div>
-                        </div>
-
-                        <div class="d-flex  mt-3 justify-content-around">
-                           <button id="submit-btn" type="submit" class="btn btn-success my-3 w-10">Registrar
-                              Saída</button>
-                        </div>
+                     <div class="d-flex  mt-3 justify-content-around">
+                        <button id="submit-btn" type="submit" class="btn btn-success my-3 w-10">Registrar
+                           Saída</button>
                      </div>
                   </div>
                </div>
             </div>
          </div>
+      </div>
 
-         <!-- Modal de Alerta -->
-         <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-               <div class="modal-content">
-                  <div class="modal-header">
-                     <h5 class="modal-title" id="errorModalLabel">Erro de Validação</h5>
-                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                     <p id="errorMessage"></p>
-                  </div>
-                  <div class="modal-footer">
-                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                  </div>
+      <!-- Modal de Alerta -->
+      <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title" id="errorModalLabel">Erro de Validação</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+               </div>
+               <div class="modal-body">
+                  <p id="errorMessage"></p>
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                </div>
             </div>
          </div>
+      </div>
 
-         <!-- Scripts necessários para o modal -->
-         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-            integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
-            </script>
-         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-            </script>
+      <!-- Scripts necessários para o modal -->
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+         integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
+         </script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+         </script>
 
-         <!-- Scripts para buscar e registrar saída -->
-         <script>
+      <!-- Scripts para buscar e registrar saída -->
+      <script>
+         document.addEventListener('DOMContentLoaded', function () {
             // Adiciona a função para selecionar um intervalo de itens
             function selectRange(start, end) {
                const checkboxes = document.querySelectorAll("#tombos-list input[type='checkbox']");
@@ -237,55 +245,94 @@
                   const li = document.getElementById(`selected-${checkbox.value}`);
                   selectedTombos.removeChild(li);
                }
+
+               updateResponsibilityTerm();
             }
-            document.addEventListener("DOMContentLoaded", async () => {
-               try {
-                  const response = await fetch("http://localhost:3030/api/itens-disponiveis");
-                  if (response.ok) {
-                     const itens = await response.json();
-                     const tombosList = document.getElementById("tombos-list");
 
-                     itens.forEach(item => {
-                        const div = document.createElement("div");
-                        div.className = "form-check";
+            // Função para obter o ano atual
+            function getCurrentYear() {
+               return new Date().getFullYear();
+            }
 
-                        const checkbox = document.createElement("input");
-                        checkbox.type = "checkbox";
-                        checkbox.className = "form-check-input";
-                        checkbox.value = item.tombo;
-                        checkbox.id = `tombo-${item.tombo}`;
-                        checkbox.addEventListener("change", () => toggleItem(checkbox));
+            // Função para obter o próximo número da sequência
+            function getNextSequence(year) {
+               let sequence = localStorage.getItem(`sequence_${year}`);
+               if (!sequence) {
+                  sequence = 1;
+               } else {
+                  sequence = parseInt(sequence, 10);
+                  console.log(`Número atual da sequência para o ano ${year}: ${sequence}`);
+               }
+               return sequence;
+            }
 
-                        const label = document.createElement("label");
-                        label.className = "form-check-label";
-                        label.htmlFor = `tombo-${item.tombo}`;
-                        label.textContent = `ID: ${item.id} - ${item.descricao} - Tombo: ${item.tombo}`;
-                        label.style.fontSize = "0.8rem";
+            // Função para incrementar e salvar o próximo número da sequência
+            function incrementSequence(year) {
+               let sequence = getNextSequence(year) + 1;
+               localStorage.setItem(`sequence_${year}`, sequence);
+               return sequence;
+            }
 
-                        div.appendChild(checkbox);
-                        div.appendChild(label);
-                        tombosList.appendChild(div);
-                     });
+            // Função para formatar a sequência com 5 dígitos
+            function formatSequence(sequence) {
+               return String(sequence).padStart(5, '0');
+            }
 
-                     let startCheckbox = null;
-                     tombosList.addEventListener("click", event => {
-                        if (event.target.tagName === "INPUT" && event.target.type === "checkbox") {
-                           if (startCheckbox && event.shiftKey) {
-                              selectRange(startCheckbox, event.target);
-                              startCheckbox = null;
-                           } else {
-                              startCheckbox = event.target;
-                           }
-                        }
-                     });
+            // Função para gerar o valor do Termo de Responsabilidade sem incrementar a sequência
+            function generateResponsibilityTerm() {
+               const year = getCurrentYear();
+               const sequence = getNextSequence(year);
+               const term = `${year}/${formatSequence(sequence)}`;
+               console.log(`Gerando Termo de Responsabilidade: ${term}`);
+               return term;
+            }
 
-                  } else {
-                     console.error("Erro na resposta da API:", await response.text());
+            // Função para gerar e incrementar o valor do Termo de Responsabilidade
+            function generateAndIncrementResponsibilityTerm() {
+               const year = getCurrentYear();
+               const sequence = incrementSequence(year);
+               const term = `${year}/${formatSequence(sequence)}`;
+               console.log(`Gerando e Incrementando Termo de Responsabilidade: ${term}`);
+               return term;
+            }
+
+            // Função para atualizar o termo de responsabilidade
+            function updateResponsibilityTerm() {
+               const docSaidaInput = document.getElementById('doc_saida');
+               if (isAnyCheckboxChecked()) {
+                  const term = generateResponsibilityTerm();
+                  docSaidaInput.value = term;
+               } else {
+                  docSaidaInput.value = "";
+               }
+            }
+
+            // Função para verificar se algum checkbox está marcado
+            function isAnyCheckboxChecked() {
+               const checkboxes = document.querySelectorAll('#tombos-list input[type="checkbox"]');
+               for (let checkbox of checkboxes) {
+                  if (checkbox.checked) {
+                     return true;
                   }
-               } catch (error) {
-                  console.error("Erro ao buscar itens disponíveis:", error);
+               }
+               return false;
+            }
+
+            // Observe checkboxes for range selection
+            const tombosList = document.getElementById("tombos-list");
+            let startCheckbox = null;
+            tombosList.addEventListener("click", event => {
+               if (event.target.tagName === "INPUT" && event.target.type === "checkbox") {
+                  if (startCheckbox && event.shiftKey) {
+                     selectRange(startCheckbox, event.target);
+                     startCheckbox = null;
+                  } else {
+                     startCheckbox = event.target;
+                  }
+                  toggleItem(event.target);
                }
             });
+
             document.getElementById("submit-btn").addEventListener("click", async () => {
                const selectedOptions = Array.from(document.querySelectorAll("#tombos-list input:checked"));
                const tombos = selectedOptions.map(option => option.value);
@@ -307,11 +354,10 @@
                   observacao: document.getElementById("observacao").value
                };
 
-               // Log dos dados que serão enviados
                console.log("Dados a serem enviados:", data);
 
                try {
-                  const response = await fetch("http://localhost:3030/saida", {
+                  const response = await fetch("https://56c9-45-166-118-225.ngrok-free.app/saida", { // URL do ngrok
                      method: "POST",
                      headers: {
                         "Content-Type": "application/json"
@@ -339,149 +385,54 @@
             function showAlert(message) {
                const alertPlaceholder = document.getElementById("errorMessage");
                alertPlaceholder.innerHTML = `
-      <div class="alert alert-danger alert-dismissible" role="alert">
-         ${message}
-         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-   `;
+               <div class="alert alert-danger alert-dismissible" role="alert">
+                  ${message}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+               </div>
+            `;
                var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
                errorModal.show();
             }
 
-            document.addEventListener('DOMContentLoaded', () => {
-               const telefoneInput = document.getElementById('tel_recebedor');
-               const matriculaInput = document.getElementById('mf_recebedor');
+            // Funções adicionais para formatação de telefone e matrícula
+            const telefoneInput = document.getElementById('tel_recebedor');
+            const matriculaInput = document.getElementById('mf_recebedor');
 
-               telefoneInput.addEventListener('input', (e) => {
-                  let value = e.target.value.replace(/\D/g, '');
-                  if (value.length > 11) value = value.slice(0, 11);
+            telefoneInput.addEventListener('input', (e) => {
+               let value = e.target.value.replace(/\D/g, '');
+               if (value.length > 11) value = value.slice(0, 11);
 
-                  if (value.length > 0) value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
-                  if (value.length > 3) value = `${value.slice(0, 4)} ${value.slice(4)}`;
-                  if (value.length > 10) value = `${value.slice(0, 11)}-${value.slice(11)}`;
+               if (value.length > 0) value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
+               if (value.length > 3) value = `${value.slice(0, 4)} ${value.slice(4)}`;
+               if (value.length > 10) value = `${value.slice(0, 11)}-${value.slice(11)}`;
 
-                  e.target.value = value;
-               });
-
-               matriculaInput.addEventListener('input', (e) => {
-                  let value = e.target.value.replace(/\D/g, '');
-                  console.log('Valor atual (apenas dígitos):', value);
-
-                  let bloco1 = value.slice(0, 3);
-                  let bloco2 = value.slice(3, 6);
-                  let bloco3 = value.slice(6, 7);
-                  let bloco4 = value.slice(7, 8);
-
-                  console.log('Bloco 1:', bloco1);
-                  console.log('Bloco 2:', bloco2);
-                  console.log('Bloco 3:', bloco3);
-                  console.log('Bloco 4:', bloco4);
-
-                  let formattedValue = bloco1;
-                  if (bloco2) formattedValue += `.${bloco2}`;
-                  if (bloco3) formattedValue += `-${bloco3}`;
-                  if (bloco4) formattedValue += `-${bloco4}`;
-
-                  e.target.value = formattedValue;
-                  console.log('Valor final formatado:', e.target.value);
-               });
+               e.target.value = value;
             });
 
-            document.addEventListener('DOMContentLoaded', function () {
+            matriculaInput.addEventListener('input', (e) => {
+               let value = e.target.value.replace(/\D/g, '');
+               console.log('Valor atual (apenas dígitos):', value);
 
-               // Função para obter o ano atual
-               function getCurrentYear() {
-                  return new Date().getFullYear();
-               }
+               let bloco1 = value.slice(0, 3);
+               let bloco2 = value.slice(3, 6);
+               let bloco3 = value.slice(6, 7);
+               let bloco4 = value.slice(7, 8);
 
-               // Função para obter o próximo número da sequência
-               function getNextSequence(year) {
-                  let sequence = localStorage.getItem(`sequence_${year}`);
-                  if (!sequence) {
-                     sequence = 1;
-                  } else {
-                     sequence = parseInt(sequence, 10);
-                     console.log(`Número atual da sequência para o ano ${year}: ${sequence}`);
-                  }
-                  return sequence;
-               }
+               console.log('Bloco 1:', bloco1);
+               console.log('Bloco 2:', bloco2);
+               console.log('Bloco 3:', bloco3);
+               console.log('Bloco 4:', bloco4);
 
-               // Função para incrementar e salvar o próximo número da sequência
-               function incrementSequence(year) {
-                  let sequence = getNextSequence(year) + 1;
-                  localStorage.setItem(`sequence_${year}`, sequence);
-                  return sequence;
-               }
+               let formattedValue = bloco1;
+               if (bloco2) formattedValue += `.${bloco2}`;
+               if (bloco3) formattedValue += `-${bloco3}`;
+               if (bloco4) formattedValue += `-${bloco4}`;
 
-               // Função para formatar a sequência com 5 dígitos
-               function formatSequence(sequence) {
-                  return String(sequence).padStart(5, '0');
-               }
-
-               // Função para gerar o valor do Termo de Responsabilidade sem incrementar a sequência
-               function generateResponsibilityTerm() {
-                  const year = getCurrentYear();
-                  const sequence = getNextSequence(year);
-                  const term = `${year}/${formatSequence(sequence)}`;
-                  console.log(`Gerando Termo de Responsabilidade: ${term}`);
-                  return term;
-               }
-
-               // Função para gerar e incrementar o valor do Termo de Responsabilidade
-               function generateAndIncrementResponsibilityTerm() {
-                  const year = getCurrentYear();
-                  const sequence = incrementSequence(year);
-                  const term = `${year}/${formatSequence(sequence)}`;
-                  console.log(`Gerando e Incrementando Termo de Responsabilidade: ${term}`);
-                  return term;
-               }
-
-               // Função para verificar se algum checkbox está marcado
-               function isAnyCheckboxChecked() {
-                  const checkboxes = document.querySelectorAll('#tombos-list input[type="checkbox"]');
-                  for (let checkbox of checkboxes) {
-                     if (checkbox.checked) {
-                        return true;
-                     }
-                  }
-                  return false;
-               }
-
-               // Observa mudanças nos checkboxes
-               function observeCheckboxes() {
-                  const checkboxes = document.querySelectorAll('#tombos-list input[type="checkbox"]');
-                  checkboxes.forEach(function (checkbox) {
-                     checkbox.addEventListener('change', function () {
-                        if (isAnyCheckboxChecked()) {
-                           const term = generateResponsibilityTerm();
-                           document.getElementById('doc_saida').value = term;
-                        }
-                     });
-                  });
-               }
-
-               // Observa submissão do formulário
-               document.getElementById('submit-btn').addEventListener('click', function (event) {
-                  if (isAnyCheckboxChecked()) {
-                     const term = generateAndIncrementResponsibilityTerm();
-                     document.getElementById('doc_saida').value = term;
-                  } else {
-                     showAlert("Selecione ao menos um item para registrar a saída.");
-                  }
-               });
-
-               // Chama a função para observar os checkboxes após o carregamento inicial da página
-               observeCheckboxes();
-
-               // Observar DOM para novos checkboxes sendo adicionados
-               const observer = new MutationObserver(function (mutationsList, observer) {
-                  observeCheckboxes();
-               });
-
-               observer.observe(document.getElementById('tombos-list'), { childList: true, subtree: true });
+               e.target.value = formattedValue;
+               console.log('Valor final formatado:', e.target.value);
             });
+         });
 
-         </script>
+      </script>
    </body>
-
 </html>

@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -12,6 +13,9 @@ import isAuthenticated from "./src/middleware/auth.js";
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Middleware de CORS
+app.use(cors());
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/pdfs", express.static(path.join(__dirname, "pdfs")));
@@ -30,8 +34,6 @@ app.use(
     cookie: { secure: false },
   })
 );
-
-
 
 app.use("/", loginLogoutRoutes); // As rotas de login/logout
 app.use("/", estoqueRoutes); // As rotas públicas de estoque
