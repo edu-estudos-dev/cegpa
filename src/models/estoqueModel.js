@@ -184,9 +184,9 @@ class EstoqueModel {
       observacao,
       descricao
    ) => {
-      const query = `INSERT INTO itensPagos (tombo, doc_saida, data_de_saida, quantidade, referencia, destino, posto_graduacao, mat_funcional, telefone, nome_completo, observacao, descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      const query = `INSERT INTO itenspagos (tombo, doc_saida, data_de_saida, quantidade, referencia, destino, posto_graduacao, mat_funcional, telefone, nome_completo, observacao, descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
       try {
-         console.log('Inserindo na tabela itensPagos com os seguintes dados:', {
+         console.log('Inserindo na tabela itenspagos com os seguintes dados:', {
             tombo,
             doc_saida,
             data_de_saida,
@@ -200,8 +200,8 @@ class EstoqueModel {
             observacao,
             descricao,
          });
-
-         await connection.execute(query, [
+   
+         const [result] = await connection.execute(query, [
             tombo,
             doc_saida,
             data_de_saida,
@@ -215,14 +215,17 @@ class EstoqueModel {
             observacao,
             descricao,
          ]);
-
+   
          const updateQuery = `UPDATE estoqueatual SET pago = 1 WHERE tombo = ?`;
          await connection.execute(updateQuery, [tombo]);
+   
+         return result.insertId; // Retorna o ID gerado pela inserção
       } catch (error) {
-         console.error('Erro ao inserir dados na tabela itensPagos:', error);
+         console.error('Erro ao inserir dados na tabela itenspagos:', error);
          throw error;
       }
    };
+   
 
    // Método para marcar item que saiu do estoque atual como 'pago'
    markAsPaid = async (id) => {

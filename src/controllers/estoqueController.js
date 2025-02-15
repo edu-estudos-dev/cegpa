@@ -287,7 +287,7 @@ class EstoqueController {
          res.status(500).json({ error: 'Erro ao obter itens disponíveis' });
       }
    }
-   
+
    // Método para Renderizar a tabela de itens pagos
    renderTabelaSaida = (_, res) => {
       res.render('tabelaSaidaEstoque', { itensPagos: [] }); // Render padrão com valor vazio
@@ -299,7 +299,9 @@ class EstoqueController {
          const itensPagos = await estoqueModel.getItensPagos();
          for (const item of itensPagos) {
             const detalhes = await estoqueModel.getItemPagoDetalhes(item.id);
-            item.tombo_estoqueatual = detalhes.tombo_estoqueatual;
+            item.tombo_estoqueatual = detalhes
+               ? detalhes.tombo_estoqueatual
+               : null;
          }
          res.render('tabelaSaidaEstoque', { itensPagos });
       } catch (error) {
@@ -307,7 +309,6 @@ class EstoqueController {
          res.status(500).send('Erro ao carregar os itens pagos.');
       }
    };
-   
 
    // Método para mostrar os itens que foram pagos na tabela
    fetchItensDisponiveis = async (_, res) => {
@@ -387,7 +388,7 @@ class EstoqueController {
          // Definindo a variável doc para criar o PDF
          const doc = new jsPDF();
          doc.setFont('helvetica');
-         const header = [['Ord.', 'Tombo', 'Descricao']];
+         const header = [['Ord.', 'Tombo', 'Descricao', 'Situacao']];
 
          const rows = [];
 
@@ -396,7 +397,7 @@ class EstoqueController {
             const itemEstoque = await estoqueModel.getItemByTombo(tombo);
             console.log('Item obtido do estoque:', itemEstoque);
 
-            await estoqueModel.createSaida(
+            const saidaId = await estoqueModel.createSaida(
                itemEstoque.id,
                doc_saida,
                dataDeSaida,
@@ -411,6 +412,8 @@ class EstoqueController {
                itemEstoque.descricao
             );
 
+            console.log('ID da saída registrada:', saidaId);
+
             // Atualiza a coluna "pago" na tabela estoqueatual
             await estoqueModel.markAsPaid(itemEstoque.id);
 
@@ -418,6 +421,7 @@ class EstoqueController {
                (i + 1).toString(),
                tombo,
                itemEstoque.descricao.toUpperCase(),
+               itemEstoque.situacao.toUpperCase(), // Obtém a situação do item do banco de dados
             ]);
          }
 
@@ -452,6 +456,7 @@ class EstoqueController {
                0: { cellWidth: 10 }, // Largura da coluna "Ord."
                1: { cellWidth: 30 }, // Largura da coluna "Tombo"
                2: { cellWidth: 'auto' }, // Largura da coluna "Descricao" ajustada automaticamente
+               3: { cellWidth: 30 }, // Largura da coluna "Situacao"
             },
          });
 
