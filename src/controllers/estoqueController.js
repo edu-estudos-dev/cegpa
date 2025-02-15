@@ -297,12 +297,17 @@ class EstoqueController {
    getAllItensPagos = async (_, res) => {
       try {
          const itensPagos = await estoqueModel.getItensPagos();
+         for (const item of itensPagos) {
+            const detalhes = await estoqueModel.getItemPagoDetalhes(item.id);
+            item.tombo_estoqueatual = detalhes.tombo_estoqueatual;
+         }
          res.render('tabelaSaidaEstoque', { itensPagos });
       } catch (error) {
          console.error('Erro ao carregar o estoque:', error);
          res.status(500).send('Erro ao carregar os itens pagos.');
       }
    };
+   
 
    // Método para mostrar os itens que foram pagos na tabela
    fetchItensDisponiveis = async (_, res) => {
