@@ -4,6 +4,7 @@ import 'jspdf-autotable';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import estoqueModel from '../models/estoqueModel.js';
+import sequenciaModel from "../models/sequenciaModel.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -337,6 +338,8 @@ class EstoqueController {
          observacao,
       } = req.body;
 
+      console.log('Requisição recebida para registrar saída:', req.body);
+
       // Verificações de campos obrigatórios
       if (!tombos || !tombos.length) {
          console.log('Erro: Nenhum tombo selecionado.');
@@ -467,15 +470,21 @@ class EstoqueController {
          fs.writeFileSync(pdfPath, doc.output());
 
          console.log('SAÍDA REGISTRADA COM SUCESSO.');
+
+         // Incrementa a sequência após salvar o PDF com sucesso
+         await sequenciaModel.incrementarSequencia(new Date().getFullYear());
+
          res.status(200).json({
             message: 'SAÍDA REGISTRADA COM SUCESSO!',
             pdfPath: `/pdfs/termo_de_entrega.pdf`,
          });
       } catch (error) {
          console.error('Erro ao registrar saída:', error);
-         res.status(500).json({
-            error: 'Erro ao registrar saída.',
-         });
+         if (!res.headersSent) {
+            res.status(500).json({
+               error: 'Erro ao registrar saída.',
+            });
+         }
       }
    };
 
