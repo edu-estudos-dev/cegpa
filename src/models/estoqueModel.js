@@ -47,7 +47,6 @@ class EstoqueModel {
       descricao,
       tombo,
       quantidade,
-      subgrupo,
       categoria,
       conta_contabil,
       doc_origem,
@@ -56,14 +55,13 @@ class EstoqueModel {
       situacao,
       observacao
    ) => {
-      const query = `INSERT INTO estoqueatual (data_de_entrada, descricao, tombo, quantidade, subgrupo, categoria, conta_contabil, doc_origem, estoque, valor, situacao, observacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      const query = `INSERT INTO estoqueatual (data_de_entrada, descricao, tombo, quantidade, categoria, conta_contabil, doc_origem, estoque, valor, situacao, observacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
       try {
          await connection.execute(query, [
             data_de_entrada,
             descricao,
             tombo,
             quantidade,
-            subgrupo,
             categoria,
             conta_contabil,
             doc_origem,
@@ -79,21 +77,25 @@ class EstoqueModel {
    };
 
    // Método para obter o último tombo de um subgrupo em um ano específico
-   getUltimoTombo = async (ano, subgrupo) => {
+   getUltimoTombo = async () => {
       const query = `
-      SELECT MAX(CAST(SUBSTR(tombo, 8) AS UNSIGNED)) AS ultimoTombo
-      FROM estoqueAtual
-      WHERE SUBSTR(tombo, 3, 4) = ? AND SUBSTR(tombo, 7, 1) = ?
-    `;
+      SELECT MAX(CAST(tombo AS UNSIGNED)) AS ultimoTombo
+      FROM estoqueatual
+      WHERE tombo LIKE '70000%';
+   `;
       try {
-         const [results] = await connection.execute(query, [ano, subgrupo]);
-         return results[0]?.ultimoTombo || 0; // Retorna o último tombo ou 0 se não houver resultados
+         const [results] = await connection.execute(query);
+         const ultimoTombo = results[0]?.ultimoTombo;
+         if (!ultimoTombo || ultimoTombo < 70000) {
+            return 69999; // Retorna 69999 para que o próximo seja 70000
+         }
+         return ultimoTombo;
       } catch (error) {
          console.error('Erro ao obter o último tombo:', error);
          throw error;
       }
    };
-
+   
    // Método para obter quantidade de itens únicos com base na descrição
    getQtdeUnicaEstoque = async () => {
       const query = `
@@ -200,7 +202,7 @@ class EstoqueModel {
             observacao,
             descricao,
          });
-   
+
          const [result] = await connection.execute(query, [
             tombo,
             doc_saida,
@@ -215,17 +217,16 @@ class EstoqueModel {
             observacao,
             descricao,
          ]);
-   
+
          const updateQuery = `UPDATE estoqueatual SET pago = 1 WHERE tombo = ?`;
          await connection.execute(updateQuery, [tombo]);
-   
+
          return result.insertId; // Retorna o ID gerado pela inserção
       } catch (error) {
          console.error('Erro ao inserir dados na tabela itenspagos:', error);
          throw error;
       }
    };
-   
 
    // Método para marcar item que saiu do estoque atual como 'pago'
    markAsPaid = async (id) => {

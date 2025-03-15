@@ -366,7 +366,7 @@
                   console.log("Dados a serem enviados:", data);
 
                   try {
-                     const response = await fetch("http://localhost:3000/saida", { // URL do ngrok
+                     const response = await fetch("http://localhost:3030/saida", { // URL do ngrok
                         method: "POST",
                         headers: {
                            "Content-Type": "application/json"
@@ -395,10 +395,10 @@
                });
 
                // Funções adicionais para formatação de telefone, matrícula e referência
-               const telefoneInput = document.getElementById('tel_recebedor');
                const matriculaInput = document.getElementById('mf_recebedor');
                const referenciaInput = document.getElementById('referencia');
-
+               const telefoneInput = document.getElementById('tel_recebedor');
+               
                telefoneInput.addEventListener('input', (e) => {
                   let value = e.target.value.replace(/\D/g, '');
                   if (value.length > 11) value = value.slice(0, 11);

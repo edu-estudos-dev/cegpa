@@ -22,7 +22,7 @@
 
          <div class="caixa container p-4">
 
-            <div class=" border caixa-externa p-4 shadow-sm rounded">
+            <div class="border caixa-externa p-4 shadow-sm rounded">
                <form id="formulario-entrada" action="/entrada" method="post">
 
                   <input id="id" type="hidden">
@@ -41,24 +41,11 @@
                         </div>
                      </div>
 
-                     <div class="col-md-1">
+                     <div class="col-md-2">
                         <div id="qtd-div" class="mb-3 text-center">
                            <label class="form-label text-center fw-bold">Qtde.</label>
                            <input id="qtd" type="number" class="form-control" name="quantidade"
                               onchange="atualizarTomboInicial()" min="1">
-                        </div>
-                     </div>
-
-                     <div class="col-md-1">
-                        <div id="subgrupo-div" class="mb-3 text-center">
-                           <label class="form-label fw-bold">Subgrupo</label>
-                           <select id="subgrupo" class="form-select" name="subgrupo" placeholder="Selecione"
-                              onchange="atualizarTomboInicial()">
-                              <option value=""></option>
-                              <option value="A">A</option>
-                              <option value="B">B</option>
-                              <option value="C">C</option>
-                           </select>
                         </div>
                      </div>
 
@@ -69,7 +56,7 @@
                         </div>
                      </div>
 
-                     <div class="col-md-2">
+                     <div class="col-md-3">
                         <div id="categoria-div" class="mb-3 text-center">
                            <label class="form-label fw-bold">Categoria</label>
                            <select id="categoria" class="form-select" name="categoria">
@@ -92,14 +79,16 @@
                         </div>
                      </div>
 
-                     <div class="col-md-2">
+                     <div class="col-md-3">
                         <div id="doc_origem-div" class="mb-3 text-center">
                            <label class="form-label fw-bold">Doc. de Origem</label>
                            <input id="doc_origem" type="text" class="form-control" placeholder="Nota Fiscal, etc..."
                               name="doc_origem">
                         </div>
                      </div>
+                  </div>
 
+                  <div id="row2" class="row">
                      <div class="col-md-2">
                         <div class="mb-3 text-center">
                            <label class="form-label fw-bold">Valor Unitário</label>
@@ -110,10 +99,7 @@
                         </div>
                      </div>
 
-                  </div>
-
-                  <div id="row2" class="row">
-                     <div class="col-md-10">
+                     <div class="col-md-8">
                         <div id="observacao-div" class="mb-3">
                            <label class="form-label fw-bold">Descrição</label>
                            <input placeholder="Descreva o item em detalhes." id="descricao" name="descricao" type="text"
@@ -145,20 +131,17 @@
                               <option selected>Escolha uma opção...</option>
                               <option value="medicao">APARELHOS DE MEDIÇÃO E ORIENTAÇÃO</option>
                               <option value="aeronaves">AERONAVES</option>
-                              <option value="almoxarifado">ALMOXARIFADO DE MATERIAIS A SEREM APLICADOS EM BENS EM
-                                 ANDAMENTO </option>
+                              <option value="almoxarifado">ALMOXARIFADO DE MATERIAIS A SEREM APLICADOS EM BENS EM ANDAMENTO</option>
                               <option value="comunicacao">APARELHOS E EQUIPAMENTOS DE COMUNICAÇÃO</option>
                               <option value="esportes">APARELHOS E EQUIPAMENTOS PARA ESPORTES E DIVERSÕES</option>
                               <option value="domesticos">APARELHOS E UTENSÍLIOS DOMÉSTICOS</option>
-                              <option value="medicos">APARELHOS, EQUIPAMENTOS E UTENSÍLIOS MÉDICOS, ODONTOLÓGICOS,
-                                 LABORATORIAIS E
-                                 HOSPITALARES</option>
+                              <option value="medicos">APARELHOS, EQUIPAMENTOS E UTENSÍLIOS MÉDICOS, ODONTOLÓGICOS, LABORATORIAIS E HOSPITALARES</option>
                               <option value="armamentos">ARMAMENTOS</option>
                               <option value="poder_outro">BENS EM PODER DE OUTRA UNIDADE OU TERCEIROS</option>
                               <option value="alienar">BENS MÓVEIS A ALIENAR</option>
                               <option value="classificar">BENS MÓVEIS A CLASSIFICAR</option>
                               <option value="reparar">BENS MÓVEIS A REPARAR</option>
-                              <option value="movel_elaboracao">BENS MÓVEIS EM ELABORACÃO</option>
+                              <option value="movel_elaboracao">BENS MÓVEIS EM ELABORAÇÃO</option>
                               <option value="inserviveis">BENS MÓVEIS INSERVÍVEIS</option>
                               <option value="combate">CARROS DE COMBATE</option>
                               <option value="colecoes">COLEÇÕES E MATERIAIS BIBLIOGRÁFICOS</option>
@@ -175,7 +158,7 @@
                               <option value="hidraulicos">EQUIPAMENTOS HIDRÁULICOS E ELÉTRICOS</option>
                               <option value="audio_video">EQUIPAMENTOS PARA ÁUDIO, VÍDEO E FOTO</option>
                               <option value="aeronauticos">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS AERONÁUTICOS</option>
-                              <option value="protecao_voo">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS DE PROTEÇÃO AO VOO </option>
+                              <option value="protecao_voo">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS DE PROTEÇÃO AO VOO</option>
                               <option value="maritimos">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS MARÍTIMOS</option>
                               <option value="automoveis">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS PARA AUTOMÓVEIS</option>
                               <option value="estoque_interno">ESTOQUE INTERNO</option>
@@ -185,16 +168,14 @@
                               <option value="graficos">MÁQUINAS E EQUIPAMENTOS GRÁFICOS</option>
                               <option value="industriais">MÁQUINAS E EQUIPAMENTOS INDUSTRIAIS</option>
                               <option value="escritorio">MÁQUINAS E UTENSÍLIOS DE ESCRITÓRIO</option>
-                              <option value="agropecuarios">MÁQUINAS, EQUIPAMENTOS E UTENSÍLIOS AGROPECUÁRIOS </option>
+                              <option value="agropecuarios">MÁQUINAS, EQUIPAMENTOS E UTENSÍLIOS AGROPECUÁRIOS</option>
                               <option value="rodoviarios">MÁQUINAS, EQUIPAMENTOS E UTENSÍLIOS RODOVIÁRIOS</option>
                               <option value="oficina">MÁQUINAS, FERRAMENTAS E UTENSÍLIOS DE OFICINA</option>
                               <option value="mobiliario">MOBILIÁRIO EM GERAL</option>
                               <option value="obras_arte">OBRAS DE ARTE E PEÇAS PARA EXPOSIÇÃO</option>
-                              <option value="outras_maquinas">OUTRAS MÁQUINAS, APARELHOS, EQUIPAMENTOS E FERRAMENTAS
-                              </option>
+                              <option value="outras_maquinas">OUTRAS MÁQUINAS, APARELHOS, EQUIPAMENTOS E FERRAMENTAS</option>
                               <option value="outros_bens">OUTROS BENS MÓVEIS</option>
-                              <option value="outros_culturais">OUTROS MATERIAIS CULTURAIS, EDUCACIONAIS E DE COMUNICAÇÃO
-                              </option>
+                              <option value="outros_culturais">OUTROS MATERIAIS CULTURAIS, EDUCACIONAIS E DE COMUNICAÇÃO</option>
                               <option value="pecas_reposicao">PEÇAS E CONJUNTOS DE REPOSIÇÃO</option>
                               <option value="semoventes">SEMOVENTES</option>
                               <option value="utensilios">UTENSÍLIOS EM GERAL</option>
@@ -233,7 +214,6 @@
                </form>
             </div>
          </div>
-         </div>
 
          <!-- Modal de Alerta -->
          <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
@@ -256,36 +236,28 @@
          <!-- Scripts necessários para o modal -->
          <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
             integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
-            </script>
+         </script>
          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-            </script>
+         </script>
 
          <!-- Scripts para o funcionamento do Tombo Inicial -->
          <script>
-            const gerarTomboInicial = (data, subgrupo, seq) => {
-               let ano = new Date(data).getFullYear().toString();
-               let sequencia = seq.toString().padStart(6, '0');
-               let tombo = `37${ano}${subgrupo}${sequencia}`;
-               console.log('Tombo inicial calculado:', tombo);
-               return tombo;
-            };
-
             const atualizarTomboInicial = () => {
                let data = document.getElementById('data_de_entrada').value;
-               let subgrupo = document.getElementById('subgrupo').value;
                let qtd = document.getElementById('qtd').value;
 
-               if (data && subgrupo && qtd) {
-                  let ano = new Date(data).getUTCFullYear().toString();
-                  fetch(`/ultimo-tombo?ano=${ano}&subgrupo=${subgrupo}`)
+               if (data && qtd) {
+                  fetch('/ultimo-tombo')
                      .then(response => response.json())
                      .then(data => {
-                        let ultimoTombo = data.ultimoTombo;
-                        let sequencia = (ultimoTombo + 1).toString().padStart(6, '0');
-                        let tombo_inicial = `37${ano}${subgrupo}${sequencia}`;
-                        document.getElementById('tombo_inicial').value = tombo_inicial;
-                        console.log('Tombo Inicial gerado:', tombo_inicial);
+                        let ultimoTombo = parseInt(data.ultimoTombo);
+                        let tomboInicial = (ultimoTombo + 1).toString();
+                        if (!tomboInicial.startsWith('70000')) {
+                           tomboInicial = '70000'; // Valor padrão se algo der errado
+                        }
+                        document.getElementById('tombo_inicial').value = tomboInicial;
+                        console.log('Tombo Inicial gerado:', tomboInicial);
                      })
                      .catch(error => console.error('Erro ao obter o último tombo:', error));
                }
@@ -293,7 +265,6 @@
 
             document.addEventListener('DOMContentLoaded', (event) => {
                document.getElementById('data_de_entrada').addEventListener('input', atualizarTomboInicial);
-               document.getElementById('subgrupo').addEventListener('input', atualizarTomboInicial);
                document.getElementById('qtd').addEventListener('input', atualizarTomboInicial);
             });
 
@@ -329,7 +300,6 @@
                      errorModal.show();
                   });
             });
-
          </script>
    </body>
 

@@ -4,7 +4,7 @@ import 'jspdf-autotable';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import estoqueModel from '../models/estoqueModel.js';
-import sequenciaModel from "../models/sequenciaModel.js";
+import sequenciaModel from '../models/sequenciaModel.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -68,13 +68,28 @@ class EstoqueController {
       res.render('cadastrarEstoque'); // Renderiza a view de cadastro de estoque
    };
 
+   // estoqueController.js
+
+   // Método para obter o último tombo
+   fetchUltimoTombo = async (req, res) => {
+      try {
+         const ultimoTombo = await estoqueModel.getUltimoTombo();
+         res.json({ ultimoTombo }); // Retorna o último tombo como JSON
+      } catch (error) {
+         console.error('Erro ao obter o último tombo:', error);
+         res.status(500).json({
+            error: 'Erro ao obter o último tombo',
+         });
+      }
+   };
+
    // Método para criar um novo item no estoque
+
    create = async (req, res) => {
       const {
          data_de_entrada,
          descricao,
          quantidade,
-         subgrupo,
          categoria,
          conta_contabil,
          doc_origem,
@@ -87,21 +102,17 @@ class EstoqueController {
       // Verificações de campos obrigatórios
       if (!data_de_entrada) {
          console.log('Erro: A data de entrada é obrigatória.');
-         return res.status(400).json({
-            error: 'A data de entrada é obrigatória.',
-         });
+         return res
+            .status(400)
+            .json({ error: 'A data de entrada é obrigatória.' });
       }
       if (!quantidade || quantidade <= 0) {
          console.log('Erro: A quantidade deve ser maior que zero.');
-         return res.status(400).json({
-            error: 'A quantidade deve ser maior que zero.',
-         });
+         return res
+            .status(400)
+            .json({ error: 'A quantidade deve ser maior que zero.' });
       }
-      if (!subgrupo || subgrupo === 'Selecione...') {
-         console.log('Erro: O subgrupo é obrigatório.');
-         return res.status(400).json({ error: 'O subgrupo é obrigatório.' });
-      }
-      if (!categoria || categoria === 'Escolha uma opção...') {
+      if (!categoria || categoria === 'Selecione...') {
          console.log('Erro: A categoria é obrigatória.');
          return res.status(400).json({ error: 'A categoria é obrigatória.' });
       }
@@ -111,23 +122,25 @@ class EstoqueController {
       }
       if (!conta_contabil || conta_contabil === 'Escolha uma opção...') {
          console.log('Erro: A conta contábil é obrigatória.');
-         return res.status(400).json({
-            error: 'A conta contábil é obrigatória.',
-         });
+         return res
+            .status(400)
+            .json({ error: 'A conta contábil é obrigatória.' });
       }
       if (!estoque || estoque === 'Escolha uma opção...') {
          console.log('Erro: O estoque é obrigatório.');
          return res.status(400).json({ error: 'O estoque é obrigatório.' });
       }
-      if (!doc_origem || doc_origem === 'Escolha uma opção...') {
+      if (!doc_origem) {
          console.log('Erro: O Documento de Origem é obrigatório.');
-         return res.status(400).json({
-            error: 'O Documento de Origem é obrigatório.',
-         });
+         return res
+            .status(400)
+            .json({ error: 'O Documento de Origem é obrigatório.' });
       }
-      if (!valor || valor === 'Escolha uma opção...') {
-         console.log('Erro: O valor é obrigatório.');
-         return res.status(400).json({ error: 'O valor é obrigatório.' });
+      if (!valor || valor <= 0) {
+         console.log('Erro: O valor é obrigatório e deve ser maior que zero.');
+         return res.status(400).json({
+            error: 'O valor é obrigatório e deve ser maior que zero.',
+         });
       }
       if (!situacao || situacao === 'Escolha uma opção...') {
          console.log('Erro: A Situação é obrigatória.');
@@ -138,7 +151,6 @@ class EstoqueController {
          data_de_entrada: data_de_entrada || null,
          descricao: descricao ? descricao.toUpperCase() : null,
          quantidade: quantidade || null,
-         subgrupo: subgrupo ? subgrupo.toUpperCase() : null,
          categoria: categoria ? categoria.toUpperCase() : null,
          conta_contabil: conta_contabil ? conta_contabil.toUpperCase() : null,
          doc_origem: doc_origem ? doc_origem.toUpperCase() : null,
@@ -149,26 +161,17 @@ class EstoqueController {
       };
 
       try {
-         const ano = new Date(safeData.data_de_entrada)
-            .getUTCFullYear()
-            .toString();
-         const ultimoTombo = await estoqueModel.getUltimoTombo(
-            ano,
-            safeData.subgrupo
-         );
-         let sequencia = (ultimoTombo + 1).toString().padStart(6, '0');
-         console.log('Sequência inicial:', sequencia);
+         const ultimoTombo = await estoqueModel.getUltimoTombo();
+         let tomboInicial = ultimoTombo + 1; // Incrementa sempre a partir do último
 
          for (let i = 0; i < safeData.quantidade; i++) {
-            const tomboUnico =
-               `37${ano}${safeData.subgrupo}${sequencia}`.substring(0, 13); // Garantir 13 caracteres
+            const tomboUnico = (tomboInicial + i).toString();
 
             await estoqueModel.createEstoque(
                safeData.data_de_entrada,
                safeData.descricao,
                tomboUnico,
                1,
-               safeData.subgrupo,
                safeData.categoria,
                safeData.conta_contabil,
                safeData.doc_origem,
@@ -177,34 +180,18 @@ class EstoqueController {
                safeData.situacao,
                safeData.observacao
             );
-
-            sequencia = (parseInt(sequencia) + 1).toString().padStart(6, '0');
          }
 
-         const todosEstoque = await estoqueModel.getAllEstoque(); // Obtém todos os itens do estoque
-         res.status(200).render('tabelaEstoque', {
-            estoque: todosEstoque,
-         }); // Renderiza a view de tabela de estoque
-         console.log(todosEstoque);
+         const todosEstoque = await estoqueModel.getAllEstoque();
+         res.status(200).render('tabelaEstoque', { estoque: todosEstoque });
       } catch (error) {
-         console.error('Erro ao inserir dados no estoque:', error);
+         console.error(
+            'Erro ao inserir dados no estoque:',
+            error.message,
+            error.stack
+         );
          res.status(500).json({
-            error: 'Erro ao inserir dados no estoque.',
-         });
-      }
-   };
-
-   // Método para obter o último tombo de um subgrupo em um ano específico
-   fetchUltimoTombo = async (req, res) => {
-      const { ano, subgrupo } = req.query;
-
-      try {
-         const ultimoTombo = await estoqueModel.getUltimoTombo(ano, subgrupo);
-         res.json({ ultimoTombo }); // Retorna o último tombo como JSON
-      } catch (error) {
-         console.error('Erro ao obter o último tombo:', error);
-         res.status(500).json({
-            error: 'Erro ao obter o último tombo',
+            error: `Erro ao inserir dados no estoque: ${error.message}`,
          });
       }
    };

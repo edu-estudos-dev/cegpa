@@ -11,16 +11,16 @@
   padding: 0;
 }
 
-body {
+/* body {
   margin-top: 2rem;
-}
+} */
 
 main {
   padding: 1rem;
 }
 
 .caixa {
-  /* margin-top: 5rem; */
+  margin-top: 2rem;
 }
 
 .caixa-externa{
