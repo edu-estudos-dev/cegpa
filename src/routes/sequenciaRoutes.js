@@ -3,7 +3,10 @@ import sequenciaController from "../controllers/sequenciaController.js";
 
 const router = express.Router();
 
-router.get('/proxima-sequencia', sequenciaController.getProximaSequencia);
-router.post('/incrementar-sequencia', sequenciaController.incrementarSequencia);
+// Gera novo termo de responsabilidade
+router.get('/gerar-termo', sequenciaController.gerarTermoResponsabilidade);
+
+// Consulta sequência por ano (opcional)
+router.get('/consultar/:ano', sequenciaController.consultarSequencia);
 
 export default router;

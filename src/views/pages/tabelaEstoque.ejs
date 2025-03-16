@@ -90,18 +90,19 @@
 
             <div class="row d-flex justify-content-center botoes">
                <div class="col-md-1 mx-3">
-                  <a href="/tabela/estoqueatual"
-                     class="btn btn-outline-success w-100 btn-header fw-bold nav-link active py-2 ">Geral</a>
+                  <a href="/tabela/estoqueatual" class="btn btn-outline-success w-100 btn-header fw-bold nav-link active py-2">Geral</a>
                </div>
                <div class="col-md-1 mx-3">
-                  <a href="/tabela/itens-novos" class="btn btn-outline-success w-100 btn-header fw-bold ">Itens Novo</a>
+                  <a href="/tabela/itens-novos" class="btn btn-outline-success w-100 btn-header fw-bold">Itens Novo</a>
                </div>
                <div class="col-md-1 mx-3">
-                  <a href="/tabela/itens-usados" class="btn btn-outline-success w-100 btn-header fw-bold ">Itens
-                     Usados</a>
+                  <a href="/tabela/itens-usados" class="btn btn-outline-success w-100 btn-header fw-bold">Itens Usados</a>
                </div>
                <div class="col-md-1 mx-3">
-                  <a href="/qtde-unica" class="btn btn-outline-success w-100 btn-header fw-bold ">Quantitativo</a>
+                  <a href="/qtde-unica" class="btn btn-outline-success w-100 btn-header fw-bold">Quantitativo</a>
+               </div>
+               <div class="col-md-1 mx-3">
+                  <a href="/generate-pdf" class="btn btn-outline-success w-100 btn-header fw-bold">Gerar PDF</a>
                </div>
             </div>
 
@@ -110,6 +111,8 @@
                   <h2 style="border-bottom: 4px solid orange;"
                      class="text-center text-white py-2 mt-0 fw-bold bg-success"> Estoque Geral</h2>
                </div>
+
+               <!-- tabelaEstoque.ejs -->
                <div class="table-container">
                   <table class="table table-striped table-hover mb-0">
                      <thead class="thead-success">
@@ -159,11 +162,11 @@
                                  </td>
                               </tr>
                               <% }); %>
-                        <% } else { %>
-                              <tr>
-                                 <td colspan="11" class="text-center">Ainda não há itens cadastrados</td>
-                              </tr>
-                           <% } %>
+                                 <% } else { %>
+                                    <tr>
+                                       <td colspan="11" class="text-center">Ainda não há itens cadastrados</td>
+                                    </tr>
+                                    <% } %>
                      </tbody>
                   </table>
                </div>

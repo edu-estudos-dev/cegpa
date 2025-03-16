@@ -11,15 +11,20 @@ const db_config = {
 
 const connection = mysql.createPool(db_config);
 
+// Função para testar a conexão
 const testConnection = async () => {
     try {
         const [rows] = await connection.query('SELECT 1');
         console.log(`Connected to database: ${process.env.DB_DATABASE}`);
     } catch (err) {
         console.error(`Error connecting to database: ${process.env.DB_DATABASE}`, err);
+        throw err; // Lançar o erro para que o chamador possa tratá-lo
     }
 };
 
-testConnection();
+// Chamar a função de teste, mas não bloquear a exportação
+testConnection().catch((err) => {
+    console.error('Initial connection test failed:', err);
+});
 
 export default connection;

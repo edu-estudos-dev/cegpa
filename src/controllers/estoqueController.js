@@ -5,13 +5,15 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import estoqueModel from '../models/estoqueModel.js';
 import sequenciaModel from '../models/sequenciaModel.js';
+
+// Configurar __dirname para ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 class EstoqueController {
    /* ********************************************************************************
                   Métodos para a ENTRADA de itens no Estoque
-  *********************************************************************************/
+   *********************************************************************************/
 
    // Método para renderizar a tabela com os itens novos
    showItensNovos = async (_req, res) => {
@@ -63,28 +65,23 @@ class EstoqueController {
       }
    };
 
+   // Método para listar todos os itens no estoque
+   getAllEstoque = async (req, res) => {
+      try {
+         const estoque = await estoqueModel.getAllEstoque(); // Obtém todos os itens do estoque
+         res.status(200).render('tabelaEstoque', { estoque }); // Renderiza a tabela de estoque
+      } catch (error) {
+         console.error('Erro ao carregar o estoque:', error);
+         res.status(500).send('Erro ao carregar o estoque.');
+      }
+   };
+
    // Método para renderizar o formulário de cadastro de estoque
    renderEntradaForm = (_, res) => {
       res.render('cadastrarEstoque'); // Renderiza a view de cadastro de estoque
    };
 
-   // estoqueController.js
-
-   // Método para obter o último tombo
-   fetchUltimoTombo = async (req, res) => {
-      try {
-         const ultimoTombo = await estoqueModel.getUltimoTombo();
-         res.json({ ultimoTombo }); // Retorna o último tombo como JSON
-      } catch (error) {
-         console.error('Erro ao obter o último tombo:', error);
-         res.status(500).json({
-            error: 'Erro ao obter o último tombo',
-         });
-      }
-   };
-
    // Método para criar um novo item no estoque
-
    create = async (req, res) => {
       const {
          data_de_entrada,
@@ -162,15 +159,17 @@ class EstoqueController {
 
       try {
          const ultimoTombo = await estoqueModel.getUltimoTombo();
-         let tomboInicial = ultimoTombo + 1; // Incrementa sempre a partir do último
+         console.log('Tombo inicial antes do incremento:', ultimoTombo);
+         let tomboInicial = ultimoTombo;
 
          for (let i = 0; i < safeData.quantidade; i++) {
-            const tomboUnico = (tomboInicial + i).toString();
+            const tomboUnico = tomboInicial + i + 1;
+            console.log('Tombo gerado:', tomboUnico);
 
             await estoqueModel.createEstoque(
                safeData.data_de_entrada,
                safeData.descricao,
-               tomboUnico,
+               tomboUnico, // Agora passa o número diretamente
                1,
                safeData.categoria,
                safeData.conta_contabil,
@@ -196,18 +195,19 @@ class EstoqueController {
       }
    };
 
-   // Método para trazer toso os itens do estoque
-   getAllEstoque = async (req, res) => {
+   // Método para obter o último tombo (endpoint para o frontend)
+   fetchUltimoTombo = async (req, res) => {
       try {
-         const estoque = await estoqueModel.getAllEstoque();
-         res.render('tabelaEstoque', { estoque });
+         const ultimoTombo = await estoqueModel.getUltimoTombo();
+         console.log('Tombo retornado para o frontend:', ultimoTombo); // Log para depuração
+         res.json({ ultimoTombo });
       } catch (error) {
-         console.error('Erro ao carregar o estoque:', error);
-         res.status(500).send('Erro ao carregar o estoque.');
+         console.error('Erro ao obter o último tombo:', error);
+         res.status(500).json({ error: 'Erro ao obter o último tombo' });
       }
    };
 
-   // Método para vizuaçizar um item
+   // Método para visualizar um item
    visualizarItem = async (req, res) => {
       try {
          const { id } = req.params;
@@ -261,9 +261,121 @@ class EstoqueController {
       }
    };
 
+   // Método para Gerar PDF da Tabela Geral
+   generatePDF = async (req, res) => {
+      try {
+         const estoque = await estoqueModel.getAllEstoque();
+         this._generatePDF(res, estoque, 'Relatório de Estoque Geral');
+      } catch (error) {
+         console.error('Erro ao gerar PDF:', error);
+         res.status(500).send('Erro ao gerar relatório em PDF');
+      }
+   };
+
+   // Método para Gerar PDF de Itens Novos
+   generatePDFNovos = async (req, res) => {
+      try {
+         const novos = await estoqueModel.getAllItensNovos();
+         this._generatePDF(res, novos, 'Relatório de Itens Novos');
+      } catch (error) {
+         console.error('Erro ao gerar PDF:', error);
+         res.status(500).send('Erro ao gerar relatório em PDF');
+      }
+   };
+
+   // Método para Gerar PDF de Itens Usados
+   generatePDFUsados = async (req, res) => {
+      try {
+         const usados = await estoqueModel.getAllItensUsados();
+         this._generatePDF(res, usados, 'Relatório de Itens Usados');
+      } catch (error) {
+         console.error('Erro ao gerar PDF:', error);
+         res.status(500).send('Erro ao gerar relatório em PDF');
+      }
+   };
+
+   // Método privado para geração do PDF
+   _generatePDF = (res, data, title) => {
+      try {
+         const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4',
+         });
+
+         // Configurações do PDF
+         const columns = [
+            { header: 'ID', dataKey: 'id', width: 12 },
+            { header: 'Entrada', dataKey: 'data_entrada', width: 25 },
+            { header: 'Descrição', dataKey: 'descricao', width: 120 },
+            { header: 'Tombo', dataKey: 'tombo', width: 25 },
+            { header: 'Categoria', dataKey: 'categoria', width: 35 },
+            { header: 'Estoque', dataKey: 'estoque', width: 30 },
+            { header: 'Situação', dataKey: 'situacao', width: 30 },
+         ];
+
+         const rows = data.map((item) => ({
+            id: item.id,
+            data_entrada: new Date(item.data_de_entrada).toLocaleDateString(
+               'pt-BR'
+            ),
+            descricao: item.descricao,
+            tombo: item.tombo,
+            categoria: item.categoria,
+            estoque: item.estoque,
+            situacao: item.situacao,
+         }));
+
+         // Cabeçalho
+         doc.setFontSize(16);
+         doc.text(title, 10, 15); // Ajustado para margem de 10 mm
+         doc.setFontSize(10);
+         doc.text(
+            `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
+            10,
+            22
+         );
+
+         // Tabela
+         doc.autoTable({
+            startY: 30,
+            margin: { left: 10, right: 10 }, // Margens ajustadas
+            head: [columns.map((col) => col.header)],
+            body: rows.map((row) => columns.map((col) => row[col.dataKey])),
+            styles: {
+               fontSize: 8,
+               cellPadding: 2,
+               halign: 'center',
+               overflow: 'linebreak', // Garante que o texto quebre linha dentro da célula
+            },
+            headStyles: {
+               fillColor: [34, 139, 34],
+               textColor: 255,
+               fontStyle: 'bold',
+            },
+            columnStyles: columns.reduce((acc, col, index) => {
+               acc[index] = { cellWidth: col.width };
+               return acc;
+            }, {}),
+         });
+
+         // Enviar PDF
+         const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+         res.setHeader('Content-Type', 'application/pdf');
+         res.setHeader(
+            'Content-Disposition',
+            `attachment; filename=${title.replace(/ /g, '_')}.pdf`
+         );
+         res.send(pdfBuffer);
+      } catch (error) {
+         console.error('Erro na geração do PDF:', error);
+         res.status(500).send('Erro interno na geração do PDF');
+      }
+   };
+
    /* ********************************************************************************
                   Métodos para a SAÍDA de itens no Estoque
-  *********************************************************************************/
+   *********************************************************************************/
 
    // Método para Renderizar a view de SAÍDA de estoque com dados do estoque disponíveis
    async renderSaidaForm(req, res) {
@@ -312,7 +424,7 @@ class EstoqueController {
    };
 
    // Método para registrar a saída de itens e gerar o PDF
-   registrarSaida = async (req, res) => {
+   async registrarSaida(req, res) {
       const {
          tombos,
          doc_saida,
@@ -325,69 +437,81 @@ class EstoqueController {
          observacao,
       } = req.body;
 
-      console.log('Requisição recebida para registrar saída:', req.body);
-
-      // Verificações de campos obrigatórios
-      if (!tombos || !tombos.length) {
-         console.log('Erro: Nenhum tombo selecionado.');
-         return res.status(400).json({ error: 'Nenhum tombo selecionado.' });
-      }
-      if (!doc_saida) {
-         console.log('Erro: O termo de responsabilidade é obrigatório.');
-         return res.status(400).json({
-            error: 'O termo de responsabilidade é obrigatório.',
-         });
-      }
-      if (!referencia) {
-         console.log('Erro: A referência é obrigatória.');
-         return res.status(400).json({ error: 'A referência é obrigatória.' });
-      }
-      if (!destino) {
-         console.log('Erro: O destino é obrigatório.');
-         return res.status(400).json({ error: 'O destino é obrigatório.' });
-      }
-      if (!postoGrad || postoGrad === 'Selecione') {
-         console.log('Erro: O posto/graduação é obrigatório.');
-         return res.status(400).json({
-            error: 'O posto/graduação é obrigatório.',
-         });
-      }
-      if (!mf_recebedor) {
-         console.log('Erro: A matrícula funcional é obrigatória.');
-         return res.status(400).json({
-            error: 'A matrícula funcional é obrigatória.',
-         });
-      }
-      if (!tel_recebedor) {
-         console.log('Erro: O telefone é obrigatório.');
-         return res.status(400).json({ error: 'O telefone é obrigatório.' });
-      }
-      if (!nome_do_recebedor) {
-         console.log('Erro: O nome do recebedor é obrigatório.');
-         return res.status(400).json({
-            error: 'O nome do recebedor é obrigatório.',
-         });
-      }
-
       try {
+         if (
+            !tombos?.length ||
+            !doc_saida ||
+            !referencia ||
+            !destino ||
+            !postoGrad ||
+            !mf_recebedor ||
+            !tel_recebedor ||
+            !nome_do_recebedor
+         ) {
+            return res
+               .status(400)
+               .json({ error: 'Preencha todos os campos obrigatórios' });
+         }
+
          const dataDeSaida = new Date();
-         const dataFormatada = dataDeSaida.toLocaleString('pt-BR', {
-            timeZone: 'America/Fortaleza',
+         const doc = new jsPDF();
+
+         // Borda externa em todas as páginas (5mm de margem)
+         doc.setDrawColor(0);
+         doc.setLineWidth(0.5);
+         doc.rect(
+            5,
+            5,
+            doc.internal.pageSize.width - 10,
+            doc.internal.pageSize.height - 10
+         );
+
+         // Cabeçalho
+         doc.setFontSize(16);
+         doc.text('TERMO DE ENTREGA DE MATERIAIS', 105, 20, {
+            align: 'center',
+         });
+         doc.setFontSize(10);
+
+         // Informações do termo
+         const headerYStart = 30;
+         const headerData = [
+            `Nº Termo: ${doc_saida}`,
+            `Data: ${dataDeSaida.toLocaleDateString('pt-BR')}`,
+            `Destino: ${destino}`,
+            `Responsável: ${postoGrad} ${nome_do_recebedor}`,
+            `MF: ${mf_recebedor}`,
+            `Contato: ${tel_recebedor}`,
+            `Referência: ${referencia}`,
+            `Observações: ${observacao || 'Nenhuma'}`,
+         ];
+
+         headerData.forEach((line, index) => {
+            doc.text(line, 14, headerYStart + index * 5);
          });
 
-         // Definindo a variável doc para criar o PDF
-         const doc = new jsPDF();
-         doc.setFont('helvetica');
-         const header = [['Ord.', 'Tombo', 'Descricao', 'Situacao']];
+         // Tabela de itens
+         let ordem = 1;
+         const items = [];
 
-         const rows = [];
-
-         for (let i = 0; i < tombos.length; i++) {
-            const tombo = tombos[i];
+         for (const tombo of tombos) {
             const itemEstoque = await estoqueModel.getItemByTombo(tombo);
-            console.log('Item obtido do estoque:', itemEstoque);
 
-            const saidaId = await estoqueModel.createSaida(
+            if (!itemEstoque) {
+               console.warn(`Tombo ${tombo} não encontrado`);
+               continue;
+            }
+
+            items.push([
+               ordem++,
+               itemEstoque.tombo,
+               itemEstoque.descricao
+                  .toUpperCase()
+                  .replace('RETAINGLIAR', 'RETANGULAR'),
+               itemEstoque.situacao.toUpperCase(),
+            ]);
+
+            await estoqueModel.createSaida(
                itemEstoque.id,
                doc_saida,
                dataDeSaida,
@@ -402,78 +526,129 @@ class EstoqueController {
                itemEstoque.descricao
             );
 
-            console.log('ID da saída registrada:', saidaId);
-
-            // Atualiza a coluna "pago" na tabela estoqueatual
             await estoqueModel.markAsPaid(itemEstoque.id);
-
-            rows.push([
-               (i + 1).toString(),
-               tombo,
-               itemEstoque.descricao.toUpperCase(),
-               itemEstoque.situacao.toUpperCase(), // Obtém a situação do item do banco de dados
-            ]);
          }
 
-         doc.setFontSize(18);
-         doc.text('Termo de Entrega', 105, 15, {
-            align: 'center',
-         });
-         doc.setFontSize(12);
-         doc.text(`Termo de Responsabilidade: ${doc_saida}`, 14, 25);
-         doc.text(`Referencia: ${referencia}`, 14, 32);
-         doc.text(`Destino: ${destino}`, 14, 39);
-         doc.text(`Posto/Graduacao: ${postoGrad}`, 14, 46);
-         doc.text(`Mat. Funcional: ${mf_recebedor}`, 14, 53);
-         doc.text(`Telefone: ${tel_recebedor}`, 14, 60);
-         doc.text(`Nome do Recebedor: ${nome_do_recebedor}`, 14, 67);
-         doc.text(`Data da Saida: ${dataFormatada}`, 14, 74);
-         doc.text(`Observacao: ${observacao}`, 14, 81);
-         doc.setFontSize(14);
-         doc.text('Itens entregues', 105, 90, {
-            align: 'center',
-         });
-
+         // Configuração da tabela e assinaturas
          doc.autoTable({
-            startY: 95,
-            head: header,
-            body: rows,
-            styles: { fontSize: 8, halign: 'center' },
-            headStyles: { fillColor: [53, 110, 0] },
-            footStyles: { fillColor: [20, 128, 185] },
-            theme: 'grid',
+            startY: 70,
+            head: [['ORD.', 'TOMBO', 'DESCRIÇÃO', 'SITUAÇÃO']],
+            body: items,
+            styles: {
+               fontSize: 8,
+               halign: 'center',
+               cellPadding: 1.5,
+            },
+            headStyles: {
+               fillColor: [34, 139, 34],
+               textColor: 255,
+               fontStyle: 'bold',
+            },
             columnStyles: {
-               0: { cellWidth: 10 }, // Largura da coluna "Ord."
-               1: { cellWidth: 30 }, // Largura da coluna "Tombo"
-               2: { cellWidth: 'auto' }, // Largura da coluna "Descricao" ajustada automaticamente
-               3: { cellWidth: 30 }, // Largura da coluna "Situacao"
+               0: { cellWidth: 10 },
+               1: { cellWidth: 25 },
+               2: { cellWidth: 130, halign: 'left' },
+               3: { cellWidth: 20 },
+            },
+            margin: { left: 13, right: 7 },
+            tableWidth: 'wrap',
+            didDrawPage: (data) => {
+               // Redesenha borda para páginas subsequentes
+               doc.rect(
+                  5,
+                  5,
+                  doc.internal.pageSize.width - 10,
+                  doc.internal.pageSize.height - 10
+               );
+
+               const pageHeight = doc.internal.pageSize.height;
+               const pageWidth = doc.internal.pageSize.width;
+
+               // Assinaturas 30mm da borda inferior
+               const signatureY = pageHeight - 30;
+               const lineMargin = 15;
+               const lineLength = 80;
+               const gapBetween = 30;
+
+               // Linhas de assinatura
+               doc.setLineWidth(0.5);
+
+               // Recebedor (esquerda)
+               doc.line(
+                  lineMargin,
+                  signatureY,
+                  lineMargin + lineLength,
+                  signatureY
+               );
+
+               // Responsável (direita)
+               doc.line(
+                  pageWidth - lineMargin - lineLength,
+                  signatureY,
+                  pageWidth - lineMargin,
+                  signatureY
+               );
+
+               // Textos centralizados
+               doc.setFontSize(9);
+
+               // Recebedor
+               doc.text(
+                  `${nome_do_recebedor}\nMF: ${mf_recebedor}`,
+                  lineMargin + lineLength / 2,
+                  signatureY + 5,
+                  { align: 'center' }
+               );
+               doc.text(
+                  '(RECEBEDOR)',
+                  lineMargin + lineLength / 2,
+                  signatureY + 12,
+                  { align: 'center', fontSize: 8 }
+               );
+
+               // Responsável
+               doc.text(
+                  'Cap. Ernesto Sales\nMF: 301.125-34',
+                  pageWidth - lineMargin - lineLength / 2,
+                  signatureY + 5,
+                  { align: 'center' }
+               );
+               doc.text(
+                  '(Responsável PELA ENTREGA)',
+                  pageWidth - lineMargin - lineLength / 2,
+                  signatureY + 12,
+                  { align: 'center', fontSize: 8 }
+               );
             },
          });
 
-         const pdfPath = path.join(
-            __dirname,
-            '../../pdfs/termo_de_entrega.pdf'
-         );
-         fs.writeFileSync(pdfPath, doc.output());
+         // Salvar PDF
+         const fileName = `Termo_${doc_saida.replace(/\//g, '-')}.pdf`;
+         const pdfPath = path.join(__dirname, '../../pdfs', fileName);
 
-         console.log('SAÍDA REGISTRADA COM SUCESSO.');
+         if (!fs.existsSync(path.dirname(pdfPath))) {
+            fs.mkdirSync(path.dirname(pdfPath), { recursive: true });
+         }
 
-         // Incrementa a sequência após salvar o PDF com sucesso
+         doc.save(pdfPath);
+
+         // Atualizar sequência
          await sequenciaModel.incrementarSequencia(new Date().getFullYear());
 
          res.status(200).json({
-            message: 'SAÍDA REGISTRADA COM SUCESSO!',
-            pdfPath: `/pdfs/termo_de_entrega.pdf`,
+            success: true,
+            pdfPath: `/pdfs/${fileName}`,
+            message: 'Saída registrada com sucesso!',
          });
       } catch (error) {
-         console.error('Erro ao registrar saída:', error);
-         if (!res.headersSent) {
-            res.status(500).json({
-               error: 'Erro ao registrar saída.',
-            });
-         }
+         console.error('Erro no registrarSaida:', error);
+         res.status(500).json({
+            success: false,
+            error: 'Erro interno no servidor',
+            details: error.message,
+         });
       }
-   };
+   }
 
    // Método para visualizar um item pago específico
    visualizarItemPago = async (req, res) => {

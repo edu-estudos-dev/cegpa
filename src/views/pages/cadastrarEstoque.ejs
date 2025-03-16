@@ -131,11 +131,13 @@
                               <option selected>Escolha uma opção...</option>
                               <option value="medicao">APARELHOS DE MEDIÇÃO E ORIENTAÇÃO</option>
                               <option value="aeronaves">AERONAVES</option>
-                              <option value="almoxarifado">ALMOXARIFADO DE MATERIAIS A SEREM APLICADOS EM BENS EM ANDAMENTO</option>
+                              <option value="almoxarifado">ALMOXARIFADO DE MATERIAIS A SEREM APLICADOS EM BENS EM
+                                 ANDAMENTO</option>
                               <option value="comunicacao">APARELHOS E EQUIPAMENTOS DE COMUNICAÇÃO</option>
                               <option value="esportes">APARELHOS E EQUIPAMENTOS PARA ESPORTES E DIVERSÕES</option>
                               <option value="domesticos">APARELHOS E UTENSÍLIOS DOMÉSTICOS</option>
-                              <option value="medicos">APARELHOS, EQUIPAMENTOS E UTENSÍLIOS MÉDICOS, ODONTOLÓGICOS, LABORATORIAIS E HOSPITALARES</option>
+                              <option value="medicos">APARELHOS, EQUIPAMENTOS E UTENSÍLIOS MÉDICOS, ODONTOLÓGICOS,
+                                 LABORATORIAIS E HOSPITALARES</option>
                               <option value="armamentos">ARMAMENTOS</option>
                               <option value="poder_outro">BENS EM PODER DE OUTRA UNIDADE OU TERCEIROS</option>
                               <option value="alienar">BENS MÓVEIS A ALIENAR</option>
@@ -173,9 +175,11 @@
                               <option value="oficina">MÁQUINAS, FERRAMENTAS E UTENSÍLIOS DE OFICINA</option>
                               <option value="mobiliario">MOBILIÁRIO EM GERAL</option>
                               <option value="obras_arte">OBRAS DE ARTE E PEÇAS PARA EXPOSIÇÃO</option>
-                              <option value="outras_maquinas">OUTRAS MÁQUINAS, APARELHOS, EQUIPAMENTOS E FERRAMENTAS</option>
+                              <option value="outras_maquinas">OUTRAS MÁQUINAS, APARELHOS, EQUIPAMENTOS E FERRAMENTAS
+                              </option>
                               <option value="outros_bens">OUTROS BENS MÓVEIS</option>
-                              <option value="outros_culturais">OUTROS MATERIAIS CULTURAIS, EDUCACIONAIS E DE COMUNICAÇÃO</option>
+                              <option value="outros_culturais">OUTROS MATERIAIS CULTURAIS, EDUCACIONAIS E DE COMUNICAÇÃO
+                              </option>
                               <option value="pecas_reposicao">PEÇAS E CONJUNTOS DE REPOSIÇÃO</option>
                               <option value="semoventes">SEMOVENTES</option>
                               <option value="utensilios">UTENSÍLIOS EM GERAL</option>
@@ -236,43 +240,43 @@
          <!-- Scripts necessários para o modal -->
          <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
             integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
-         </script>
+            </script>
          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-         </script>
+            </script>
 
          <!-- Scripts para o funcionamento do Tombo Inicial -->
          <script>
             const atualizarTomboInicial = () => {
                let data = document.getElementById('data_de_entrada').value;
                let qtd = document.getElementById('qtd').value;
-
+         
                if (data && qtd) {
                   fetch('/ultimo-tombo')
                      .then(response => response.json())
                      .then(data => {
                         let ultimoTombo = parseInt(data.ultimoTombo);
-                        let tomboInicial = (ultimoTombo + 1).toString();
-                        if (!tomboInicial.startsWith('70000')) {
-                           tomboInicial = '70000'; // Valor padrão se algo der errado
-                        }
+                        let tomboInicial = (ultimoTombo + 1).toString(); // Próximo tombo após o último
                         document.getElementById('tombo_inicial').value = tomboInicial;
-                        console.log('Tombo Inicial gerado:', tomboInicial);
+                        console.log('Tombo Inicial gerado no frontend:', tomboInicial); // Log para depuração
                      })
-                     .catch(error => console.error('Erro ao obter o último tombo:', error));
+                     .catch(error => {
+                        console.error('Erro ao obter o último tombo:', error);
+                        document.getElementById('tombo_inicial').value = '70000'; // Fallback apenas em erro
+                     });
                }
             };
-
+         
             document.addEventListener('DOMContentLoaded', (event) => {
                document.getElementById('data_de_entrada').addEventListener('input', atualizarTomboInicial);
                document.getElementById('qtd').addEventListener('input', atualizarTomboInicial);
             });
-
+         
             document.getElementById('formulario-entrada').addEventListener('submit', function (event) {
                event.preventDefault();
                const formData = new FormData(this);
                const json = JSON.stringify(Object.fromEntries(formData));
-
+         
                fetch('/entrada', {
                   method: 'POST',
                   headers: {

@@ -1,42 +1,23 @@
 import connection from '../../db_config/connection.js';
 
 class EstoqueModel {
-   //   /* ********************************************************************************
-   //                   Métodos para a ENTRADA de itens no Estoque
-   //   *********************************************************************************/
+   constructor() {
+      console.log('Instanciando EstoqueModel...');
+   }
+
+   /* ********************************************************************************
+                  Métodos para a ENTRADA de itens no Estoque
+   *********************************************************************************/
 
    // Método para obter todo o estoque
    getAllEstoque = async () => {
-      const query = `SELECT * FROM estoqueAtual WHERE pago = FALSE ORDER BY descricao ASC`;
+      const query = `SELECT * FROM estoqueatual WHERE pago = FALSE ORDER BY descricao ASC`;
       try {
          const [results] = await connection.execute(query);
-         return results; // Retorna apenas os itens não pagos
+         console.log('Resultados de getAllEstoque:', results);
+         return results;
       } catch (error) {
-         console.error('Erro ao buscar estoque Atual:', error);
-         throw error;
-      }
-   };
-
-   // Método para obter apenas os itens Usados do estoque
-   getAllItensNovos = async () => {
-      const query = `SELECT * FROM estoqueAtual WHERE pago = FALSE AND situacao = 'NOVO' ORDER BY descricao ASC`;
-      try {
-         const [results] = await connection.execute(query);
-         return results; // Retorna apenas os itens não pagos
-      } catch (error) {
-         console.error('Erro ao buscar itens novos no estoque atual:', error);
-         throw error;
-      }
-   };
-
-   // Método para obter apenas os itens Usados do estoque
-   getAllItensUsados = async () => {
-      const query = `SELECT * FROM estoqueAtual WHERE pago = FALSE AND (situacao = 'BOM' OR situacao = 'OTIMO' OR situacao = 'REGULAR') ORDER BY descricao ASC`;
-      try {
-         const [results] = await connection.execute(query);
-         return results; // Retorna apenas os itens não pagos
-      } catch (error) {
-         console.error('Erro ao buscar itens Usados no estoque atual:', error);
+         console.error('Erro ao buscar estoque atual:', error);
          throw error;
       }
    };
@@ -55,6 +36,10 @@ class EstoqueModel {
       situacao,
       observacao
    ) => {
+      // Validar que tombo é um número inteiro
+      if (!Number.isInteger(Number(tombo)) || tombo < 0) {
+         throw new Error('O tombo deve ser um número inteiro não negativo.');
+      }
       const query = `INSERT INTO estoqueatual (data_de_entrada, descricao, tombo, quantidade, categoria, conta_contabil, doc_origem, estoque, valor, situacao, observacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
       try {
          await connection.execute(query, [
@@ -76,64 +61,95 @@ class EstoqueModel {
       }
    };
 
-   // Método para obter o último tombo de um subgrupo em um ano específico
+   // Método para obter o último tombo
    getUltimoTombo = async () => {
+      // Logar todos os tombos para depuração
+      const queryAll = `SELECT tombo FROM estoqueatual ORDER BY tombo ASC`;
+      const [allResults] = await connection.execute(queryAll);
+      console.log('Todos os tombos no banco:', allResults);
+
+      // Consulta para obter o maior tombo
       const query = `
-      SELECT MAX(CAST(tombo AS UNSIGNED)) AS ultimoTombo
-      FROM estoqueatual
-      WHERE tombo LIKE '70000%';
-   `;
+         SELECT tombo
+         FROM estoqueatual
+         ORDER BY tombo DESC
+         LIMIT 1;
+      `;
       try {
          const [results] = await connection.execute(query);
-         const ultimoTombo = results[0]?.ultimoTombo;
-         if (!ultimoTombo || ultimoTombo < 70000) {
-            return 69999; // Retorna 69999 para que o próximo seja 70000
+         console.log('Resultado da query para maior tombo:', results);
+         if (!results || results.length === 0) {
+            console.log('Nenhum tombo encontrado, usando 70000 como fallback.');
+            return 70000;
          }
+         const ultimoTombo = results[0].tombo;
+         console.log('Maior tombo encontrado no banco:', ultimoTombo);
          return ultimoTombo;
       } catch (error) {
          console.error('Erro ao obter o último tombo:', error);
          throw error;
       }
    };
-   
+
+   // Método para obter apenas os itens Novos do estoque
+   getAllItensNovos = async () => {
+      const query = `SELECT * FROM estoqueatual WHERE pago = FALSE AND situacao = 'NOVO' ORDER BY descricao ASC`;
+      try {
+         const [results] = await connection.execute(query);
+         return results;
+      } catch (error) {
+         console.error('Erro ao buscar itens novos no estoque atual:', error);
+         throw error;
+      }
+   };
+
+   // Método para obter apenas os itens Usados do estoque
+   getAllItensUsados = async () => {
+      const query = `SELECT * FROM estoqueatual WHERE pago = FALSE AND (situacao = 'BOM' OR situacao = 'OTIMO' OR situacao = 'REGULAR') ORDER BY descricao ASC`;
+      try {
+         const [results] = await connection.execute(query);
+         return results;
+      } catch (error) {
+         console.error('Erro ao buscar itens Usados no estoque atual:', error);
+         throw error;
+      }
+   };
+
    // Método para obter quantidade de itens únicos com base na descrição
    getQtdeUnicaEstoque = async () => {
       const query = `
-    SELECT descricao, COUNT(*) AS quantidade
-    FROM estoqueAtual
-    WHERE pago = FALSE
-    GROUP BY descricao
-    ORDER BY descricao ASC;
-  `;
+         SELECT descricao, COUNT(*) AS quantidade
+         FROM estoqueatual
+         WHERE pago = FALSE
+         GROUP BY descricao
+         ORDER BY descricao ASC;
+      `;
       try {
          const [results] = await connection.execute(query);
-         return results; // Retorna a quantidade de itens únicos com base na descrição
+         return results;
       } catch (error) {
-         console.error(
-            'Erro ao buscar quantidade única de itens no estoque:',
-            error
-         );
+         console.error('Erro ao buscar quantidade única de itens no estoque:', error);
          throw error;
       }
    };
 
    /* ********************************************************************************
                   Métodos para a SAÍDA de itens no Estoque
-  *********************************************************************************/
+   *********************************************************************************/
 
    // Método para obter os itens disponíveis
    getItensDisponiveis = async () => {
-      const query = `SELECT * FROM estoqueAtual WHERE pago = FALSE`;
+      const query = `SELECT * FROM estoqueatual WHERE pago = FALSE`;
       try {
          const [results] = await connection.execute(query);
-         return results; // Retorna apenas os itens disponíveis
+         return results;
       } catch (error) {
          console.error('Erro ao buscar itens disponíveis:', error);
          throw error;
       }
    };
 
-   // Método para obter os itens que sairam do estoque
+   // Método para obter os itens que saíram do estoque
    getItensPagos = async () => {
       const query = `SELECT * FROM itenspagos`;
       try {
@@ -148,22 +164,22 @@ class EstoqueModel {
    // Método para obter os detalhes do item pago com informações do estoque atual
    getItemPagoDetalhes = async (id) => {
       const query = `
-      SELECT 
-        ip.*, 
-        ea.tombo AS tombo_estoqueatual 
-      FROM 
-        itenspagos ip
-      JOIN 
-        estoqueatual ea 
-      ON 
-        ip.tombo = ea.id  -- Alterando aqui para corresponder ao ID do estoque atual
-      WHERE 
-        ip.id = ?`;
+         SELECT 
+            ip.*, 
+            ea.tombo AS tombo_estoqueatual 
+         FROM 
+            itenspagos ip
+         JOIN 
+            estoqueatual ea 
+         ON 
+            ip.tombo = ea.id
+         WHERE 
+            ip.id = ?`;
       try {
          const [results] = await connection.execute(query, [id]);
-         console.log('Query executada:', query); // Log da query executada
-         console.log('Parâmetro ID:', id); // Log do parâmetro ID
-         console.log('Resultados da query:', results); // Log dos resultados
+         console.log('Query executada:', query);
+         console.log('Parâmetro ID:', id);
+         console.log('Resultados da query:', results);
          return results.length > 0 ? results[0] : null;
       } catch (error) {
          console.error('Erro ao buscar detalhes do item pago:', error);
@@ -171,7 +187,7 @@ class EstoqueModel {
       }
    };
 
-   // Método para adicionar a saida no banco de dados
+   // Método para adicionar a saída no banco de dados
    createSaida = async (
       tombo,
       doc_saida,
@@ -186,6 +202,10 @@ class EstoqueModel {
       observacao,
       descricao
    ) => {
+      // Validar que tombo é um número inteiro
+      if (!Number.isInteger(Number(tombo)) || tombo < 0) {
+         throw new Error('O tombo deve ser um número inteiro não negativo.');
+      }
       const query = `INSERT INTO itenspagos (tombo, doc_saida, data_de_saida, quantidade, referencia, destino, posto_graduacao, mat_funcional, telefone, nome_completo, observacao, descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
       try {
          console.log('Inserindo na tabela itenspagos com os seguintes dados:', {
@@ -221,7 +241,7 @@ class EstoqueModel {
          const updateQuery = `UPDATE estoqueatual SET pago = 1 WHERE tombo = ?`;
          await connection.execute(updateQuery, [tombo]);
 
-         return result.insertId; // Retorna o ID gerado pela inserção
+         return result.insertId;
       } catch (error) {
          console.error('Erro ao inserir dados na tabela itenspagos:', error);
          throw error;
@@ -234,17 +254,18 @@ class EstoqueModel {
       try {
          await connection.execute(query, [id]);
       } catch (error) {
-         console.error(
-            'Erro ao atualizar a coluna pago na tabela estoqueatual:',
-            error
-         );
+         console.error('Erro ao atualizar a coluna pago na tabela estoqueatual:', error);
          throw error;
       }
    };
 
    // Método para selecionar um item do estoque atual pelo tombo
    getItemByTombo = async (tombo) => {
-      const query = `SELECT * FROM estoqueAtual WHERE tombo = ?`;
+      // Validar que tombo é um número inteiro
+      if (!Number.isInteger(Number(tombo)) || tombo < 0) {
+         throw new Error('O tombo deve ser um número inteiro não negativo.');
+      }
+      const query = `SELECT * FROM estoqueatual WHERE tombo = ?`;
       try {
          const [results] = await connection.execute(query, [tombo]);
          return results.length > 0 ? results[0] : null;
@@ -256,10 +277,10 @@ class EstoqueModel {
 
    // Método para obter informações do tombo pelo ID
    getInfoByID = async (id) => {
-      const query = `SELECT * FROM estoqueAtual WHERE id = ?`;
+      const query = `SELECT * FROM estoqueatual WHERE id = ?`;
       try {
          const [results] = await connection.execute(query, [id]);
-         return results[0]; // Retorna apenas o item correspondente ao id
+         return results[0];
       } catch (error) {
          console.error('Erro ao buscar informações do tombo:', error);
          throw error;
@@ -270,9 +291,9 @@ class EstoqueModel {
    getItemPagoByID = async (id) => {
       const query = `SELECT * FROM itenspagos WHERE id = ?`;
       try {
-         console.log('Executando query:', query); // log da query
+         console.log('Executando query:', query);
          const [results] = await connection.execute(query, [id]);
-         console.log('Results from getItemPagoByID:', results); // log dos resultados
+         console.log('Results from getItemPagoByID:', results);
          return results.length > 0 ? results[0] : null;
       } catch (error) {
          console.error('Erro ao buscar item pago pelo ID:', error);
@@ -282,10 +303,10 @@ class EstoqueModel {
 
    // Método para excluir um item do estoque
    delete = async (id) => {
-      const query = `DELETE FROM estoqueAtual WHERE id = ?`;
+      const query = `DELETE FROM estoqueatual WHERE id = ?`;
       try {
          const [results] = await connection.execute(query, [id]);
-         return results.affectedRows; // Retorna o número de linhas deletadas
+         return results.affectedRows;
       } catch (error) {
          console.error('Erro ao excluir item:', error);
          throw error;
