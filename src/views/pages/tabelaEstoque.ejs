@@ -90,13 +90,15 @@
 
             <div class="row d-flex justify-content-center botoes">
                <div class="col-md-1 mx-3">
-                  <a href="/tabela/estoqueatual" class="btn btn-outline-success w-100 btn-header fw-bold nav-link active py-2">Geral</a>
+                  <a href="/tabela/estoqueatual"
+                     class="btn btn-outline-success w-100 btn-header fw-bold nav-link active py-2">Geral</a>
                </div>
                <div class="col-md-1 mx-3">
                   <a href="/tabela/itens-novos" class="btn btn-outline-success w-100 btn-header fw-bold">Itens Novo</a>
                </div>
                <div class="col-md-1 mx-3">
-                  <a href="/tabela/itens-usados" class="btn btn-outline-success w-100 btn-header fw-bold">Itens Usados</a>
+                  <a href="/tabela/itens-usados" class="btn btn-outline-success w-100 btn-header fw-bold">Itens
+                     Usados</a>
                </div>
                <div class="col-md-1 mx-3">
                   <a href="/qtde-unica" class="btn btn-outline-success w-100 btn-header fw-bold">Quantitativo</a>
@@ -119,11 +121,10 @@
                         <tr>
                            <th class="text-center">ID</th>
                            <th class="text-center">Entrada</th>
-                           <th>Descrição</th>
+                           <th class="text-center">Descrição</th>
                            <th class="text-center">Tombo</th>
                            <th class="text-center">Categoria</th>
                            <th class="text-center">Estoque</th>
-                           <!-- <th class="text-center">Valor</th> -->
                            <th class="text-center">Situação</th>
                            <th class="text-center">Ações</th>
                         </tr>
@@ -138,7 +139,7 @@
                                  <td class="py-1 text-center">
                                     <%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %>
                                  </td>
-                                 <td class="py-1">
+                                 <td class="py-1 text-center">
                                     <%= item.descricao %>
                                  </td>
                                  <td class="py-1 text-center">
@@ -150,7 +151,6 @@
                                  <td class="py-1 text-center">
                                     <%= item.estoque %>
                                  </td>
-                                 <!-- <td class="py-1 text-center">R$ <%= Number(item.valor).toFixed(2) %> </td> -->
                                  <td class="py-1 text-center">
                                     <%= item.situacao %>
                                  </td>
@@ -161,12 +161,12 @@
                                        class="btn btn-danger btn-sm btn-action btn-delete">Excluir</a>
                                  </td>
                               </tr>
-                              <% }); %>
-                                 <% } else { %>
-                                    <tr>
-                                       <td colspan="11" class="text-center">Ainda não há itens cadastrados</td>
-                                    </tr>
-                                    <% } %>
+                           <% }); %>
+                        <% } else { %>
+                           <tr>
+                              <td colspan="11" class="text-center">Ainda não há itens cadastrados</td>
+                           </tr>
+                        <% } %>
                      </tbody>
                   </table>
                </div>

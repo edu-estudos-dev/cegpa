@@ -565,7 +565,7 @@ class EstoqueController {
                const pageWidth = doc.internal.pageSize.width;
 
                // Assinaturas 30mm da borda inferior
-               const signatureY = pageHeight - 30;
+               const signatureY = pageHeight - 25;
                const lineMargin = 15;
                const lineLength = 80;
                const gapBetween = 30;
@@ -600,7 +600,7 @@ class EstoqueController {
                   { align: 'center' }
                );
                doc.text(
-                  '(RECEBEDOR)',
+                  '(Recebedor)',
                   lineMargin + lineLength / 2,
                   signatureY + 12,
                   { align: 'center', fontSize: 8 }
@@ -608,13 +608,13 @@ class EstoqueController {
 
                // Responsável
                doc.text(
-                  'Cap. Ernesto Sales\nMF: 301.125-34',
+                  'Cap. Ewandro Sales\nMF: 301.125-34',
                   pageWidth - lineMargin - lineLength / 2,
                   signatureY + 5,
                   { align: 'center' }
                );
                doc.text(
-                  '(Responsável PELA ENTREGA)',
+                  '(Responsável pela entrega)',
                   pageWidth - lineMargin - lineLength / 2,
                   signatureY + 12,
                   { align: 'center', fontSize: 8 }

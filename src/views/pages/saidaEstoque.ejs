@@ -46,365 +46,393 @@
    </style>
 
    <body>
-
       <%- include('../partials/header') %>
+      <div class="caixa w-90 p-4 mx-auto">
 
-         <div class="caixa w-90 p-4 mx-auto">
+         <div class=" border caixa-externa p-4 shadow-sm rounded">
 
-            <div class=" border caixa-externa p-4 shadow-sm rounded">
+            <div class="row align-items-center mb-3 px-3">
+               <h2 style="border-bottom: 4px solid orange;"
+                  class="text-center text-white py-2 mt-0 fw-bold bg-success"> Formulário de Saída </h2>
+            </div>
 
-               <div class="row align-items-center mb-3 px-3">
-                  <h2 style="border-bottom: 4px solid orange;"
-                     class="text-center text-white py-2 mt-0 fw-bold bg-success"> Formulário de Saída </h2>
-               </div>
-
-               <div class="row">
-                  <!-- Coluna da Esquerda -->
-                  <div class="col-md-6">
-                     <div id="row2" class="row">
-                        <div class="col-md-12">
-                           <div id="tombo_div" class="mb-2">
-                              <label class="form-label fw-bold">Itens em estoque</label>
-                              <div id="tombos-container">
-                                 <div style="font-size: 12px;" id="tombos-list" class="form-check">
-                                    <% itensDisponiveis.forEach(item=> { %>
-                                       <div class="form-check">
-                                          <input type="checkbox" class="form-check-input" value="<%= item.tombo %>"
-                                             id="tombo-<%= item.tombo %>">
-                                          <label class="form-check-label" for="tombo-<%= item.tombo %>">ID: <%= item.id
-                                                %> - <%= item.descricao %> - Tombo: <%= item.tombo %></label>
-                                       </div>
-                                       <% }); %>
-                                 </div>
+            <div class="row">
+               <!-- Coluna da Esquerda -->
+               <div class="col-md-6">
+                  <div id="row2" class="row">
+                     <div class="col-md-12">
+                        <div id="tombo_div" class="mb-2">
+                           <label class="form-label fw-bold">Itens em estoque</label>
+                           <div id="tombos-container">
+                              <div style="font-size: 12px;" id="tombos-list" class="form-check">
+                                 <% itensDisponiveis.forEach(item=> { %>
+                                    <div class="form-check">
+                                       <input type="checkbox" class="form-check-input" value="<%= item.tombo %>"
+                                          id="tombo-<%= item.tombo %>">
+                                       <label class="form-check-label" for="tombo-<%= item.tombo %>">ID: <%= item.id
+                                             %> - <%= item.descricao %> - Tombo: <%= item.tombo %></label>
+                                    </div>
+                                    <% }); %>
                               </div>
                            </div>
                         </div>
                      </div>
                   </div>
+               </div>
 
-                  <!-- Coluna da Direita -->
-                  <div class="col-md-6">
-                     <div id="row4" class="row">
-                        <div class="col-md-4">
-                           <div id="doc_saida-div">
-                              <label class="form-label fw-bold">Termo de Responsabilidade</label>
-                              <input style="background-color: var(secondary-color) !important;" name="doc_saida"
-                                 id="doc_saida" type="text" class="form-control mb-2" readonly>
-                           </div>
-
-                        </div>
-                        <div class="col-md-4">
-                           <div id="referencia-div">
-                              <label class="form-label fw-bold">NUP (Suite)</label>
-                              <input id="referencia" type="text" class="form-control mb-2">
-                           </div>
-
-                        </div>
-                        <div class="col-md-4">
-                           <div id="destino-div" class="mb-1">
-                              <label class="form-label fw-bold">Destino</label>
-                              <input id="destino" type="text" class="form-control mb-2">
-                           </div>
+               <!-- Coluna da Direita -->
+               <div class="col-md-6">
+                  <div id="row4" class="row">
+                     <div class="col-md-4">
+                        <div id="doc_saida-div">
+                           <label class="form-label fw-bold">Termo de Responsabilidade</label>
+                           <input style="background-color: var(secondary-color) !important;" name="doc_saida"
+                              id="doc_saida" type="text" class="form-control mb-2" readonly>
                         </div>
 
                      </div>
-                     <div id="row5" class="row">
-                        <div class="col-md-4">
-                           <div id="postoGrad-div" class="mb-1">
-                              <label class="form-label fw-bold">Posto/Graduação</label>
-                              <select class="form-control mb-2" id="postoGrad">
-                                 <option value="">Selecione</option>
-                                 <option value="sd">SD.</option>
-                                 <option value="cb">CB.</option>
-                                 <option value="3sgt">3º SGT.</option>
-                                 <option value="2sgt">2º SGT.</option>
-                                 <option value="1sgt">1º SGT.</option>
-                                 <option value="st">ST.</option>
-                                 <option value="2ten">2º TEN.</option>
-                                 <option value="1ten">1º TEN.</option>
-                                 <option value="cap">CAP.</option>
-                                 <option value="maj">MAJ.</option>
-                                 <option value="tenCel">TEN. CEL.</option>
-                                 <option value="cel">CEL.</option>
-                              </select>
-                           </div>
+                     <div class="col-md-4">
+                        <div id="referencia-div">
+                           <label class="form-label fw-bold">NUP (Suite)</label>
+                           <input id="referencia" type="text" class="form-control mb-2">
                         </div>
 
-                        <div class="col-md-4">
-                           <div id="mf_recebedor-div" class="mb-1">
-                              <label class="form-label fw-bold">Mat. Funcional</label>
-                              <input id="mf_recebedor" type="text" class="form-control mb-2" maxlength="11">
-                           </div>
+                     </div>
+                     <div class="col-md-4">
+                        <div id="destino-div" class="mb-1">
+                           <label class="form-label fw-bold">Destino</label>
+                           <input id="destino" type="text" class="form-control mb-2">
                         </div>
+                     </div>
 
-                        <div class="col-md-4">
-                           <div id="tel_recebedor-div" class="mb-1">
-                              <label class="form-label fw-bold">Telefone</label>
-                              <input id="tel_recebedor" type="tel" class="form-control mb-2"
-                                 placeholder="somente números">
-                           </div>
+                  </div>
+                  <div id="row5" class="row">
+                     <div class="col-md-4">
+                        <div id="postoGrad-div" class="mb-1">
+                           <label class="form-label fw-bold">Posto/Graduação</label>
+                           <select class="form-control mb-2" id="postoGrad">
+                              <option value="">Selecione</option>
+                              <option value="sd">SD.</option>
+                              <option value="cb">CB.</option>
+                              <option value="3sgt">3º SGT.</option>
+                              <option value="2sgt">2º SGT.</option>
+                              <option value="1sgt">1º SGT.</option>
+                              <option value="st">ST.</option>
+                              <option value="2ten">2º TEN.</option>
+                              <option value="1ten">1º TEN.</option>
+                              <option value="cap">CAP.</option>
+                              <option value="maj">MAJ.</option>
+                              <option value="tenCel">TEN. CEL.</option>
+                              <option value="cel">CEL.</option>
+                           </select>
                         </div>
+                     </div>
 
-                        <div class="col-md-12">
-                           <div id="nome_do_recebedor-div" class="mb-1">
-                              <label class="form-label fw-bold">Nome Completo</label>
-                              <input id="nome_do_recebedor" type="text" class="form-control mb-2">
+                     <div class="col-md-4">
+                        <div id="mf_recebedor-div" class="mb-1">
+                           <label class="form-label fw-bold">Mat. Funcional</label>
+                           <input id="mf_recebedor" type="text" class="form-control mb-2" maxlength="11">
+                        </div>
+                     </div>
+
+                     <div class="col-md-4">
+                        <div id="tel_recebedor-div" class="mb-1">
+                           <label class="form-label fw-bold">Telefone</label>
+                           <input id="tel_recebedor" type="tel" class="form-control mb-2"
+                              placeholder="somente números">
+                        </div>
+                     </div>
+
+                     <div class="col-md-12">
+                        <div id="nome_do_recebedor-div" class="mb-1">
+                           <label class="form-label fw-bold">Nome Completo</label>
+                           <input id="nome_do_recebedor" type="text" class="form-control mb-2">
+                        </div>
+                     </div>
+                  </div>
+
+                  <div id="row6" class="row">
+                     <div class="col-md-12">
+                        <div id="observacao-div" class="mb-1">
+                           <label class="form-label fw-bold">Observação</label>
+                           <textarea id="observacao" type="text" class="form-control mb-2"></textarea>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div id="row3" class="row">
+                     <div class="col-md-12">
+                        <div id="itens_selecionados" class="mb-1">
+                           <label class="form-label mb-2 fw-bold">Itens a sair do estoque</label>
+                           <div id="selected-tombos-container">
+                              <ul id="selected-tombos" class="list-group">
+                                 <!-- Itens selecionados serão listados aqui -->
+                              </ul>
                            </div>
                         </div>
                      </div>
 
-                     <div id="row6" class="row">
-                        <div class="col-md-12">
-                           <div id="observacao-div" class="mb-1">
-                              <label class="form-label fw-bold">Observação</label>
-                              <textarea id="observacao" type="text" class="form-control mb-2"></textarea>
-                           </div>
-                        </div>
-                     </div>
-
-                     <div id="row3" class="row">
-                        <div class="col-md-12">
-                           <div id="itens_selecionados" class="mb-1">
-                              <label class="form-label mb-2 fw-bold">Itens a sair do estoque</label>
-                              <div id="selected-tombos-container">
-                                 <ul id="selected-tombos" class="list-group">
-                                    <!-- Itens selecionados serão listados aqui -->
-                                 </ul>
-                              </div>
-                           </div>
-                        </div>
-
-                        <div class="d-flex  mt-3 justify-content-around">
-                           <button id="submit-btn" type="submit" class="btn btn-success my-3 w-10">Registrar
-                              Saída</button>
-                        </div>
+                     <div class="d-flex  mt-3 justify-content-around">
+                        <button id="submit-btn" type="submit" class="btn btn-success my-3 w-10">Registrar
+                           Saída</button>
                      </div>
                   </div>
                </div>
             </div>
          </div>
+      </div>
 
-         <!-- Modal de Alerta -->
-         <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-               <div class="modal-content">
-                  <div class="modal-header">
-                     <h5 class="modal-title" id="errorModalLabel">Erro de Validação</h5>
-                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                     <p id="errorMessage"></p>
-                  </div>
-                  <div class="modal-footer">
-                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                  </div>
+      <!-- Modal de Alerta -->
+      <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title" id="errorModalLabel">Erro de Validação</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+               </div>
+               <div class="modal-body">
+                  <p id="errorMessage"></p>
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                </div>
             </div>
          </div>
+      </div>
 
-         <!-- Scripts necessários para o modal -->
-         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-            integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
-            </script>
-         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-            </script>
+      <!-- Scripts necessários para o modal -->
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+         integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
+         </script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+         </script>
 
+      <!-- Scripts para buscar e registrar saída -->
+      <script>
+         document.addEventListener('DOMContentLoaded', function () {
+             // Estado da aplicação
+             let currentDocSaida = null;
+             let startCheckbox = null;
+     
+             // Elementos DOM
+             const docSaidaInput = document.getElementById('doc_saida');
+             const tombosList = document.getElementById('tombos-list');
+             const selectedTombos = document.getElementById('selected-tombos');
+     
+             // Funções auxiliares
+             const showAlert = (message) => {
+                 const errorMessage = document.getElementById('errorMessage');
+                 errorMessage.innerHTML = `
+                     <div class="alert alert-danger alert-dismissible" role="alert">
+                         ${message}
+                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                     </div>`;
+                 new bootstrap.Modal(document.getElementById('errorModal')).show();
+             };
+     
+             const formatarTelefone = (value) => {
+                 value = value.replace(/\D/g, '');
+                 if (value.length > 11) value = value.slice(0, 11);
+                 return value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+             };
+     
+             const formatarMatricula = (value) => {
+            // Remove todos os caracteres não numéricos e X
+            let cleaned = value.replace(/[^\dX]/gi, '');
+            
+            // Separa dígitos e Xs
+            let digits = [];
+            let xChars = [];
+            
+            for (let char of cleaned) {
+                if (char.toUpperCase() === 'X') {
+                    xChars.push(char);
+                } else {
+                    digits.push(char);
+                }
+            }
 
-         <!-- Scripts para buscar e registrar saída -->
-         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-               // Estado da aplicação
-               let currentDocSaida = null;
-               let startCheckbox = null;
+            // Mantém máximo de 7 dígitos + 1 caractere (X ou dígito)
+            let mainDigits = digits.slice(0, 7).join('');
+            let lastChar = xChars.length > 0 
+                ? 'X' 
+                : digits.slice(7, 8)[0] || '';
 
-               // Elementos DOM
-               const docSaidaInput = document.getElementById('doc_saida');
-               const tombosList = document.getElementById('tombos-list');
-               const selectedTombos = document.getElementById('selected-tombos');
+            // Limita a 8 caracteres no total
+            let formatted = (mainDigits + lastChar).slice(0, 8);
 
-               // Funções auxiliares
-               const showAlert = (message) => {
-                  const errorMessage = document.getElementById('errorMessage');
-                  errorMessage.innerHTML = `
-               <div class="alert alert-danger alert-dismissible" role="alert">
-                   ${message}
-                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-               </div>`;
-                  new bootstrap.Modal(document.getElementById('errorModal')).show();
-               };
-
-               const formatarTelefone = (value) => {
-                  value = value.replace(/\D/g, '');
-                  if (value.length > 11) value = value.slice(0, 11);
-                  return value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-               };
-
-               const formatarMatricula = (value) => {
-                  value = value.replace(/[^\dX]/gi, '');
-                  value = value.slice(0, 9);
-                  return value.replace(/(\d{3})(\d{3})(\d{1})(\w{1})/, '$1.$2-$3$4').toUpperCase();
-               };
-
-               const formatarReferencia = (value) => {
-                  value = value.replace(/\D/g, '');
-                  value = value.slice(0, 20);
-                  const parts = [
+            // Aplica a máscara
+            return formatted.replace(/(\d{3})(\d{3})(\d{1})([\dX])/i, '$1.$2-$3-$4')
+                           .toUpperCase();
+        };
+     
+             const formatarReferencia = (value) => {
+                 value = value.replace(/\D/g, '');
+                 value = value.slice(0, 20);
+                 const parts = [
                      value.slice(0, 5),
                      value.slice(5, 11),
                      value.slice(11, 15),
                      value.slice(15, 17)
-                  ];
-                  return `NUP ${parts[0]}${parts[1] ? `.${parts[1]}` : ''}${parts[2] ? `/${parts[2]}` : ''}${parts[3] ? `-${parts[3]}` : ''}`;
-               };
-
-               // Lógica de negócio
-               const gerarTermoResponsabilidade = async () => {
-                  try {
+                 ];
+                 return `NUP ${parts[0]}${parts[1] ? `.${parts[1]}` : ''}${parts[2] ? `/${parts[2]}` : ''}${parts[3] ? `-${parts[3]}` : ''}`;
+             };
+     
+             // Lógica de negócio
+             const gerarTermoResponsabilidade = async () => {
+                 try {
                      const response = await fetch('/gerar-termo');
                      if (!response.ok) throw new Error('Falha na geração do termo');
-
+     
                      const { doc_saida } = await response.json();
                      currentDocSaida = doc_saida;
                      docSaidaInput.value = doc_saida;
                      return true;
-
-                  } catch (error) {
+     
+                 } catch (error) {
                      showAlert(`Erro ao gerar termo: ${error.message}`);
                      return false;
-                  }
-               };
-
-               const validarFormulario = () => {
-                  const camposObrigatorios = {
+                 }
+             };
+     
+             const validarFormulario = () => {
+                 const camposObrigatorios = {
                      referencia: 'Referência (NUP)',
                      destino: 'Destino',
                      postoGrad: 'Posto/Graduação',
                      mf_recebedor: 'Matrícula Funcional',
                      tel_recebedor: 'Telefone',
                      nome_do_recebedor: 'Nome do Recebedor'
-                  };
-
-                  const erros = [];
-
-                  // Verificar seleção de itens
-                  if (document.querySelectorAll('#tombos-list input:checked').length === 0) {
+                 };
+     
+                 const erros = [];
+     
+                 if (document.querySelectorAll('#tombos-list input:checked').length === 0) {
                      erros.push('Selecione pelo menos um item do estoque');
-                  }
-
-                  // Verificar campos obrigatórios
-                  for (const [id, nome] of Object.entries(camposObrigatorios)) {
+                 }
+     
+                 for (const [id, nome] of Object.entries(camposObrigatorios)) {
                      if (!document.getElementById(id).value.trim()) {
-                        erros.push(`${nome} é obrigatório`);
+                         erros.push(`${nome} é obrigatório`);
                      }
-                  }
-
-                  return erros;
-               };
-
-               // Eventos
-               tombosList.addEventListener('click', (event) => {
-                  if (event.target.tagName === 'INPUT' && event.target.type === 'checkbox') {
-                     if (startCheckbox && event.shiftKey) {
-                        document.querySelectorAll('#tombos-list input[type="checkbox"]').forEach(checkbox => {
-                           if (checkbox === startCheckbox || checkbox === event.target) {
-                              checkbox.checked = true;
-                              atualizarItemSelecionado(checkbox);
-                           }
-                        });
-                        startCheckbox = null;
-                     } else {
-                        startCheckbox = event.target;
+                 }
+     
+                 return erros;
+             };
+     
+             // Evento de clique aprimorado
+             tombosList.addEventListener('click', (event) => {
+                 let checkbox;
+                 const target = event.target;
+     
+                 // Verificar se o clique foi em uma label ou checkbox
+                 if (target.tagName === 'LABEL' && target.htmlFor) {
+                     checkbox = document.getElementById(target.htmlFor);
+                 } else if (target.tagName === 'INPUT' && target.type === 'checkbox') {
+                     checkbox = target;
+                 } else {
+                     return;
+                 }
+     
+                 const checkboxes = Array.from(tombosList.querySelectorAll('input[type="checkbox"]'));
+                 
+                 if (event.shiftKey && startCheckbox) {
+                     const startIndex = checkboxes.indexOf(startCheckbox);
+                     const endIndex = checkboxes.indexOf(checkbox);
+                     const [start, end] = [Math.min(startIndex, endIndex), Math.max(startIndex, endIndex)];
+                     
+                     const isChecked = startCheckbox.checked;
+                     for (let i = start; i <= end; i++) {
+                         checkboxes[i].checked = isChecked;
+                         atualizarItemSelecionado(checkboxes[i]);
                      }
-                     atualizarItemSelecionado(event.target);
-                  }
-               });
-
-               const atualizarItemSelecionado = (checkbox) => {
-                  const item = checkbox.closest('div').querySelector('label').textContent;
-                  const listItem = document.getElementById(`selected-${checkbox.value}`);
-
-                  if (checkbox.checked) {
+                 } else {
+                     startCheckbox = checkbox;
+                     atualizarItemSelecionado(checkbox);
+                 }
+             });
+     
+             const atualizarItemSelecionado = (checkbox) => {
+                 const item = checkbox.closest('div').querySelector('label').textContent;
+                 const listItem = document.getElementById(`selected-${checkbox.value}`);
+     
+                 if (checkbox.checked) {
                      if (!listItem) {
-                        const li = document.createElement('li');
-                        li.className = 'list-group-item';
-                        li.id = `selected-${checkbox.value}`;
-                        li.textContent = item;
-                        li.style.fontSize = '0.8rem';
-                        selectedTombos.appendChild(li);
+                         const li = document.createElement('li');
+                         li.className = 'list-group-item';
+                         li.id = `selected-${checkbox.value}`;
+                         li.textContent = item;
+                         li.style.fontSize = '0.8rem';
+                         selectedTombos.appendChild(li);
                      }
                      if (!currentDocSaida) gerarTermoResponsabilidade();
-                  } else if (listItem) {
+                 } else if (listItem) {
                      listItem.remove();
-                  }
-               };
-
-               document.getElementById('submit-btn').addEventListener('click', async (e) => {
-                  e.preventDefault();
-
-                  try {
-                     // Validação inicial
+                 }
+             };
+     
+             // Evento de submit
+             document.getElementById('submit-btn').addEventListener('click', async (e) => {
+                 e.preventDefault();
+     
+                 try {
                      const erros = validarFormulario();
                      if (erros.length > 0) {
-                        showAlert(erros.join('<br>'));
-                        return;
+                         showAlert(erros.join('<br>'));
+                         return;
                      }
-
-                     // Garantir termo gerado
+     
                      if (!currentDocSaida && !await gerarTermoResponsabilidade()) return;
-
-                     // Preparar dados
+     
                      const formData = {
-                        tombos: Array.from(document.querySelectorAll('#tombos-list input:checked')).map(i => i.value),
-                        doc_saida: currentDocSaida,
-                        referencia: document.getElementById('referencia').value.trim(),
-                        destino: document.getElementById('destino').value.trim(),
-                        postoGrad: document.getElementById('postoGrad').value.trim(),
-                        mf_recebedor: document.getElementById('mf_recebedor').value.trim(),
-                        tel_recebedor: document.getElementById('tel_recebedor').value.trim(),
-                        nome_do_recebedor: document.getElementById('nome_do_recebedor').value.trim(),
-                        observacao: document.getElementById('observacao').value.trim()
+                         tombos: Array.from(document.querySelectorAll('#tombos-list input:checked')).map(i => i.value),
+                         doc_saida: currentDocSaida,
+                         referencia: document.getElementById('referencia').value.trim(),
+                         destino: document.getElementById('destino').value.trim(),
+                         postoGrad: document.getElementById('postoGrad').value.trim(),
+                         mf_recebedor: document.getElementById('mf_recebedor').value.trim(),
+                         tel_recebedor: document.getElementById('tel_recebedor').value.trim(),
+                         nome_do_recebedor: document.getElementById('nome_do_recebedor').value.trim(),
+                         observacao: document.getElementById('observacao').value.trim()
                      };
-
-                     // Enviar dados
+     
                      const response = await fetch('/saida', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData)
+                         method: 'POST',
+                         headers: { 'Content-Type': 'application/json' },
+                         body: JSON.stringify(formData)
                      });
-
+     
                      const result = await response.json();
-
+     
                      if (!response.ok) throw new Error(result.error || 'Erro desconhecido');
-
-                     // Sucesso
+     
                      window.open(result.pdfPath, '_blank');
                      location.reload();
-
-                  } catch (error) {
+     
+                 } catch (error) {
                      console.error('Erro:', error);
                      showAlert(error.message);
-                  } finally {
+                 } finally {
                      currentDocSaida = null;
-                  }
-               });
-
-               // Formatação automática de campos
-               document.getElementById('tel_recebedor').addEventListener('input', (e) => {
-                  e.target.value = formatarTelefone(e.target.value);
-               });
-
-               document.getElementById('mf_recebedor').addEventListener('input', (e) => {
-                  e.target.value = formatarMatricula(e.target.value);
-               });
-
-               document.getElementById('referencia').addEventListener('input', (e) => {
-                  e.target.value = formatarReferencia(e.target.value);
-               });
-            });
-         </script>
-
-
+                 }
+             });
+     
+             // Formatação automática
+             document.getElementById('tel_recebedor').addEventListener('input', (e) => {
+                 e.target.value = formatarTelefone(e.target.value);
+             });
+     
+             document.getElementById('mf_recebedor').addEventListener('input', (e) => {
+                 e.target.value = formatarMatricula(e.target.value);
+             });
+     
+             document.getElementById('referencia').addEventListener('input', (e) => {
+                 e.target.value = formatarReferencia(e.target.value);
+             });
+         });
+     </script>
+      
    </body>
 
 </html>
