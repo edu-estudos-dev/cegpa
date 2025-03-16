@@ -50,29 +50,6 @@
       <%- include('../partials/header') %>
 
          <div class="caixa w-90 p-4 mx-auto">
-
-            <div class="row d-flex justify-content-center botoes">
-
-               <div class="col-md-1 mx-3">
-                  <a href="/tabela/estoqueatual"
-                     class="btn btn-outline-success mx-2 w-100 btn-header fw-bold mx-3">Geral</a>
-               </div>
-               <div class="col-md-1 mx-3">
-                  <a href="/tabela/itens-novos"
-                     class="btn btn-outline-success mx-2 w-100 btn-header fw-bold  mx-3">Itens Novo</a>
-               </div>
-               <div class="col-md-1 mx-3">
-                  <a href="/tabela/itens-usados"
-                     class="btn btn-outline-success mx-2 w-100 btn-header fw-bold mx-3">Itens
-                     Usados</a>
-               </div>
-               <div class="col-md-1 mx-3">
-                  <a href="/qtde-unica"
-                     class="btn btn-outline-success mx-2 w-100 btn-header fw-bold nav-link active py-2 mx-3">Quantitativo</a>
-               </div>
-            </div>
-
-
             <div class="border caixa-externa p-4 shadow-sm rounded">
                <div class="row align-items-center mb-3 px-3">
                   <h2 style="border-bottom: 4px solid orange;"
@@ -98,17 +75,15 @@
                                  </td>
                               </tr>
                               <% }); %>
-                                 <% } else { %>
-
-                                    <tr>
-                                       <td colspan="2" class="text-center">Ainda não há itens cadastrados</td>
-                                    </tr>
-                                    <% } %>
+                           <% } else { %>
+                              <tr>
+                                 <td colspan="2" class="text-center">Ainda não há itens cadastrados</td>
+                              </tr>
+                           <% } %>
                      </tbody>
                   </table>
                </div>
             </div>
          </div>
    </body>
-
 </html>

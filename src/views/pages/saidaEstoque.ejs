@@ -12,7 +12,7 @@
       body {
          display: flex;
          align-items: center;
-         padding-top: 5.5rem;
+         padding-top: 2.5rem;
       }
 
 
@@ -263,10 +263,8 @@
             let formatted = (mainDigits + lastChar).slice(0, 8);
 
             // Aplica a máscara
-            return formatted.replace(/(\d{3})(\d{3})(\d{1})([\dX])/i, '$1.$2-$3-$4')
-                           .toUpperCase();
+            return formatted.replace(/(\d{3})(\d{3})(\d{1})([\dX])/i, '$1.$2-$3-$4').toUpperCase();
         };
-     
              const formatarReferencia = (value) => {
                  value = value.replace(/\D/g, '');
                  value = value.slice(0, 20);

@@ -1,57 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
    <style>
-      i {
-         font-size: 1rem !important;
+      * {
+         margin: 0;
+         padding: 0;
+         box-sizing: border-box;
+      }
+
+      .navbar {
+         background: linear-gradient(to right, #00621D, #0BA23D);
+         padding: 1rem 0;
+         width: 100%;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+      }
+
+      .navbar-container {
+         width: 90%;
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+      }
+
+      .navbar-brand {
+         color: #fff;
+         text-decoration: none;
+         font-size: 1.5rem;
+         font-weight: bold;
+         /* cursor: default; */ /* Removido para restaurar o cursor pointer */
+      }
+
+      /* Remove o efeito visual de hover para o navbar-brand */
+      .navbar-brand:hover {
+         background: none;
+         color: #fff; /* Mantém a cor branca mesmo ao passar o mouse */
+      }
+
+      .navbar-menu {
+         display: flex;
+         align-items: center;
+         list-style: none;
+         margin: 0;
+         padding: 0;
+      }
+
+      .navbar-item {
+         position: relative;
+         margin: 0 1rem;
+      }
+
+      .navbar-link, .dropdown-toggle {
+         color: #fff;
+         text-decoration: none;
+         font-weight: bold;
+         padding: 0.5rem 1rem;
+         border: 1px solid #fff;
+         border-radius: 4px;
+         transition: background-color 0.3s, color 0.3s;
+         display: inline-block;
+         width: 150px;
+         text-align: center;
+      }
+
+      .navbar-link.active, .dropdown-toggle.active {
+         background-color: #fffefc;
+         color: green;
+      }
+
+      .navbar-link:hover, .dropdown-toggle:hover {
+         background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .dropdown {
+         position: relative;
+      }
+
+      /* Adiciona uma área invisível para cobrir o espaço entre o botão e o dropdown */
+      .dropdown::before {
+         content: '';
+         position: absolute;
+         top: 100%;
+         left: 0;
+         width: 100%;
+         height: 10px; /* Preenche o espaço de 10px entre o botão e o dropdown */
+         z-index: 1000;
+      }
+
+      .dropdown-menu {
+         display: none;
+         position: absolute;
+         top: calc(100% + 10px); /* Mantém o espaço de 10px */
+         left: 0;
+         background-color: #fff;
+         border: none;
+         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+         list-style: none;
+         padding: 0;
+         margin: 0;
+         min-width: 200px;
+         z-index: 1000;
+      }
+
+      .dropdown:hover .dropdown-menu {
+         display: block;
+      }
+
+      .dropdown-item {
+         display: block;
+         padding: 0.5rem 1rem;
+         color: #333;
+         text-decoration: none;
+         transition: background-color 0.3s;
+      }
+
+      .dropdown-item:hover {
+         background-color: #f8f9fa;
+      }
+
+      .dropdown-item.active {
+         background-color: #fffefc;
+         color: green;
+         font-weight: bold;
+      }
+
+      .logout-link {
+         color: #fff;
+         text-decoration: none;
+         font-size: 1.2rem;
+         padding: 0.5rem 1.5rem;
       }
    </style>
 </head>
+<body>
+   <nav class="navbar">
+      <div class="navbar-container">
+         <a class="navbar-brand" href="/painel">CEGPA / NUCPA</a>
+         <ul class="navbar-menu">
+            <!-- Dropdown para Estoque -->
+            <li class="navbar-item dropdown">
+               <a href="/tabela/estoqueatual" class="dropdown-toggle">Estoque</a>
+               <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="/tabela/estoqueatual">Estoque Geral</a></li>
+                  <li><a class="dropdown-item" href="/tabela/itens-novos">Itens Novos</a></li>
+                  <li><a class="dropdown-item" href="/tabela/itens-usados">Itens Usados</a></li>
+                  <li><a class="dropdown-item" href="/qtde-unica">Quantitativo</a></li>
+               </ul>
+            </li>
 
-<nav class="navbar navbar-expand-lg py-3 navbar-light d-flex justify-content-between">
-   <div class="container-fluid ">
-      <div class="d-flex justify-content-between w-100 mx-5">
-         <div class="col-auto my-auto">
-            <a class="navbar-brand text-white" href="/painel">CEGPA / NUCPA</a>
-         </div>
-         <div class="col-auto d-flex align-items-center">
-            <form class="d-flex align-items-center w-100">
-               <a href="/tabela/estoqueatual" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Estoque</a>
-               <a href="/entrada" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Entrada</a>
-               <a href="/saida" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Saída</a>
-               <a href="/relatorios" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Relatórios</a>
-               <a href="/pesquisa-avancada-page" class="btn btn-outline-light mx-2 w-100 btn-header fw-bold">Pesquisa</a>
-            </form>
-         </div>
-         <div class="col-auto mt-1">
-            <a style="padding: 0.5rem 1.5rem; margin: 0; font-size: 1.2rem; text-decoration: none;" href="/logout"
-               class="text-white mx-2 w-100">Sair</a>
-         </div>
+            <!-- Dropdown para Formulários -->
+            <li class="navbar-item dropdown">
+               <a href="/entrada" class="dropdown-toggle">Formulários</a>
+               <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="/entrada">Entrada de Itens</a></li>
+                  <li><a class="dropdown-item" href="/saida">Saída de Itens</a></li>
+               </ul>
+            </li>
+
+            <!-- Dropdown para Relatórios -->
+            <li class="navbar-item dropdown">
+               <a href="/relatorios" class="dropdown-toggle">Relatórios</a>
+               <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="/relatorios">Entradas e Saídas</a></li>
+                  <li><a class="dropdown-item" href="/estoque/itenspagos">Itens Pagos</a></li>
+                  <li><a class="dropdown-item" href="/historico-movimentacao-page">Histórico</a></li>
+               </ul>
+            </li>
+
+            <!-- Botão Pesquisa -->
+            <li class="navbar-item">
+               <a href="/pesquisa-avancada-page" class="navbar-link">Pesquisa</a>
+            </li>
+         </ul>
+         <a class="logout-link" href="/logout">Sair</a>
       </div>
-   </div>
-</nav>
+   </nav>
 
-<script>
-   document.addEventListener('DOMContentLoaded', () => {
-      const currentPath = window.location.pathname;
-      const navLinks = document.querySelectorAll('.navbar a:not(.navbar-brand)');
+   <script>
+      document.addEventListener('DOMContentLoaded', () => {
+         const currentPath = window.location.pathname;
+         const navLinks = document.querySelectorAll('.navbar a:not(.navbar-brand)');
 
-      navLinks.forEach(link => {
-         const linkPath = new URL(link.href).pathname;
+         navLinks.forEach(link => {
+            const linkPath = new URL(link.href).pathname;
 
-         if (linkPath === currentPath) {
-            link.classList.add('active');
-         }
+            if (linkPath === currentPath) {
+               link.classList.add('active');
+               // Se for um item do dropdown, também marca o botão principal como ativo
+               if (link.classList.contains('dropdown-item')) {
+                  const parentDropdown = link.closest('.dropdown');
+                  if (parentDropdown) {
+                     parentDropdown.querySelector('.dropdown-toggle').classList.add('active');
+                  }
+               }
+            }
+         });
       });
-   });
-</script>
-
-<style>
-   .navbar a.active {
-      background-color: #fffefc;
-      color: green;
-   }
-
-   .navbar {
-      background: linear-gradient(to right, #00621D, #0BA23D);
-   }
-</style>
+   </script>
+</body>
+</html>
