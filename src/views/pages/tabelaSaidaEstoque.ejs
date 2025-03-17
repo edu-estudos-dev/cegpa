@@ -3,74 +3,74 @@
 
 <%- include('../partials/head', { title: 'Itens Pagos' }) %>
 
-   <style>
-      * {
-         margin: 0;
-         padding: 0;
-      }
+<style>
+   * {
+      margin: 0;
+      padding: 0;
+   }
 
-      body {
-         padding-top: 2.5rem;
-      }
+   body {
+      padding-top: 2.5rem;
+   }
 
-      .botoes {
-         margin-bottom: 1.9rem;
-      }
+   .botoes {
+      margin-bottom: 1.9rem;
+   }
 
+   .table-container {
+      max-height: 67vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 67vh;
+   }
+
+   .table-container table {
+      width: 100%;
+   }
+
+   .table-container th,
+   .table-container td {
+      word-wrap: break-word;
+      white-space: nowrap;
+   }
+
+   .table-container thead th {
+      position: sticky;
+      top: 0;
+      background-color: #fff;
+      z-index: 1;
+   }
+
+   .btn-action {
+      width: 70px;
+   }
+
+   .modal.fade .modal-dialog {
+      transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
+      transform: translateY(-10%);
+      opacity: 0;
+   }
+
+   .modal.show .modal-dialog {
+      transform: translateY(0);
+      opacity: 1;
+   }
+
+   .w-90 {
+      width: 90% !important;
+   }
+
+   .thead-success {
+      background-color: green !important;
+   }
+
+   /* Media Query para notebooks */
+   @media (max-width: 1920px) {
       .table-container {
-         max-height: 67vh;
-         overflow-y: auto;
-         overflow-x: hidden;
-         min-height: 67vh;
+         max-height: 56vh;
       }
-
-      .table-container table {
-         width: 100%;
-      }
-
-      .table-container th,
-      .table-container td {
-         word-wrap: break-word;
-         white-space: nowrap;
-      }
-
-      .table-container thead th {
-         position: sticky;
-         top: 0;
-         background-color: #fff;
-         z-index: 1;
-      }
-
-      .btn-action {
-         width: 70px;
-      }
-
-      .modal.fade .modal-dialog {
-         transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
-         transform: translateY(-10%);
-         opacity: 0;
-      }
-
-      .modal.show .modal-dialog {
-         transform: translateY(0);
-         opacity: 1;
-      }
-
-      .w-90 {
-         width: 90% !important;
-      }
-
-      .thead-success {
-         background-color: green !important;
-      }
-
-      /* Media Query para notebooks */
-      @media (max-width: 1920px) {
-         .table-container {
-            max-height: 56vh;
-         }
-      }
-   </style>
+   }
+</style>
 
 <body>
    <%- include('../partials/header') %>
@@ -89,9 +89,12 @@
                      <th class="text-center">ID</th>
                      <th class="text-center">Data da Saída</th>
                      <th>Descrição</th>
-                     <th class="text-center">Tombo</th> 
+                     <th class="text-center">Tombo</th>
                      <th class="text-center">Destino</th>
                      <th class="text-center">NUP (Suite)</th>
+                     <th class="text-center">Termo de Entrega</th>
+                     <th class="text-center">Doc Origem</th> <!-- Nova coluna -->
+                     <th class="text-center">Valor</th>
                      <th class="text-center">Vizualizar</th>
                   </tr>
                </thead>
@@ -109,7 +112,7 @@
                               <%= item.descricao.toUpperCase() %>
                            </td>
                            <td class="py-1 text-center">
-                              <%= item.tombo_estoqueatual %> <!-- Valor do Tombo -->
+                              <%= item.tombo_estoqueatual %>
                            </td>
                            <td class="py-1 text-center">
                               <%= item.destino.toUpperCase() %>
@@ -117,15 +120,29 @@
                            <td class="py-1 text-center">
                               <%= item.referencia.toUpperCase() %>
                            </td>
+                           <td class="py-1 text-center">
+                              <%= item.doc_saida.toUpperCase() %>
+                           </td>
+                           <td class="py-1 text-center">
+                              <%= item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A' %>
+                           </td> <!-- Nova coluna -->
+                           <td class="py-1 text-center">
+                              <% console.log('Valor do item:', item.valor); %>
+                              <% if (item.valor && !isNaN(parseFloat(item.valor))) { %>
+                                 <%= parseFloat(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %>
+                              <% } else { %>
+                                 R$ 0,00
+                              <% } %>
+                           </td>
                            <td class="py-1 text-center w-10">
                               <button type="button" class="btn btn-secondary btn-sm btn-action"
                                  data-id="<%= item.id %>">Detalhes</button>
                            </td>
                         </tr>
                         <% }); %>
-                           <% } else { %>
-                              <tr>
-                           <td colspan="7" class="text-center">Ainda não há itens Pagos</td>
+                     <% } else { %>
+                        <tr>
+                           <td colspan="10" class="text-center">Ainda não há itens Pagos</td> <!-- Ajustado para 10 colunas -->
                         </tr>
                      <% } %>
                </tbody>
@@ -173,6 +190,8 @@
                                           <strong>DESTINO:</strong> ${item.destino.toUpperCase()} <br/>
                                           <strong>REFERÊNCIA:</strong> ${item.referencia} <br/>
                                           <strong>DOC SAÍDA:</strong> ${item.doc_saida} <br/>
+                                          <strong>DOC ORIGEM:</strong> ${item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A'} <br/> <!-- Novo campo -->
+                                          <strong>VALOR:</strong> ${item.valor && !isNaN(parseFloat(item.valor)) ? parseFloat(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'} <br/>
                                           <strong>NOME COMPLETO:</strong> ${item.nome_completo} <br/>
                                           <strong>POSTO/GRADUAÇÃO:</strong> ${item.posto_graduacao} <br/>
                                           <strong>MAT FUNCIONAL:</strong> ${item.mat_funcional} <br/>
@@ -206,6 +225,4 @@
       });
    </script>
 </body>
-
-
 </html>

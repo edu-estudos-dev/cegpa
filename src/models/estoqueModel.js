@@ -151,12 +151,27 @@ class EstoqueModel {
 
    // Método para obter os itens que saíram do estoque
    getItensPagos = async () => {
-      const query = `SELECT * FROM itenspagos`;
+      const query = `
+         SELECT 
+            ip.id,
+            ip.data_de_saida,
+            ip.descricao,
+            ea.tombo AS tombo_estoqueatual,
+            ip.destino,
+            ip.referencia,
+            ip.doc_saida,
+            ea.doc_origem,
+            ea.valor
+         FROM itenspagos ip
+         JOIN estoqueatual ea ON ip.estoqueatual_id = ea.id
+         ORDER BY ip.data_de_saida DESC;
+      `;
       try {
          const [results] = await connection.execute(query);
+         console.log('Resultados de getItensPagos:', results);
          return results;
       } catch (error) {
-         console.error('Erro ao trazer itens pagos:', error);
+         console.error('Erro ao buscar itens pagos:', error);
          throw error;
       }
    };

@@ -509,6 +509,7 @@ class EstoqueController {
       }
    };
 
+
    // Método para registrar a saída de itens e gerar o PDF
    async registrarSaida(req, res) {
       console.log('Requisição recebida em registrarSaida:', req.body);
@@ -566,8 +567,8 @@ class EstoqueController {
          );
 
          // Cabeçalho
-         doc.setFontSize(16);
-         doc.text('TERMO DE ENTREGA DE MATERIAIS', 105, 20, {
+         doc.setFontSize(14);
+         doc.text('TERMO DE RECEBIMENTO E RESPONSABILIDADE - CEGPA/COLOG', 105, 20, {
             align: 'center',
          });
          doc.setFontSize(10);
@@ -596,7 +597,7 @@ class EstoqueController {
          console.log('Processando tombos:', tombos);
          for (const tombo of tombos) {
             console.log(`Buscando item com tombo ${tombo}...`);
-            const itemEstoque = await estoqueModel.getItemByTombo(tombo);
+            const itemEstoque = await estoqueModel.getInfoByTombo(tombo); // Corrigido de getItemByTombo para getInfoByTombo
 
             if (!itemEstoque) {
                console.warn(`Tombo ${tombo} não encontrado`);
