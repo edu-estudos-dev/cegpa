@@ -161,7 +161,6 @@ class EstoqueModel {
       }
    };
 
-
    // Método para obter os itens pagos formatados para o PDF
    getItensPagosForPDF = async () => {
       const query = `
@@ -188,7 +187,7 @@ class EstoqueModel {
          throw error;
       }
    };
-   
+
    // Método para obter os detalhes do item pago com informações do estoque atual
    getItemPagoDetalhes = async (id) => {
       const query = `
@@ -284,12 +283,12 @@ class EstoqueModel {
    };
 
    // Método para selecionar um item do estoque atual pelo tombo
-   getItemByTombo = async (tombo) => {
+   getInfoByTombo = async (tombo) => {
       // Validar que tombo é um número inteiro
       if (!Number.isInteger(Number(tombo)) || tombo < 0) {
          throw new Error('O tombo deve ser um número inteiro não negativo.');
       }
-      const query = `SELECT * FROM estoqueatual WHERE tombo = ?`;
+      const query = `SELECT * FROM estoqueatual WHERE tombo = ?`; // Removida a restrição pago = FALSE
       try {
          const [results] = await connection.execute(query, [tombo]);
          return results.length > 0 ? results[0] : null;
@@ -304,7 +303,7 @@ class EstoqueModel {
       const query = `SELECT * FROM estoqueatual WHERE id = ?`;
       try {
          const [results] = await connection.execute(query, [id]);
-         return results[0];
+         return results.length > 0 ? results[0] : null;
       } catch (error) {
          console.error('Erro ao buscar informações do tombo:', error);
          throw error;
@@ -333,6 +332,19 @@ class EstoqueModel {
          return results.affectedRows;
       } catch (error) {
          console.error('Erro ao excluir item:', error);
+         throw error;
+      }
+   };
+
+   // Método para obter informações de saída com base no estoqueatual_id (adicionado)
+   getSaidaByEstoqueatualId = async (estoqueatual_id) => {
+      const query = `SELECT * FROM itenspagos WHERE estoqueatual_id = ?`;
+      try {
+         const [results] = await connection.execute(query, [estoqueatual_id]);
+         console.log('Resultados de getSaidaByEstoqueatualId:', results);
+         return results.length > 0 ? results[0] : null;
+      } catch (error) {
+         console.error('Erro ao buscar dados de saída pelo estoqueatual_id:', error);
          throw error;
       }
    };

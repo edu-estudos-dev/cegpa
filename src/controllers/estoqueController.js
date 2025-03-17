@@ -128,10 +128,10 @@ class EstoqueController {
          return res.status(400).json({ error: 'O estoque é obrigatório.' });
       }
       if (!doc_origem) {
-         console.log('Erro: O Documento de Origem é obrigatório.');
+         console.log('Erro: O Documento de Origem é obrigatória.');
          return res
             .status(400)
-            .json({ error: 'O Documento de Origem é obrigatório.' });
+            .json({ error: 'O Documento de Origem é obrigatória.' });
       }
       if (!valor || valor <= 0) {
          console.log('Erro: O valor é obrigatório e deve ser maior que zero.');
@@ -394,139 +394,6 @@ class EstoqueController {
          });
 
          const columns = [
-            { header: 'ID', dataKey: 'id', width: 15 },
-            { header: 'Data da Saída', dataKey: 'data_de_saida', width: 25 },
-            { header: 'Descrição', dataKey: 'descricao', width: 60 },
-            { header: 'Tombo', dataKey: 'tombo_estoqueatual', width: 25 },
-            { header: 'Destino', dataKey: 'destino', width: 30 },
-            { header: 'NUP (Suite)', dataKey: 'referencia', width: 35 },
-            { header: 'Doc Saída', dataKey: 'doc_saida', width: 25 },
-            { header: 'Valor', dataKey: 'valor', width: 25 },
-         ];
-
-         const rows = data.map((item) => ({
-            id: item.id,
-            data_de_saida: new Date(item.data_de_saida).toLocaleDateString('pt-BR'),
-            descricao: item.descricao ? item.descricao.toUpperCase() : 'N/A',
-            tombo_estoqueatual: item.tombo_estoqueatual || 'N/A',
-            destino: item.destino ? item.destino.toUpperCase() : 'N/A',
-            referencia: item.referencia ? item.referencia.toUpperCase() : 'N/A',
-            doc_saida: item.doc_saida || 'N/A',
-            valor: item.valor 
-               ? parseFloat(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
-               : 'N/A',
-         }));
-
-         doc.setFontSize(16);
-         doc.text(title, 10, 15);
-         doc.setFontSize(10);
-         doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 10, 22);
-
-         doc.autoTable({
-            startY: 30,
-            margin: { left: 10, right: 10 },
-            head: [columns.map((col) => col.header)],
-            body: rows.map((row) => columns.map((col) => row[col.dataKey])),
-            styles: {
-               fontSize: 8,
-               cellPadding: 2,
-               halign: 'center',
-               overflow: 'linebreak',
-            },
-            headStyles: {
-               fillColor: [34, 139, 34],
-               textColor: 255,
-               fontStyle: 'bold',
-            },
-            columnStyles: columns.reduce((acc, col, index) => {
-               acc[index] = { cellWidth: col.width };
-               return acc;
-            }, {}),
-         });
-
-         const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
-         res.setHeader('Content-Type', 'application/pdf');
-         res.setHeader(
-            'Content-Disposition',
-            `attachment; filename=${title.replace(/ /g, '_')}.pdf`
-         );
-         res.send(pdfBuffer);
-      } catch (error) {
-         console.error('Erro na geração do PDF:', error);
-         res.status(500).json({ error: 'Erro interno na geração do PDF' });
-      }
-   };
-
-      /* ********************************************************************************
-                  Métodos para a SAÍDA de itens no Estoque
-      *********************************************************************************/
-
-   // Método para Renderizar a view de SAÍDA de estoque com dados do estoque disponíveis
-   async renderSaidaForm(req, res) {
-      try {
-         const itensDisponiveis = await estoqueModel.getItensDisponiveis();
-         res.render('saidaEstoque', { itensDisponiveis });
-      } catch (error) {
-         console.error('Erro ao obter itens disponíveis:', error);
-         res.status(500).json({ error: 'Erro ao obter itens disponíveis' });
-      }
-   }
-
-   // Método para Renderizar a tabela de itens pagos
-   renderTabelaSaida = (_, res) => {
-      res.render('tabelaSaidaEstoque', { itensPagos: [] });
-   };
-
-   // Método para mostrar todos os itens pagos
-   getAllItensPagos = async (_, res) => {
-      try {
-         const itensPagos = await estoqueModel.getItensPagos();
-         for (const item of itensPagos) {
-            const detalhes = await estoqueModel.getItemPagoDetalhes(item.id);
-            item.tombo_estoqueatual = detalhes ? detalhes.tombo_estoqueatual : null;
-         }
-         res.render('tabelaSaidaEstoque', { itensPagos });
-      } catch (error) {
-         console.error('Erro ao carregar os itens pagos:', error);
-         res.status(500).json({ error: 'Erro ao carregar os itens pagos.' });
-      }
-   };
-
-   // Método para mostrar os itens que foram pagos na tabela
-   fetchItensDisponiveis = async (_, res) => {
-      try {
-         const itens = await estoqueModel.getItensDisponiveis();
-         res.json(itens);
-      } catch (error) {
-         console.error('Erro ao buscar itens disponíveis:', error);
-         res.status(500).json({
-            error: 'Erro ao buscar itens disponíveis.',
-            details: error.message,
-         });
-      }
-   };
-
-   // Método para Gerar PDF de Itens Pagos
-   generatePDFItensPagos = async (req, res) => {
-      try {
-         const itensPagos = await estoqueModel.getItensPagosForPDF();
-         this._generatePDFItensPagos(res, itensPagos, 'Relatório de Itens Pagos');
-      } catch (error) {
-         console.error('Erro ao gerar PDF:', error);
-         res.status(500).json({ error: 'Erro ao gerar relatório em PDF' });
-      }
-   };
-
-   // Método privado para geração do PDF de Itens Pagos
-   _generatePDFItensPagos = (res, data, title) => {
-      try {
-         const doc = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: 'a4',
-         });
-
-         const columns = [
             { header: 'ID', dataKey: 'id', width: 10 }, // Diminuída de 15mm para 10mm
             { header: 'Saída', dataKey: 'data_de_saida', width: 20 }, // Diminuída de 25mm para 20mm
             { header: 'Descrição', dataKey: 'descricao', width: 65 }, // Ajustada para equilibrar
@@ -589,6 +456,56 @@ class EstoqueController {
       } catch (error) {
          console.error('Erro na geração do PDF:', error);
          res.status(500).json({ error: 'Erro interno na geração do PDF' });
+      }
+   };
+
+   /* ********************************************************************************
+                  Métodos para a SAÍDA de itens no Estoque
+   *********************************************************************************/
+
+   // Método para Renderizar a view de SAÍDA de estoque com dados do estoque disponíveis
+   async renderSaidaForm(req, res) {
+      try {
+         const itensDisponiveis = await estoqueModel.getItensDisponiveis();
+         res.render('saidaEstoque', { itensDisponiveis });
+      } catch (error) {
+         console.error('Erro ao obter itens disponíveis:', error);
+         res.status(500).json({ error: 'Erro ao obter itens disponíveis' });
+      }
+   }
+
+   // Método para Renderizar a tabela de itens pagos
+   renderTabelaSaida = (_, res) => {
+      res.render('tabelaSaidaEstoque', { itensPagos: [] });
+   };
+
+   // Método para mostrar todos os itens pagos
+   getAllItensPagos = async (_, res) => {
+      try {
+         const itensPagos = await estoqueModel.getItensPagos();
+         for (const item of itensPagos) {
+            const detalhes = await estoqueModel.getItemPagoDetalhes(item.id);
+            item.tombo_estoqueatual = detalhes ? detalhes.tombo_estoqueatual : null;
+            item.doc_origem = detalhes ? detalhes.doc_origem : null; // Adicionando doc_origem
+         }
+         res.render('tabelaSaidaEstoque', { itensPagos });
+      } catch (error) {
+         console.error('Erro ao carregar os itens pagos:', error);
+         res.status(500).json({ error: 'Erro ao carregar os itens pagos.' });
+      }
+   };
+
+   // Método para mostrar os itens que foram pagos na tabela
+   fetchItensDisponiveis = async (_, res) => {
+      try {
+         const itens = await estoqueModel.getItensDisponiveis();
+         res.json(itens);
+      } catch (error) {
+         console.error('Erro ao buscar itens disponíveis:', error);
+         res.status(500).json({
+            error: 'Erro ao buscar itens disponíveis.',
+            details: error.message,
+         });
       }
    };
 
@@ -724,7 +641,7 @@ class EstoqueController {
          // Configuração da tabela e assinaturas
          doc.autoTable({
             startY: 70,
-            head: [['ORD.', 'TOMBO', 'DESCRIÇÃO', 'SITUAÇÃO']], // Restaurado ao original, sem "DOC ORIGEM"
+            head: [['ORD.', 'TOMBO', 'DESCRIÇÃO', 'SITUAÇÃO']],
             body: items,
             styles: {
                fontSize: 8,
@@ -739,7 +656,7 @@ class EstoqueController {
             columnStyles: {
                0: { cellWidth: 10 },
                1: { cellWidth: 25 },
-               2: { cellWidth: 130, halign: 'left' }, // Restaurado ao valor original
+               2: { cellWidth: 130, halign: 'left' },
                3: { cellWidth: 20 },
             },
             margin: { left: 13, right: 7 },
@@ -857,6 +774,27 @@ class EstoqueController {
       } catch (error) {
          console.error('Erro ao buscar item pago pelo ID:', error);
          res.status(500).json({ error: 'Erro ao buscar item pago.' });
+      }
+   };
+
+   // Método para buscar informações de um tombo (restaurado para Pesquisa Avançada)
+   fetchInfoTombo = async (req, res) => {
+      const { tombo } = req.query;
+      try {
+         console.log(`Buscando informações para o tombo: ${tombo}`);
+         const infoTombo = await estoqueModel.getInfoByTombo(tombo);
+         if (infoTombo) {
+            console.log(`Tombo ${tombo} encontrado:`, infoTombo);
+            // Buscar informações de saída, se existirem
+            const infoSaida = await estoqueModel.getSaidaByEstoqueatualId(infoTombo.id);
+            res.json({ infoTombo, infoSaida });
+         } else {
+            console.log(`Tombo ${tombo} não encontrado.`);
+            res.json({ infoTombo: null, infoSaida: null });
+         }
+      } catch (error) {
+         console.error('Erro ao buscar informações do tombo:', error);
+         res.status(500).json({ error: 'Erro ao buscar informações do tombo.' });
       }
    };
 }

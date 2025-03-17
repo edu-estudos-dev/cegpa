@@ -67,4 +67,7 @@ router.get('/generate-pdf-itens-pagos', estoqueController.generatePDFItensPagos)
 // Rota para visualizar um item pago específico
 router.get('/visualizar/itempago/:id', estoqueController.visualizarItemPago);
 
+// Rota para buscar informações de um tombo (restaurada para Pesquisa Avançada)
+router.get('/fetch-info-tombo', estoqueController.fetchInfoTombo);
+
 export default router;
