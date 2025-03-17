@@ -161,6 +161,34 @@ class EstoqueModel {
       }
    };
 
+
+   // Método para obter os itens pagos formatados para o PDF
+   getItensPagosForPDF = async () => {
+      const query = `
+         SELECT 
+            ip.id,
+            ip.data_de_saida,
+            ip.descricao,
+            ea.tombo AS tombo_estoqueatual,
+            ip.destino,
+            ip.referencia,
+            ip.doc_saida,
+            ea.doc_origem,  -- Adicionado o campo doc_origem
+            ea.valor
+         FROM itenspagos ip
+         JOIN estoqueatual ea ON ip.estoqueatual_id = ea.id
+         ORDER BY ip.data_de_saida DESC;
+      `;
+      try {
+         const [results] = await connection.execute(query);
+         console.log('Resultados de getItensPagosForPDF:', results);
+         return results;
+      } catch (error) {
+         console.error('Erro ao trazer itens pagos para PDF:', error);
+         throw error;
+      }
+   };
+   
    // Método para obter os detalhes do item pago com informações do estoque atual
    getItemPagoDetalhes = async (id) => {
       const query = `
@@ -172,7 +200,7 @@ class EstoqueModel {
          JOIN 
             estoqueatual ea 
          ON 
-            ip.tombo = ea.id
+            ip.estoqueatual_id = ea.id
          WHERE 
             ip.id = ?`;
       try {
@@ -189,7 +217,7 @@ class EstoqueModel {
 
    // Método para adicionar a saída no banco de dados
    createSaida = async (
-      tombo,
+      estoqueatual_id,
       doc_saida,
       data_de_saida,
       quantidade,
@@ -202,14 +230,10 @@ class EstoqueModel {
       observacao,
       descricao
    ) => {
-      // Validar que tombo é um número inteiro
-      if (!Number.isInteger(Number(tombo)) || tombo < 0) {
-         throw new Error('O tombo deve ser um número inteiro não negativo.');
-      }
-      const query = `INSERT INTO itenspagos (tombo, doc_saida, data_de_saida, quantidade, referencia, destino, posto_graduacao, mat_funcional, telefone, nome_completo, observacao, descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      const query = `INSERT INTO itenspagos (estoqueatual_id, doc_saida, data_de_saida, quantidade, referencia, destino, posto_graduacao, mat_funcional, telefone, nome_completo, observacao, descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
       try {
          console.log('Inserindo na tabela itenspagos com os seguintes dados:', {
-            tombo,
+            estoqueatual_id,
             doc_saida,
             data_de_saida,
             quantidade,
@@ -224,7 +248,7 @@ class EstoqueModel {
          });
 
          const [result] = await connection.execute(query, [
-            tombo,
+            estoqueatual_id,
             doc_saida,
             data_de_saida,
             quantidade,
@@ -238,8 +262,8 @@ class EstoqueModel {
             descricao,
          ]);
 
-         const updateQuery = `UPDATE estoqueatual SET pago = 1 WHERE tombo = ?`;
-         await connection.execute(updateQuery, [tombo]);
+         const updateQuery = `UPDATE estoqueatual SET pago = 1 WHERE id = ?`;
+         await connection.execute(updateQuery, [estoqueatual_id]);
 
          return result.insertId;
       } catch (error) {

@@ -34,7 +34,6 @@ router.get('/tabela/estoqueatual', estoqueController.getAllEstoque);
 // Rota para visualizar item específico (entrada)
 router.get('/visualizar/:id', estoqueController.visualizarItem);
 
-
 // Rota para mostrar quantidade única de itens no estoque
 router.get('/qtde-unica', estoqueController.getQtdeUnicaEstoque);
 
@@ -61,6 +60,9 @@ router.post('/saida', estoqueController.registrarSaida);
 router.get('/generate-pdf', estoqueController.generatePDF);
 router.get('/generate-pdf-novos', estoqueController.generatePDFNovos);
 router.get('/generate-pdf-usados', estoqueController.generatePDFUsados);
+
+// Rota para gerar PDF da tabela de itens pagos
+router.get('/generate-pdf-itens-pagos', estoqueController.generatePDFItensPagos);
 
 // Rota para visualizar um item pago específico
 router.get('/visualizar/itempago/:id', estoqueController.visualizarItemPago);
