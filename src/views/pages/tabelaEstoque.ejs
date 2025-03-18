@@ -107,6 +107,8 @@
                         <th class="text-center">Categoria</th>
                         <th class="text-center">Estoque</th>
                         <th class="text-center">Situação</th>
+                        <th class="text-center">Doc De Origem</th>
+                        <th class="text-center">Valor</th>
                         <th class="text-center">Ações</th>
                      </tr>
                   </thead>
@@ -134,6 +136,12 @@
                               </td>
                               <td class="py-1 text-center">
                                  <%= item.situacao %>
+                              </td>
+                              <td class="py-1 text-center">
+                                 <%= item.doc_origem %>
+                              </td>
+                              <td class="py-1 text-center">
+                                 <%= item.valor %>
                               </td>
                               <td class="py-1 text-center ">
                                  <a href="/estoque/visualizar/<%= item.id %>"

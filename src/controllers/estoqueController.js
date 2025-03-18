@@ -306,41 +306,41 @@ class EstoqueController {
             unit: 'mm',
             format: 'a4',
          });
-
+   
          const columns = [
             { header: 'ID', dataKey: 'id', width: 12 },
-            { header: 'Entrada', dataKey: 'data_entrada', width: 25 },
-            { header: 'Descrição', dataKey: 'descricao', width: 120 },
-            { header: 'Tombo', dataKey: 'tombo', width: 25 },
+            { header: 'Entrada', dataKey: 'data_entrada', width: 20 },
+            { header: 'Descrição', dataKey: 'descricao', width: 80 },
+            { header: 'Tombo', dataKey: 'tombo', width: 20 },
             { header: 'Categoria', dataKey: 'categoria', width: 35 },
             { header: 'Estoque', dataKey: 'estoque', width: 30 },
             { header: 'Situação', dataKey: 'situacao', width: 30 },
+            { header: 'Valor', dataKey: 'valor', width: 30 },
+            { header: 'Doc Origem', dataKey: 'doc_origem', width: 30 },
          ];
-
+   
          const rows = data.map((item) => ({
             id: item.id,
-            data_entrada: new Date(item.data_de_entrada).toLocaleDateString(
-               'pt-BR'
-            ),
+            data_entrada: new Date(item.data_de_entrada).toLocaleDateString('pt-BR'),
             descricao: item.descricao,
             tombo: item.tombo,
             categoria: item.categoria,
             estoque: item.estoque,
             situacao: item.situacao,
+            valor: item.valor
+               ? parseFloat(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+               : 'N/A',
+            doc_origem: item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A',
          }));
-
+   
          doc.setFontSize(16);
          doc.text(title, 10, 15);
          doc.setFontSize(10);
-         doc.text(
-            `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
-            10,
-            22
-         );
-
+         doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 10, 22);
+   
          doc.autoTable({
             startY: 30,
-            margin: { left: 10, right: 10 },
+            margin: { left: 5, right: 5 }, // Margens reduzidas para 5mm
             head: [columns.map((col) => col.header)],
             body: rows.map((row) => columns.map((col) => row[col.dataKey])),
             styles: {
@@ -359,7 +359,7 @@ class EstoqueController {
                return acc;
             }, {}),
          });
-
+   
          const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
          res.setHeader('Content-Type', 'application/pdf');
          res.setHeader(
@@ -504,7 +504,6 @@ class EstoqueController {
          });
       }
    };
-
 
    // Método para registrar a saída de itens e gerar o PDF
    async registrarSaida(req, res) {
