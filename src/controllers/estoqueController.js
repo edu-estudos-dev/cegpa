@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import ExcelJS from 'exceljs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import estoqueModel from '../models/estoqueModel.js';
@@ -265,73 +266,72 @@ class EstoqueController {
       }
    };
 
-   // Método para Gerar PDF da Tabela Geral
+   // Método para Gerar Relatório da Tabela Geral (PDF ou Excel)
    generatePDF = async (req, res) => {
       try {
+         const { formato = 'pdf' } = req.query; // Formato vem como query param, padrão é PDF
          const estoque = await estoqueModel.getAllEstoque();
-         this._generatePDF(res, estoque, 'Relatório de Estoque Geral');
+         await this._generateReport(res, estoque, 'Relatório de Estoque Geral', formato);
       } catch (error) {
-         console.error('Erro ao gerar PDF:', error);
-         res.status(500).json({ error: 'Erro ao gerar relatório em PDF' });
+         console.error('Erro ao gerar relatório:', error);
+         res.status(500).json({ error: 'Erro ao gerar relatório' });
       }
    };
 
-   // Método para Gerar PDF de Itens Novos
+   // Método para Gerar Relatório de Itens Novos (PDF ou Excel)
    generatePDFNovos = async (req, res) => {
       try {
+         const { formato = 'pdf' } = req.query;
          const novos = await estoqueModel.getAllItensNovos();
-         this._generatePDF(res, novos, 'Relatório de Itens Novos');
+         await this._generateReport(res, novos, 'Relatório de Itens Novos', formato);
       } catch (error) {
-         console.error('Erro ao gerar PDF:', error);
-         res.status(500).json({ error: 'Erro ao gerar relatório em PDF' });
+         console.error('Erro ao gerar relatório:', error);
+         res.status(500).json({ error: 'Erro ao gerar relatório' });
       }
    };
 
-   // Método para Gerar PDF de Itens Usados
+   // Método para Gerar Relatório de Itens Usados (PDF ou Excel)
    generatePDFUsados = async (req, res) => {
       try {
+         const { formato = 'pdf' } = req.query;
          const usados = await estoqueModel.getAllItensUsados();
-         this._generatePDF(res, usados, 'Relatório de Itens Usados');
+         await this._generateReport(res, usados, 'Relatório de Itens Usados', formato);
       } catch (error) {
-         console.error('Erro ao gerar PDF:', error);
-         res.status(500).json({ error: 'Erro ao gerar relatório em PDF' });
+         console.error('Erro ao gerar relatório:', error);
+         res.status(500).json({ error: 'Erro ao gerar relatório' });
       }
    };
 
-   // Método privado para geração do PDF
-   _generatePDF = (res, data, title) => {
-      try {
-         const doc = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: 'a4',
-         });
+   // Método privado para geração de relatórios gerais (PDF ou Excel)
+   _generateReport = async (res, data, title, formato) => {
+      const columns = [
+         { header: 'ID', dataKey: 'id', width: 12 },
+         { header: 'Entrada', dataKey: 'data_entrada', width: 20 },
+         { header: 'Descrição', dataKey: 'descricao', width: 80 },
+         { header: 'Tombo', dataKey: 'tombo', width: 20 },
+         { header: 'Categoria', dataKey: 'categoria', width: 35 },
+         { header: 'Estoque', dataKey: 'estoque', width: 30 },
+         { header: 'Situação', dataKey: 'situacao', width: 30 },
+         { header: 'Valor', dataKey: 'valor', width: 30 },
+         { header: 'Doc Origem', dataKey: 'doc_origem', width: 30 },
+      ];
    
-         const columns = [
-            { header: 'ID', dataKey: 'id', width: 12 },
-            { header: 'Entrada', dataKey: 'data_entrada', width: 20 },
-            { header: 'Descrição', dataKey: 'descricao', width: 80 },
-            { header: 'Tombo', dataKey: 'tombo', width: 20 },
-            { header: 'Categoria', dataKey: 'categoria', width: 35 },
-            { header: 'Estoque', dataKey: 'estoque', width: 30 },
-            { header: 'Situação', dataKey: 'situacao', width: 30 },
-            { header: 'Valor', dataKey: 'valor', width: 30 },
-            { header: 'Doc Origem', dataKey: 'doc_origem', width: 30 },
-         ];
+      const rows = data.map((item) => ({
+         id: item.id,
+         data_entrada: new Date(item.data_de_entrada).toLocaleDateString('pt-BR'),
+         descricao: item.descricao,
+         tombo: item.tombo,
+         categoria: item.categoria,
+         estoque: item.estoque,
+         situacao: item.situacao,
+         valor: item.valor
+            ? parseFloat(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+            : 'N/A',
+         doc_origem: item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A',
+      }));
    
-         const rows = data.map((item) => ({
-            id: item.id,
-            data_entrada: new Date(item.data_de_entrada).toLocaleDateString('pt-BR'),
-            descricao: item.descricao,
-            tombo: item.tombo,
-            categoria: item.categoria,
-            estoque: item.estoque,
-            situacao: item.situacao,
-            valor: item.valor
-               ? parseFloat(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-               : 'N/A',
-            doc_origem: item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A',
-         }));
+      if (formato === 'pdf') {
+         const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
    
          doc.setFontSize(16);
          doc.text(title, 10, 15);
@@ -340,20 +340,11 @@ class EstoqueController {
    
          doc.autoTable({
             startY: 30,
-            margin: { left: 5, right: 5 }, // Margens reduzidas para 5mm
+            margin: { left: 5, right: 5 },
             head: [columns.map((col) => col.header)],
             body: rows.map((row) => columns.map((col) => row[col.dataKey])),
-            styles: {
-               fontSize: 8,
-               cellPadding: 2,
-               halign: 'center',
-               overflow: 'linebreak',
-            },
-            headStyles: {
-               fillColor: [34, 139, 34],
-               textColor: 255,
-               fontStyle: 'bold',
-            },
+            styles: { fontSize: 8, cellPadding: 2, halign: 'center', overflow: 'linebreak' },
+            headStyles: { fillColor: [34, 139, 34], textColor: 255, fontStyle: 'bold' },
             columnStyles: columns.reduce((acc, col, index) => {
                acc[index] = { cellWidth: col.width };
                return acc;
@@ -362,100 +353,144 @@ class EstoqueController {
    
          const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
          res.setHeader('Content-Type', 'application/pdf');
-         res.setHeader(
-            'Content-Disposition',
-            `attachment; filename=${title.replace(/ /g, '_')}.pdf`
-         );
+         res.setHeader('Content-Disposition', `attachment; filename=${title.replace(/ /g, '_')}.pdf`);
          res.send(pdfBuffer);
-      } catch (error) {
-         console.error('Erro na geração do PDF:', error);
-         res.status(500).json({ error: 'Erro interno na geração do PDF' });
+      } else if (formato === 'excel') {
+         const workbook = new ExcelJS.Workbook();
+         const worksheet = workbook.addWorksheet(title);
+   
+         // Adicionar o título e mesclar as células
+         const titleRow = worksheet.addRow([title]);
+         worksheet.mergeCells(`A1:I1`); // Mesclar células diretamente no worksheet
+         worksheet.getCell('A1').alignment = { horizontal: 'center' };
+         worksheet.getCell('A1').font = { size: 16, bold: true };
+   
+         // Adicionar a data de geração
+         worksheet.addRow([`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`]);
+   
+         // Adicionar o cabeçalho
+         worksheet.addRow(columns.map(col => col.header)).eachCell(cell => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF228B22' } };
+            cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+            cell.alignment = { horizontal: 'center' };
+         });
+   
+         // Adicionar os dados
+         rows.forEach(row => {
+            worksheet.addRow(columns.map(col => row[col.dataKey]));
+         });
+   
+         // Ajustar a largura das colunas
+         worksheet.columns = columns.map(col => ({ width: col.width / 6 })); // Ajuste proporcional
+   
+         const excelBuffer = await workbook.xlsx.writeBuffer();
+         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+         res.setHeader('Content-Disposition', `attachment; filename=${title.replace(/ /g, '_')}.xlsx`);
+         res.send(excelBuffer);
+      } else {
+         res.status(400).json({ error: 'Formato inválido. Use "pdf" ou "excel".' });
       }
    };
-
-   // Método para Gerar PDF de Itens Pagos
+   
+   // Método para Gerar Relatório de Itens Pagos (PDF ou Excel)
    generatePDFItensPagos = async (req, res) => {
       try {
+         const { formato = 'pdf' } = req.query;
          const itensPagos = await estoqueModel.getItensPagosForPDF();
-         this._generatePDFItensPagos(res, itensPagos, 'Relatório de Itens Pagos');
+         await this._generatePDFItensPagos(res, itensPagos, 'Relatório de Itens Pagos', formato);
       } catch (error) {
-         console.error('Erro ao gerar PDF:', error);
-         res.status(500).json({ error: 'Erro ao gerar relatório em PDF' });
+         console.error('Erro ao gerar relatório:', error);
+         res.status(500).json({ error: 'Erro ao gerar relatório' });
       }
    };
 
-   // Método privado para geração do PDF de Itens Pagos
-   _generatePDFItensPagos = (res, data, title) => {
-      try {
-         const doc = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: 'a4',
-         });
-
-         const columns = [
-            { header: 'ID', dataKey: 'id', width: 10 }, // Diminuída de 15mm para 10mm
-            { header: 'Saída', dataKey: 'data_de_saida', width: 20 }, // Diminuída de 25mm para 20mm
-            { header: 'Descrição', dataKey: 'descricao', width: 65 }, // Ajustada para equilibrar
-            { header: 'Tombo', dataKey: 'tombo_estoqueatual', width: 25 },
-            { header: 'Destino', dataKey: 'destino', width: 30 },
-            { header: 'NUP (Suite)', dataKey: 'referencia', width: 50 }, // Aumentada de 35mm para 50mm
-            { header: 'Doc Saída', dataKey: 'doc_saida', width: 25 },
-            { header: 'Doc Origem', dataKey: 'doc_origem', width: 30 },
-            { header: 'Valor', dataKey: 'valor', width: 22 },
-         ];
-
-         const rows = data.map((item) => ({
-            id: item.id,
-            data_de_saida: new Date(item.data_de_saida).toLocaleDateString('pt-BR'),
-            descricao: item.descricao ? item.descricao.toUpperCase() : 'N/A',
-            tombo_estoqueatual: item.tombo_estoqueatual || 'N/A',
-            destino: item.destino ? item.destino.toUpperCase() : 'N/A',
-            referencia: item.referencia ? item.referencia.toUpperCase() : 'N/A',
-            doc_saida: item.doc_saida || 'N/A',
-            doc_origem: item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A',
-            valor: item.valor 
-               ? parseFloat(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
-               : 'N/A',
-         }));
-
+   // Método privado para geração de relatórios de itens pagos (PDF ou Excel)
+   _generatePDFItensPagos = async (res, data, title, formato) => {
+      const columns = [
+         { header: 'ID', dataKey: 'id', width: 10 },
+         { header: 'Saída', dataKey: 'data_de_saida', width: 20 },
+         { header: 'Descrição', dataKey: 'descricao', width: 65 },
+         { header: 'Tombo', dataKey: 'tombo_estoqueatual', width: 25 },
+         { header: 'Destino', dataKey: 'destino', width: 30 },
+         { header: 'NUP (Suite)', dataKey: 'referencia', width: 50 },
+         { header: 'Doc Saída', dataKey: 'doc_saida', width: 25 },
+         { header: 'Doc Origem', dataKey: 'doc_origem', width: 30 },
+         { header: 'Valor', dataKey: 'valor', width: 22 },
+      ];
+   
+      const rows = data.map((item) => ({
+         id: item.id,
+         data_de_saida: new Date(item.data_de_saida).toLocaleDateString('pt-BR'),
+         descricao: item.descricao ? item.descricao.toUpperCase() : 'N/A',
+         tombo_estoqueatual: item.tombo_estoqueatual || 'N/A',
+         destino: item.destino ? item.destino.toUpperCase() : 'N/A',
+         referencia: item.referencia ? item.referencia.toUpperCase() : 'N/A',
+         doc_saida: item.doc_saida || 'N/A',
+         doc_origem: item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A',
+         valor: item.valor
+            ? parseFloat(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+            : 'N/A',
+      }));
+   
+      if (formato === 'pdf') {
+         const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+   
          doc.setFontSize(16);
          doc.text(title, 10, 15);
          doc.setFontSize(10);
          doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 10, 22);
-
+   
          doc.autoTable({
             startY: 30,
             margin: { left: 10, right: 10 },
             head: [columns.map((col) => col.header)],
             body: rows.map((row) => columns.map((col) => row[col.dataKey])),
-            styles: {
-               fontSize: 8,
-               cellPadding: 2,
-               halign: 'center',
-               overflow: 'linebreak',
-            },
-            headStyles: {
-               fillColor: [34, 139, 34],
-               textColor: 255,
-               fontStyle: 'bold',
-            },
+            styles: { fontSize: 8, cellPadding: 2, halign: 'center', overflow: 'linebreak' },
+            headStyles: { fillColor: [34, 139, 34], textColor: 255, fontStyle: 'bold' },
             columnStyles: columns.reduce((acc, col, index) => {
                acc[index] = { cellWidth: col.width };
                return acc;
             }, {}),
          });
-
+   
          const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
          res.setHeader('Content-Type', 'application/pdf');
-         res.setHeader(
-            'Content-Disposition',
-            `attachment; filename=${title.replace(/ /g, '_')}.pdf`
-         );
+         res.setHeader('Content-Disposition', `attachment; filename=${title.replace(/ /g, '_')}.pdf`);
          res.send(pdfBuffer);
-      } catch (error) {
-         console.error('Erro na geração do PDF:', error);
-         res.status(500).json({ error: 'Erro interno na geração do PDF' });
+      } else if (formato === 'excel') {
+         const workbook = new ExcelJS.Workbook();
+         const worksheet = workbook.addWorksheet(title);
+   
+         // Adicionar o título e mesclar as células
+         const titleRow = worksheet.addRow([title]); // Adiciona a linha do título
+         worksheet.mergeCells('A1:I1'); // Mescla as células diretamente no worksheet
+         worksheet.getCell('A1').alignment = { horizontal: 'center' };
+         worksheet.getCell('A1').font = { size: 16, bold: true };
+   
+         // Adicionar a data de geração
+         worksheet.addRow([`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`]);
+   
+         // Adicionar o cabeçalho
+         worksheet.addRow(columns.map(col => col.header)).eachCell(cell => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF228B22' } };
+            cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+            cell.alignment = { horizontal: 'center' };
+         });
+   
+         // Adicionar os dados
+         rows.forEach(row => {
+            worksheet.addRow(columns.map(col => row[col.dataKey]));
+         });
+   
+         // Ajustar a largura das colunas
+         worksheet.columns = columns.map(col => ({ width: col.width / 6 }));
+   
+         const excelBuffer = await workbook.xlsx.writeBuffer();
+         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+         res.setHeader('Content-Disposition', `attachment; filename=${title.replace(/ /g, '_')}.xlsx`);
+         res.send(excelBuffer);
+      } else {
+         res.status(400).json({ error: 'Formato inválido. Use "pdf" ou "excel".' });
       }
    };
 
@@ -478,7 +513,6 @@ class EstoqueController {
    renderTabelaSaida = (_, res) => {
       res.render('tabelaSaidaEstoque', { itensPagos: [] });
    };
-
 
    // Método para mostrar todos os itens pagos
    getAllItensPagos = async (_, res) => {
@@ -658,7 +692,6 @@ class EstoqueController {
             margin: { left: 13, right: 7 },
             tableWidth: 'wrap',
             didDrawPage: (data) => {
-               // Redesenha borda para páginas subsequentes
                doc.rect(
                   5,
                   5,
@@ -668,35 +701,15 @@ class EstoqueController {
 
                const pageHeight = doc.internal.pageSize.height;
                const pageWidth = doc.internal.pageSize.width;
-
-               // Assinaturas 30mm da borda inferior
                const signatureY = pageHeight - 25;
                const lineMargin = 15;
                const lineLength = 80;
 
-               // Linhas de assinatura
                doc.setLineWidth(0.5);
+               doc.line(lineMargin, signatureY, lineMargin + lineLength, signatureY);
+               doc.line(pageWidth - lineMargin - lineLength, signatureY, pageWidth - lineMargin, signatureY);
 
-               // Recebedor (esquerda)
-               doc.line(
-                  lineMargin,
-                  signatureY,
-                  lineMargin + lineLength,
-                  signatureY
-               );
-
-               // Responsável (direita)
-               doc.line(
-                  pageWidth - lineMargin - lineLength,
-                  signatureY,
-                  pageWidth - lineMargin,
-                  signatureY
-               );
-
-               // Textos centralizados
                doc.setFontSize(9);
-
-               // Recebedor
                doc.text(
                   `${nome_do_recebedor.toUpperCase()}\nMF: ${mf_recebedor}`,
                   lineMargin + lineLength / 2,
@@ -709,8 +722,6 @@ class EstoqueController {
                   signatureY + 12,
                   { align: 'center', fontSize: 8 }
                );
-
-               // Responsável
                doc.text(
                   'Cap. Ewandro Sales\nMF: 301.125-34',
                   pageWidth - lineMargin - lineLength / 2,
@@ -727,7 +738,6 @@ class EstoqueController {
          });
 
          console.log('Salvando PDF...');
-         // Salvar PDF
          const fileName = `Termo_${doc_saida.replace(/\//g, '-')}.pdf`;
          const pdfPath = path.join(__dirname, '../../pdfs', fileName);
 
@@ -738,7 +748,6 @@ class EstoqueController {
          doc.save(pdfPath);
 
          console.log('Atualizando sequência...');
-         // Atualizar sequência
          await sequenciaModel.incrementarSequencia(new Date().getFullYear());
 
          console.log('Enviando resposta de sucesso...');
@@ -762,7 +771,7 @@ class EstoqueController {
       const { id } = req.params;
       try {
          const item = await estoqueModel.getItemPagoDetalhes(id);
-         console.log('Item retornado:', item); // Adicione este log para inspecionar
+         console.log('Item retornado:', item);
          if (item) {
             res.json(item);
          } else {
@@ -782,7 +791,6 @@ class EstoqueController {
          const infoTombo = await estoqueModel.getInfoByTombo(tombo);
          if (infoTombo) {
             console.log(`Tombo ${tombo} encontrado:`, infoTombo);
-            // Buscar informações de saída, se existirem
             const infoSaida = await estoqueModel.getSaidaByEstoqueatualId(infoTombo.id);
             res.json({ infoTombo, infoSaida });
          } else {

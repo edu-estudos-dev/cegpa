@@ -56,13 +56,17 @@ router.get('/api/itens-disponiveis', estoqueController.fetchItensDisponiveis);
 // Rota para registrar a saída de itens
 router.post('/saida', estoqueController.registrarSaida);
 
-// Rota para gerar PDF da tabela de estoque
-router.get('/generate-pdf', estoqueController.generatePDF);
-router.get('/generate-pdf-novos', estoqueController.generatePDFNovos);
-router.get('/generate-pdf-usados', estoqueController.generatePDFUsados);
+// Rota para gerar relatório da tabela de estoque (PDF ou Excel)
+router.get('/relatorio/geral', estoqueController.generatePDF);
 
-// Rota para gerar PDF da tabela de itens pagos
-router.get('/generate-pdf-itens-pagos', estoqueController.generatePDFItensPagos);
+// Rota para gerar relatório de itens novos (PDF ou Excel)
+router.get('/relatorio/novos', estoqueController.generatePDFNovos);
+
+// Rota para gerar relatório de itens usados (PDF ou Excel)
+router.get('/relatorio/usados', estoqueController.generatePDFUsados);
+
+// Rota para gerar relatório de itens pagos (PDF ou Excel)
+router.get('/relatorio/itens-pagos', estoqueController.generatePDFItensPagos);
 
 // Rota para visualizar um item pago específico
 router.get('/visualizar/itempago/:id', estoqueController.visualizarItemPago);
