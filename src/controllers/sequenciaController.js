@@ -12,7 +12,7 @@ class SequenciaController {
             const novaSequencia = await sequenciaModel.incrementarSequencia(anoAtual);
             
             // 3. Formata o número do termo
-            const doc_saida = `${anoAtual}/${novaSequencia.toString().padStart(5, '0')}`;
+            const doc_saida = `${novaSequencia.toString().padStart(5, '0')}/${anoAtual}`;
             
             res.status(200).json({
                 success: true,

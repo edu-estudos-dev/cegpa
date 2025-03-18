@@ -562,7 +562,7 @@ class EstoqueController {
          );
 
          // Cabeçalho
-         doc.setFontSize(14);
+         doc.setFontSize(11);
          doc.text('TERMO DE RECEBIMENTO E RESPONSABILIDADE - CEGPA/COLOG', 105, 20, {
             align: 'center',
          });
@@ -573,12 +573,12 @@ class EstoqueController {
          const headerData = [
             `Nº Termo: ${doc_saida}`,
             `Data: ${dataDeSaida.toLocaleDateString('pt-BR')}`,
-            `Destino: ${destino}`,
-            `Responsável: ${postoGrad} ${nome_do_recebedor}`,
+            `Destino: ${destino.toUpperCase()}`,
+            `Responsável: ${postoGrad} ${nome_do_recebedor.toUpperCase()}`,
             `MF: ${mf_recebedor}`,
             `Contato: ${tel_recebedor}`,
             `Referência: ${referencia}`,
-            `Observações: ${observacao || 'Nenhuma'}`,
+            `Observações: ${(observacao || 'Nenhuma').toUpperCase()}`,
          ];
 
          headerData.forEach((line, index) => {
@@ -592,7 +592,7 @@ class EstoqueController {
          console.log('Processando tombos:', tombos);
          for (const tombo of tombos) {
             console.log(`Buscando item com tombo ${tombo}...`);
-            const itemEstoque = await estoqueModel.getInfoByTombo(tombo); // Corrigido de getItemByTombo para getInfoByTombo
+            const itemEstoque = await estoqueModel.getInfoByTombo(tombo); 
 
             if (!itemEstoque) {
                console.warn(`Tombo ${tombo} não encontrado`);
@@ -698,7 +698,7 @@ class EstoqueController {
 
                // Recebedor
                doc.text(
-                  `${nome_do_recebedor}\nMF: ${mf_recebedor}`,
+                  `${nome_do_recebedor.toUpperCase()}\nMF: ${mf_recebedor}`,
                   lineMargin + lineLength / 2,
                   signatureY + 5,
                   { align: 'center' }
