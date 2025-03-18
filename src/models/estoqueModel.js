@@ -208,7 +208,9 @@ class EstoqueModel {
       const query = `
          SELECT 
             ip.*, 
-            ea.tombo AS tombo_estoqueatual 
+            ea.tombo AS tombo_estoqueatual,
+            ea.valor AS valor,
+            ea.doc_origem AS doc_origem
          FROM 
             itenspagos ip
          JOIN 
@@ -327,17 +329,29 @@ class EstoqueModel {
 
    // Método para obter informações do item pago pelo ID
    getItemPagoByID = async (id) => {
-      const query = `SELECT * FROM itenspagos WHERE id = ?`;
-      try {
-         console.log('Executando query:', query);
-         const [results] = await connection.execute(query, [id]);
-         console.log('Results from getItemPagoByID:', results);
-         return results.length > 0 ? results[0] : null;
-      } catch (error) {
-         console.error('Erro ao buscar item pago pelo ID:', error);
-         throw error;
-      }
-   };
+      const query = `
+        SELECT 
+          ip.id,
+          ip.data_de_saida,
+          ip.descricao,
+          ea.tombo AS tombo_estoqueatual,
+          ip.destino,
+          ip.referencia,
+          ip.doc_saida,
+          ea.doc_origem,
+          ea.valor, // <-- Certifique-se que este campo está presente
+          ip.nome_completo,
+          ip.posto_graduacao,
+          ip.mat_funcional,
+          ip.telefone,
+          ip.observacao
+        FROM itenspagos ip
+        JOIN estoqueatual ea ON ip.estoqueatual_id = ea.id
+        WHERE ip.id = ?;
+      `;
+      // ... resto do código
+    }
+
 
    // Método para excluir um item do estoque
    delete = async (id) => {

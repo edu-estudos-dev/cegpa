@@ -479,15 +479,11 @@ class EstoqueController {
       res.render('tabelaSaidaEstoque', { itensPagos: [] });
    };
 
+
    // Método para mostrar todos os itens pagos
    getAllItensPagos = async (_, res) => {
       try {
          const itensPagos = await estoqueModel.getItensPagos();
-         for (const item of itensPagos) {
-            const detalhes = await estoqueModel.getItemPagoDetalhes(item.id);
-            item.tombo_estoqueatual = detalhes ? detalhes.tombo_estoqueatual : null;
-            item.doc_origem = detalhes ? detalhes.doc_origem : null; // Adicionando doc_origem
-         }
          res.render('tabelaSaidaEstoque', { itensPagos });
       } catch (error) {
          console.error('Erro ao carregar os itens pagos:', error);
@@ -767,6 +763,7 @@ class EstoqueController {
       const { id } = req.params;
       try {
          const item = await estoqueModel.getItemPagoDetalhes(id);
+         console.log('Item retornado:', item); // Adicione este log para inspecionar
          if (item) {
             res.json(item);
          } else {
