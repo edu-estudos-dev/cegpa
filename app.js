@@ -34,13 +34,15 @@ app.use(
   })
 );
 
+// Rotas que não precisam de autenticação
 app.use("/", loginLogoutRoutes);
-app.use("/", estoqueRoutes);
-app.use("/", pesquisaRoutes);
-app.use("/", isAuthenticated);
-app.use("/painel", painelRoutes);
-app.use("/estoque", estoqueRoutes);
-app.use(sequenciaRoutes); // Adicionar as rotas de sequência
+
+// Aplicando o middleware de autenticação apenas às rotas protegidas
+// Mantendo as URLs originais, mas protegendo-as com o middleware
+app.use("/painel", isAuthenticated, painelRoutes);
+app.use("/", isAuthenticated, estoqueRoutes); // Os caminhos já estão definidos no router
+app.use("/", isAuthenticated, pesquisaRoutes); // Os caminhos já estão definidos no router
+app.use("/", isAuthenticated, sequenciaRoutes); // Os caminhos já estão definidos no router
 
 app.use((req, res, next) => {
   res.status(404).render("404");

@@ -543,228 +543,240 @@ class EstoqueController {
    async registrarSaida(req, res) {
       console.log('Requisição recebida em registrarSaida:', req.body);
       const {
-         tombos,
-         doc_saida,
-         referencia,
-         destino,
-         postoGrad,
-         mf_recebedor,
-         tel_recebedor,
-         nome_do_recebedor,
-         observacao,
+          tombos,
+          doc_saida,
+          referencia,
+          destino,
+          postoGrad,
+          mf_recebedor,
+          tel_recebedor,
+          nome_do_recebedor,
+          observacao,
       } = req.body;
-
+  
+      // Log para verificar req.user antes de acessar
+      console.log('req.user no registrarSaida:', req.user);
+  
+      // Obtendo informações do usuário logado
+      const usuarioLogado = req.user;
+      const nomeResponsavel = usuarioLogado?.nome_completo;
+      const mfResponsavel = usuarioLogado?.mf;
+  
       try {
-         // Validação dos campos obrigatórios
-         if (
-            !tombos?.length ||
-            !doc_saida ||
-            !referencia ||
-            !destino ||
-            !postoGrad ||
-            !mf_recebedor ||
-            !tel_recebedor ||
-            !nome_do_recebedor
-         ) {
-            console.log('Campos obrigatórios faltando:', {
-               tombos,
-               doc_saida,
-               referencia,
-               destino,
-               postoGrad,
-               mf_recebedor,
-               tel_recebedor,
-               nome_do_recebedor,
-            });
-            return res
-               .status(400)
-               .json({ error: 'Preencha todos os campos obrigatórios' });
-         }
-
-         const dataDeSaida = new Date();
-         const doc = new jsPDF();
-
-         console.log('Iniciando geração do PDF...');
-         // Borda externa em todas as páginas (5mm de margem)
-         doc.setDrawColor(0);
-         doc.setLineWidth(0.5);
-         doc.rect(
-            5,
-            5,
-            doc.internal.pageSize.width - 10,
-            doc.internal.pageSize.height - 10
-         );
-
-         // Cabeçalho
-         doc.setFontSize(11);
-         doc.text('TERMO DE RECEBIMENTO E RESPONSABILIDADE - CEGPA/COLOG', 105, 20, {
-            align: 'center',
-         });
-         doc.setFontSize(10);
-
-         // Informações do termo
-         const headerYStart = 30;
-         const headerData = [
-            `Nº Termo: ${doc_saida}`,
-            `Data: ${dataDeSaida.toLocaleDateString('pt-BR')}`,
-            `Destino: ${destino.toUpperCase()}`,
-            `Responsável: ${postoGrad} ${nome_do_recebedor.toUpperCase()}`,
-            `MF: ${mf_recebedor}`,
-            `Contato: ${tel_recebedor}`,
-            `Referência: ${referencia}`,
-            `Observações: ${(observacao || 'Nenhuma').toUpperCase()}`,
-         ];
-
-         headerData.forEach((line, index) => {
-            doc.text(line, 14, headerYStart + index * 5);
-         });
-
-         // Tabela de itens
-         let ordem = 1;
-         const items = [];
-
-         console.log('Processando tombos:', tombos);
-         for (const tombo of tombos) {
-            console.log(`Buscando item com tombo ${tombo}...`);
-            const itemEstoque = await estoqueModel.getInfoByTombo(tombo); 
-
-            if (!itemEstoque) {
-               console.warn(`Tombo ${tombo} não encontrado`);
-               continue;
-            }
-
-            console.log(`Item encontrado para tombo ${tombo}:`, itemEstoque);
-            items.push([
-               ordem++,
-               itemEstoque.tombo,
-               itemEstoque.descricao
-                  .toUpperCase()
-                  .replace('RETAINGLIAR', 'RETANGULAR'),
-               itemEstoque.situacao.toUpperCase(),
-            ]);
-
-            console.log(`Registrando saída para tombo ${tombo}...`);
-            await estoqueModel.createSaida(
-               itemEstoque.id,
-               doc_saida,
-               dataDeSaida,
-               1,
-               referencia,
-               destino,
-               postoGrad,
-               mf_recebedor,
-               tel_recebedor,
-               nome_do_recebedor,
-               observacao,
-               itemEstoque.descricao
-            );
-
-            console.log(`Marcando tombo ${tombo} como pago...`);
-            await estoqueModel.markAsPaid(itemEstoque.id);
-         }
-
-         if (items.length === 0) {
-            console.log('Nenhum item válido encontrado para gerar o termo.');
-            return res.status(400).json({ error: 'Nenhum item válido encontrado para gerar o termo.' });
-         }
-
-         // Configuração da tabela e assinaturas
-         doc.autoTable({
-            startY: 70,
-            head: [['ORD.', 'TOMBO', 'DESCRIÇÃO', 'SITUAÇÃO']],
-            body: items,
-            styles: {
-               fontSize: 8,
-               halign: 'center',
-               cellPadding: 1.5,
-            },
-            headStyles: {
-               fillColor: [34, 139, 34],
-               textColor: 255,
-               fontStyle: 'bold',
-            },
-            columnStyles: {
-               0: { cellWidth: 10 },
-               1: { cellWidth: 25 },
-               2: { cellWidth: 130, halign: 'left' },
-               3: { cellWidth: 20 },
-            },
-            margin: { left: 13, right: 7 },
-            tableWidth: 'wrap',
-            didDrawPage: (data) => {
-               doc.rect(
-                  5,
-                  5,
-                  doc.internal.pageSize.width - 10,
-                  doc.internal.pageSize.height - 10
-               );
-
-               const pageHeight = doc.internal.pageSize.height;
-               const pageWidth = doc.internal.pageSize.width;
-               const signatureY = pageHeight - 25;
-               const lineMargin = 15;
-               const lineLength = 80;
-
-               doc.setLineWidth(0.5);
-               doc.line(lineMargin, signatureY, lineMargin + lineLength, signatureY);
-               doc.line(pageWidth - lineMargin - lineLength, signatureY, pageWidth - lineMargin, signatureY);
-
-               doc.setFontSize(9);
-               doc.text(
-                  `${nome_do_recebedor.toUpperCase()}\nMF: ${mf_recebedor}`,
-                  lineMargin + lineLength / 2,
-                  signatureY + 5,
-                  { align: 'center' }
-               );
-               doc.text(
-                  '(Recebedor)',
-                  lineMargin + lineLength / 2,
-                  signatureY + 12,
-                  { align: 'center', fontSize: 8 }
-               );
-               doc.text(
-                  'Cap. Ewandro Sales\nMF: 301.125-34',
-                  pageWidth - lineMargin - lineLength / 2,
-                  signatureY + 5,
-                  { align: 'center' }
-               );
-               doc.text(
-                  '(Responsável pela entrega)',
-                  pageWidth - lineMargin - lineLength / 2,
-                  signatureY + 12,
-                  { align: 'center', fontSize: 8 }
-               );
-            },
-         });
-
-         console.log('Salvando PDF...');
-         const fileName = `Termo_${doc_saida.replace(/\//g, '-')}.pdf`;
-         const pdfPath = path.join(__dirname, '../../pdfs', fileName);
-
-         if (!fs.existsSync(path.dirname(pdfPath))) {
-            fs.mkdirSync(path.dirname(pdfPath), { recursive: true });
-         }
-
-         doc.save(pdfPath);
-
-         console.log('Atualizando sequência...');
-         await sequenciaModel.incrementarSequencia(new Date().getFullYear());
-
-         console.log('Enviando resposta de sucesso...');
-         res.status(200).json({
-            success: true,
-            pdfPath: `/pdfs/${fileName}`,
-            message: 'Saída registrada com sucesso!',
-         });
+          // Validação dos campos obrigatórios
+          if (
+              !tombos?.length ||
+              !doc_saida ||
+              !referencia ||
+              !destino ||
+              !postoGrad ||
+              !mf_recebedor ||
+              !tel_recebedor ||
+              !nome_do_recebedor
+          ) {
+              console.log('Campos obrigatórios faltando:', {
+                  tombos,
+                  doc_saida,
+                  referencia,
+                  destino,
+                  postoGrad,
+                  mf_recebedor,
+                  tel_recebedor,
+                  nome_do_recebedor,
+              });
+              return res
+                  .status(400)
+                  .json({ error: 'Preencha todos os campos obrigatórios' });
+          }
+  
+          // Validação dos dados do usuário logado
+          if (!nomeResponsavel || !mfResponsavel) {
+              console.log('Dados do usuário logado incompletos:', { nomeResponsavel, mfResponsavel });
+              return res
+                  .status(401)
+                  .json({ error: 'Usuário autenticado não possui informações completas' });
+          }
+  
+          const dataDeSaida = new Date();
+          const doc = new jsPDF();
+  
+          console.log('Iniciando geração do PDF...');
+          doc.setDrawColor(0);
+          doc.setLineWidth(0.5);
+          doc.rect(
+              5,
+              5,
+              doc.internal.pageSize.width - 10,
+              doc.internal.pageSize.height - 10
+          );
+  
+          doc.setFontSize(11);
+          doc.text('TERMO DE RECEBIMENTO E RESPONSABILIDADE - CEGPA/COLOG', 105, 20, {
+              align: 'center',
+          });
+          doc.setFontSize(10);
+  
+          const headerYStart = 30;
+          const headerData = [
+              `Nº Termo: ${doc_saida}`,
+              `Data: ${dataDeSaida.toLocaleDateString('pt-BR')}`,
+              `Destino: ${destino.toUpperCase()}`,
+              `Responsável: ${postoGrad} ${nome_do_recebedor.toUpperCase()}`,
+              `MF: ${mf_recebedor}`,
+              `Contato: ${tel_recebedor}`,
+              `Referência: ${referencia}`,
+              `Observações: ${(observacao || 'Nenhuma').toUpperCase()}`,
+          ];
+  
+          headerData.forEach((line, index) => {
+              doc.text(line, 14, headerYStart + index * 5);
+          });
+  
+          let ordem = 1;
+          const items = [];
+  
+          console.log('Processando tombos:', tombos);
+          for (const tombo of tombos) {
+              console.log(`Buscando item com tombo ${tombo}...`);
+              const itemEstoque = await estoqueModel.getInfoByTombo(tombo);
+  
+              if (!itemEstoque) {
+                  console.warn(`Tombo ${tombo} não encontrado`);
+                  continue;
+  ;
+              }
+  
+              console.log(`Item encontrado para tombo ${tombo}:`, itemEstoque);
+              items.push([
+                  ordem++,
+                  itemEstoque.tombo,
+                  itemEstoque.descricao
+                      .toUpperCase()
+                      .replace('RETAINGLIAR', 'RETANGULAR'),
+                  itemEstoque.situacao.toUpperCase(),
+              ]);
+  
+              console.log(`Registrando saída para tombo ${tombo}...`);
+              await estoqueModel.createSaida(
+                  itemEstoque.id,
+                  doc_saida,
+                  dataDeSaida,
+                  1,
+                  referencia,
+                  destino,
+                  postoGrad,
+                  mf_recebedor,
+                  tel_recebedor,
+                  nome_do_recebedor,
+                  observacao,
+                  itemEstoque.descricao
+              );
+  
+              console.log(`Marcando tombo ${tombo} como pago...`);
+              await estoqueModel.markAsPaid(itemEstoque.id);
+          }
+  
+          if (items.length === 0) {
+              console.log('Nenhum item válido encontrado para gerar o termo.');
+              return res.status(400).json({ error: 'Nenhum item válido encontrado para gerar o termo.' });
+          }
+  
+          doc.autoTable({
+              startY: 70,
+              head: [['ORD.', 'TOMBO', 'DESCRIÇÃO', 'SITUAÇÃO']],
+              body: items,
+              styles: {
+                  fontSize: 8,
+                  halign: 'center',
+                  cellPadding: 1.5,
+              },
+              headStyles: {
+                  fillColor: [34, 139, 34],
+                  textColor: 255,
+                  fontStyle: 'bold',
+              },
+              columnStyles: {
+                  0: { cellWidth: 10 },
+                  1: { cellWidth: 25 },
+                  2: { cellWidth: 130, halign: 'left' },
+                  3: { cellWidth: 20 },
+              },
+              margin: { left: 13, right: 7 },
+              tableWidth: 'wrap',
+              didDrawPage: (data) => {
+                  doc.rect(
+                      5,
+                      5,
+                      doc.internal.pageSize.width - 10,
+                      doc.internal.pageSize.height - 10
+                  );
+  
+                  const pageHeight = doc.internal.pageSize.height;
+                  const pageWidth = doc.internal.pageSize.width;
+                  const signatureY = pageHeight - 25;
+                  const lineMargin = 15;
+                  const lineLength = 80;
+  
+                  doc.setLineWidth(0.5);
+                  doc.line(lineMargin, signatureY, lineMargin + lineLength, signatureY);
+                  doc.line(pageWidth - lineMargin - lineLength, signatureY, pageWidth - lineMargin, signatureY);
+  
+                  doc.setFontSize(9);
+                  doc.text(
+                      `${nome_do_recebedor.toUpperCase()}\nMF: ${mf_recebedor}`,
+                      lineMargin + lineLength / 2,
+                      signatureY + 5,
+                      { align: 'center' }
+                  );
+                  doc.text(
+                      '(Recebedor)',
+                      lineMargin + lineLength / 2,
+                      signatureY + 12,
+                      { align: 'center', fontSize: 8 }
+                  );
+                  doc.text(
+                      `${nomeResponsavel.toUpperCase()}\nMF: ${mfResponsavel}`,
+                      pageWidth - lineMargin - lineLength / 2,
+                      signatureY + 5,
+                      { align: 'center' }
+                  );
+                  doc.text(
+                      '(Responsável pela entrega)',
+                      pageWidth - lineMargin - lineLength / 2,
+                      signatureY + 12,
+                      { align: 'center', fontSize: 8 }
+                  );
+              },
+          });
+  
+          console.log('Salvando PDF...');
+          const fileName = `Termo_${doc_saida.replace(/\//g, '-')}.pdf`;
+          const pdfPath = path.join(__dirname, '../../pdfs', fileName);
+  
+          if (!fs.existsSync(path.dirname(pdfPath))) {
+              fs.mkdirSync(path.dirname(pdfPath), { recursive: true });
+          }
+  
+          doc.save(pdfPath);
+  
+          console.log('Atualizando sequência...');
+          await sequenciaModel.incrementarSequencia(new Date().getFullYear());
+  
+          console.log('Enviando resposta de sucesso...');
+          res.status(200).json({
+              success: true,
+              pdfPath: `/pdfs/${fileName}`,
+              message: 'Saída registrada com sucesso!',
+          });
       } catch (error) {
-         console.error('Erro no registrarSaida:', error);
-         res.status(500).json({
-            success: false,
-            error: 'Erro interno no servidor',
-            details: error.message,
-         });
+          console.error('Erro no registrarSaida:', error);
+          res.status(500).json({
+              success: false,
+              error: 'Erro interno no servidor',
+              details: error.message,
+          });
       }
-   }
+  }
 
    // Método para visualizar um item pago específico
    visualizarItemPago = async (req, res) => {
