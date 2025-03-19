@@ -638,7 +638,6 @@ class EstoqueController {
    };
 
    // Método para registrar a saída de itens e gerar o PDF
-   // Método para registrar a saída de itens e gerar o PDF
    async registrarSaida(req, res) {
       console.log('Requisição recebida em registrarSaida:', req.body);
       const {
@@ -659,7 +658,8 @@ class EstoqueController {
       // Obtendo informações do usuário logado
       const usuarioLogado = req.user;
       const nomeResponsavel = usuarioLogado?.nome_completo;
-      const mfResponsavel = usuarioLogado?.mf;
+      const mfResponsavel = usuarioLogado?.matricula;
+      const postoGradResponsavel = usuarioLogado?.posto_grad;
 
       try {
          // Validação dos campos obrigatórios
@@ -689,10 +689,11 @@ class EstoqueController {
          }
 
          // Validação dos dados do usuário logado
-         if (!nomeResponsavel || !mfResponsavel) {
+         if (!nomeResponsavel || !mfResponsavel || !postoGradResponsavel) {
             console.log('Dados do usuário logado incompletos:', {
                nomeResponsavel,
                mfResponsavel,
+               postoGradResponsavel,
             });
             return res.status(401).json({
                error: 'Usuário autenticado não possui informações completas',
@@ -839,19 +840,19 @@ class EstoqueController {
          const totalPages = doc.internal.getNumberOfPages();
          doc.setPage(totalPages);
 
-         // Ensure the signature block is drawn below the table
+         // Ensure the signature block is drawn below the table, closer to the bottom
          const pageHeight = doc.internal.pageSize.height;
-         const signatureY = Math.max(finalY + 20, pageHeight - 20); // At least 40 units from the bottom
+         const signatureY = Math.max(finalY + 20, pageHeight - 20);
          const lineLength = 50;
          const gapBetweenBlocks = 10;
 
-         const totalBlockWidth = lineLength * 3 + gapBetweenBlocks * 2; // 50 * 3 + 10 * 2 = 170 mm
-         const startX = 5 + (200 - totalBlockWidth) / 2; // 5 + (200 - 170) / 2 = 20
+         const totalBlockWidth = lineLength * 3 + gapBetweenBlocks * 2;
+         const startX = 5 + (200 - totalBlockWidth) / 2;
 
          // Calculate positions for the three signature blocks
          const leftPos = startX + lineLength / 2; // 20 + 25 = 45
-         const centerPos = leftPos + lineLength + gapBetweenBlocks; // 45 + 50 + 10 = 105
-         const rightPos = centerPos + lineLength + gapBetweenBlocks; // 105 + 50 + 10 = 165
+         const centerPos = leftPos + lineLength + gapBetweenBlocks;
+         const rightPos = centerPos + lineLength + gapBetweenBlocks;
 
          doc.setLineWidth(0.3);
 
@@ -873,7 +874,7 @@ class EstoqueController {
          // Texto do recebedor
          doc.setFontSize(6);
          doc.text(
-            `${nome_do_recebedor.toUpperCase()}\nMF: ${mf_recebedor}`,
+            `${postoGrad.toUpperCase()} ${nome_do_recebedor.toUpperCase()}\nMF: ${mf_recebedor}`,
             leftPos,
             signatureY + 4,
             { align: 'center' }
@@ -899,7 +900,7 @@ class EstoqueController {
          // Texto do responsável pela entrega
          doc.setFontSize(6);
          doc.text(
-            `${nomeResponsavel.toUpperCase()}\nMF: ${mfResponsavel}`,
+            `${postoGradResponsavel.toUpperCase()} ${nomeResponsavel.toUpperCase()}\nMF: ${mfResponsavel}`,
             rightPos,
             signatureY + 4,
             { align: 'center' }

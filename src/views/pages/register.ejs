@@ -6,61 +6,137 @@
          outline: 0;
          box-shadow: none !important;
       }
+
+      /* Increase the width of the form container */
+      .caixa-externa {
+         width: 300px;
+         max-width: 100%;
+      }
    </style>
+
    <body>
       <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
          <div class="border p-4 py-5 rounded shadow-lg caixa-externa">
-               <h1 class="text-center display-6 fw-bold mb-4 text-success">Registrar</h1>
-               <hr>
-               <% if (erro) { %>
-                  <div class="alert alert-danger">
-                     <%= erro %>
+            <h1 class="text-center display-6 fw-bold mb-4 text-success">Registrar</h1>
+            <hr>
+            <% if (erro) { %>
+               <div class="alert alert-danger">
+                  <%= erro %>
+               </div>
+            <% } %>
+            <% if (success) { %>
+               <div class="alert alert-success">
+                  <%= success %>
+               </div>
+               <script>
+                  setTimeout(function () {
+                     window.location.href = "/login";
+                  }, 2000);  // 2 segundos antes de redirecionar
+               </script>
+            <% } else { %>
+               <form action="/register" method="POST">
+                  <div class="form-group mb-3">
+                     <label for="nome_completo" class="form-label">Nome Completo</label>
+                     <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" class="form-control input-custom" id="nome_completo"
+                           name="nome_completo" placeholder="Entre com seu Nome Completo" required>
+                     </div>
                   </div>
-               <% } %>
-               <% if (success) { %>
-                  <div class="alert alert-success"> <%= success %> </div>
-                  <script>
-                     setTimeout(function () {
-                           window.location.href = "/login";
-                     }, 2000);  // 2 segundos antes de redirecionar
-                  </script>
-               <% } else { %>
-                     <form action="/register" method="POST">
-                           <div class="form-group mb-3">
-                              <label for="matricula" class="form-label">Matrícula Funcional</label>
-                              <div class="input-group">
-                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                 <input type="text" class="form-control input-custom" id="matricula" name="matricula" placeholder="Entre com sua MF" required>
-                              </div>
-                           </div>
-                           <div class="form-group mb-3">
-                              <label for="nome_completo" class="form-label">Nome Completo</label>
-                              <div class="input-group">
-                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                 <input type="text" class="form-control input-custom" id="nome_completo" name="nome_completo" placeholder="Entre com seu Nome Completo" required>
-                              </div>
-                           </div>
-                           <div class="form-group mb-3">
-                              <label for="senha" class="form-label">Senha</label>
-                              <div class="input-group">
-                                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                 <input type="password" class="form-control input-custom" id="senha" name="senha" placeholder="Sua Senha" required>
-                              </div>
-                           </div>
-                           <div class="d-flex justify-content-center">
-                              <button type="submit" class="btn btn-success mt-4 w-100">Registrar</button>
-                           </div>
-                     </form>
-               <% } %>
+
+                  <div class="form-group mb-3">
+                     <label for="matricula" class="form-label">Matrícula Funcional</label>
+                     <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                        <input type="text" class="form-control input-custom" id="matricula" name="matricula"
+                           placeholder="Entre com sua M.F." required>
+                     </div>
+                  </div>
+
+                  <div class="form-group mb-3">
+                     <label for="postoGrad" class="form-label">Posto/Graduação</label>
+                     <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-star"></i></span>
+                        <select class="form-control input-custom" id="postoGrad" name="postoGrad" required>
+                           <option value="">Selecione</option>
+                           <option value="SD. PM">SD. PM</option>
+                           <option value="CB. PM">CB. PM</option>
+                           <option value="3º SGT. PM">3º SGT. PM</option>
+                           <option value="2º SGT. PM">2º SGT. PM</option>
+                           <option value="1º SGT. PM">1º SGT. PM</option>
+                           <option value="SUB TEN. PM">SUB TEN. PM</option>
+                           <option value="2º TEN. QOPM">2º TEN. QOPM</option>
+                           <option value="2º TEN. QOAPM">2º TEN. QOAPM</option>
+                           <option value="1º TEN. QOPM">1º TEN. QOPM</option>
+                           <option value="1º TEN. QOAPM">1º TEN. QOAPM</option>
+                           <option value="CAP. QOPM">CAP. QOPM</option>
+                           <option value="CAP. QOAPM">CAP. QOAPM</option>
+                           <option value="MAJ. QOPM">MAJ. QOPM</option>
+                           <option value="MAJ QOAPM">MAJ. QOAPM</option>
+                           <option value="TEN. CEL.">TEN. CEL.</option>
+                           <option value="CEL.">CEL.</option>
+                        </select>
+                     </div>
+                  </div>
+                  <div class="form-group mb-3">
+                     <label for="senha" class="form-label">Senha</label>
+                     <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" class="form-control input-custom" id="senha" name="senha"
+                           placeholder="Sua Senha" required>
+                     </div>
+                  </div>
+                  <div class="d-flex justify-content-center">
+                     <button type="submit" class="btn btn-success mt-4 w-100">Registrar</button>
+                  </div>
+               </form>
+            <% } %>
          </div>
       </div>
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
       <script>
          window.onload = function () {
-               document.getElementById('matricula').focus(); // Corrigido de 'user' para 'matricula'
+            document.getElementById('nome_completo').focus();
          };
-         document.getElementById('matricula').addEventListener('input', function () {
-               this.value = this.value.toLowerCase(); // Mantém matrícula em minúsculas
+
+         const matriculaInput = document.getElementById('matricula');
+
+         // Função para formatar a matrícula no formato 000.000-0-0 ou 000.000-0-X
+         const formatarMatricula = (value) => {
+            // Remove todos os caracteres não numéricos e X
+            let cleaned = value.replace(/[^\dX]/gi, '');
+
+            // Separa dígitos e Xs
+            let digits = [];
+            let xChars = [];
+
+            for (let char of cleaned) {
+               if (char.toUpperCase() === 'X') {
+                  xChars.push(char);
+               } else {
+                  digits.push(char);
+               }
+            }
+
+            // Mantém máximo de 7 dígitos + 1 caractere (X ou dígito)
+            let mainDigits = digits.slice(0, 7).join('');
+            let lastChar = xChars.length > 0
+               ? 'X'
+               : digits.slice(7, 8)[0] || '';
+
+            // Limita a 8 caracteres no total
+            let formatted = (mainDigits + lastChar).slice(0, 8);
+
+            // Aplica a máscara
+            return formatted.replace(/(\d{3})(\d{3})(\d{1})([\dX])/i, '$1.$2-$3-$4').toUpperCase();
+         };
+
+         // Aplica a máscara enquanto o usuário digita
+         matriculaInput.addEventListener('input', function () {
+            // Mantém matrícula em minúsculas durante a digitação (conforme o comportamento original)
+            this.value = this.value.toLowerCase();
+            // Aplica a máscara e converte para maiúsculas no final
+            this.value = formatarMatricula(this.value);
          });
       </script>
    </body>

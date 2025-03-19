@@ -14,14 +14,18 @@ class LoginLogoutController {
       const lowerCaseMatricula = matricula.toLowerCase().trim();
       console.log('Tentativa de login - Matrícula:', lowerCaseMatricula);
       try {
-         const isAuthenticated = await loginLogoutModel.verifyUser(
-            lowerCaseMatricula,
-            senha
-         );
-         console.log('Resultado da autenticação:', isAuthenticated);
-         if (isAuthenticated) {
-            req.session.matricula = lowerCaseMatricula;
-            console.log('Sessão iniciada para:', req.session.matricula);
+         const user = await loginLogoutModel.verifyUser(lowerCaseMatricula, senha);
+         console.log('Resultado da autenticação:', user);
+         if (user) {
+            // Store user data in the session
+            req.session.user = {
+               matricula: user.matricula,
+               nome_completo: user.nome_completo,
+               posto_grad: user.posto_grad,
+            };
+            // Also populate req.user for consistency
+            req.user = req.session.user;
+            console.log('Sessão iniciada para:', req.session.user);
             // Salvar a sessão explicitamente antes do redirecionamento
             req.session.save((err) => {
                if (err) {
@@ -58,11 +62,12 @@ class LoginLogoutController {
    };
 
    createUser = async (req, res) => {
-      const { matricula, nome_completo, senha } = req.body; // Adicionado 'nome_completo'
+      const { matricula, nome_completo, postoGrad, senha } = req.body;
       try {
          await loginLogoutModel.createUser(
             matricula.toLowerCase().trim(),
             nome_completo.trim(),
+            postoGrad.trim(),
             senha
          );
          res.render('register', {

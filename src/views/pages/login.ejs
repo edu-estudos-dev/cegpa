@@ -10,6 +10,11 @@
          color: #2e7d32 !important;
          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
       }
+      /* Increase the width of the form container to match the registration form */
+      .caixa-externa {
+         width: 300px;
+         max-width: 100%;
+      }
    </style>
    <body>
       <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
@@ -22,17 +27,17 @@
                   </div>
                <% } %>
                <form action="/login" method="POST">
-                  <div class="form-group mb-3 caixa-externa">
+                  <div class="form-group mb-3">
                      <label for="matricula" class="form-label">Matrícula Funcional</label>
                      <div class="input-group">
-                           <span class="input-group-text"><i class="bi bi-person"></i></span>
+                           <span class="input-group-text"><i class="fas fa-id-card"></i></span>
                            <input type="text" class="form-control input-custom" id="matricula" name="matricula" placeholder="Entre com sua MF" autocomplete="username" required>
                      </div>
                   </div>
                   <div class="form-group mb-3">
                      <label for="senha" class="form-label">Senha</label>
                      <div class="input-group">
-                           <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                           <span class="input-group-text"><i class="fas fa-lock"></i></span>
                            <input type="password" class="form-control input-custom" id="senha" name="senha" placeholder="Sua Senha" autocomplete="current-password" required>
                      </div>
                   </div>
@@ -48,7 +53,7 @@
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
       <script>
          window.onload = function () {
-               document.getElementById('matricula').focus(); // Corrigido de 'user' para 'matricula'
+               document.getElementById('matricula').focus();
          };
       </script>
    </body>
