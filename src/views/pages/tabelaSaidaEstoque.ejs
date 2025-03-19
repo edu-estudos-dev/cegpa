@@ -181,11 +181,11 @@
                                        <strong>DOC SAÍDA:</strong> ${item.doc_saida} <br/>
                                        <strong>DOC ORIGEM:</strong> ${item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A'} <br/>
                                        <strong>VALOR:</strong> ${item.valor ? parseFloat(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'} <br>
-                                       <strong>NOME COMPLETO:</strong> ${item.nome_completo} <br/>
+                                       <strong>NOME COMPLETO:</strong> ${item.nome_completo.toUpperCase()} <br/>
                                        <strong>POSTO/GRADUAÇÃO:</strong> ${item.posto_graduacao} <br/>
                                        <strong>MAT FUNCIONAL:</strong> ${item.mat_funcional} <br/>
                                        <strong>TELEFONE:</strong> ${item.telefone} <br/>
-                                       <strong>OBSERVAÇÃO:</strong> ${item.observacao || 'N/A'} <br/>
+                                       <strong>OBSERVAÇÃO:</strong> ${item.observacao.toUpperCase() || 'N/A'} <br/>
                                     </p>
                                  </div>
                               </div>

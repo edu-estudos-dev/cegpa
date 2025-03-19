@@ -128,7 +128,10 @@ class EstoqueModel {
          const [results] = await connection.execute(query);
          return results;
       } catch (error) {
-         console.error('Erro ao buscar quantidade única de itens no estoque:', error);
+         console.error(
+            'Erro ao buscar quantidade única de itens no estoque:',
+            error
+         );
          throw error;
       }
    };
@@ -152,20 +155,20 @@ class EstoqueModel {
    // Método para obter os itens que saíram do estoque
    getItensPagos = async () => {
       const query = `
-         SELECT 
-            ip.id,
-            ip.data_de_saida,
-            ip.descricao,
-            ea.tombo AS tombo_estoqueatual,
-            ip.destino,
-            ip.referencia,
-            ip.doc_saida,
-            ea.doc_origem,
-            ea.valor
-         FROM itenspagos ip
-         JOIN estoqueatual ea ON ip.estoqueatual_id = ea.id
-         ORDER BY ip.data_de_saida DESC;
-      `;
+      SELECT 
+        ip.id,
+        ip.data_de_saida,
+        ip.descricao,
+        ea.tombo AS tombo_estoqueatual,
+        ip.destino,
+        ip.referencia,
+        ip.doc_saida,
+        ea.doc_origem,
+        ea.valor
+      FROM itenspagos ip
+      JOIN estoqueatual ea ON ip.estoqueatual_id = ea.id
+      ORDER BY ip.data_de_saida DESC;
+    `;
       try {
          const [results] = await connection.execute(query);
          console.log('Resultados de getItensPagos:', results);
@@ -294,7 +297,10 @@ class EstoqueModel {
       try {
          await connection.execute(query, [id]);
       } catch (error) {
-         console.error('Erro ao atualizar a coluna pago na tabela estoqueatual:', error);
+         console.error(
+            'Erro ao atualizar a coluna pago na tabela estoqueatual:',
+            error
+         );
          throw error;
       }
    };
@@ -350,8 +356,7 @@ class EstoqueModel {
         WHERE ip.id = ?;
       `;
       // ... resto do código
-    }
-
+   };
 
    // Método para excluir um item do estoque
    delete = async (id) => {
@@ -373,7 +378,10 @@ class EstoqueModel {
          console.log('Resultados de getSaidaByEstoqueatualId:', results);
          return results.length > 0 ? results[0] : null;
       } catch (error) {
-         console.error('Erro ao buscar dados de saída pelo estoqueatual_id:', error);
+         console.error(
+            'Erro ao buscar dados de saída pelo estoqueatual_id:',
+            error
+         );
          throw error;
       }
    };

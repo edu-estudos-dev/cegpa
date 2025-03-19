@@ -311,8 +311,8 @@
                                     <strong>Posto/Graduação:</strong> ${saida.posto_graduacao.toUpperCase()} <br/>
                                     <strong>Matrícula Funcional:</strong> ${saida.mat_funcional} <br/>
                                     <strong>Telefone:</strong> ${saida.telefone} <br/>
-                                    <strong>Nome Completo:</strong> ${saida.nome_completo} <br/>
-                                    <strong>Observação de Saída:</strong> ${getObservacao(saida)} <br/>` : `
+                                    <strong>Nome Completo:</strong> ${saida.nome_completo.toUpperCase()} <br/>
+                                    <strong>Observação de Saída:</strong> ${getObservacao(saida).toUpperCase()} <br/>` : `
                                     <h5 class="bg-secondary text-white p-2">Item foi dado como pago, mas não há detalhes de saída.</h5>`) : `
                                     <h5 class="bg-secondary text-white p-2">Item consta no estoque, ainda não foi pago.</h5>`}
                                 </p>
