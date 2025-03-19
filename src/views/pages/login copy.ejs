@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <%- include('../partials/head', { title: 'Login' }) %>
+
    <style>
       .input-custom:focus {
          outline: 0;
          box-shadow: none !important;
       }
+
       .text-secondary:hover {
          color: #2e7d32 !important;
          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
       }
    </style>
+
    <body>
       <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
          <div class="border p-4 py-5 rounded shadow-lg caixa-externa">
@@ -20,13 +24,14 @@
                   <div class="alert alert-danger">
                      <%= erro %>
                   </div>
-               <% } %>
+                  <% } %>
+
                <form action="/login" method="POST">
                   <div class="form-group mb-3 caixa-externa">
-                     <label for="matricula" class="form-label">Matrícula Funcional</label>
+                     <label for="user" class="form-label">Usuário</label>
                      <div class="input-group">
                            <span class="input-group-text"><i class="bi bi-person"></i></span>
-                           <input type="text" class="form-control input-custom" id="matricula" name="matricula" placeholder="Entre com sua MF" autocomplete="username" required>
+                           <input type="text" class="form-control input-custom" id="user" name="user" placeholder="Entre com o usuário" autocomplete="username" required>
                      </div>
                   </div>
                   <div class="form-group mb-3">
@@ -40,6 +45,7 @@
                      <button type="submit" class="btn btn-success mt-4 w-100">Entrar</button>
                   </div>
                </form>
+               
                <div class="text-center mt-4">
                   <a href="/register" class="text-decoration-none text-secondary">Primeiro acesso? Cadastre-se aqui</a>
                </div>
@@ -48,8 +54,9 @@
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
       <script>
          window.onload = function () {
-               document.getElementById('matricula').focus(); // Corrigido de 'user' para 'matricula'
+               document.getElementById('user').focus();
          };
       </script>
    </body>
+
 </html>
