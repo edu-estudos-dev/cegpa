@@ -54,7 +54,7 @@
    }
 
    .btn-action {
-      width: 70px;
+      width: 70px; 
    }
 
    .modal.fade .modal-dialog {
@@ -87,6 +87,22 @@
       .botoes {
          margin-bottom: 1rem;
       }
+   }
+
+   /* Ajuste das colunas */
+   .table-container th:nth-child(3), /* Descrição */
+   .table-container td:nth-child(3) {
+      width: 35%;
+   }
+
+   .table-container th:nth-child(5), /* Categoria */
+   .table-container td:nth-child(5) {
+      width: 15%;
+   }
+
+   .table-container th:last-child, /* Ações */
+   .table-container td:last-child {
+      width: 10%;
    }
 </style>
 
@@ -155,77 +171,77 @@
       </div>
    </div>
 
-   <!-- JavaScript para exibição do modal -->
    <script>
       document.addEventListener('DOMContentLoaded', () => {
          const viewButtons = document.querySelectorAll('.btn-action');
          viewButtons.forEach(button => {
             button.addEventListener('click', async (event) => {
-               const itemId = event.target.getAttribute('data-id');
-               const url = `/estoque/visualizar/${itemId}`;
-               try {
-                  console.log("Fetching data for item ID:", itemId);
-                  const response = await fetch(url);
-                  if (!response.ok) {
-                     throw new Error(`ERRO: ${response.statusText.toUpperCase()}`);
-                  }
-                  const item = await response.json();
-                  console.log("Data fetched:", item);
-                  if (item) {
-                     const modalHtml = `
-                        <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
-                           <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
-                              <div class="modal-content">
-                                 <div class="modal-header bg-success text-white d-flex justify-content-between">
-                                    <h3 class="modal-title ms-3" id="infoTomboModalLabel">Informações do Tombo</h3>
-                                    <button type="button" class="btn text-white" data-bs-dismiss="modal" aria-label="Close">
-                                       <i class="fa fa-times fa-lg"></i>
-                                    </button>
-                                 </div>
-                                 <div class="modal-body">
-                                    <div class="card">
-                                       <div class="card-body pb-0">
-                                          <h5 class="card-title">${item.descricao}</h5>
-                                          <p class="card-text">
-                                             <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
-                                             <strong>ID:</strong> ${item.id} <br/>
-                                             <strong>Tombo:</strong> ${item.tombo} <br/>
-                                             <strong>Data de Entrada:</strong> ${new Date(item.data_de_entrada).toLocaleDateString('pt-BR')} <br/>
-                                             <strong>Categoria:</strong> ${item.categoria} <br/>
-                                             <strong>Doc Origem:</strong> ${item.doc_origem} <br/>
-                                             <strong>Estoque:</strong> ${item.estoque} <br/>
-                                             <strong>Valor:</strong> ${parseFloat(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} <br/>
-                                             <strong>Situação:</strong> ${item.situacao} <br/>
-                                             <strong>Observação:</strong> ${item.observacao || 'N/A'} <br/>
-                                          </p>
+               if (!event.target.classList.contains('btn-delete')) {
+                  const itemId = event.target.getAttribute('data-id');
+                  const url = `/visualizar/${itemId}`;
+                  try {
+                     console.log("Fetching data for item ID:", itemId);
+                     const response = await fetch(url);
+                     if (!response.ok) {
+                        throw new Error(`ERRO: ${response.statusText.toUpperCase()}`);
+                     }
+                     const item = await response.json();
+                     console.log("Data fetched:", item);
+                     if (item) {
+                        const modalHtml = `
+                           <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
+                              <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
+                                 <div class="modal-content">
+                                    <div class="modal-header bg-success text-white d-flex justify-content-between">
+                                       <h3 class="modal-title ms-3" id="infoTomboModalLabel">Informações do Tombo</h3>
+                                       <button type="button" class="btn text-white" data-bs-dismiss="modal" aria-label="Close">
+                                          <i class="fa fa-times fa-lg"></i>
+                                       </button>
+                                    </div>
+                                    <div class="modal-body">
+                                       <div class="card">
+                                          <div class="card-body pb-0">
+                                             <h5 class="card-title">${item.descricao}</h5>
+                                             <p class="card-text">
+                                                <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
+                                                <strong>ID:</strong> ${item.id} <br/>
+                                                <strong>Tombo:</strong> ${item.tombo} <br/>
+                                                <strong>Data de Entrada:</strong> ${item.data_de_entrada} <br/>
+                                                <strong>Categoria:</strong> ${item.categoria} <br/>
+                                                <strong>Doc Origem:</strong> ${item.doc_origem || 'N/A'} <br/>
+                                                <strong>Estoque:</strong> ${item.estoque} <br/>
+                                                <strong>Valor:</strong> ${item.valor} <br/>
+                                                <strong>Situação:</strong> ${item.situacao} <br/>
+                                                <strong>Observação:</strong> ${item.observacao || 'N/A'} <br/>
+                                             </p>
+                                          </div>
                                        </div>
                                     </div>
                                  </div>
                               </div>
-                           </div>
-                        </div>`;
-                     const modalDiv = document.createElement('div');
-                     modalDiv.innerHTML = modalHtml;
-                     document.body.appendChild(modalDiv);
+                           </div>`;
+                        const modalDiv = document.createElement('div');
+                        modalDiv.innerHTML = modalHtml;
+                        document.body.appendChild(modalDiv);
 
-                     const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
-                        backdrop: true,
-                        focus: true
-                     });
-                     infoTomboModal.show();
+                        const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
+                           backdrop: true,
+                           focus: true
+                        });
+                        infoTomboModal.show();
 
-                     infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
-                        modalDiv.remove();
-                     });
+                        infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
+                           modalDiv.remove();
+                        });
+                     }
+                  } catch (error) {
+                     console.error('ERRO AO BUSCAR INFORMAÇÕES DO ITEM:', error.message.toUpperCase());
+                     alert('Erro ao carregar os detalhes. Verifique o console para mais informações.');
                   }
-               } catch (error) {
-                  console.error('ERRO AO BUSCAR INFORMAÇÕES DO ITEM:', error.message.toUpperCase());
-                  alert('Erro ao carregar os detalhes. Verifique o console para mais informações.');
                }
             });
          });
 
-         // Evento para o botão de exportação
          const exportarBtn = document.getElementById('exportarBtn');
          exportarBtn.addEventListener('click', (event) => {
             event.preventDefault();
@@ -233,7 +249,6 @@
             window.location.href = `/relatorio/geral?formato=${formato}`;
          });
 
-         // Evento para os botões de exclusão
          const deleteButtons = document.querySelectorAll('.btn-delete');
          deleteButtons.forEach(button => {
             button.addEventListener('click', async (event) => {

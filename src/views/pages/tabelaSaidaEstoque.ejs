@@ -26,30 +26,29 @@
 
    .table-container table {
       width: 100%;
-      border-collapse: separate; /* Muda para separate para evitar sobreposição de bordas */
-      border-spacing: 0; /* Remove qualquer espaçamento entre as células */
+      border-collapse: separate;
+      border-spacing: 0;
    }
 
    .table-container th,
    .table-container td {
       word-wrap: break-word;
       white-space: nowrap;
-      border: none !important; /* Remove qualquer borda padrão das células */
+      border: none !important;
    }
 
    .table-container thead th {
       position: sticky;
       top: 0;
-      background-color: rgb(231, 161, 9); /* Fundo laranja para o thead */
-      color: white; /* Texto branco para contraste */
-      border-left: 1px solid white !important; /* Borda branca à esquerda para todas as colunas */
-      border-right: none !important; /* Remove borda à direita */
-      border-top: none !important; /* Remove borda superior */
-      border-bottom: 1px solid white !important; /* Adiciona uma borda inferior branca para separação */
+      background-color: rgb(231, 161, 9);
+      color: white;
+      border-left: 1px solid white !important;
+      border-right: none !important;
+      border-top: none !important;
+      border-bottom: 1px solid white !important;
       z-index: 1;
    }
 
-   /* Garante que a última coluna não tenha borda à direita */
    .table-container thead th:last-child {
       border-right: none !important;
    }
@@ -73,11 +72,57 @@
       width: 90% !important;
    }
 
-   /* Media Query para notebooks */
    @media (max-width: 1920px) {
       .table-container {
          max-height: 56vh;
       }
+   }
+
+   /* Ajuste das colunas */
+   .table-container th:nth-child(1), /* ID */
+   .table-container td:nth-child(1) {
+      width: 3%;
+   }
+
+   .table-container th:nth-child(2), /* Entrada */
+   .table-container td:nth-child(2) {
+      width: 6%;
+   }
+
+   .table-container th:nth-child(3), /* Descrição */
+   .table-container td:nth-child(3) {
+      width: 35%;
+   }
+
+   .table-container th:nth-child(4), /* Tombo */
+   .table-container td:nth-child(4) {
+      width: 5%;
+   }
+
+
+   .table-container th:nth-child(5), /* Destino */
+   .table-container td:nth-child(5) {
+      width: 12%;
+   }
+
+   .table-container th:nth-child(7), /* Termo de entrega */
+   .table-container td:nth-child(7) {
+      width: 8%;
+   }
+
+   .table-container th:nth-child(8), /* Doc de Origem */
+   .table-container td:nth-child(8) {
+      width: 9%;
+   }
+
+   .table-container th:nth-child(8), /* Valor */
+   .table-container td:nth-child(8) {
+      width: 6%;
+   }
+
+   .table-container th:last-child, /* Ações */
+   .table-container td:last-child {
+      width: 7%;
    }
 </style>
 
@@ -120,7 +165,7 @@
                         <tr>
                            <td class="py-1 text-center"><%= item.id %></td>
                            <td class="py-1 text-center"><%= new Date(item.data_de_saida).toLocaleDateString('pt-BR') %></td>
-                           <td class="py-1"><%= item.descricao.toUpperCase() %></td>
+                           <td class="py-1 text-center"><%= item.descricao.toUpperCase() %></td>
                            <td class="py-1 text-center"><%= item.tombo_estoqueatual %></td>
                            <td class="py-1 text-center"><%= item.destino.toUpperCase() %></td>
                            <td class="py-1 text-center"><%= item.referencia.toUpperCase() %></td>
@@ -149,7 +194,6 @@
       </div>
    </div>
 
-   <!-- JavaScript para exibição do modal -->
    <script>
       document.addEventListener('DOMContentLoaded', () => {
          const viewButtons = document.querySelectorAll('.btn-action');
@@ -221,7 +265,6 @@
             });
          });
 
-         // Adicionar evento para o botão de exportação
          const exportarBtn = document.getElementById('exportarBtn');
          exportarBtn.addEventListener('click', (event) => {
             event.preventDefault();
