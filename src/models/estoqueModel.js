@@ -9,6 +9,69 @@ class EstoqueModel {
                   Métodos para a ENTRADA de itens no Estoque
    *********************************************************************************/
 
+   // Método para atualizar um item no estoque
+   updateEstoque = async (id, data) => {
+      // Validação dos dados recebidos
+      const requiredFields = [
+         'data_de_entrada',
+         'descricao',
+         'tombo',
+         'categoria',
+         'conta_contabil',
+         'doc_origem',
+         'estoque',
+         'valor',
+         'situacao',
+         'observacao'
+      ];
+
+      for (const field of requiredFields) {
+         if (data[field] === undefined || data[field] === null) {
+            throw new Error(`Campo obrigatório '${field}' está ausente ou nulo.`);
+         }
+      }
+
+      const query = `
+         UPDATE estoqueatual 
+         SET 
+            data_de_entrada = ?, 
+            descricao = ?, 
+            tombo = ?, 
+            categoria = ?, 
+            conta_contabil = ?, 
+            doc_origem = ?, 
+            estoque = ?, 
+            valor = ?, 
+            situacao = ?, 
+            observacao = ?
+         WHERE id = ?`;
+      try {
+         console.log('Dados recebidos para atualização:', data); // Log para depuração
+         const [result] = await connection.execute(query, [
+            data.data_de_entrada,
+            data.descricao,
+            data.tombo,
+            data.categoria,
+            data.conta_contabil,
+            data.doc_origem,
+            data.estoque,
+            data.valor,
+            data.situacao,
+            data.observacao,
+            id,
+         ]);
+         console.log('Resultado da atualização:', result); // Log para depuração
+         return result.affectedRows;
+      } catch (error) {
+         console.error('Erro ao atualizar o item no estoque:', {
+            error: error.message,
+            data,
+            id
+         });
+         throw new Error(`Erro ao atualizar o item no estoque: ${error.message}`);
+      }
+   };
+      
    // Método para obter todo o estoque
    getAllEstoque = async () => {
       const query = `SELECT * FROM estoqueatual WHERE pago = FALSE ORDER BY descricao ASC`;

@@ -16,6 +16,95 @@ class EstoqueController {
                   Métodos para a ENTRADA de itens no Estoque
    *********************************************************************************/
 
+   // Método para renderizar o formulário de edição
+   renderEditForm = async (req, res) => {
+      try {
+         const { id } = req.params;
+         const item = await estoqueModel.getInfoByID(id);
+         if (!item) {
+            return res.status(404).json({ error: 'Item não encontrado' });
+         }
+         // Ajustar formato da data para o input type="date" (YYYY-MM-DD)
+         item.data_de_entrada = new Date(item.data_de_entrada).toISOString().split('T')[0];
+         // Garantir que o valor seja um número puro
+         item.valor = parseFloat(item.valor).toFixed(2);
+         // Ajustar valores para corresponder às opções do formulário
+         item.categoria = item.categoria.toLowerCase(); // Ex.: "MESA" -> "mesa"
+         item.estoque = item.estoque.toLowerCase(); // Ex.: "GALPAO" -> "galpao"
+         item.situacao = item.situacao.toLowerCase(); // Ex.: "REGULAR" -> "regular"
+         // Ajustar conta_contabil para corresponder às opções do formulário
+         item.conta_contabil = item.conta_contabil.toLowerCase(); // Ex.: "MOBILIÁRIO EM GERAL" -> "mobiliario"
+         res.render('tabelaEstoqueEdit', { item });
+      } catch (error) {
+         console.error('Erro ao carregar o item para edição:', error);
+         res.status(500).json({ error: 'Erro ao carregar o item para edição.' });
+      }
+   };
+
+  // Método para atualizar um item no estoque
+   update = async (req, res) => {
+      const { id } = req.params;
+      const {
+         data_de_entrada,
+         descricao,
+         tombo,
+         categoria,
+         conta_contabil,
+         doc_origem,
+         estoque,
+         valor,
+         situacao,
+         observacao,
+      } = req.body;
+
+      // Validações básicas (similares ao create)
+      if (!data_de_entrada) return res.status(400).json({ error: 'A data de entrada é obrigatória.' });
+      if (!descricao) return res.status(400).json({ error: 'A descrição é obrigatória.' });
+      if (!tombo || !Number.isInteger(Number(tombo)) || tombo < 0) {
+         return res.status(400).json({ error: 'O tombo deve ser um número inteiro válido.' });
+      }
+      if (!categoria || categoria === 'Selecione...') return res.status(400).json({ error: 'A categoria é obrigatória.' });
+      if (!conta_contabil || conta_contabil === 'Escolha uma opção...') {
+         return res.status(400).json({ error: 'A conta contábil é obrigatória.' });
+      }
+      if (!estoque || estoque === 'Escolha uma opção...') return res.status(400).json({ error: 'O estoque é obrigatório.' });
+      if (!doc_origem) return res.status(400).json({ error: 'O documento de origem é obrigatório.' });
+      if (!valor || valor <= 0) return res.status(400).json({ error: 'O valor deve ser maior que zero.' });
+      if (!situacao || situacao === 'Escolha uma opção...') return res.status(400).json({ error: 'A situação é obrigatória.' });
+      if (observacao && observacao.trim() === '') {
+         return res.status(400).json({ error: 'A observação não pode ser uma string vazia.' });
+      }
+
+      const safeData = {
+         data_de_entrada,
+         descricao: descricao.toUpperCase(),
+         tombo: Number(tombo),
+         categoria: categoria.toUpperCase(),
+         conta_contabil: conta_contabil.toUpperCase(),
+         doc_origem: doc_origem.toUpperCase(),
+         estoque: estoque.toUpperCase(),
+         valor: Number(valor),
+         situacao: situacao.toUpperCase(),
+         observacao: observacao ? observacao.toUpperCase() : null,
+      };
+
+      try {
+         console.log('Dados recebidos no controlador para atualização:', safeData); // Log para depuração
+         const affectedRows = await estoqueModel.updateEstoque(id, safeData);
+         if (affectedRows === 0) {
+            return res.status(404).json({ error: 'Item não encontrado.' });
+         }
+         res.status(200).json({ message: 'Item atualizado com sucesso!' });
+      } catch (error) {
+         console.error('Erro ao atualizar o item no estoque:', {
+            error: error.message,
+            data: safeData,
+            id,
+         });
+         res.status(500).json({ error: `Erro ao atualizar o item no estoque: ${error.message}` });
+      }
+   };
+   
    // Método para renderizar a tabela com os itens novos
    showItensNovos = async (_req, res) => {
       try {

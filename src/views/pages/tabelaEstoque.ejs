@@ -53,7 +53,9 @@
       border-right: none !important;
    }
 
-   .btn-action {
+   .btn-details,
+   .btn-edit,
+   .btn-delete {
       width: 70px; 
    }
 
@@ -90,14 +92,44 @@
    }
 
    /* Ajuste das colunas */
+   .table-container th:nth-child(2), /* Data de entrada */
+   .table-container td:nth-child(2) {
+      width: 6%;
+   }
+
    .table-container th:nth-child(3), /* Descrição */
    .table-container td:nth-child(3) {
       width: 35%;
    }
 
+   .table-container th:nth-child(4), /* tombo */
+   .table-container td:nth-child(4) {
+      width: 5%;
+   }
+
    .table-container th:nth-child(5), /* Categoria */
    .table-container td:nth-child(5) {
-      width: 15%;
+      width: 10%;
+   }
+
+   .table-container th:nth-child(6), /* Estoque */
+   .table-container td:nth-child(6) {
+      width: 8%;
+   }
+
+   .table-container th:nth-child(7), /* Conservação */
+   .table-container td:nth-child(7) {
+      width: 8%;
+   }
+
+   .table-container th:nth-child(8), /* Doc. de Origem */
+   .table-container td:nth-child(8) {
+      width: 8%;
+   }
+
+   .table-container th:nth-child(9), /* Valor */
+   .table-container td:nth-child(9) {
+      width: 8%;
    }
 
    .table-container th:last-child, /* Ações */
@@ -135,7 +167,7 @@
                      <th class="text-center table-borderless px-0">Tombo</th>
                      <th class="text-center table-borderless px-0">Categoria</th>
                      <th class="text-center table-borderless px-0">Estoque</th>
-                     <th class="text-center table-borderless px-0">Situação</th>
+                     <th class="text-center table-borderless px-0">Conservação</th>
                      <th class="text-center table-borderless px-0">Doc De Origem</th>
                      <th class="text-center table-borderless px-0">Valor</th>
                      <th class="text-center table-borderless px-0">Ações</th>
@@ -145,24 +177,25 @@
                   <% if (estoque.length > 0) { %>
                      <% estoque.forEach(function(item) { %>
                         <tr>
-                           <td class="py-1 text-center"><%= item.id %></td>
-                           <td class="py-1 text-center"><%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %></td>
-                           <td class="py-1 text-center"><%= item.descricao %></td>
-                           <td class="py-1 text-center"><%= item.tombo %></td>
-                           <td class="py-1 text-center"><%= item.categoria %></td>
-                           <td class="py-1 text-center"><%= item.estoque %></td>
-                           <td class="py-1 text-center"><%= item.situacao %></td>
-                           <td class="py-1 text-center"><%= item.doc_origem %></td>
-                           <td class="py-1 text-center"><%= item.valor %></td>
-                           <td class="py-1 text-center">
-                              <button type="button" class="btn btn-secondary btn-sm btn-action" data-id="<%= item.id %>">Detalhes</button>
-                              <a href="/excluir/<%= item.id %>" class="btn btn-danger btn-sm btn-action btn-delete">Excluir</a>
+                           <td class="py-1 align-middle text-center"><%= item.id %></td>
+                           <td class="py-1 align-middle text-center"><%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %></td>
+                           <td class="py-1 align-middle text-center"><%= item.descricao %></td>
+                           <td class="py-1 align-middle text-center"><%= item.tombo %></td>
+                           <td class="py-1 align-middle text-center"><%= item.categoria %></td>
+                           <td class="py-1 align-middle text-center"><%= item.estoque %></td>
+                           <td class="py-1 align-middle text-center"><%= item.situacao %></td>
+                           <td class="py-1 align-middle text-center"><%= item.doc_origem %></td>
+                           <td class="py-1 align-middle text-center valor-cell" data-valor="<%= item.valor %>"><%= item.valor %></td>
+                           <td class="py-1 align-middle text-center">
+                              <button type="button" class="btn btn-secondary btn-sm btn-details" data-id="<%= item.id %>">Detalhes</button>
+                              <a href="/editar/<%= item.id %>" class="btn btn-warning btn-sm btn-edit">Editar</a>
+                              <a href="/excluir/<%= item.id %>" class="btn btn-danger btn-sm btn-delete">Excluir</a>
                            </td>
                         </tr>
                      <% }); %>
                   <% } else { %>
                      <tr>
-                        <td colspan="10" class="text-center">Ainda não há itens cadastrados</td>
+                        <td colspan="10" class="text-center align-middle">Ainda não há itens cadastrados</td>
                      </tr>
                   <% } %>
                </tbody>
@@ -173,75 +206,96 @@
 
    <script>
       document.addEventListener('DOMContentLoaded', () => {
-         const viewButtons = document.querySelectorAll('.btn-action');
+         // Função para formatar valores no padrão de moeda brasileira
+         const formatarMoeda = (valor) => {
+            return parseFloat(valor).toLocaleString('pt-BR', {
+               style: 'currency',
+               currency: 'BRL'
+            });
+         };
+
+         // Seleciona todas as células da coluna "Valor" e formata os valores
+         const valorCells = document.querySelectorAll('.valor-cell');
+         valorCells.forEach(cell => {
+            const valor = cell.getAttribute('data-valor');
+            if (valor) {
+               cell.textContent = formatarMoeda(valor);
+            }
+         });
+
+         // Script para o botão "Detalhes"
+         const viewButtons = document.querySelectorAll('.btn-details');
          viewButtons.forEach(button => {
             button.addEventListener('click', async (event) => {
-               if (!event.target.classList.contains('btn-delete')) {
-                  const itemId = event.target.getAttribute('data-id');
-                  const url = `/visualizar/${itemId}`;
-                  try {
-                     console.log("Fetching data for item ID:", itemId);
-                     const response = await fetch(url);
-                     if (!response.ok) {
-                        throw new Error(`ERRO: ${response.statusText.toUpperCase()}`);
-                     }
-                     const item = await response.json();
-                     console.log("Data fetched:", item);
-                     if (item) {
-                        const modalHtml = `
-                           <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
-                              <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
-                                 <div class="modal-content">
-                                    <div class="modal-header bg-success text-white d-flex justify-content-between">
-                                       <h3 class="modal-title ms-3" id="infoTomboModalLabel">Informações do Tombo</h3>
-                                       <button type="button" class="btn text-white" data-bs-dismiss="modal" aria-label="Close">
-                                          <i class="fa fa-times fa-lg"></i>
-                                       </button>
-                                    </div>
-                                    <div class="modal-body">
-                                       <div class="card">
-                                          <div class="card-body pb-0">
-                                             <h5 class="card-title">${item.descricao}</h5>
-                                             <p class="card-text">
-                                                <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
-                                                <strong>ID:</strong> ${item.id} <br/>
-                                                <strong>Tombo:</strong> ${item.tombo} <br/>
-                                                <strong>Data de Entrada:</strong> ${item.data_de_entrada} <br/>
-                                                <strong>Categoria:</strong> ${item.categoria} <br/>
-                                                <strong>Doc Origem:</strong> ${item.doc_origem || 'N/A'} <br/>
-                                                <strong>Estoque:</strong> ${item.estoque} <br/>
-                                                <strong>Valor:</strong> ${item.valor} <br/>
-                                                <strong>Situação:</strong> ${item.situacao} <br/>
-                                                <strong>Observação:</strong> ${item.observacao || 'N/A'} <br/>
-                                             </p>
-                                          </div>
+               const itemId = event.target.getAttribute('data-id');
+               const url = `/visualizar/${itemId}`;
+               try {
+                  console.log("Fetching data for item ID:", itemId);
+                  const response = await fetch(url);
+                  if (!response.ok) {
+                     const errorText = await response.text();
+                     console.error('Erro na resposta do servidor:', response.status, errorText);
+                     throw new Error(`ERRO: ${response.status} - ${response.statusText.toUpperCase()}`);
+                  }
+                  const item = await response.json();
+                  console.log("Data fetched:", item);
+                  if (item) {
+                     const modalHtml = `
+                        <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
+                           <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
+                              <div class="modal-content">
+                                 <div class="modal-header bg-success text-white d-flex justify-content-between">
+                                    <h3 class="modal-title ms-3" id="infoTomboModalLabel">Informações do Tombo</h3>
+                                    <button type="button" class="btn text-white" data-bs-dismiss="modal" aria-label="Close">
+                                       <i class="fa fa-times fa-lg"></i>
+                                    </button>
+                                 </div>
+                                 <div class="modal-body">
+                                    <div class="card">
+                                       <div class="card-body pb-0">
+                                          <h5 class="card-title">${item.descricao || 'N/A'}</h5>
+                                          <p class="card-text">
+                                             <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
+                                             <strong>ID:</strong> ${item.id || 'N/A'} <br/>
+                                             <strong>Tombo:</strong> ${item.tombo || 'N/A'} <br/>
+                                             <strong>Data de Entrada:</strong> ${item.data_de_entrada || 'N/A'} <br/>
+                                             <strong>Categoria:</strong> ${item.categoria || 'N/A'} <br/>
+                                             <strong>Doc Origem:</strong> ${item.doc_origem || 'N/A'} <br/>
+                                             <strong>Estoque:</strong> ${item.estoque || 'N/A'} <br/>
+                                             <strong>Valor:</strong> ${formatarMoeda(item.valor) || 'N/A'} <br/>
+                                             <strong>Situação:</strong> ${item.situacao || 'N/A'} <br/>
+                                             <strong>Observação:</strong> ${item.observacao || 'N/A'} <br/>
+                                          </p>
                                        </div>
                                     </div>
                                  </div>
                               </div>
-                           </div>`;
-                        const modalDiv = document.createElement('div');
-                        modalDiv.innerHTML = modalHtml;
-                        document.body.appendChild(modalDiv);
+                           </div>
+                        </div>`;
+                     const modalDiv = document.createElement('div');
+                     modalDiv.innerHTML = modalHtml;
+                     document.body.appendChild(modalDiv);
 
-                        const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
-                           backdrop: true,
-                           focus: true
-                        });
-                        infoTomboModal.show();
+                     const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
+                        backdrop: true,
+                        focus: true
+                     });
+                     infoTomboModal.show();
 
-                        infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
-                           modalDiv.remove();
-                        });
-                     }
-                  } catch (error) {
-                     console.error('ERRO AO BUSCAR INFORMAÇÕES DO ITEM:', error.message.toUpperCase());
-                     alert('Erro ao carregar os detalhes. Verifique o console para mais informações.');
+                     infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
+                        modalDiv.remove();
+                     });
+                  } else {
+                     throw new Error('Item não retornado pelo servidor.');
                   }
+               } catch (error) {
+                  console.error('ERRO AO BUSCAR INFORMAÇÕES DO ITEM:', error.message.toUpperCase());
+                  alert(`Erro ao carregar os detalhes: ${error.message}. Verifique o console para mais informações.`);
                }
             });
          });
 
+         // Script para o botão "Exportar Relatório"
          const exportarBtn = document.getElementById('exportarBtn');
          exportarBtn.addEventListener('click', (event) => {
             event.preventDefault();
@@ -249,6 +303,7 @@
             window.location.href = `/relatorio/geral?formato=${formato}`;
          });
 
+         // Script para o botão "Excluir"
          const deleteButtons = document.querySelectorAll('.btn-delete');
          deleteButtons.forEach(button => {
             button.addEventListener('click', async (event) => {

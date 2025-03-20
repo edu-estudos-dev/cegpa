@@ -7,6 +7,12 @@ const router = express.Router();
                   Rotas para a ENTRADA de itens no Estoque
 *********************************************************************************/
 
+// Rota para renderizar o formulário de edição
+router.get('/editar/:id', estoqueController.renderEditForm);
+
+// Rota para atualizar os dados do item
+router.put('/editar/:id', estoqueController.update);
+
 // Rota para listar apenas os itens novos do estoque
 router.get('/itens-novos', estoqueController.getItensNovos);
 
