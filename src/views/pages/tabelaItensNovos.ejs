@@ -26,19 +26,32 @@
 
    .table-container table {
       width: 100%;
+      border-collapse: separate; /* Muda para separate para evitar sobreposição de bordas */
+      border-spacing: 0; /* Remove qualquer espaçamento entre as células */
    }
 
    .table-container th,
    .table-container td {
       word-wrap: break-word;
       white-space: nowrap;
+      border: none !important; /* Remove qualquer borda padrão das células */
    }
 
    .table-container thead th {
       position: sticky;
       top: 0;
-      background-color: #fff;
+      background-color: rgb(231, 161, 9); /* Fundo laranja para o thead */
+      color: white; /* Texto branco para contraste */
+      border-left: 1px solid white !important; /* Borda branca à esquerda para todas as colunas */
+      border-right: none !important; /* Remove borda à direita */
+      border-top: none !important; /* Remove borda superior */
+      border-bottom: 1px solid white !important; /* Adiciona uma borda inferior branca para separação */
       z-index: 1;
+   }
+
+   /* Garante que a última coluna não tenha borda à direita */
+   .table-container thead th:last-child {
+      border-right: none !important;
    }
 
    .btn-action {
@@ -58,10 +71,6 @@
 
    .w-90 {
       width: 90% !important;
-   }
-
-   .thead-success {
-      background-color: green !important;
    }
 
    /* Media Query para notebooks */
@@ -104,16 +113,16 @@
 
          <div class="table-container">
             <table class="table table-striped table-hover mb-0">
-               <thead class="thead-success">
+               <thead>
                   <tr>
-                     <th class="text-center">ID</th>
-                     <th class="text-center">Entrada</th>
-                     <th>Descrição</th>
-                     <th class="text-center">Tombo</th>
-                     <th class="text-center">Categoria</th>
-                     <th class="text-center">Estoque</th>
-                     <th class="text-center">Situação</th>
-                     <th class="text-center">Ações</th>
+                     <th class="text-center px-0">ID</th>
+                     <th class="text-center px-0">Entrada</th>
+                     <th class="text-center px-0">Descrição</th>
+                     <th class="text-center px-0">Tombo</th>
+                     <th class="text-center px-0">Categoria</th>
+                     <th class="text-center px-0">Estoque</th>
+                     <th class="text-center px-0">Situação</th>
+                     <th class="text-center px-0">Ações</th>
                   </tr>
                </thead>
                <tbody>
@@ -122,7 +131,7 @@
                         <tr>
                            <td class="py-1 text-center"><%= item.id %></td>
                            <td class="py-1 text-center"><%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %></td>
-                           <td class="py-1"><%= item.descricao %></td>
+                           <td class="py-1 text-center"><%= item.descricao %></td>
                            <td class="py-1 text-center"><%= item.tombo %></td>
                            <td class="py-1 text-center"><%= item.categoria %></td>
                            <td class="py-1 text-center"><%= item.estoque %></td>

@@ -213,19 +213,23 @@ class EstoqueController {
       try {
          const { id } = req.params;
          const item = await estoqueModel.getInfoByID(id);
-         if (item) {
-            res.json(item);
-         } else {
-            res.status(404).json({
-               msg: 'Item não encontrado',
-            });
-         }
-      } catch (error) {
-         console.error('Erro ao buscar informações do item:', error);
-         res.status(500).json({
-            msg: 'Erro ao buscar informações do item',
-            details: error.message,
+
+         if (!item)
+            return res.status(404).json({ error: 'Item não encontrado' });
+
+         // Formatar datas e valores
+         item.data_de_entrada = new Date(
+            item.data_de_entrada
+         ).toLocaleDateString('pt-BR');
+         item.valor = item.valor.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
          });
+
+         res.json(item);
+      } catch (error) {
+         console.error('Erro:', error);
+         res.status(500).json({ error: 'Erro interno no servidor' });
       }
    };
 

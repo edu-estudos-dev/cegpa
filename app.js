@@ -38,11 +38,10 @@ app.use(
 app.use("/", loginLogoutRoutes);
 
 // Aplicando o middleware de autenticação apenas às rotas protegidas
-// Mantendo as URLs originais, mas protegendo-as com o middleware
 app.use("/painel", isAuthenticated, painelRoutes);
-app.use("/", isAuthenticated, estoqueRoutes); // Os caminhos já estão definidos no router
-app.use("/", isAuthenticated, pesquisaRoutes); // Os caminhos já estão definidos no router
-app.use("/", isAuthenticated, sequenciaRoutes); // Os caminhos já estão definidos no router
+app.use("/", isAuthenticated, estoqueRoutes); 
+app.use("/", isAuthenticated, pesquisaRoutes); 
+app.use("/", isAuthenticated, sequenciaRoutes); 
 
 app.use((req, res, next) => {
   res.status(404).render("404");
