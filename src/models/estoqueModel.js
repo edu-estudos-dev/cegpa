@@ -1,10 +1,6 @@
 import connection from '../../db_config/connection.js';
 
 class EstoqueModel {
-   constructor() {
-      console.log('Instanciando EstoqueModel...');
-   }
-
    /* ********************************************************************************
                   Métodos para a ENTRADA de itens no Estoque
    *********************************************************************************/
@@ -300,6 +296,7 @@ class EstoqueModel {
    // Método para adicionar a saída no banco de dados
    createSaida = async (
       estoqueatual_id,
+      tombo, // Added tombo parameter
       doc_saida,
       data_de_saida,
       quantidade,
@@ -312,10 +309,11 @@ class EstoqueModel {
       observacao,
       descricao
    ) => {
-      const query = `INSERT INTO itenspagos (estoqueatual_id, doc_saida, data_de_saida, quantidade, referencia, destino, posto_graduacao, mat_funcional, telefone, nome_completo, observacao, descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      const query = `INSERT INTO itenspagos (estoqueatual_id, tombo, doc_saida, data_de_saida, quantidade, referencia, destino, posto_graduacao, mat_funcional, telefone, nome_completo, observacao, descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
       try {
          console.log('Inserindo na tabela itenspagos com os seguintes dados:', {
             estoqueatual_id,
+            tombo,
             doc_saida,
             data_de_saida,
             quantidade,
@@ -328,9 +326,10 @@ class EstoqueModel {
             observacao,
             descricao,
          });
-
+   
          const [result] = await connection.execute(query, [
             estoqueatual_id,
+            tombo,
             doc_saida,
             data_de_saida,
             quantidade,
@@ -343,17 +342,17 @@ class EstoqueModel {
             observacao,
             descricao,
          ]);
-
+   
          const updateQuery = `UPDATE estoqueatual SET pago = 1 WHERE id = ?`;
          await connection.execute(updateQuery, [estoqueatual_id]);
-
+   
          return result.insertId;
       } catch (error) {
          console.error('Erro ao inserir dados na tabela itenspagos:', error);
          throw error;
       }
    };
-
+  
    // Método para marcar item que saiu do estoque atual como 'pago'
    markAsPaid = async (id) => {
       const query = `UPDATE estoqueatual SET pago = 1 WHERE id = ?`;

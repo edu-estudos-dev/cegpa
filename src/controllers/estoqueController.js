@@ -28,13 +28,11 @@ class EstoqueController {
          item.data_de_entrada = new Date(item.data_de_entrada).toISOString().split('T')[0];
          // Garantir que o valor seja um número puro
          item.valor = parseFloat(item.valor).toFixed(2);
-         // Ajustar valores para corresponder às opções do formulário
-         item.categoria = item.categoria.toLowerCase(); // Ex.: "MESA" -> "mesa"
-         item.estoque = item.estoque.toLowerCase(); // Ex.: "GALPAO" -> "galpao"
-         item.situacao = item.situacao.toLowerCase(); // Ex.: "REGULAR" -> "regular"
-         // Ajustar conta_contabil para corresponder às opções do formulário
-         item.conta_contabil = item.conta_contabil.toLowerCase(); // Ex.: "MOBILIÁRIO EM GERAL" -> "mobiliario"
-         res.render('tabelaEstoqueEdit', { item });
+         item.categoria = item.categoria.toLowerCase();
+         item.estoque = item.estoque.toLowerCase(); 
+         item.situacao = item.situacao.toLowerCase(); 
+         item.conta_contabil = item.conta_contabil.toLowerCase();
+         res.render('formEdit', { item });
       } catch (error) {
          console.error('Erro ao carregar o item para edição:', error);
          res.status(500).json({ error: 'Erro ao carregar o item para edição.' });
@@ -800,7 +798,7 @@ class EstoqueController {
          doc.setDrawColor(0);
          doc.setLineWidth(0.5);
 
-         // Draw the border on the first page (will be redrawn on subsequent pages in didDrawPage)
+         // Desenha a borda na primeira página (será redesenhada em outras páginas via didDrawPage)
          doc.rect(
             5,
             5,
@@ -813,9 +811,7 @@ class EstoqueController {
             'TERMO DE RECEBIMENTO E RESPONSABILIDADE - CEGPA/COLOG',
             105,
             20,
-            {
-               align: 'center',
-            }
+            { align: 'center' }
          );
          doc.setFontSize(10);
 
@@ -861,6 +857,7 @@ class EstoqueController {
             console.log(`Registrando saída para tombo ${tombo}...`);
             await estoqueModel.createSaida(
                itemEstoque.id,
+               itemEstoque.tombo,
                doc_saida,
                dataDeSaida,
                1,
@@ -885,8 +882,8 @@ class EstoqueController {
             });
          }
 
-         // Render the table
-         let finalY = 70; // Initial Y position for the table
+         // Renderiza a tabela
+         let finalY = 70; // Posição Y inicial para a tabela
          doc.autoTable({
             startY: 70,
             head: [['ORD.', 'TOMBO', 'DESCRIÇÃO', 'SITUAÇÃO']],
@@ -910,7 +907,7 @@ class EstoqueController {
             margin: { left: 13, right: 7 },
             tableWidth: 'wrap',
             didDrawPage: (data) => {
-               // Draw the border on every page
+               // Desenha a borda em todas as páginas
                doc.rect(
                   5,
                   5,
@@ -918,22 +915,16 @@ class EstoqueController {
                   doc.internal.pageSize.height - 10
                );
             },
-            didParseCell: (data) => {
-               // Optional: Adjust cell parsing if needed
-            },
-            didDrawCell: (data) => {
-               // Optional: Adjust cell drawing if needed
-            },
          });
 
-         // After the table is fully rendered, get the final Y position
+         // Após a tabela ser renderizada, obtém a posição Y final
          finalY = doc.lastAutoTable.finalY || 70;
 
-         // Switch to the last page to draw the signature block
+         // Alterna para a última página para desenhar o bloco de assinaturas
          const totalPages = doc.internal.getNumberOfPages();
          doc.setPage(totalPages);
 
-         // Ensure the signature block is drawn below the table, closer to the bottom
+         // Garante que o bloco de assinaturas seja desenhado abaixo da tabela, próximo ao rodapé
          const pageHeight = doc.internal.pageSize.height;
          const signatureY = Math.max(finalY + 20, pageHeight - 20);
          const lineLength = 50;
@@ -942,27 +933,27 @@ class EstoqueController {
          const totalBlockWidth = lineLength * 3 + gapBetweenBlocks * 2;
          const startX = 5 + (200 - totalBlockWidth) / 2;
 
-         // Calculate positions for the three signature blocks
-         const leftPos = startX + lineLength / 2; // 20 + 25 = 45
+         // Calcula as posições dos três blocos de assinatura
+         const leftPos = startX + lineLength / 2;
          const centerPos = leftPos + lineLength + gapBetweenBlocks;
          const rightPos = centerPos + lineLength + gapBetweenBlocks;
 
          doc.setLineWidth(0.3);
 
-         // Draw the signature lines
-         doc.line(startX, signatureY, startX + lineLength, signatureY); // Left line (20 to 70)
+         // Desenha as linhas de assinatura
+         doc.line(startX, signatureY, startX + lineLength, signatureY); // Linha à esquerda
          doc.line(
             centerPos - lineLength / 2,
             signatureY,
             centerPos + lineLength / 2,
             signatureY
-         ); // Center line (80 to 130)
+         ); // Linha central
          doc.line(
             rightPos - lineLength / 2,
             signatureY,
             rightPos + lineLength / 2,
             signatureY
-         ); // Right line (140 to 190)
+         ); // Linha à direita
 
          // Texto do recebedor
          doc.setFontSize(6);
@@ -1031,7 +1022,7 @@ class EstoqueController {
          });
       }
    }
-
+   
    // Método para visualizar um item pago específico
    visualizarItemPago = async (req, res) => {
       const { id } = req.params;

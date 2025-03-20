@@ -5,16 +5,12 @@ class LoginModel {
    verifyUser = async (matricula, senha) => {
       const query = `SELECT * FROM usuarios WHERE matricula = ?`;
       matricula = matricula.toLowerCase().trim();
-      console.log('Verificando matrícula:', matricula);
       try {
          const [results] = await connection.execute(query, [matricula]);
-         console.log('Resultados do banco:', results);
          if (results.length > 0) {
             const user = results[0];
             const hashedPassword = user['senha_hash'];
-            console.log('Senha hash do banco:', hashedPassword);
             const match = await bcrypt.compare(senha.trim(), hashedPassword);
-            console.log('Senha corresponde:', match);
             if (match) {
                // Return the user object with all necessary fields
                return {

@@ -18,10 +18,10 @@
    }
 
    .table-container {
-      max-height: 67vh;
+      max-height: 72vh;
       overflow-y: auto;
       overflow-x: hidden;
-      min-height: 67vh;
+      min-height: 72vh;
    }
 
    .table-container table {
@@ -141,6 +141,17 @@
    .table-container td:last-child {
       width: 10%;
    }
+
+   /* Adicionando transição para a exibição */
+   .table-container #estoqueTable tbody tr {
+      transition: opacity 0.3s ease;
+   }
+
+   /* Estilo para linhas ocultas */
+   .table-container #estoqueTable tbody tr.hidden {
+      display: none;
+      opacity: 0;
+   }
 </style>
 
 <body>
@@ -163,7 +174,12 @@
          </div>
 
          <div class="table-container">
-            <table class="table table-striped table-hover mb-0">
+            <div class="d-flex justify-content-end align-items-center mb-2">
+               <label for="searchTombo" class="me-2 fw-bold">Pesquisar:</label>
+               <input type="text" id="searchTombo" placeholder="Digite o número do tombo, categoria, descrição ou conservação" style="width: 410px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; margin-right: 10px;">
+               <button id="clearSearch" class="btn btn-secondary btn-md me-2">Limpar</button>
+            </div>
+            <table id="estoqueTable" class="table table-striped table-hover mb-0">
                <thead class="thead-success">
                   <tr class="table-borderless">
                      <th class="text-center table-borderless px-0">ID</th>
@@ -336,6 +352,50 @@
                }
             });
          });
+
+         // Script para pesquisa por tombo, categoria, descrição ou conservação e filtragem
+         document.getElementById('searchTombo').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim(); // Converte para minúsculas e remove espaços extras
+            console.log('Termo digitado:', searchTerm); // Log para depuração
+            filterRows(searchTerm);
+         });
+
+         // Script para o botão "Limpar"
+         document.getElementById('clearSearch').addEventListener('click', () => {
+            document.getElementById('searchTombo').value = '';
+            filterRows('');
+         });
+
+         function filterRows(searchTerm) {
+            const table = document.getElementById('estoqueTable');
+            const rows = table.getElementsByTagName('tr');
+
+            // Percorre as linhas, começando do índice 1 para pular o cabeçalho
+            for (let i = 1; i < rows.length; i++) {
+               const cells = rows[i].getElementsByTagName('td');
+               // Verifica se a linha tem células suficientes (evita erro em linhas como "Ainda não há itens")
+               if (cells.length < 7) {
+                  rows[i].classList.add('hidden'); // Oculta linhas inválidas
+                  continue;
+               }
+
+               const descricaoCell = cells[2].textContent.toLowerCase().trim(); // Coluna "Descrição" (índice 2)
+               const tomboCell = cells[3].textContent.toLowerCase().trim(); // Coluna "Tombo" (índice 3)
+               const categoriaCell = cells[4].textContent.toLowerCase().trim(); // Coluna "Categoria" (índice 4)
+               const conservacaoCell = cells[6].textContent.toLowerCase().trim(); // Coluna "Conservação" (índice 6)
+               console.log(`Comparando descricaoCell: ${descricaoCell}, tomboCell: ${tomboCell}, categoriaCell: ${categoriaCell}, conservacaoCell: ${conservacaoCell} com termo: ${searchTerm}`); // Log para depuração
+
+               // Verifica se o termo digitado corresponde à descrição, tombo, categoria ou conservação
+               const matches = descricaoCell.includes(searchTerm) || tomboCell.includes(searchTerm) || categoriaCell.includes(searchTerm) || conservacaoCell.includes(searchTerm);
+
+               if (searchTerm === '' || matches) {
+                  rows[i].classList.remove('hidden'); // Mostra a linha
+                  console.log(`Linha ${i} mostrada: descricao=${descricaoCell}, tombo=${tomboCell}, categoria=${categoriaCell}, conservacao=${conservacaoCell}`); // Log para confirmar
+               } else {
+                  rows[i].classList.add('hidden'); // Oculta a linha
+               }
+            }
+         }
       });
    </script>
 </body>

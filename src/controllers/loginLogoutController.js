@@ -12,10 +12,8 @@ class LoginLogoutController {
    login = async (req, res) => {
       const { matricula, senha } = req.body;
       const lowerCaseMatricula = matricula.toLowerCase().trim();
-      console.log('Tentativa de login - Matrícula:', lowerCaseMatricula);
       try {
          const user = await loginLogoutModel.verifyUser(lowerCaseMatricula, senha);
-         console.log('Resultado da autenticação:', user);
          if (user) {
             // Store user data in the session
             req.session.user = {
