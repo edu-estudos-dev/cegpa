@@ -891,7 +891,7 @@ class EstoqueController {
          // Texto do comandante
          doc.setFontSize(6);
          doc.text(
-            'TEN. CEL. ALLAN KARDECC\nMF: 132.654-7-5',
+            'TEN. CEL. ALLAN KARDEK\nMF: 135.907-1-0',
             centerPos,
             signatureY + 4,
             { align: 'center' }

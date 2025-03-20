@@ -38,7 +38,7 @@ app.use(
 app.use("/", loginLogoutRoutes);
 
 // Aplicando o middleware de autenticação apenas às rotas protegidas
-app.use("/painel", isAuthenticated, painelRoutes);
+app.use("/painel", painelRoutes);
 app.use("/", isAuthenticated, estoqueRoutes); 
 app.use("/", isAuthenticated, pesquisaRoutes); 
 app.use("/", isAuthenticated, sequenciaRoutes); 
