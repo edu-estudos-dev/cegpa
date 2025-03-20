@@ -84,7 +84,7 @@
       width: 3%;
    }
 
-   .table-container th:nth-child(2), /* Entrada */
+   .table-container th:nth-child(2), /* Saida */
    .table-container td:nth-child(2) {
       width: 6%;
    }
@@ -107,16 +107,16 @@
 
    .table-container th:nth-child(7), /* Termo de entrega */
    .table-container td:nth-child(7) {
-      width: 8%;
+      width: 10%;
    }
 
    .table-container th:nth-child(8), /* Doc de Origem */
    .table-container td:nth-child(8) {
-      width: 9%;
+      width: 8%;
    }
 
-   .table-container th:nth-child(8), /* Valor */
-   .table-container td:nth-child(8) {
+   .table-container th:nth-child(9), /* Valor */
+   .table-container td:nth-child(9) {
       width: 6%;
    }
 
@@ -147,45 +147,45 @@
             <table class="table table-striped table-hover mb-0">
                <thead>
                   <tr>
-                     <th class="text-center px-0">ID</th>
-                     <th class="text-center px-0">Data da Saída</th>
-                     <th class="text-center px-0">Descrição</th>
-                     <th class="text-center px-0">Tombo</th>
-                     <th class="text-center px-0">Destino</th>
-                     <th class="text-center px-0">NUP (Suite)</th>
-                     <th class="text-center px-0">Termo de Entrega</th>
-                     <th class="text-center px-0">Doc Origem</th>
-                     <th class="text-center px-0">Valor</th>
-                     <th class="text-center px-0">Vizualizar</th>
+                     <th class="text-center px-0 align-middle">ID</th>
+                     <th class="text-center px-0 align-middle">Saída</th>
+                     <th class="text-center px-0 align-middle">Descrição</th>
+                     <th class="text-center px-0 align-middle">Tombo</th>
+                     <th class="text-center px-0 align-middle">Destino</th>
+                     <th class="text-center px-0 align-middle">NUP (Suite)</th>
+                     <th class="text-center px-0 align-middle">Termo de Entrega</th>
+                     <th class="text-center px-0 align-middle">Doc Origem</th>
+                     <th class="text-center px-0 align-middle">Valor</th>
+                     <th class="text-center px-0 align-middle">Vizualizar</th>
                   </tr>
                </thead>
                <tbody>
                   <% if (itensPagos.length > 0) { %>
                      <% itensPagos.forEach(function(item) { %>
                         <tr>
-                           <td class="py-1 text-center"><%= item.id %></td>
-                           <td class="py-1 text-center"><%= new Date(item.data_de_saida).toLocaleDateString('pt-BR') %></td>
-                           <td class="py-1 text-center"><%= item.descricao.toUpperCase() %></td>
-                           <td class="py-1 text-center"><%= item.tombo_estoqueatual %></td>
-                           <td class="py-1 text-center"><%= item.destino.toUpperCase() %></td>
-                           <td class="py-1 text-center"><%= item.referencia.toUpperCase() %></td>
-                           <td class="py-1 text-center"><%= item.doc_saida.toUpperCase() %></td>
-                           <td class="py-1 text-center"><%= item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A' %></td>
-                           <td class="py-1 text-center">
+                           <td class="py-1 text-center align-middle"><%= item.id %></td>
+                           <td class="py-1 text-center align-middle"><%= new Date(item.data_de_saida).toLocaleDateString('pt-BR') %></td>
+                           <td class="py-1 text-center align-middle"><%= item.descricao.toUpperCase() %></td>
+                           <td class="py-1 text-center align-middle"><%= item.tombo_estoqueatual %></td>
+                           <td class="py-1 text-center align-middle"><%= item.destino.toUpperCase() %></td>
+                           <td class="py-1 text-center align-middle"><%= item.referencia.toUpperCase() %></td>
+                           <td class="py-1 text-center align-middle"><%= item.doc_saida.toUpperCase() %></td>
+                           <td class="py-1 text-center align-middle"><%= item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A' %></td>
+                           <td class="py-1 text-center align-middle">
                               <% if (item.valor && !isNaN(parseFloat(item.valor))) { %>
                                  <%= parseFloat(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %>
                               <% } else { %>
                                  R$ 0,00
                               <% } %>
                            </td>
-                           <td class="py-1 text-center w-10">
+                           <td class="py-1 text-center align-middle w-10">
                               <button type="button" class="btn btn-secondary btn-sm btn-action" data-id="<%= item.id %>">Detalhes</button>
                            </td>
                         </tr>
                      <% }); %>
                   <% } else { %>
                      <tr>
-                        <td colspan="10" class="text-center">Ainda não há itens Pagos</td>
+                        <td colspan="10" class="text-center align-middle">Ainda não há itens Pagos</td>
                      </tr>
                   <% } %>
                </tbody>

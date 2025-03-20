@@ -139,36 +139,37 @@
             <table class="table table-striped table-hover mb-0">
                <thead>
                   <tr>
-                     <th class="text-center px-0">ID</th>
-                     <th class="text-center px-0">Entrada</th>
-                     <th class="text-center px-0">Descrição</th>
-                     <th class="text-center px-0">Tombo</th>
-                     <th class="text-center px-0">Categoria</th>
-                     <th class="text-center px-0">Estoque</th>
-                     <th class="text-center px-0">Situação</th>
-                     <th class="text-center px-0">Ações</th>
+                     <th class="text-center px-0 align-middle">ID</th>
+                     <th class="text-center px-0 align-middle">Entrada</th>
+                     <th class="text-center px-0 align-middle">Descrição</th>
+                     <th class="text-center px-0 align-middle">Tombo</th>
+                     <th class="text-center px-0 align-middle">Categoria</th>
+                     <th class="text-center px-0 align-middle">Estoque</th>
+                     <th class="text-center px-0 align-middle">Situação</th>
+                     <th class="text-center px-0 align-middle">Ações</th>
                   </tr>
                </thead>
                <tbody>
                   <% if (usados.length > 0) { %>
                      <% usados.forEach(function(item) { %>
                         <tr>
-                           <td class="py-1 text-center"><%= item.id %></td>
-                           <td class="py-1 text-center"><%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %></td>
-                           <td class="py-1 text-center"><%= item.descricao %></td>
-                           <td class="py-1 text-center"><%= item.tombo %></td>
-                           <td class="py-1 text-center"><%= item.categoria %></td>
-                           <td class="py-1 text-center"><%= item.estoque %></td>
-                           <td class="py-1 text-center"><%= item.situacao %></td>
-                           <td class="py-1 text-center">
+                           <td class="py-1 text-center align-middle"><%= item.id %></td>
+                           <td class="py-1 text-center align-middle"><%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %></td>
+                           <td class="py-1 text-center align-middle"><%= item.descricao %></td>
+                           <td class="py-1 text-center align-middle"><%= item.tombo %></td>
+                           <td class="py-1 text-center align-middle"><%= item.categoria %></td>
+                           <td class="py-1 text-center align-middle"><%= item.estoque %></td>
+                           <td class="py-1 text-center align-middle"><%= item.situacao %></td>
+                           <td class="py-1 text-center align-middle">
                               <button type="button" class="btn btn-secondary btn-sm btn-action" data-id="<%= item.id %>">Detalhes</button>
+                              <a href="/editar/<%= item.id %>" class="btn btn-warning btn-sm btn-action">Editar</a>
                               <a href="/excluir/<%= item.id %>" class="btn btn-danger btn-sm btn-action btn-delete">Excluir</a>
                            </td>
                         </tr>
                      <% }); %>
                   <% } else { %>
                      <tr>
-                        <td colspan="8" class="text-center">Ainda não há itens cadastrados</td>
+                        <td colspan="8" class="text-center align-middle">Ainda não há itens cadastrados</td>
                      </tr>
                   <% } %>
                </tbody>
@@ -179,10 +180,18 @@
 
    <script>
       document.addEventListener('DOMContentLoaded', () => {
+         // Função para formatar valores no padrão de moeda brasileira
+         const formatarMoeda = (valor) => {
+            return parseFloat(valor).toLocaleString('pt-BR', {
+               style: 'currency',
+               currency: 'BRL'
+            });
+         };
+
          const viewButtons = document.querySelectorAll('.btn-action');
          viewButtons.forEach(button => {
             button.addEventListener('click', async (event) => {
-               if (!event.target.classList.contains('btn-delete')) {
+               if (!event.target.classList.contains('btn-delete') && !event.target.classList.contains('btn-warning')) {
                   const itemId = event.target.getAttribute('data-id');
                   const url = `/visualizar/${itemId}`;
                   try {
@@ -207,17 +216,17 @@
                                     <div class="modal-body">
                                        <div class="card">
                                           <div class="card-body pb-0">
-                                             <h5 class="card-title">${item.descricao}</h5>
+                                             <h5 class="card-title">${item.descricao || 'N/A'}</h5>
                                              <p class="card-text">
                                                 <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
-                                                <strong>ID:</strong> ${item.id} <br/>
-                                                <strong>Tombo:</strong> ${item.tombo} <br/>
-                                                <strong>Data de Entrada:</strong> ${item.data_de_entrada} <br/>
-                                                <strong>Categoria:</strong> ${item.categoria} <br/>
+                                                <strong>ID:</strong> ${item.id || 'N/A'} <br/>
+                                                <strong>Tombo:</strong> ${item.tombo || 'N/A'} <br/>
+                                                <strong>Data de Entrada:</strong> ${item.data_de_entrada || 'N/A'} <br/>
+                                                <strong>Categoria:</strong> ${item.categoria || 'N/A'} <br/>
                                                 <strong>Doc Origem:</strong> ${item.doc_origem || 'N/A'} <br/>
-                                                <strong>Estoque:</strong> ${item.estoque} <br/>
-                                                <strong>Valor:</strong> ${item.valor} <br/>
-                                                <strong>Situação:</strong> ${item.situacao} <br/>
+                                                <strong>Estoque:</strong> ${item.estoque || 'N/A'} <br/>
+                                                <strong>Valor:</strong> ${formatarMoeda(item.valor) || 'N/A'} <br/>
+                                                <strong>Situação:</strong> ${item.situacao || 'N/A'} <br/>
                                                 <strong>Observação:</strong> ${item.observacao || 'N/A'} <br/>
                                              </p>
                                           </div>
