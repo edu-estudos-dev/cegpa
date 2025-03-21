@@ -54,8 +54,8 @@ class EstoqueController {
          situacao,
          observacao,
       } = req.body;
-
-      // Validações básicas (similares ao create)
+   
+      // Validações básicas
       if (!data_de_entrada) return res.status(400).json({ error: 'A data de entrada é obrigatória.' });
       if (!descricao) return res.status(400).json({ error: 'A descrição é obrigatória.' });
       if (!tombo || !Number.isInteger(Number(tombo)) || tombo < 0) {
@@ -69,10 +69,8 @@ class EstoqueController {
       if (!doc_origem) return res.status(400).json({ error: 'O documento de origem é obrigatório.' });
       if (!valor || valor <= 0) return res.status(400).json({ error: 'O valor deve ser maior que zero.' });
       if (!situacao || situacao === 'Escolha uma opção...') return res.status(400).json({ error: 'A situação é obrigatória.' });
-      if (observacao && observacao.trim() === '') {
-         return res.status(400).json({ error: 'A observação não pode ser uma string vazia.' });
-      }
-
+      // Removida a validação: if (observacao && observacao.trim() === '')
+   
       const safeData = {
          data_de_entrada,
          descricao: descricao.toUpperCase(),
@@ -85,7 +83,7 @@ class EstoqueController {
          situacao: situacao.toUpperCase(),
          observacao: observacao ? observacao.toUpperCase() : null,
       };
-
+   
       try {
          console.log('Dados recebidos no controlador para atualização:', safeData); // Log para depuração
          const affectedRows = await estoqueModel.updateEstoque(id, safeData);

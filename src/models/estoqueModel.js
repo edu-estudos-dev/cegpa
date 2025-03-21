@@ -18,7 +18,6 @@ class EstoqueModel {
          'estoque',
          'valor',
          'situacao',
-         'observacao'
       ];
 
       for (const field of requiredFields) {

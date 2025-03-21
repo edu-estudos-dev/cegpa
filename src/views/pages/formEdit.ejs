@@ -16,7 +16,11 @@
    }
 
    .w-90 {
-      width: 90% !important;
+      width: 85% !important;
+   }
+
+   .disabled{
+      background-color: #E5E7EB;
    }
 </style>
 
@@ -43,8 +47,8 @@
                <div class="col-md-2">
                   <div id="tombo-div" class="mb-3 text-center">
                      <label class="form-label fw-bold">Tombo</label>
-                     <input id="tombo" type="number" class="form-control" name="tombo"
-                        value="<%= item.tombo %>" readonly disabled>
+                     <input id="tombo" type="number" class="form-control disabled " name="tombo"
+                        value="<%= item.tombo %>" readonly >
                   </div>
                </div>
 
@@ -70,15 +74,18 @@
                   </div>
                </div>
 
-               <div class="col-md-3">
-                  <div id="doc_origem-div" class="mb-3 text-center">
-                     <label class="form-label fw-bold">Doc. de Origem</label>
-                     <input id="doc_origem" type="text" class="form-control" name="doc_origem"
-                        value="<%= item.doc_origem || '' %>" required>
+               <div class="col-md-2">
+                  <div class="mb-3 text-center">
+                     <label class="form-label fw-bold">Valor Unitário</label>
+                     <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input id="valor" type="number" class="form-control" name="valor" step="0.01"
+                           value="<%= parseFloat(item.valor).toFixed(2) %>" required>
+                     </div>
                   </div>
                </div>
 
-               <div class="col-md-2">
+               <div class="col-md-3">
                   <div id="conta_contabil-div" class="mb-3 text-center">
                      <label class="form-label fw-bold">Conta Contábil</label>
                      <select id="conta_contabil" class="form-select" name="conta_contabil" required>
@@ -141,18 +148,8 @@
             </div>
 
             <div id="row2" class="row">
-               <div class="col-md-2">
-                  <div class="mb-3 text-center">
-                     <label class="form-label fw-bold">Valor Unitário</label>
-                     <div class="input-group">
-                        <span class="input-group-text">R$</span>
-                        <input id="valor" type="number" class="form-control" name="valor" step="0.01"
-                           value="<%= parseFloat(item.valor).toFixed(2) %>" required>
-                     </div>
-                  </div>
-               </div>
-
-               <div class="col-md-7">
+      
+               <div class="col-md-6">
                   <div id="descricao-div" class="mb-3">
                      <label class="form-label fw-bold">Descrição</label>
                      <input id="descricao" name="descricao" type="text" class="form-control"
@@ -160,7 +157,15 @@
                   </div>
                </div>
 
-               <div class="col-md-3">
+               <div class="col-md-2">
+                  <div id="doc_origem-div" class="mb-3 text-center">
+                     <label class="form-label fw-bold">Doc. de Origem</label>
+                     <input id="doc_origem" type="text" class="form-control" name="doc_origem"
+                        value="<%= item.doc_origem || '' %>" required>
+                  </div>
+               </div>
+
+               <div class="col-md-2">
                   <div id="situacao-div" class="mb-3">
                      <label class="form-label fw-bold">Conservação</label>
                      <select id="situacao" class="form-select" name="situacao" required>
@@ -173,17 +178,9 @@
                      </select>
                   </div>
                </div>
-            </div>
 
-            <div id="row3" class="row">
-               <div class="col-md-9">
-                  <div id="observacao-div" class="mb-3">
-                     <label class="form-label fw-bold">Observação</label>
-                     <textarea id="observacao" class="form-control" name="observacao" rows="3"><%= item.observacao || '' %></textarea>
-                  </div>
-               </div>
-
-               <div class="col-md-3">
+               
+               <div class="col-md-2">
                   <div id="estoque-div" class="mb-3">
                      <label class="form-label fw-bold">Estoque</label>
                      <select id="estoque" class="form-select" name="estoque" required>
@@ -195,9 +192,19 @@
                </div>
             </div>
 
-            <div class="d-flex justify-content-around m-3">
-               <button type="submit" class="btn btn-success w-10">Atualizar</button>
-               <a href="/tabela/estoqueatual" class="btn btn-secondary w-10">Cancelar</a>
+            <div id="row3" class="row">
+               <div class="col-md-12">
+                  <div id="observacao-div" class="mb-3">
+                     <label class="form-label fw-bold">Observação</label>
+                     <textarea id="observacao" class="form-control" name="observacao" rows="3"><%= item.observacao || '' %></textarea>
+                  </div>
+               </div>
+
+            </div>
+
+            <div class="d-flex justify-content-center m-3">
+               <a href="/tabela/estoqueatual" class="btn btn-secondary  mx-1">Cancelar</a>
+               <button type="submit" class="btn btn-success mx-1">Atualizar</button>
             </div>
          </form>
       </div>

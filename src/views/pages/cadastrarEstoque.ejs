@@ -24,21 +24,21 @@
                <input id="id" type="hidden">
             
                <div class="row align-items-center mb-3 px-3">
-                  <h2 style="border-bottom: 4px solid orange;" class="text-center text-white py-2 mt-0 fw-bold bg-success">Formulário de Entrada</h2>
+                  <h2 style="border-bottom: 4px solid orange;" class=" text-white py-2 mt-0 fw-bold bg-success">Formulário de Entrada</h2>
                </div>
             
                <!-- Linha 1: Campos principais -->
                <div id="row1" class="row">
                   <div class="col-md-2">
-                     <div id="data_de_entrada-div" class="mb-3 text-center">
+                     <div id="data_de_entrada-div" class="mb-3 ">
                         <label class="form-label fw-bold">Entrada</label>
                         <input id="data_de_entrada" type="date" class="form-control" name="data_de_entrada" onchange="atualizarTomboInicial()">
                      </div>
                   </div>
             
                   <div class="col-md-1">
-                     <div id="qtd-div" class="mb-3 text-center">
-                        <label class="form-label text-center fw-bold">Qtde.</label>
+                     <div id="qtd-div" class="mb-3 ">
+                        <label class="form-label fw-bold">Qtde.</label>
                         <input id="qtd" type="number" class="form-control" name="quantidade_visible" onchange="atualizarTomboInicial()" min="1" value="1">
                         <!-- Campo oculto para garantir que o valor seja enviado -->
                         <input id="quantidade_hidden" type="hidden" name="quantidade" value="1">
@@ -46,7 +46,7 @@
                   </div>
             
                   <div class="col-md-2">
-                     <div id="tipo_tombo-div" class="mb-3 text-center">
+                     <div id="tipo_tombo-div" class="mb-3 ">
                         <label class="form-label fw-bold">Tipo de Tombo</label>
                         <select id="tipo_tombo" class="form-select" name="tipo_tombo" onchange="toggleTomboInput()">
                            <option value="AUTO" selected>Automático</option>
@@ -57,12 +57,12 @@
                   </div>
             
                   <div class="col-md-2">
-                     <div id="tombo_inicial-div" class="mb-3 text-center">
-                        <label class="form-label fw-bold">T. Inicial</label>
+                     <div id="tombo_inicial-div" class="mb-3 ">
+                        <label class="form-label fw-bold">Tombo Inicial</label>
                         <input id="tombo_inicial" type="text" class="form-control" name="tombo_inicial" readonly>
                      </div>
-                     <div id="tombo_manual-div" class="mb-3 text-center" style="display: none;">
-                        <label class="form-label fw-bold">T. Manual</label>
+                     <div id="tombo_manual-div" class="mb-3 " style="display: none;">
+                        <label class="form-label fw-bold">Tombo Manual</label>
                         <input id="tombo_manual" type="number" class="form-control" name="tombo_manual" disabled>
                      </div>
                      <!-- Campos ocultos para Lote Manual -->
@@ -71,7 +71,7 @@
                   </div>
             
                   <div class="col-md-2">
-                     <div id="categoria-div" class="mb-3 text-center">
+                     <div id="categoria-div" class="mb-3 ">
                         <label class="form-label fw-bold">Categoria</label>
                         <select id="categoria" class="form-select" name="categoria">
                            <option selected>Selecione...</option>
@@ -94,7 +94,7 @@
                   </div>
             
                   <div class="col-md-3">
-                     <div id="doc_origem-div" class="mb-3 text-center">
+                     <div id="doc_origem-div" class="mb-3 ">
                         <label class="form-label fw-bold">Doc. de Origem</label>
                         <input id="doc_origem" type="text" class="form-control" placeholder="Nota Fiscal, etc..." name="doc_origem">
                      </div>
@@ -104,7 +104,7 @@
                <!-- Linha 2: Valor, Descrição e Conservação -->
                <div id="row2" class="row">
                   <div class="col-md-2">
-                     <div class="mb-3 text-center">
+                     <div class="mb-3 ">
                         <label class="form-label fw-bold">Valor Unitário</label>
                         <div class="input-group">
                            <span class="input-group-text">R$</span>
@@ -121,7 +121,7 @@
                   </div>
             
                   <div class="col-md-3">
-                     <div id="situacao-div" class="mb-3">
+                     <div id="situacao-div" class="mb-3 ">
                         <label class="form-label fw-bold">Conservação</label>
                         <select id="situacao" class="form-select" name="situacao">
                            <option selected>Escolha uma opção...</option>
@@ -138,7 +138,7 @@
             
                <!-- Linha 3: Conta Contábil e Estoque -->
                <div id="row3" class="row">
-                  <div class="col-md-9">
+                  <div class="col-md-9 ">
                      <div id="conta_contabil-div" class="mb-3">
                         <label class="form-label fw-bold">Conta Contábil</label>
                         <select id="conta_contabil" class="form-select" name="conta_contabil">
@@ -201,7 +201,7 @@
                   </div>
             
                   <div class="col-md-3">
-                     <div id="estoque-div" class="mb-3">
+                     <div id="estoque-div" class="mb-3 ">
                         <label class="form-label fw-bold">Estoque</label>
                         <select id="estoque" class="form-select" name="estoque">
                            <option selected>Escolha uma opção...</option>

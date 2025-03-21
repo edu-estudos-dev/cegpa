@@ -53,8 +53,45 @@
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
       <script>
          window.onload = function () {
-               document.getElementById('matricula').focus();
+            document.getElementById('matricula').focus();
          };
+
+         const matriculaInput = document.getElementById('matricula');
+
+         // Função para formatar a matrícula no formato 000.000-0-0 ou 000.000-0-X
+         const formatarMatricula = (value) => {
+            // Remove todos os caracteres não numéricos e X
+            let cleaned = value.replace(/[^\dX]/gi, '');
+
+            // Separa dígitos e Xs
+            let digits = [];
+            let xChars = [];
+
+            for (let char of cleaned) {
+               if (char.toUpperCase() === 'X') {
+                  xChars.push(char);
+               } else {
+                  digits.push(char);
+               }
+            }
+
+            // Mantém máximo de 7 dígitos + 1 caractere (X ou dígito)
+            let mainDigits = digits.slice(0, 7).join('');
+            let lastChar = xChars.length > 0
+               ? 'X'
+               : digits.slice(7, 8)[0] || '';
+
+            // Limita a 8 caracteres no total
+            let formatted = (mainDigits + lastChar).slice(0, 8);
+
+            // Aplica a máscara
+            return formatted.replace(/(\d{3})(\d{3})(\d{1})([\dX])/i, '$1.$2-$3-$4').toUpperCase();
+         };
+
+         // Aplica a máscara enquanto o usuário digita
+         matriculaInput.addEventListener('input', function () {
+            this.value = formatarMatricula(this.value);
+         });
       </script>
    </body>
 </html>
