@@ -206,7 +206,6 @@
          }
 
          .system-box h4 {
-
                font-size: 1.2rem;
          }
 
@@ -316,6 +315,25 @@
                   Horário de funcionamento: <br>De segunda a sexta de 8h às 12h e de 13h às 16:30hs</p>
          </div>
       </footer>
+
+      <script>
+         document.querySelectorAll('.system-box.link').forEach(link => {
+            link.addEventListener('click', (e) => {
+               e.preventDefault();
+               console.log('Navegando para:', link.href);
+               fetch(link.href, { credentials: 'include' })
+                  .then(response => {
+                     if (response.redirected) {
+                        console.log('Redirecionado para:', response.url);
+                        window.location.href = response.url;
+                     } else {
+                        window.location.href = link.href;
+                     }
+                  })
+                  .catch(err => console.error('Erro na requisição:', err));
+            });
+         });
+      </script>
    </body>
 
 </html>

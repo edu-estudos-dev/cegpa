@@ -29,6 +29,7 @@
                      class="text-center text-white py-2 mt-0 fw-bold bg-success">Formulário de Entrada</h2>
                </div>
 
+               <!-- Dentro do <form id="formulario-entrada"> -->
                <div id="row1" class="row">
                   <div class="col-md-2">
                      <div id="data_de_entrada-div" class="mb-3 text-center">
@@ -41,18 +42,35 @@
                   <div class="col-md-2">
                      <div id="qtd-div" class="mb-3 text-center">
                         <label class="form-label text-center fw-bold">Qtde.</label>
-                        <input id="qtd" type="number" class="form-control" name="quantidade"
-                           onchange="atualizarTomboInicial()" min="1">
+                        <input id="qtd" type="number" class="form-control" name="quantidade_visible"
+                           onchange="atualizarTomboInicial()" min="1" value="1">
+                        <!-- Campo oculto para garantir que o valor seja enviado -->
+                        <input id="quantidade_hidden" type="hidden" name="quantidade" value="1">
+                     </div>
+                  </div>
+
+                  <div class="col-md-2">
+                     <div id="tipo_tombo-div" class="mb-3 text-center">
+                        <label class="form-label fw-bold">Tipo de Tombo</label>
+                        <select id="tipo_tombo" class="form-select" name="tipo_tombo" onchange="toggleTomboInput()">
+                           <option value="AUTO" selected>Automático</option>
+                           <option value="MANUAL">Manual</option>
+                        </select>
                      </div>
                   </div>
 
                   <div class="col-md-2">
                      <div id="tombo_inicial-div" class="mb-3 text-center">
                         <label class="form-label fw-bold">Tombo Inicial</label>
-                        <input id="tombo_inicial" type="text" class="form-control" name="tombo" readonly disabled>
+                        <input id="tombo_inicial" type="text" class="form-control" name="tombo_inicial" readonly>
+                     </div>
+                     <div id="tombo_manual-div" class="mb-3 text-center" style="display: none;">
+                        <label class="form-label fw-bold">Tombo Manual</label>
+                        <input id="tombo_manual" type="number" class="form-control" name="tombo_manual" disabled>
                      </div>
                   </div>
 
+                  <!-- Restante do formulário -->
                   <div class="col-md-3">
                      <div id="categoria-div" class="mb-3 text-center">
                         <label class="form-label fw-bold">Categoria</label>
@@ -128,13 +146,11 @@
                            <option selected>Escolha uma opção...</option>
                            <option value="medicao">APARELHOS DE MEDIÇÃO E ORIENTAÇÃO</option>
                            <option value="aeronaves">AERONAVES</option>
-                           <option value="almoxarifado">ALMOXARIFADO DE MATERIAIS A SEREM APLICADOS EM BENS EM
-                              ANDAMENTO</option>
+                           <option value="almoxarifado">ALMOXARIFADO DE MATERIAIS A SEREM APLICADOS EM BENS EM ANDAMENTO</option>
                            <option value="comunicacao">APARELHOS E EQUIPAMENTOS DE COMUNICAÇÃO</option>
                            <option value="esportes">APARELHOS E EQUIPAMENTOS PARA ESPORTES E DIVERSÕES</option>
                            <option value="domesticos">APARELHOS E UTENSÍLIOS DOMÉSTICOS</option>
-                           <option value="medicos">APARELHOS, EQUIPAMENTOS E UTENSÍLIOS MÉDICOS, ODONTOLÓGICOS,
-                              LABORATORIAIS E HOSPITALARES</option>
+                           <option value="medicos">APARELHOS, EQUIPAMENTOS E UTENSÍLIOS MÉDICOS, ODONTOLÓGICOS, LABORATORIAIS E HOSPITALARES</option>
                            <option value="armamentos">ARMAMENTOS</option>
                            <option value="poder_outro">BENS EM PODER DE OUTRA UNIDADE OU TERCEIROS</option>
                            <option value="alienar">BENS MÓVEIS A ALIENAR</option>
@@ -172,11 +188,9 @@
                            <option value="oficina">MÁQUINAS, FERRAMENTAS E UTENSÍLIOS DE OFICINA</option>
                            <option value="mobiliario">MOBILIÁRIO EM GERAL</option>
                            <option value="obras_arte">OBRAS DE ARTE E PEÇAS PARA EXPOSIÇÃO</option>
-                           <option value="outras_maquinas">OUTRAS MÁQUINAS, APARELHOS, EQUIPAMENTOS E FERRAMENTAS
-                           </option>
+                           <option value="outras_maquinas">OUTRAS MÁQUINAS, APARELHOS, EQUIPAMENTOS E FERRAMENTAS</option>
                            <option value="outros_bens">OUTROS BENS MÓVEIS</option>
-                           <option value="outros_culturais">OUTROS MATERIAIS CULTURAIS, EDUCACIONAIS E DE COMUNICAÇÃO
-                           </option>
+                           <option value="outros_culturais">OUTROS MATERIAIS CULTURAIS, EDUCACIONAIS E DE COMUNICAÇÃO</option>
                            <option value="pecas_reposicao">PEÇAS E CONJUNTOS DE REPOSIÇÃO</option>
                            <option value="semoventes">SEMOVENTES</option>
                            <option value="utensilios">UTENSÍLIOS EM GERAL</option>
@@ -242,63 +256,94 @@
          integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
          </script>
 
-      <!-- Scripts para o funcionamento do Tombo Inicial -->
+      <!-- Script ajustado -->
       <script>
+         function toggleTomboInput() {
+            const tipoTombo = document.getElementById('tipo_tombo').value;
+            const tomboInicialDiv = document.getElementById('tombo_inicial-div');
+            const tomboManualDiv = document.getElementById('tombo_manual-div');
+            const tomboInicialInput = document.getElementById('tombo_inicial');
+            const tomboManualInput = document.getElementById('tombo_manual');
+            const qtdInput = document.getElementById('qtd');
+            const quantidadeHidden = document.getElementById('quantidade_hidden');
+
+            if (tipoTombo === 'AUTO') {
+               tomboInicialDiv.style.display = 'block';
+               tomboManualDiv.style.display = 'none';
+               tomboManualInput.disabled = true;
+               tomboInicialInput.disabled = false;
+               qtdInput.disabled = false;
+               atualizarTomboInicial();
+            } else {
+               tomboInicialDiv.style.display = 'none';
+               tomboManualDiv.style.display = 'block';
+               tomboManualInput.disabled = false;
+               tomboInicialInput.disabled = true;
+               qtdInput.value = 1; // Força quantidade 1 para tombo manual
+               qtdInput.disabled = true;
+               tomboInicialInput.value = '';
+            }
+            // Sincroniza o campo oculto com o valor visível
+            quantidadeHidden.value = qtdInput.value || 1; // Garante que o valor seja 1 se o campo estiver vazio
+         }
+
          const atualizarTomboInicial = () => {
             let data = document.getElementById('data_de_entrada').value;
             let qtd = document.getElementById('qtd').value;
-      
-            if (data && qtd) {
+            const tipoTombo = document.getElementById('tipo_tombo').value;
+            const quantidadeHidden = document.getElementById('quantidade_hidden');
+
+            if (tipoTombo === 'AUTO' && data && qtd) {
                fetch('/ultimo-tombo')
                   .then(response => response.json())
                   .then(data => {
                      let ultimoTombo = parseInt(data.ultimoTombo);
-                     let tomboInicial = (ultimoTombo + 1).toString(); 
+                     let tomboInicial = (ultimoTombo + 1).toString();
                      document.getElementById('tombo_inicial').value = tomboInicial;
                      console.log('Tombo Inicial gerado no frontend:', tomboInicial);
                   })
                   .catch(error => {
                      console.error('Erro ao obter o último tombo:', error);
-                     document.getElementById('tombo_inicial').value = '70000'; 
+                     document.getElementById('tombo_inicial').value = '70000';
                   });
             }
+            // Sincroniza o campo oculto com o valor visível
+            quantidadeHidden.value = document.getElementById('qtd').value || 1; // Garante que o valor seja 1 se o campo estiver vazio
          };
-      
-         document.addEventListener('DOMContentLoaded', (event) => {
+
+         document.addEventListener('DOMContentLoaded', () => {
+            toggleTomboInput(); // Inicializa o estado do formulário
             document.getElementById('data_de_entrada').addEventListener('input', atualizarTomboInicial);
             document.getElementById('qtd').addEventListener('input', atualizarTomboInicial);
-         });
-      
-         document.getElementById('formulario-entrada').addEventListener('submit', function (event) {
-            event.preventDefault();
-            const formData = new FormData(this);
-            const json = JSON.stringify(Object.fromEntries(formData));
-      
-            fetch('/entrada', {
-               method: 'POST',
-               headers: {
-                  'Content-Type': 'application/json'
-               },
-               body: json
-            })
-            .then(response => {
-               if (response.status === 404) {
-                  window.location.href = '/404';
-               }
-               if (!response.ok) {
-                  return response.json().then(data => {
-                     throw new Error(data.error);
-                  });
-               }
-               return response.text();
-            })
-            .then(() => {
-               window.location.href = '/tabela/estoqueatual';
-            })
-            .catch(error => {
-               document.getElementById('errorMessage').innerText = error.message;
-               var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-               errorModal.show();
+            document.getElementById('tipo_tombo').addEventListener('change', toggleTomboInput);
+
+            document.getElementById('formulario-entrada').addEventListener('submit', function (event) {
+               event.preventDefault();
+               const formData = new FormData(this);
+               const json = JSON.stringify(Object.fromEntries(formData));
+
+               fetch('/entrada', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: json
+               })
+               .then(response => {
+                  if (response.status === 404) {
+                     window.location.href = '/404';
+                  }
+                  if (!response.ok) {
+                     return response.json().then(data => { throw new Error(data.error); });
+                  }
+                  return response.text();
+               })
+               .then(() => {
+                  window.location.href = '/tabela/estoqueatual';
+               })
+               .catch(error => {
+                  document.getElementById('errorMessage').innerText = error.message;
+                  var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                  errorModal.show();
+               });
             });
          });
       </script>

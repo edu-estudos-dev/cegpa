@@ -16,14 +16,18 @@ const isAuthenticated = async (req, res, next) => {
                posto_grad: results[0].posto_grad,
             };
             console.log('Usuário autenticado:', req.user);
-            return next(); // Prossegue para a próxima função
+            return next();
          } else {
             console.log('Usuário não encontrado no banco de dados');
+            req.session.destroy(); // Limpa a sessão inválida
             res.redirect('/login');
          }
       } catch (error) {
          console.error('Erro ao buscar informações do usuário:', error);
-         res.redirect('/login');
+         // Usa os dados da sessão como fallback em caso de erro
+         req.user = req.session.user;
+         console.log('Usando dados da sessão como fallback:', req.user);
+         return next();
       }
    } else {
       console.log('Usuário não autenticado, redirecionando para /login');

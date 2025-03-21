@@ -24,6 +24,7 @@ class LoginLogoutController {
             // Also populate req.user for consistency
             req.user = req.session.user;
             console.log('Sessão iniciada para:', req.session.user);
+            console.log('ID da sessão após definir user:', req.sessionID);
             // Salvar a sessão explicitamente antes do redirecionamento
             req.session.save((err) => {
                if (err) {
@@ -32,6 +33,7 @@ class LoginLogoutController {
                      .status(500)
                      .render('login', { erro: 'Erro ao salvar sessão' });
                }
+               console.log('Sessão salva com sucesso, ID:', req.sessionID);
                res.redirect('/painel');
             });
          } else {

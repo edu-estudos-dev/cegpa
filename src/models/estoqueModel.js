@@ -73,7 +73,6 @@ class EstoqueModel {
       const query = `SELECT * FROM estoqueatual WHERE pago = FALSE ORDER BY descricao ASC`;
       try {
          const [results] = await connection.execute(query);
-         console.log('Resultados de getAllEstoque:', results);
          return results;
       } catch (error) {
          console.error('Erro ao buscar estoque atual:', error);
@@ -93,13 +92,19 @@ class EstoqueModel {
       estoque,
       valor,
       situacao,
-      observacao
+      observacao,
+      tipo_tombo = 'AUTO'
    ) => {
-      // Validar que tombo é um número inteiro
       if (!Number.isInteger(Number(tombo)) || tombo < 0) {
          throw new Error('O tombo deve ser um número inteiro não negativo.');
       }
-      const query = `INSERT INTO estoqueatual (data_de_entrada, descricao, tombo, quantidade, categoria, conta_contabil, doc_origem, estoque, valor, situacao, observacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      const query = `
+         INSERT INTO estoqueatual (
+            data_de_entrada, descricao, tombo, quantidade, categoria, 
+            conta_contabil, doc_origem, estoque, valor, situacao, 
+            observacao, tipo_tombo
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
       try {
          await connection.execute(query, [
             data_de_entrada,
@@ -113,13 +118,14 @@ class EstoqueModel {
             valor,
             situacao,
             observacao,
+            tipo_tombo,
          ]);
       } catch (error) {
          console.error('Erro ao inserir dados no estoque:', error);
          throw error;
       }
    };
-
+   
    // Método para obter o último tombo
    getUltimoTombo = async () => {
       // Logar todos os tombos para depuração

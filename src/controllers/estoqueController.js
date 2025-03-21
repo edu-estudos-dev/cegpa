@@ -182,107 +182,104 @@ class EstoqueController {
          valor,
          situacao,
          observacao,
+         tipo_tombo,
+         tombo_manual,
       } = req.body;
-
+   
+      // Log para depuração
+      console.log('Dados recebidos no backend:', req.body);
+   
       // Verificações de campos obrigatórios
-      if (!data_de_entrada) {
-         console.log('Erro: A data de entrada é obrigatória.');
-         return res
-            .status(400)
-            .json({ error: 'A data de entrada é obrigatória.' });
+      if (!data_de_entrada) return res.status(400).json({ error: 'A data de entrada é obrigatória.' });
+      if (!categoria || categoria === 'Selecione...') return res.status(400).json({ error: 'A categoria é obrigatória.' });
+      if (!descricao) return res.status(400).json({ error: 'A descrição é obrigatória.' });
+      if (!conta_contabil || conta_contabil === 'Escolha uma opção...') return res.status(400).json({ error: 'A conta contábil é obrigatória.' });
+      if (!estoque || estoque === 'Escolha uma opção...') return res.status(400).json({ error: 'O estoque é obrigatório.' });
+      if (!doc_origem) return res.status(400).json({ error: 'O documento de origem é obrigatório.' });
+      if (!valor || Number(valor) <= 0) return res.status(400).json({ error: 'O valor deve ser maior que zero.' });
+      if (!situacao || situacao === 'Escolha uma opção...') return res.status(400).json({ error: 'A situação é obrigatória.' });
+      if (tipo_tombo === 'MANUAL' && (!tombo_manual || Number(tombo_manual) <= 0)) return res.status(400).json({ error: 'O tombo manual é obrigatório e deve ser maior que zero.' });
+   
+      // Validação e conversão de quantidade
+      const quantidadeNum = Number(quantidade);
+      if (isNaN(quantidadeNum) || quantidadeNum <= 0) {
+         console.log('Erro: A quantidade deve ser maior que zero. Recebido:', quantidade);
+         return res.status(400).json({ error: 'A quantidade deve ser maior que zero.' });
       }
-      if (!quantidade || quantidade <= 0) {
-         console.log('Erro: A quantidade deve ser maior que zero.');
-         return res
-            .status(400)
-            .json({ error: 'A quantidade deve ser maior que zero.' });
-      }
-      if (!categoria || categoria === 'Selecione...') {
-         console.log('Erro: A categoria é obrigatória.');
-         return res.status(400).json({ error: 'A categoria é obrigatória.' });
-      }
-      if (!descricao) {
-         console.log('Erro: A descrição é obrigatória.');
-         return res.status(400).json({ error: 'A descrição é obrigatória.' });
-      }
-      if (!conta_contabil || conta_contabil === 'Escolha uma opção...') {
-         console.log('Erro: A conta contábil é obrigatória.');
-         return res
-            .status(400)
-            .json({ error: 'A conta contábil é obrigatória.' });
-      }
-      if (!estoque || estoque === 'Escolha uma opção...') {
-         console.log('Erro: O estoque é obrigatório.');
-         return res.status(400).json({ error: 'O estoque é obrigatório.' });
-      }
-      if (!doc_origem) {
-         console.log('Erro: O Documento de Origem é obrigatória.');
-         return res
-            .status(400)
-            .json({ error: 'O Documento de Origem é obrigatória.' });
-      }
-      if (!valor || valor <= 0) {
-         console.log('Erro: O valor é obrigatório e deve ser maior que zero.');
-         return res.status(400).json({
-            error: 'O valor é obrigatório e deve ser maior que zero.',
-         });
-      }
-      if (!situacao || situacao === 'Escolha uma opção...') {
-         console.log('Erro: A Situação é obrigatória.');
-         return res.status(400).json({ error: 'A Situação é obrigatória.' });
-      }
-
+   
       const safeData = {
-         data_de_entrada: data_de_entrada || null,
-         descricao: descricao ? descricao.toUpperCase() : null,
-         quantidade: quantidade || null,
-         categoria: categoria ? categoria.toUpperCase() : null,
-         conta_contabil: conta_contabil ? conta_contabil.toUpperCase() : null,
-         doc_origem: doc_origem ? doc_origem.toUpperCase() : null,
-         estoque: estoque ? estoque.toUpperCase() : null,
-         valor: valor || null,
-         situacao: situacao ? situacao.toUpperCase() : null,
+         data_de_entrada,
+         descricao: descricao.toUpperCase(),
+         quantidade: quantidadeNum,
+         categoria: categoria.toUpperCase(),
+         conta_contabil: conta_contabil.toUpperCase(),
+         doc_origem: doc_origem.toUpperCase(),
+         estoque: estoque.toUpperCase(),
+         valor: Number(valor),
+         situacao: situacao.toUpperCase(),
          observacao: observacao ? observacao.toUpperCase() : null,
+         tipo_tombo: tipo_tombo || 'AUTO',
       };
-
+   
       try {
-         const ultimoTombo = await estoqueModel.getUltimoTombo();
-         console.log('Tombo inicial antes do incremento:', ultimoTombo);
-         let tomboInicial = ultimoTombo;
-
-         for (let i = 0; i < safeData.quantidade; i++) {
-            const tomboUnico = tomboInicial + i + 1;
-            console.log('Tombo gerado:', tomboUnico);
-
+         if (safeData.tipo_tombo === 'AUTO') {
+            const ultimoTombo = await estoqueModel.getUltimoTombo();
+            console.log('Tombo inicial antes do incremento:', ultimoTombo);
+            let tomboInicial = ultimoTombo;
+   
+            for (let i = 0; i < safeData.quantidade; i++) {
+               const tomboUnico = tomboInicial + i + 1;
+               console.log('Tombo gerado:', tomboUnico);
+   
+               await estoqueModel.createEstoque(
+                  safeData.data_de_entrada,
+                  safeData.descricao,
+                  tomboUnico,
+                  1,
+                  safeData.categoria,
+                  safeData.conta_contabil,
+                  safeData.doc_origem,
+                  safeData.estoque,
+                  safeData.valor,
+                  safeData.situacao,
+                  safeData.observacao,
+                  safeData.tipo_tombo
+               );
+            }
+         } else if (safeData.tipo_tombo === 'MANUAL') {
+            const tomboUnico = Number(tombo_manual);
+            console.log('Tombo manual fornecido:', tomboUnico);
+   
+            // Verificar se o tombo já existe
+            const tomboExistente = await estoqueModel.getInfoByTombo(tomboUnico);
+            if (tomboExistente) {
+               return res.status(400).json({ error: `O tombo ${tomboUnico} já existe no sistema.` });
+            }
+   
             await estoqueModel.createEstoque(
                safeData.data_de_entrada,
                safeData.descricao,
                tomboUnico,
-               1,
+               1, // Quantidade fixa como 1 para tombo manual
                safeData.categoria,
                safeData.conta_contabil,
                safeData.doc_origem,
                safeData.estoque,
                safeData.valor,
                safeData.situacao,
-               safeData.observacao
+               safeData.observacao,
+               safeData.tipo_tombo
             );
          }
-
+   
          const todosEstoque = await estoqueModel.getAllEstoque();
          res.status(200).render('tabelaEstoque', { estoque: todosEstoque });
       } catch (error) {
-         console.error(
-            'Erro ao inserir dados no estoque:',
-            error.message,
-            error.stack
-         );
-         res.status(500).json({
-            error: `Erro ao inserir dados no estoque: ${error.message}`,
-         });
+         console.error('Erro ao inserir dados no estoque:', error.message, error.stack);
+         res.status(500).json({ error: `Erro ao inserir dados no estoque: ${error.message}` });
       }
    };
-
+ 
    // Método para obter o último tombo (endpoint para o frontend)
    fetchUltimoTombo = async (req, res) => {
       try {

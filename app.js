@@ -29,8 +29,12 @@ app.use(
   session({
     secret: "sua_chave_secreta",
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false },
+    saveUninitialized: false, // Alterado para false para evitar sessões desnecessárias
+    cookie: {
+      secure: false, // Use true em produção com HTTPS
+      maxAge: 24 * 60 * 60 * 1000, // 24 horas em milissegundos
+      httpOnly: true, // Impede acesso ao cookie via JavaScript no cliente
+    },
   })
 );
 
