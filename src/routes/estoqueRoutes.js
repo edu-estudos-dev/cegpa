@@ -3,6 +3,14 @@ import estoqueController from '../controllers/estoqueController.js';
 
 const router = express.Router();
 
+// Middleware para logar os dados recebidos em todas as rotas
+router.use((req, res, next) => {
+   console.log(`[${new Date().toISOString()}] Rota acessada: ${req.method} ${req.originalUrl}`);
+   console.log('Dados recebidos (req.body):', req.body);
+   console.log('Dados recebidos (req.query):', req.query);
+   next();
+});
+
 /* ********************************************************************************
                   Rotas para a ENTRADA de itens no Estoque
 *********************************************************************************/

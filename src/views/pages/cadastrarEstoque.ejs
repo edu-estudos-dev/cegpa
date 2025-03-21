@@ -21,57 +21,56 @@
       <div class="caixa w-90 p-4 mx-auto">
          <div class="border caixa-externa p-4 shadow-sm rounded">
             <form id="formulario-entrada" action="/entrada" method="post">
-
                <input id="id" type="hidden">
-
+            
                <div class="row align-items-center mb-3 px-3">
-                  <h2 style="border-bottom: 4px solid orange;"
-                     class="text-center text-white py-2 mt-0 fw-bold bg-success">Formulário de Entrada</h2>
+                  <h2 style="border-bottom: 4px solid orange;" class="text-center text-white py-2 mt-0 fw-bold bg-success">Formulário de Entrada</h2>
                </div>
-
-               <!-- Dentro do <form id="formulario-entrada"> -->
+            
+               <!-- Linha 1: Campos principais -->
                <div id="row1" class="row">
                   <div class="col-md-2">
                      <div id="data_de_entrada-div" class="mb-3 text-center">
                         <label class="form-label fw-bold">Entrada</label>
-                        <input id="data_de_entrada" type="date" class="form-control" name="data_de_entrada"
-                           onchange="atualizarTomboInicial()">
+                        <input id="data_de_entrada" type="date" class="form-control" name="data_de_entrada" onchange="atualizarTomboInicial()">
                      </div>
                   </div>
-
-                  <div class="col-md-2">
+            
+                  <div class="col-md-1">
                      <div id="qtd-div" class="mb-3 text-center">
                         <label class="form-label text-center fw-bold">Qtde.</label>
-                        <input id="qtd" type="number" class="form-control" name="quantidade_visible"
-                           onchange="atualizarTomboInicial()" min="1" value="1">
+                        <input id="qtd" type="number" class="form-control" name="quantidade_visible" onchange="atualizarTomboInicial()" min="1" value="1">
                         <!-- Campo oculto para garantir que o valor seja enviado -->
                         <input id="quantidade_hidden" type="hidden" name="quantidade" value="1">
                      </div>
                   </div>
-
+            
                   <div class="col-md-2">
                      <div id="tipo_tombo-div" class="mb-3 text-center">
                         <label class="form-label fw-bold">Tipo de Tombo</label>
                         <select id="tipo_tombo" class="form-select" name="tipo_tombo" onchange="toggleTomboInput()">
                            <option value="AUTO" selected>Automático</option>
                            <option value="MANUAL">Manual</option>
+                           <option value="LOTE_MANUAL">Lote Manual</option>
                         </select>
                      </div>
                   </div>
-
+            
                   <div class="col-md-2">
                      <div id="tombo_inicial-div" class="mb-3 text-center">
-                        <label class="form-label fw-bold">Tombo Inicial</label>
+                        <label class="form-label fw-bold">T. Inicial</label>
                         <input id="tombo_inicial" type="text" class="form-control" name="tombo_inicial" readonly>
                      </div>
                      <div id="tombo_manual-div" class="mb-3 text-center" style="display: none;">
-                        <label class="form-label fw-bold">Tombo Manual</label>
+                        <label class="form-label fw-bold">T. Manual</label>
                         <input id="tombo_manual" type="number" class="form-control" name="tombo_manual" disabled>
                      </div>
+                     <!-- Campos ocultos para Lote Manual -->
+                     <input id="tombo_lote_inicial" type="hidden" name="tombo_lote_inicial">
+                     <input id="tombo_lote_final" type="hidden" name="tombo_lote_final">
                   </div>
-
-                  <!-- Restante do formulário -->
-                  <div class="col-md-3">
+            
+                  <div class="col-md-2">
                      <div id="categoria-div" class="mb-3 text-center">
                         <label class="form-label fw-bold">Categoria</label>
                         <select id="categoria" class="form-select" name="categoria">
@@ -93,16 +92,16 @@
                         </select>
                      </div>
                   </div>
-
+            
                   <div class="col-md-3">
                      <div id="doc_origem-div" class="mb-3 text-center">
                         <label class="form-label fw-bold">Doc. de Origem</label>
-                        <input id="doc_origem" type="text" class="form-control" placeholder="Nota Fiscal, etc..."
-                           name="doc_origem">
+                        <input id="doc_origem" type="text" class="form-control" placeholder="Nota Fiscal, etc..." name="doc_origem">
                      </div>
                   </div>
                </div>
-
+            
+               <!-- Linha 2: Valor, Descrição e Conservação -->
                <div id="row2" class="row">
                   <div class="col-md-2">
                      <div class="mb-3 text-center">
@@ -113,15 +112,14 @@
                         </div>
                      </div>
                   </div>
-
+            
                   <div class="col-md-7">
                      <div id="observacao-div" class="mb-3">
                         <label class="form-label fw-bold">Descrição</label>
-                        <input placeholder="Descreva o item em detalhes." id="descricao" name="descricao" type="text"
-                           class="form-control">
+                        <input placeholder="Descreva o item em detalhes." id="descricao" name="descricao" type="text" class="form-control">
                      </div>
                   </div>
-
+            
                   <div class="col-md-3">
                      <div id="situacao-div" class="mb-3">
                         <label class="form-label fw-bold">Conservação</label>
@@ -137,7 +135,8 @@
                      </div>
                   </div>
                </div>
-
+            
+               <!-- Linha 3: Conta Contábil e Estoque -->
                <div id="row3" class="row">
                   <div class="col-md-9">
                      <div id="conta_contabil-div" class="mb-3">
@@ -200,7 +199,7 @@
                         </select>
                      </div>
                   </div>
-
+            
                   <div class="col-md-3">
                      <div id="estoque-div" class="mb-3">
                         <label class="form-label fw-bold">Estoque</label>
@@ -213,7 +212,8 @@
                      </div>
                   </div>
                </div>
-
+            
+               <!-- Linha 4: Observação -->
                <div id="row4" class="row">
                   <div class="col-md-12">
                      <div id="observacao-div" class="mb-3">
@@ -222,11 +222,44 @@
                      </div>
                   </div>
                </div>
-
+            
                <div class="d-flex justify-content-around m-3">
                   <button id="btnRegistrar" type="submit" class="btn btn-success w-10">Registrar Entrada</button>
                </div>
             </form>
+            
+            <!-- Modal para Lote Manual -->
+            <div class="modal fade" id="loteManualModal" tabindex="-1" aria-labelledby="loteManualModalLabel" aria-hidden="true">
+               <div class="modal-dialog">
+                  <div class="modal-content">
+                     <div class="modal-header">
+                        <h5 class="modal-title" id="loteManualModalLabel">Definir Faixa de Tombos</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                     </div>
+                     <div class="modal-body">
+                        <div class="row">
+                           <div class="col-md-6">
+                              <div class="mb-3">
+                                 <label for="modal_tombo_lote_inicial" class="form-label fw-bold">T. Inicial</label>
+                                 <input type="number" class="form-control" id="modal_tombo_lote_inicial" min="1">
+                              </div>
+                           </div>
+                           <div class="col-md-6">
+                              <div class="mb-3">
+                                 <label for="modal_tombo_lote_final" class="form-label fw-bold">T. Final</label>
+                                 <input type="number" class="form-control" id="modal_tombo_lote_final" min="1">
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="confirmarLoteBtn">Confirmar</button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+       
          </div>
       </div>
 
@@ -258,94 +291,279 @@
 
       <!-- Script ajustado -->
       <script>
+         // Função para atualizar o tombo inicial no modo "Automático"
+         async function atualizarTomboInicial() {
+            const tipoTombo = document.getElementById('tipo_tombo').value;
+            if (tipoTombo === 'AUTO') {
+               try {
+                  const response = await fetch('/ultimo-tombo');
+                  const data = await response.json();
+                  const ultimoTombo = data.ultimoTombo || 70149; // Fallback para 70149 se não houver tombo
+                  const qtd = parseInt(document.getElementById('qtd').value) || 1;
+                  document.getElementById('tombo_inicial').value = ultimoTombo + 1;
+                  document.getElementById('quantidade_hidden').value = qtd;
+               } catch (error) {
+                  console.error('Erro ao buscar último tombo:', error);
+                  alert('Erro ao buscar o último tombo. Verifique a conexão com o servidor.');
+               }
+            }
+         }
+      
+         // Função para alternar os campos de tombo com base no tipo selecionado
          function toggleTomboInput() {
             const tipoTombo = document.getElementById('tipo_tombo').value;
             const tomboInicialDiv = document.getElementById('tombo_inicial-div');
-            const tomboManualDiv = document.getElementById('tombo_manual-div');
             const tomboInicialInput = document.getElementById('tombo_inicial');
+            const tomboManualDiv = document.getElementById('tombo_manual-div');
             const tomboManualInput = document.getElementById('tombo_manual');
+            const tomboLoteInicialInput = document.getElementById('tombo_lote_inicial');
+            const tomboLoteFinalInput = document.getElementById('tombo_lote_final');
             const qtdInput = document.getElementById('qtd');
             const quantidadeHidden = document.getElementById('quantidade_hidden');
-
-            if (tipoTombo === 'AUTO') {
-               tomboInicialDiv.style.display = 'block';
-               tomboManualDiv.style.display = 'none';
-               tomboManualInput.disabled = true;
-               tomboInicialInput.disabled = false;
-               qtdInput.disabled = false;
-               atualizarTomboInicial();
-            } else {
-               tomboInicialDiv.style.display = 'none';
+      
+            // Resetar estados
+            tomboInicialDiv.style.display = 'none';
+            tomboInicialInput.disabled = true;
+            tomboInicialInput.value = '';
+            tomboManualDiv.style.display = 'none';
+            tomboManualInput.disabled = true;
+            tomboLoteInicialInput.value = '';
+            tomboLoteFinalInput.value = '';
+      
+            // Controlar o campo Qtde. com base no modo
+            if (tipoTombo === 'MANUAL') {
+               // No modo Manual, fixar a quantidade em 1 e desabilitar o campo
+               qtdInput.value = 1;
+               quantidadeHidden.value = 1;
+               qtdInput.disabled = true;
                tomboManualDiv.style.display = 'block';
                tomboManualInput.disabled = false;
+            } else if (tipoTombo === 'AUTO') {
+               // No modo Automático, permitir edição da quantidade
+               qtdInput.disabled = false;
+               tomboInicialDiv.style.display = 'block';
                tomboInicialInput.disabled = true;
-               qtdInput.value = 1; // Força quantidade 1 para tombo manual
-               qtdInput.disabled = true;
-               tomboInicialInput.value = '';
+               atualizarTomboInicial();
+            } else if (tipoTombo === 'LOTE_MANUAL') {
+               // No modo Lote Manual, permitir edição da quantidade (será calculada pelo modal)
+               qtdInput.disabled = false;
+               tomboInicialDiv.style.display = 'block';
+               tomboInicialInput.disabled = true;
+               tomboInicialInput.value = ''; // Inicialmente vazio até o modal ser preenchido
+               // Abrir o modal para Lote Manual
+               const loteModal = new bootstrap.Modal(document.getElementById('loteManualModal'));
+               loteModal.show();
             }
-            // Sincroniza o campo oculto com o valor visível
-            quantidadeHidden.value = qtdInput.value || 1; // Garante que o valor seja 1 se o campo estiver vazio
          }
-
-         const atualizarTomboInicial = () => {
-            let data = document.getElementById('data_de_entrada').value;
-            let qtd = document.getElementById('qtd').value;
-            const tipoTombo = document.getElementById('tipo_tombo').value;
-            const quantidadeHidden = document.getElementById('quantidade_hidden');
-
-            if (tipoTombo === 'AUTO' && data && qtd) {
-               fetch('/ultimo-tombo')
-                  .then(response => response.json())
-                  .then(data => {
-                     let ultimoTombo = parseInt(data.ultimoTombo);
-                     let tomboInicial = (ultimoTombo + 1).toString();
-                     document.getElementById('tombo_inicial').value = tomboInicial;
-                     console.log('Tombo Inicial gerado no frontend:', tomboInicial);
-                  })
-                  .catch(error => {
-                     console.error('Erro ao obter o último tombo:', error);
-                     document.getElementById('tombo_inicial').value = '70000';
-                  });
+      
+         // Sincronizar o campo visível "quantidade_visible" com o campo oculto "quantidade"
+         document.getElementById('qtd').addEventListener('input', function () {
+            const qtd = this.value;
+            document.getElementById('quantidade_hidden').value = qtd;
+            atualizarTomboInicial(); // Atualizar o tombo inicial se necessário
+         });
+      
+         // Evento para o botão "Confirmar" do modal
+         document.getElementById('confirmarLoteBtn').addEventListener('click', function () {
+            const tomboLoteInicial = document.getElementById('modal_tombo_lote_inicial').value;
+            const tomboLoteFinal = document.getElementById('modal_tombo_lote_final').value;
+      
+            // Validação dos campos do modal
+            if (!tomboLoteInicial || !tomboLoteFinal) {
+               alert('Por favor, preencha os campos T. Inicial e T. Final.');
+               return;
             }
-            // Sincroniza o campo oculto com o valor visível
-            quantidadeHidden.value = document.getElementById('qtd').value || 1; // Garante que o valor seja 1 se o campo estiver vazio
-         };
-
-         document.addEventListener('DOMContentLoaded', () => {
-            toggleTomboInput(); // Inicializa o estado do formulário
-            document.getElementById('data_de_entrada').addEventListener('input', atualizarTomboInicial);
-            document.getElementById('qtd').addEventListener('input', atualizarTomboInicial);
-            document.getElementById('tipo_tombo').addEventListener('change', toggleTomboInput);
-
-            document.getElementById('formulario-entrada').addEventListener('submit', function (event) {
-               event.preventDefault();
-               const formData = new FormData(this);
-               const json = JSON.stringify(Object.fromEntries(formData));
-
-               fetch('/entrada', {
+            if (parseInt(tomboLoteFinal) < parseInt(tomboLoteInicial)) {
+               alert('O T. Final deve ser maior ou igual ao T. Inicial.');
+               return;
+            }
+      
+            // Calcular a quantidade (intervalo inclusivo: T. Final - T. Inicial + 1)
+            const quantidade = parseInt(tomboLoteFinal) - parseInt(tomboLoteInicial) + 1;
+      
+            // Transferir os valores para os campos ocultos do formulário
+            document.getElementById('tombo_lote_inicial').value = tomboLoteInicial;
+            document.getElementById('tombo_lote_final').value = tomboLoteFinal;
+      
+            // Preencher o campo T. Inicial (apenas para exibição)
+            document.getElementById('tombo_inicial').value = tomboLoteInicial;
+      
+            // Atualizar o campo Qtde. com a quantidade calculada
+            document.getElementById('qtd').value = quantidade;
+            document.getElementById('quantidade_hidden').value = quantidade;
+      
+            // Fechar o modal
+            const loteModal = bootstrap.Modal.getInstance(document.getElementById('loteManualModal'));
+            loteModal.hide();
+         });
+      
+         // Limpar os campos do modal e o campo T. Inicial ao fechá-lo
+         document.getElementById('loteManualModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('modal_tombo_lote_inicial').value = '';
+            document.getElementById('modal_tombo_lote_final').value = '';
+            // Limpar os campos ocultos, o campo T. Inicial e a quantidade se o modal for fechado sem confirmar
+            if (!document.getElementById('tombo_lote_inicial').value) {
+               document.getElementById('tombo_inicial').value = '';
+               document.getElementById('tombo_lote_inicial').value = '';
+               document.getElementById('tombo_lote_final').value = '';
+               document.getElementById('qtd').value = 1; // Resetar a quantidade para 1
+               document.getElementById('quantidade_hidden').value = 1;
+            }
+         });
+      
+         // Validação do formulário e envio assíncrono
+         document.getElementById('formulario-entrada').addEventListener('submit', async function (event) {
+            event.preventDefault(); // Impedir o envio padrão do formulário
+      
+            const tipoTombo = document.getElementById('tipo_tombo').value;
+            const dataEntrada = document.getElementById('data_de_entrada').value;
+            const qtd = document.getElementById('qtd').value;
+            const categoria = document.getElementById('categoria').value;
+            const docOrigem = document.getElementById('doc_origem').value;
+            const valor = document.getElementById('valor').value;
+            const descricao = document.getElementById('descricao').value;
+            const situacao = document.getElementById('situacao').value;
+            const contaContabil = document.getElementById('conta_contabil').value;
+            const estoque = document.getElementById('estoque').value;
+            const tomboManual = document.getElementById('tombo_manual').value;
+            const tomboLoteInicial = document.getElementById('tombo_lote_inicial').value;
+            const tomboLoteFinal = document.getElementById('tombo_lote_final').value;
+            const observacao = document.getElementById('observacao').value;
+      
+            // Logar os valores dos campos antes de criar o FormData
+            console.log('Valores dos campos antes do envio:');
+            console.log('Tipo de Tombo:', tipoTombo);
+            console.log('Data de Entrada:', dataEntrada);
+            console.log('Quantidade:', qtd);
+            console.log('Categoria:', categoria);
+            console.log('Doc. de Origem:', docOrigem);
+            console.log('Valor:', valor);
+            console.log('Descrição:', descricao);
+            console.log('Conservação:', situacao);
+            console.log('Conta Contábil:', contaContabil);
+            console.log('Estoque:', estoque);
+            console.log('Tombo Manual:', tomboManual);
+            console.log('Tombo Lote Inicial:', tomboLoteInicial);
+            console.log('Tombo Lote Final:', tomboLoteFinal);
+            console.log('Observação:', observacao);
+      
+            // Validação básica no frontend
+            if (!dataEntrada) {
+               alert('Por favor, preencha a Data de Entrada.');
+               return;
+            }
+            if (!qtd || qtd < 1) {
+               alert('A quantidade deve ser maior ou igual a 1.');
+               return;
+            }
+            if (tipoTombo === 'MANUAL' && !tomboManual) {
+               alert('Por favor, preencha o T. Manual.');
+               return;
+            }
+            if (tipoTombo === 'LOTE_MANUAL') {
+               if (!tomboLoteInicial || !tomboLoteFinal) {
+                  alert('Por favor, defina a faixa de tombos no modo Lote Manual.');
+                  return;
+               }
+            }
+            if (categoria === 'Selecione...') {
+               alert('Por favor, selecione uma Categoria.');
+               return;
+            }
+            if (!docOrigem) {
+               alert('Por favor, preencha o Documento de Origem.');
+               return;
+            }
+            if (!valor || valor <= 0) {
+               alert('Por favor, preencha um Valor Unitário válido.');
+               return;
+            }
+            if (!descricao) {
+               alert('Por favor, preencha a Descrição.');
+               return;
+            }
+            if (situacao === 'Escolha uma opção...') {
+               alert('Por favor, selecione a Conservação.');
+               return;
+            }
+            if (contaContabil === 'Escolha uma opção...') {
+               alert('Por favor, selecione a Conta Contábil.');
+               return;
+            }
+            if (estoque === 'Escolha uma opção...') {
+               alert('Por favor, selecione o Estoque.');
+               return;
+            }
+      
+            // Criar um objeto com os dados do formulário
+            const formDataObj = {
+               data_de_entrada: dataEntrada,
+               quantidade: qtd,
+               tipo_tombo: tipoTombo,
+               tombo_inicial: document.getElementById('tombo_inicial').value,
+               tombo_manual: tomboManual,
+               tombo_lote_inicial: tomboLoteInicial,
+               tombo_lote_final: tomboLoteFinal,
+               categoria: categoria,
+               doc_origem: docOrigem,
+               valor: valor,
+               descricao: descricao,
+               situacao: situacao,
+               conta_contabil: contaContabil,
+               estoque: estoque,
+               observacao: observacao
+            };
+      
+            // Converter o objeto para URLSearchParams (formato application/x-www-form-urlencoded)
+            const formDataParams = new URLSearchParams();
+            for (const [key, value] of Object.entries(formDataObj)) {
+               if (value !== undefined && value !== null && value !== '') {
+                  formDataParams.append(key, value);
+               }
+            }
+      
+            // Logar os dados que estão sendo enviados
+            console.log('Dados enviados ao backend (URLSearchParams):', formDataParams.toString());
+      
+            // Enviar o formulário assincronamente
+            try {
+               const response = await fetch('/entrada', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: json
-               })
-               .then(response => {
-                  if (response.status === 404) {
-                     window.location.href = '/404';
-                  }
-                  if (!response.ok) {
-                     return response.json().then(data => { throw new Error(data.error); });
-                  }
-                  return response.text();
-               })
-               .then(() => {
-                  window.location.href = '/tabela/estoqueatual';
-               })
-               .catch(error => {
-                  document.getElementById('errorMessage').innerText = error.message;
-                  var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-                  errorModal.show();
+                  headers: {
+                     'Content-Type': 'application/x-www-form-urlencoded'
+                  },
+                  body: formDataParams
                });
-            });
+      
+               console.log('Resposta do backend:', response);
+      
+               if (!response.ok) {
+                  const errorData = await response.json();
+                  console.log('Erro retornado pelo backend:', errorData);
+                  if (errorData.error && errorData.error.includes('já existe no sistema')) {
+                     alert(errorData.error); // Ex.: "O tombo 70150 já existe no sistema."
+                     return;
+                  }
+                  throw new Error('Erro ao registrar a entrada: ' + (errorData.error || 'Erro desconhecido'));
+               }
+      
+               // Se o envio for bem-sucedido, redirecionar ou mostrar mensagem de sucesso
+               alert('Entrada registrada com sucesso!');
+               window.location.href = '/tabela/estoqueatual'; // Redirecionar para a página de estoque
+            } catch (error) {
+               console.error('Erro ao enviar o formulário:', error);
+               alert(error.message || 'Erro ao registrar a entrada. Verifique os dados e tente novamente.');
+            }
+         });
+      
+         // Inicializar o formulário ao carregar a página
+         document.addEventListener('DOMContentLoaded', function () {
+            atualizarTomboInicial();
          });
       </script>
+    
+
+      <!-- Bootstrap JS (incluindo Popper.js) -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
    </body>
 </html>

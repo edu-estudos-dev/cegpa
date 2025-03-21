@@ -106,7 +106,7 @@ class EstoqueModel {
          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
       try {
-         await connection.execute(query, [
+         const [result] = await connection.execute(query, [
             data_de_entrada,
             descricao,
             tombo,
@@ -120,8 +120,47 @@ class EstoqueModel {
             observacao,
             tipo_tombo,
          ]);
+         return result;
       } catch (error) {
          console.error('Erro ao inserir dados no estoque:', error);
+         throw error;
+      }
+   };
+
+   // Novo método para inserção em lote
+   createEstoqueLote = async (itens) => {
+      if (!itens || itens.length === 0) {
+         throw new Error('Nenhum item fornecido para inserção em lote.');
+      }
+
+      const query = `
+         INSERT INTO estoqueatual (
+            data_de_entrada, descricao, tombo, quantidade, categoria, 
+            conta_contabil, doc_origem, estoque, valor, situacao, 
+            observacao, tipo_tombo
+         ) VALUES ?
+      `;
+      // Formato esperado: [[valor1, valor2, ...], [valor1, valor2, ...], ...]
+      const values = itens.map(item => [
+         item.data_de_entrada,
+         item.descricao,
+         item.tombo,
+         item.quantidade,
+         item.categoria,
+         item.conta_contabil,
+         item.doc_origem,
+         item.estoque,
+         item.valor,
+         item.situacao,
+         item.observacao,
+         item.tipo_tombo
+      ]);
+
+      try {
+         const [result] = await connection.query(query, [values]);
+         return result;
+      } catch (error) {
+         console.error('Erro ao inserir em lote no estoque:', error);
          throw error;
       }
    };
@@ -144,8 +183,8 @@ class EstoqueModel {
          const [results] = await connection.execute(query);
          console.log('Resultado da query para maior tombo:', results);
          if (!results || results.length === 0) {
-            console.log('Nenhum tombo encontrado, usando 70000 como fallback.');
-            return 70149;  // <<<===== ajuste para iniciar a partir do último tombo 
+            console.log('Nenhum tombo encontrado, usando 70149 como fallback.');
+            return 70149;  // Ajuste para iniciar a partir do último tombo 
          }
          const ultimoTombo = results[0].tombo;
          console.log('Maior tombo encontrado no banco:', ultimoTombo);
@@ -413,7 +452,7 @@ class EstoqueModel {
           ip.referencia,
           ip.doc_saida,
           ea.doc_origem,
-          ea.valor, // <-- Certifique-se que este campo está presente
+          ea.valor,
           ip.nome_completo,
           ip.posto_graduacao,
           ip.mat_funcional,
@@ -423,7 +462,13 @@ class EstoqueModel {
         JOIN estoqueatual ea ON ip.estoqueatual_id = ea.id
         WHERE ip.id = ?;
       `;
-      // ... resto do código
+      try {
+         const [results] = await connection.execute(query, [id]);
+         return results.length > 0 ? results[0] : null;
+      } catch (error) {
+         console.error('Erro ao buscar informações do item pago pelo ID:', error);
+         throw error;
+      }
    };
 
    // Método para excluir um item do estoque
@@ -438,7 +483,7 @@ class EstoqueModel {
       }
    };
 
-   // Método para obter informações de saída com base no estoqueatual_id (adicionado)
+   // Método para obter informações de saída com base no estoqueatual_id
    getSaidaByEstoqueatualId = async (estoqueatual_id) => {
       const query = `SELECT * FROM itenspagos WHERE estoqueatual_id = ?`;
       try {

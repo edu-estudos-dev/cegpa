@@ -25,15 +25,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
+// Middleware para logar todas as requisições
+app.use((req, res, next) => {
+   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+   console.log('Cabeçalhos da requisição:', req.headers);
+   console.log('Corpo da requisição (antes do middleware):', req.body);
+   next();
+});
+
 app.use(
   session({
     secret: "sua_chave_secreta",
     resave: false,
-    saveUninitialized: false, // Alterado para false para evitar sessões desnecessárias
+    saveUninitialized: false,
     cookie: {
       secure: false, // Use true em produção com HTTPS
       maxAge: 24 * 60 * 60 * 1000, // 24 horas em milissegundos
-      httpOnly: true, // Impede acesso ao cookie via JavaScript no cliente
+      httpOnly: true,
     },
   })
 );
@@ -52,6 +60,7 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
+  console.error('Erro no servidor:', err);
   res.status(500).json({ error: "Algo deu errado!" });
 });
 
