@@ -3,181 +3,189 @@
 
 <%- include('../partials/head', { title: 'Formulário de Saída' }) %>
 
-   <style>
-      * {
-         margin: 0;
-         padding: 0;
-      }
+<style>
+   * {
+      margin: 0;
+      padding: 0;
+   }
 
-      body {
-         display: flex;
-         align-items: center;
-         padding-top: 2.5rem;
-      }
+   body {
+      display: flex;
+      align-items: center;
+      padding-top: 2.5rem;
+   }
 
+   #tombos-container,
+   #selected-tombos-container {
+      overflow-y: scroll;
+      background-color: #fff;
+      padding: 10px;
+      border: 1px solid #dbdbdb;
+      border-radius: 5px;
+   }
 
-      #tombos-container,
-      #selected-tombos-container {
-         overflow-y: scroll;
-         background-color: #fff;
-         padding: 10px;
-         border: 1px solid #dbdbdb;
-         border-radius: 5px;
-      }
+   /* Use height e max-height relativos para manter a proporcionalidade */
+   #tombos-container {
+      height: 60vh;
+      max-height: 60vh;
+   }
 
-      /* Use height e max-height relativos para manter a proporcionalidade */
-      #tombos-container {
-         height: 60vh;
-         max-height: 60vh;
-      }
+   #selected-tombos-container {
+      height: 20vh;
+   }
 
-      #selected-tombos-container {
-         height: 20vh;
-      }
+   .w-90 {
+      width: 90% !important;
+   }
 
-      .w-90 {
-         width: 90% !important;
-      }
+   body {
+      display: flex;
+      align-items: center;
+   }
 
-      body {
-         display: flex;
-         align-items: center;
-      }
-   </style>
+   .tombo-highlighted {
+      background-color: #e0e0e0; /* Cinza claro */
+      transition: background-color 0.3s ease; /* Transição suave */
+   }
 
-   <body>
-      <%- include('../partials/header') %>
-      <div class="caixa w-90 p-4 mx-auto">
+   .search-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+   }
+</style>
 
-         <div class=" border caixa-externa p-4 shadow-sm rounded">
+<body>
+   <%- include('../partials/header') %>
+   <div class="caixa w-90 p-4 mx-auto">
+      <div class="border caixa-externa p-4 shadow-sm rounded">
+         <div class="row align-items-center mb-3 px-3">
+            <h2 style="border-bottom: 4px solid orange;" class="text-center text-white py-2 mt-0 fw-bold bg-success">
+               Formulário de Saída
+            </h2>
+         </div>
 
-            <div class="row align-items-center mb-3 px-3">
-               <h2 style="border-bottom: 4px solid orange;"
-                  class="text-center text-white py-2 mt-0 fw-bold bg-success"> Formulário de Saída </h2>
-            </div>
-
-            <div class="row">
-               <!-- Coluna da Esquerda -->
-               <div class="col-md-6">
-                  <div id="row2" class="row">
-                     <div class="col-md-12">
-                        <div id="tombo_div" class="mb-2">
-                           <label class="form-label fw-bold">Itens em estoque</label>
-                           <div id="tombos-container">
-                              <div style="font-size: 12px;" id="tombos-list" class="form-check">
-                                 <% itensDisponiveis.forEach(item=> { %>
-                                    <div class="form-check">
-                                       <input type="checkbox" class="form-check-input" value="<%= item.tombo %>"
-                                          id="tombo-<%= item.tombo %>">
-                                       <label class="form-check-label" for="tombo-<%= item.tombo %>">ID: <%= item.id
-                                          %> - <%= item.descricao %> - Tombo: <%= item.tombo %></label>
-                                    </div>
-                                 <% }); %>
+         <div class="row">
+            <!-- Coluna da Esquerda -->
+            <div class="col-md-6">
+               <div id="row2" class="row">
+                  <div class="col-md-12">
+                     <div class="mb-2">
+                        <label for="searchInput" class="form-label fw-bold">Pesquisar:</label>
+                        <div class="search-container">
+                           <input type="text" id="searchInput" class="form-control" placeholder="Digite o número do tombo ou uma palavra da descrição">
+                           <button id="searchBtn" class="btn btn-primary btn-md w-25">Pesquisar</button>
+                           <button id="clearSearch" class="btn btn-secondary btn-md w-25">Limpar</button>
+                        </div>
+                     </div>
+                     <div id="tombo_div" class="mb-2">
+                        <label class="form-label fw-bold">Itens em estoque</label>
+                        <div id="tombos-container">
+                           <div style="font-size: 12px;" id="tombos-list" class="form-check">
+                              <% itensDisponiveis.forEach(item => { %>
+                              <div class="form-check">
+                                 <input type="checkbox" class="form-check-input" value="<%= item.tombo %>"
+                                    id="tombo-<%= item.tombo %>">
+                                 <label class="form-check-label" for="tombo-<%= item.tombo %>">ID: <%= item.id %> -
+                                    <%= item.descricao %> - Tombo: <%= item.tombo %></label>
                               </div>
+                              <% }); %>
                            </div>
                         </div>
                      </div>
                   </div>
                </div>
+            </div>
 
-               <!-- Coluna da Direita -->
-               <div class="col-md-6">
-                  <div id="row4" class="row">
-                     <div class="col-md-4">
-                        <div id="doc_saida-div">
-                           <label class="form-label fw-bold">Termo de Responsabilidade</label>
-                           <input style="background-color: var(secondary-color) !important;" name="doc_saida"
-                              id="doc_saida" type="text" class="form-control mb-2" readonly disabled>
-                        </div>
-
-                     </div>
-                     <div class="col-md-4">
-                        <div id="referencia-div">
-                           <label class="form-label fw-bold">NUP (Suite)</label>
-                           <input id="referencia" type="text" class="form-control mb-2" placeholder= "somente números">
-                        </div>
-
-                     </div>
-                     <div class="col-md-4">
-                        <div id="destino-div" class="mb-1">
-                           <label class="form-label fw-bold">Destino</label>
-                           <input id="destino" type="text" class="form-control mb-2">
-                        </div>
-                     </div>
-
-                  </div>
-                  <div id="row5" class="row">
-                     <div class="col-md-4">
-                        <div id="postoGrad-div" class="mb-1">
-                           <label class="form-label fw-bold">Posto/Graduação</label>
-                           <select class="form-control mb-2" id="postoGrad">
-                              <option value="">Selecione</option>
-                              <option value="SD. PM">SD. PM</option>
-                              <option value="CB. PM">CB. PM</option>
-                              <option value="3º SGT. PM">3º SGT. PM</option>
-                              <option value="2º SGT. PM">2º SGT. PM</option>
-                              <option value="1º SGT PM">1º SGT. PM</option>
-                              <option value="SUB TEN. PM">SUB TEN. PM</option>
-                              <option value="2º TEN. QOPM">2º TEN. QOPM</option>
-                              <option value="2º TEN. QOAPM">2º TEN. QOAPM</option>
-                              <option value="1º TEN. QOPM">1º TEN. QOPM</option>
-                              <option value="1º TEN. QOAPM">1º TEN. QOAPM</option>
-                              <option value="CAP. QOPM">CAP. QOPM</option>
-                              <option value="CAP. QOAPM">CAP. QOAPM</option>
-                              <option value="MAJ. QOPM">MAJ. QOPM</option>
-                              <option value="MAJ QOAPM">MAJ. QOAPM</option>
-                              <option value="TEN. CEL.">TEN. CEL.</option>
-                              <option value="CEL.">CEL.</option>
-                           </select>
-                        </div>
-                     </div>
-
-                     <div class="col-md-4">
-                        <div id="mf_recebedor-div" class="mb-1">
-                           <label class="form-label fw-bold">Mat. Funcional</label>
-                           <input id="mf_recebedor" type="text" class="form-control mb-2" maxlength="11" placeholder="somente números">
-                        </div>
-                     </div>
-
-                     <div class="col-md-4">
-                        <div id="tel_recebedor-div" class="mb-1">
-                           <label class="form-label fw-bold">Telefone</label>
-                           <input id="tel_recebedor" type="tel" class="form-control mb-2" placeholder="somente números">
-                        </div>
-                     </div>
-
-                     <div class="col-md-12">
-                        <div id="nome_do_recebedor-div" class="mb-1">
-                           <label class="form-label fw-bold">Nome Completo</label>
-                           <input id="nome_do_recebedor" type="text" class="form-control mb-2">
-                        </div>
+            <!-- Coluna da Direita -->
+            <div class="col-md-6">
+               <div id="row4" class="row">
+                  <div class="col-md-4">
+                     <div id="doc_saida-div">
+                        <label class="form-label fw-bold">Termo de Responsabilidade</label>
+                        <input style="background-color: var(secondary-color) !important;" name="doc_saida"
+                           id="doc_saida" type="text" class="form-control mb-2" readonly disabled>
                      </div>
                   </div>
-
-                  <div id="row6" class="row">
-                     <div class="col-md-12">
-                        <div id="observacao-div" class="mb-1">
-                           <label class="form-label fw-bold">Observação</label>
-                           <textarea id="observacao" type="text" class="form-control mb-2"></textarea>
+                  <div class="col-md-4">
+                     <div id="referencia-div">
+                        <label class="form-label fw-bold">NUP (Suite)</label>
+                        <input id="referencia" type="text" class="form-control mb-2" placeholder="somente números">
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div id="destino-div" class="mb-1">
+                        <label class="form-label fw-bold">Destino</label>
+                        <input id="destino" type="text" class="form-control mb-2">
+                     </div>
+                  </div>
+               </div>
+               <div id="row5" class="row">
+                  <div class="col-md-4">
+                     <div id="postoGrad-div" class="mb-1">
+                        <label class="form-label fw-bold">Posto/Graduação</label>
+                        <select class="form-control mb-2" id="postoGrad">
+                           <option value="">Selecione</option>
+                           <option value="SD. PM">SD. PM</option>
+                           <option value="CB. PM">CB. PM</option>
+                           <option value="3º SGT. PM">3º SGT. PM</option>
+                           <option value="2º SGT. PM">2º SGT. PM</option>
+                           <option value="1º SGT PM">1º SGT. PM</option>
+                           <option value="SUB TEN. PM">SUB TEN. PM</option>
+                           <option value="2º TEN. QOPM">2º TEN. QOPM</option>
+                           <option value="2º TEN. QOAPM">2º TEN. QOAPM</option>
+                           <option value="1º TEN. QOPM">1º TEN. QOPM</option>
+                           <option value="1º TEN. QOAPM">1º TEN. QOAPM</option>
+                           <option value="CAP. QOPM">CAP. QOPM</option>
+                           <option value="CAP. QOAPM">CAP. QOAPM</option>
+                           <option value="MAJ. QOPM">MAJ. QOPM</option>
+                           <option value="MAJ QOAPM">MAJ. QOAPM</option>
+                           <option value="TEN. CEL.">TEN. CEL.</option>
+                           <option value="CEL.">CEL.</option>
+                        </select>
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div id="mf_recebedor-div" class="mb-1">
+                        <label class="form-label fw-bold">Mat. Funcional</label>
+                        <input id="mf_recebedor" type="text" class="form-control mb-2" maxlength="11"
+                           placeholder="somente números">
+                     </div>
+                  </div>
+                  <div class="col-md-4">
+                     <div id="tel_recebedor-div" class="mb-1">
+                        <label class="form-label fw-bold">Telefone</label>
+                        <input id="tel_recebedor" type="tel" class="form-control mb-2" placeholder="somente números">
+                     </div>
+                  </div>
+                  <div class="col-md-12">
+                     <div id="nome_do_recebedor-div" class="mb-1">
+                        <label class="form-label fw-bold">Nome Completo</label>
+                        <input id="nome_do_recebedor" type="text" class="form-control mb-2">
+                     </div>
+                  </div>
+               </div>
+               <div id="row6" class="row">
+                  <div class="col-md-12">
+                     <div id="observacao-div" class="mb-1">
+                        <label class="form-label fw-bold">Observação</label>
+                        <textarea id="observacao" type="text" class="form-control mb-2"></textarea>
+                     </div>
+                  </div>
+               </div>
+               <div id="row3" class="row">
+                  <div class="col-md-12">
+                     <div id="itens_selecionados" class="mb-1">
+                        <label class="form-label mb-2 fw-bold">Itens a sair do estoque</label>
+                        <div id="selected-tombos-container">
+                           <ul id="selected-tombos" class="list-group">
+                              <!-- Itens selecionados serão listados aqui -->
+                           </ul>
                         </div>
                      </div>
                   </div>
-
-                  <div id="row3" class="row">
-                     <div class="col-md-12">
-                        <div id="itens_selecionados" class="mb-1">
-                           <label class="form-label mb-2 fw-bold">Itens a sair do estoque</label>
-                           <div id="selected-tombos-container">
-                              <ul id="selected-tombos" class="list-group">
-                                 <!-- Itens selecionados serão listados aqui -->
-                              </ul>
-                           </div>
-                        </div>
-                     </div>
-
-                     <div class="d-flex  mt-3 justify-content-around">
-                        <button id="submit-btn" type="submit" class="btn btn-success my-3 w-10">Registrar Saída</button>
-                     </div>
+                  <div class="d-flex mt-3 justify-content-around">
+                     <button id="submit-btn" type="submit" class="btn btn-success my-3 w-10">Registrar Saída</button>
                   </div>
                </div>
             </div>
@@ -205,234 +213,330 @@
       <!-- Scripts necessários para o modal -->
       <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
          integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
-         </script>
+      </script>
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
          integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-         </script>
+      </script>
 
       <!-- Scripts para buscar e registrar saída -->
       <script>
          document.addEventListener('DOMContentLoaded', function () {
-             // Estado da aplicação
-             let currentDocSaida = null;
-             let startCheckbox = null;
-     
-             // Elementos DOM
-             const docSaidaInput = document.getElementById('doc_saida');
-             const tombosList = document.getElementById('tombos-list');
-             const selectedTombos = document.getElementById('selected-tombos');
-     
-             // Funções auxiliares
-             const showAlert = (message) => {
-                 const errorMessage = document.getElementById('errorMessage');
-                 errorMessage.innerHTML = `
+            // Estado da aplicação
+            let currentDocSaida = null;
+            let startCheckbox = null;
+
+            // Elementos DOM
+            const docSaidaInput = document.getElementById('doc_saida');
+            const tombosList = document.getElementById('tombos-list');
+            const selectedTombos = document.getElementById('selected-tombos');
+
+            // Funções auxiliares
+            const showAlert = (message) => {
+               const errorMessage = document.getElementById('errorMessage');
+               errorMessage.innerHTML = `
                      <div class="alert alert-danger alert-dismissible" role="alert">
                          ${message}
                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                      </div>`;
-                 new bootstrap.Modal(document.getElementById('errorModal')).show();
-             };
-     
-             const formatarTelefone = (value) => {
-                 value = value.replace(/\D/g, '');
-                 if (value.length > 11) value = value.slice(0, 11);
-                 return value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-             };
-     
-             const formatarMatricula = (value) => {
-            // Remove todos os caracteres não numéricos e X
-            let cleaned = value.replace(/[^\dX]/gi, '');
-            
-            // Separa dígitos e Xs
-            let digits = [];
-            let xChars = [];
-            
-            for (let char of cleaned) {
-                if (char.toUpperCase() === 'X') {
-                    xChars.push(char);
-                } else {
-                    digits.push(char);
-                }
-            }
+               new bootstrap.Modal(document.getElementById('errorModal')).show();
+            };
 
-            // Mantém máximo de 7 dígitos + 1 caractere (X ou dígito)
-            let mainDigits = digits.slice(0, 7).join('');
-            let lastChar = xChars.length > 0 
-                ? 'X' 
-                : digits.slice(7, 8)[0] || '';
+            const formatarTelefone = (value) => {
+               value = value.replace(/\D/g, '');
+               if (value.length > 11) value = value.slice(0, 11);
+               return value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            };
 
-            // Limita a 8 caracteres no total
-            let formatted = (mainDigits + lastChar).slice(0, 8);
+            const formatarMatricula = (value) => {
+               // Remove todos os caracteres não numéricos e X
+               let cleaned = value.replace(/[^\dX]/gi, '');
 
-            // Aplica a máscara
-            return formatted.replace(/(\d{3})(\d{3})(\d{1})([\dX])/i, '$1.$2-$3-$4').toUpperCase();
-        };
-             const formatarReferencia = (value) => {
-                 value = value.replace(/\D/g, '');
-                 value = value.slice(0, 20);
-                 const parts = [
-                     value.slice(0, 5),
-                     value.slice(5, 11),
-                     value.slice(11, 15),
-                     value.slice(15, 17)
-                 ];
-                 return `NUP ${parts[0]}${parts[1] ? `.${parts[1]}` : ''}${parts[2] ? `/${parts[2]}` : ''}${parts[3] ? `-${parts[3]}` : ''}`;
-             };
-     
-             // Lógica de negócio
-             const gerarTermoResponsabilidade = async () => {
-                 try {
-                     const response = await fetch('/gerar-termo');
-                     if (!response.ok) throw new Error('Falha na geração do termo');
-     
-                     const { doc_saida } = await response.json();
-                     currentDocSaida = doc_saida;
-                     docSaidaInput.value = doc_saida;
-                     return true;
-     
-                 } catch (error) {
-                     showAlert(`Erro ao gerar termo: ${error.message}`);
-                     return false;
-                 }
-             };
-     
-             const validarFormulario = () => {
-                 const camposObrigatorios = {
-                     referencia: 'Referência (NUP)',
-                     destino: 'Destino',
-                     postoGrad: 'Posto/Graduação',
-                     mf_recebedor: 'Matrícula Funcional',
-                     tel_recebedor: 'Telefone',
-                     nome_do_recebedor: 'Nome do Recebedor'
-                 };
-     
-                 const erros = [];
-     
-                 if (document.querySelectorAll('#tombos-list input:checked').length === 0) {
-                     erros.push('Selecione pelo menos um item do estoque');
-                 }
-     
-                 for (const [id, nome] of Object.entries(camposObrigatorios)) {
-                     if (!document.getElementById(id).value.trim()) {
-                         erros.push(`${nome} é obrigatório`);
-                     }
-                 }
-     
-                 return erros;
-             };
-     
-             // Evento de clique aprimorado
-             tombosList.addEventListener('click', (event) => {
-                 let checkbox;
-                 const target = event.target;
-     
-                 // Verificar se o clique foi em uma label ou checkbox
-                 if (target.tagName === 'LABEL' && target.htmlFor) {
-                     checkbox = document.getElementById(target.htmlFor);
-                 } else if (target.tagName === 'INPUT' && target.type === 'checkbox') {
-                     checkbox = target;
-                 } else {
+               // Separa dígitos e Xs
+               let digits = [];
+               let xChars = [];
+
+               for (let char of cleaned) {
+                  if (char.toUpperCase() === 'X') {
+                     xChars.push(char);
+                  } else {
+                     digits.push(char);
+                  }
+               }
+
+               // Mantém máximo de 7 dígitos + 1 caractere (X ou dígito)
+               let mainDigits = digits.slice(0, 7).join('');
+               let lastChar = xChars.length > 0
+                  ? 'X'
+                  : digits.slice(7, 8)[0] || '';
+
+               // Limita a 8 caracteres no total
+               let formatted = (mainDigits + lastChar).slice(0, 8);
+
+               // Aplica a máscara
+               return formatted.replace(/(\d{3})(\d{3})(\d{1})([\dX])/i, '$1.$2-$3-$4').toUpperCase();
+            };
+
+            const formatarReferencia = (value) => {
+               value = value.replace(/\D/g, '');
+               value = value.slice(0, 20);
+               const parts = [
+                  value.slice(0, 5),
+                  value.slice(5, 11),
+                  value.slice(11, 15),
+                  value.slice(15, 17)
+               ];
+               return `NUP ${parts[0]}${parts[1] ? `.${parts[1]}` : ''}${parts[2] ? `/${parts[2]}` : ''}${parts[3] ? `-${parts[3]}` : ''}`;
+            };
+
+            // Lógica de negócio
+            const gerarTermoResponsabilidade = async () => {
+               try {
+                  const response = await fetch('/gerar-termo');
+                  if (!response.ok) throw new Error('Falha na geração do termo');
+
+                  const { doc_saida } = await response.json();
+                  currentDocSaida = doc_saida;
+                  docSaidaInput.value = doc_saida;
+                  return true;
+               } catch (error) {
+                  showAlert(`Erro ao gerar termo: ${error.message}`);
+                  return false;
+               }
+            };
+
+            const validarFormulario = () => {
+               const camposObrigatorios = {
+                  referencia: 'Referência (NUP)',
+                  destino: 'Destino',
+                  postoGrad: 'Posto/Graduação',
+                  mf_recebedor: 'Matrícula Funcional',
+                  tel_recebedor: 'Telefone',
+                  nome_do_recebedor: 'Nome do Recebedor'
+               };
+
+               const erros = [];
+
+               if (document.querySelectorAll('#tombos-list input:checked').length === 0) {
+                  erros.push('Selecione pelo menos um item do estoque');
+               }
+
+               for (const [id, nome] of Object.entries(camposObrigatorios)) {
+                  if (!document.getElementById(id).value.trim()) {
+                     erros.push(`${nome} é obrigatório`);
+                  }
+               }
+
+               return erros;
+            };
+
+            // Evento de clique aprimorado
+            tombosList.addEventListener('click', (event) => {
+               let checkbox;
+               const target = event.target;
+
+               // Verificar se o clique foi em uma label ou checkbox
+               if (target.tagName === 'LABEL' && target.htmlFor) {
+                  checkbox = document.getElementById(target.htmlFor);
+               } else if (target.tagName === 'INPUT' && target.type === 'checkbox') {
+                  checkbox = target;
+               } else {
+                  return;
+               }
+
+               const checkboxes = Array.from(tombosList.querySelectorAll('input[type="checkbox"]'));
+
+               if (event.shiftKey && startCheckbox) {
+                  const startIndex = checkboxes.indexOf(startCheckbox);
+                  const endIndex = checkboxes.indexOf(checkbox);
+                  const [start, end] = [Math.min(startIndex, endIndex), Math.max(startIndex, endIndex)];
+
+                  const isChecked = startCheckbox.checked;
+                  for (let i = start; i <= end; i++) {
+                     checkboxes[i].checked = isChecked;
+                     atualizarItemSelecionado(checkboxes[i]);
+                  }
+               } else {
+                  startCheckbox = checkbox;
+                  atualizarItemSelecionado(checkbox);
+               }
+            });
+
+            const atualizarItemSelecionado = (checkbox) => {
+               const item = checkbox.closest('div').querySelector('label').textContent;
+               const listItem = document.getElementById(`selected-${checkbox.value}`);
+
+               if (checkbox.checked) {
+                  if (!listItem) {
+                     const li = document.createElement('li');
+                     li.className = 'list-group-item';
+                     li.id = `selected-${checkbox.value}`;
+                     li.textContent = item;
+                     li.style.fontSize = '0.8rem';
+                     selectedTombos.appendChild(li);
+                  }
+                  if (!currentDocSaida) gerarTermoResponsabilidade();
+               } else if (listItem) {
+                  listItem.remove();
+               }
+            };
+
+            // Evento de submit
+            document.getElementById('submit-btn').addEventListener('click', async (e) => {
+               e.preventDefault();
+
+               try {
+                  const erros = validarFormulario();
+                  if (erros.length > 0) {
+                     showAlert(erros.join('<br>'));
                      return;
-                 }
-     
-                 const checkboxes = Array.from(tombosList.querySelectorAll('input[type="checkbox"]'));
-                 
-                 if (event.shiftKey && startCheckbox) {
-                     const startIndex = checkboxes.indexOf(startCheckbox);
-                     const endIndex = checkboxes.indexOf(checkbox);
-                     const [start, end] = [Math.min(startIndex, endIndex), Math.max(startIndex, endIndex)];
-                     
-                     const isChecked = startCheckbox.checked;
-                     for (let i = start; i <= end; i++) {
-                         checkboxes[i].checked = isChecked;
-                         atualizarItemSelecionado(checkboxes[i]);
-                     }
-                 } else {
-                     startCheckbox = checkbox;
-                     atualizarItemSelecionado(checkbox);
-                 }
-             });
-     
-             const atualizarItemSelecionado = (checkbox) => {
-                 const item = checkbox.closest('div').querySelector('label').textContent;
-                 const listItem = document.getElementById(`selected-${checkbox.value}`);
-     
-                 if (checkbox.checked) {
-                     if (!listItem) {
-                         const li = document.createElement('li');
-                         li.className = 'list-group-item';
-                         li.id = `selected-${checkbox.value}`;
-                         li.textContent = item;
-                         li.style.fontSize = '0.8rem';
-                         selectedTombos.appendChild(li);
-                     }
-                     if (!currentDocSaida) gerarTermoResponsabilidade();
-                 } else if (listItem) {
-                     listItem.remove();
-                 }
-             };
-     
-             // Evento de submit
-             document.getElementById('submit-btn').addEventListener('click', async (e) => {
-                 e.preventDefault();
-     
-                 try {
-                     const erros = validarFormulario();
-                     if (erros.length > 0) {
-                         showAlert(erros.join('<br>'));
-                         return;
-                     }
-     
-                     if (!currentDocSaida && !await gerarTermoResponsabilidade()) return;
-     
-                     const formData = {
-                         tombos: Array.from(document.querySelectorAll('#tombos-list input:checked')).map(i => i.value),
-                         doc_saida: currentDocSaida,
-                         referencia: document.getElementById('referencia').value.trim(),
-                         destino: document.getElementById('destino').value.trim(),
-                         postoGrad: document.getElementById('postoGrad').value.trim(),
-                         mf_recebedor: document.getElementById('mf_recebedor').value.trim(),
-                         tel_recebedor: document.getElementById('tel_recebedor').value.trim(),
-                         nome_do_recebedor: document.getElementById('nome_do_recebedor').value.trim(),
-                         observacao: document.getElementById('observacao').value.trim()
-                     };
-     
-                     const response = await fetch('/saida', {
-                         method: 'POST',
-                         headers: { 'Content-Type': 'application/json' },
-                         body: JSON.stringify(formData)
-                     });
-     
-                     const result = await response.json();
-     
-                     if (!response.ok) throw new Error(result.error || 'Erro desconhecido');
-     
-                     window.open(result.pdfPath, '_blank');
-                     location.reload();
-     
-                 } catch (error) {
-                     console.error('Erro:', error);
-                     showAlert(error.message);
-                 } finally {
-                     currentDocSaida = null;
-                 }
-             });
-     
-             // Formatação automática
-             document.getElementById('tel_recebedor').addEventListener('input', (e) => {
-                 e.target.value = formatarTelefone(e.target.value);
-             });
-     
-             document.getElementById('mf_recebedor').addEventListener('input', (e) => {
-                 e.target.value = formatarMatricula(e.target.value);
-             });
-     
-             document.getElementById('referencia').addEventListener('input', (e) => {
-                 e.target.value = formatarReferencia(e.target.value);
-             });
-         });
-     </script>
-      
-   </body>
+                  }
 
+                  if (!currentDocSaida && !await gerarTermoResponsabilidade()) return;
+
+                  const formData = {
+                     tombos: Array.from(document.querySelectorAll('#tombos-list input:checked')).map(i => i.value),
+                     doc_saida: currentDocSaida,
+                     referencia: document.getElementById('referencia').value.trim(),
+                     destino: document.getElementById('destino').value.trim(),
+                     postoGrad: document.getElementById('postoGrad').value.trim(),
+                     mf_recebedor: document.getElementById('mf_recebedor').value.trim(),
+                     tel_recebedor: document.getElementById('tel_recebedor').value.trim(),
+                     nome_do_recebedor: document.getElementById('nome_do_recebedor').value.trim(),
+                     observacao: document.getElementById('observacao').value.trim()
+                  };
+
+                  const response = await fetch('/saida', {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify(formData)
+                  });
+
+                  const result = await response.json();
+
+                  if (!response.ok) throw new Error(result.error || 'Erro desconhecido');
+
+                  window.open(result.pdfPath, '_blank');
+                  location.reload();
+               } catch (error) {
+                  console.error('Erro:', error);
+                  showAlert(error.message);
+               } finally {
+                  currentDocSaida = null;
+               }
+            });
+
+            // Formatação automática
+            document.getElementById('tel_recebedor').addEventListener('input', (e) => {
+               e.target.value = formatarTelefone(e.target.value);
+            });
+
+            document.getElementById('mf_recebedor').addEventListener('input', (e) => {
+               e.target.value = formatarMatricula(e.target.value);
+            });
+
+            document.getElementById('referencia').addEventListener('input', (e) => {
+               e.target.value = formatarReferencia(e.target.value);
+            });
+
+            // Função para buscar e destacar (tombo ou descrição)
+            const searchAndHighlight = () => {
+               const searchInput = document.getElementById('searchInput');
+               const searchValue = searchInput.value.trim().toLowerCase().replace(/\s+/g, ' '); // Normaliza espaços
+               const tombosContainer = document.getElementById('tombos-container');
+               const tomboItems = document.querySelectorAll('#tombos-list .form-check');
+
+               // Remove destaque de todas as linhas
+               tomboItems.forEach(item => {
+                  item.classList.remove('tombo-highlighted');
+               });
+
+               if (searchValue === '') {
+                  alert('Por favor, digite um valor para pesquisar.');
+                  return;
+               }
+
+               // Primeiro, tenta buscar por tombo exato
+               let foundItem = null;
+               tomboItems.forEach(item => {
+                  const label = item.querySelector('label').textContent.toLowerCase().replace(/\s+/g, ' '); // Normaliza espaços
+                  const tomboMatch = label.match(/tombo:\s*(\d+)/); // Usa regex para capturar o número do tombo
+                  if (tomboMatch && tomboMatch[1] === searchValue) {
+                     foundItem = item;
+                  }
+               });
+
+               if (foundItem) {
+                  // Se encontrou um tombo exato, destaca e rola até ele
+                  foundItem.classList.add('tombo-highlighted');
+                  const containerRect = tombosContainer.getBoundingClientRect();
+                  const itemRect = foundItem.getBoundingClientRect();
+                  const scrollPosition = itemRect.top - containerRect.top + tombosContainer.scrollTop - (containerRect.height / 2) + (itemRect.height / 2);
+                  tombosContainer.scrollTo({
+                     top: scrollPosition,
+                     behavior: 'smooth'
+                  });
+               } else {
+                  // Se não encontrou um tombo, busca por descrição
+                  let firstMatch = null;
+                  const matchingItems = [];
+                  tomboItems.forEach(item => {
+                     const label = item.querySelector('label').textContent.toLowerCase().replace(/\s+/g, ' '); // Normaliza espaços
+                     const parts = label.split(' - ');
+                     if (parts.length >= 3) {
+                        const descricaoPart = parts[1].trim(); // Pega a parte da descrição (entre "ID: X" e "Tombo: Y")
+                        console.log(`Descrição extraída: "${descricaoPart}", termo buscado: "${searchValue}"`); // Log para depuração
+                        console.log(`Resultado da comparação: ${descricaoPart.includes(searchValue)}`); // Log para depuração
+                        if (descricaoPart.includes(searchValue)) {
+                           matchingItems.push(item);
+                           if (!firstMatch) firstMatch = item; // Guarda o primeiro item correspondente
+                        }
+                     } else {
+                        console.log(`Formato inesperado da label: "${label}"`); // Log para depuração
+                     }
+                  });
+
+                  if (matchingItems.length > 0 && firstMatch) {
+                     // Destaca todas as linhas correspondentes
+                     matchingItems.forEach(item => {
+                        item.classList.add('tombo-highlighted');
+                     });
+
+                     // Rola até o primeiro item correspondente
+                     const containerRect = tombosContainer.getBoundingClientRect();
+                     const itemRect = firstMatch.getBoundingClientRect();
+                     const scrollPosition = itemRect.top - containerRect.top + tombosContainer.scrollTop - (containerRect.height / 2) + (itemRect.height / 2);
+                     tombosContainer.scrollTo({
+                        top: scrollPosition,
+                        behavior: 'smooth'
+                     });
+                  } else {
+                     // Se não encontrou nem tombo nem descrição, exibe um alerta
+                     alert(`Nenhum item encontrado para "${searchValue}".`);
+                  }
+               }
+            };
+
+            // Adiciona eventos ao botão de busca e ao pressionar Enter
+            document.getElementById('searchBtn').addEventListener('click', searchAndHighlight);
+            document.getElementById('searchInput').addEventListener('keypress', (e) => {
+               if (e.key === 'Enter') {
+                  searchAndHighlight();
+               }
+            });
+
+            // Função para limpar o campo de busca e remover destaques
+            const clearSearch = () => {
+               const searchInput = document.getElementById('searchInput');
+               searchInput.value = ''; // Limpa o campo de input
+               const tomboItems = document.querySelectorAll('#tombos-list .form-check');
+               tomboItems.forEach(item => {
+                  item.classList.remove('tombo-highlighted'); // Remove todos os destaques
+               });
+            };
+
+            // Adiciona evento ao botão de limpar
+            document.getElementById('clearSearch').addEventListener('click', clearSearch);
+         });
+      </script>
+   </body>
 </html>

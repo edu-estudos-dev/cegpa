@@ -152,6 +152,41 @@
       display: none;
       opacity: 0;
    }
+
+   /* Estilo para cabeçalhos ordenáveis */
+   .sortable {
+   cursor: pointer;
+   position: relative;
+   padding-right: 25px; /* Mais espaço para a seta */
+   }
+
+   .sortable::after {
+      content: '';
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent; /* Aumenta o tamanho da seta */
+      border-right: 8px solid transparent;
+      opacity: 0.5; /* Leve transparência quando não ordenado */
+      transition: opacity 0.3s ease; /* Transição suave */
+   }
+
+   .sortable:hover::after {
+      opacity: 0.8; /* Aumenta a visibilidade ao passar o mouse */
+   }
+
+   .sort-asc::after {
+      border-bottom: 8px solid #ffffff; /* Seta para cima, branca e maior */
+      opacity: 1; /* Totalmente visível quando ordenado */
+   }
+
+   .sort-desc::after {
+      border-top: 8px solid #ffffff; /* Seta para baixo, branca e maior */
+      opacity: 1; /* Totalmente visível quando ordenado */
+   }
 </style>
 
 <body>
@@ -183,9 +218,9 @@
                <thead class="thead-success">
                   <tr class="table-borderless">
                      <th class="text-center table-borderless px-0">ID</th>
-                     <th class="text-center table-borderless px-0">Entrada</th>
-                     <th class="text-center table-borderless px-0">Descrição</th>
-                     <th class="text-center table-borderless px-0">Tombo</th>
+                     <th class="text-center table-borderless px-0 sortable" data-col="1">Entrada</th>
+                     <th class=" ps-4 table-borderless px-0 sortable" data-col="2">Descrição</th>
+                     <th class="text-center table-borderless px-0 sortable" data-col="3">Tombo</th>
                      <th class="text-center table-borderless px-0">Categoria</th>
                      <th class="text-center table-borderless px-0">Estoque</th>
                      <th class="text-center table-borderless px-0">Conservação</th>
@@ -200,7 +235,7 @@
                         <tr>
                            <td class="py-1 align-middle text-center"><%= item.id %></td>
                            <td class="py-1 align-middle text-center"><%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %></td>
-                           <td class="py-1 align-middle text-center"><%= item.descricao %></td>
+                           <td class="py-1 align-middle"><%= item.descricao %></td>
                            <td class="py-1 align-middle text-center"><%= item.tombo %></td>
                            <td class="py-1 align-middle text-center"><%= item.categoria %></td>
                            <td class="py-1 align-middle text-center"><%= item.estoque %></td>
@@ -396,6 +431,68 @@
                }
             }
          }
+
+         // Estado para rastrear a direção da ordenação por coluna
+         const sortStates = {};
+
+         // Função para ordenar a tabela
+         function sortTable(columnIndex, isNumeric = false) {
+            const table = document.getElementById('estoqueTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.getElementsByTagName('tr')).filter(row => !row.classList.contains('hidden')); // Apenas linhas visíveis
+            const th = document.querySelector(`th[data-col="${columnIndex}"]`);
+
+            // Determina a direção da ordenação
+            const currentState = sortStates[columnIndex] || 'none';
+            const newState = currentState === 'asc' ? 'desc' : 'asc';
+            sortStates[columnIndex] = newState;
+
+            // Remove classes de ordenação de todos os cabeçalhos
+            document.querySelectorAll('.sortable').forEach(header => {
+               header.classList.remove('sort-asc', 'sort-desc');
+            });
+
+            // Adiciona a classe correspondente ao cabeçalho clicado
+            th.classList.add(newState === 'asc' ? 'sort-asc' : 'sort-desc');
+
+            // Função de comparação
+            rows.sort((a, b) => {
+               let aValue = a.cells[columnIndex].textContent.trim();
+               let bValue = b.cells[columnIndex].textContent.trim();
+
+               // Verifica se é a coluna de data (índice 1 - "Entrada")
+               if (columnIndex === 1) {
+                  // Converte a data do formato DD/MM/YYYY para um objeto Date
+                  const parseDate = (dateStr) => {
+                     const [day, month, year] = dateStr.split('/').map(Number);
+                     return new Date(year, month - 1, day); // Mês é 0-based no JavaScript
+                  };
+                  const aDate = parseDate(aValue);
+                  const bDate = parseDate(bValue);
+                  return newState === 'asc' ? aDate - bDate : bDate - aDate;
+               } else if (isNumeric) {
+                  aValue = parseFloat(aValue) || 0;
+                  bValue = parseFloat(bValue) || 0;
+                  return newState === 'asc' ? aValue - bValue : bValue - aValue;
+               } else {
+                  return newState === 'asc'
+                     ? aValue.localeCompare(bValue, 'pt-BR')
+                     : bValue.localeCompare(aValue, 'pt-BR');
+               }
+            });
+
+            // Reinsere as linhas ordenadas no tbody
+            rows.forEach(row => tbody.appendChild(row));
+         }
+    
+         // Adiciona eventos de clique aos cabeçalhos ordenáveis
+         document.querySelectorAll('.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+               const columnIndex = parseInt(th.getAttribute('data-col'));
+               const isNumeric = columnIndex === 3; // "Tombo" é numérico
+               sortTable(columnIndex, isNumeric);
+            });
+         });
       });
    </script>
 </body>
