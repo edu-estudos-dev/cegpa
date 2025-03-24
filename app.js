@@ -29,7 +29,6 @@ app.use(methodOverride("_method"));
 app.use((req, res, next) => {
    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
    console.log('Cabeçalhos da requisição:', req.headers);
-   console.log('Corpo da requisição (antes do middleware):', req.body);
    next();
 });
 

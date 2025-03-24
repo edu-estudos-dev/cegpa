@@ -811,7 +811,7 @@ class EstoqueController {
    };
 
    // Método para registrar a saída de itens e gerar o PDF
-   async registrarSaida(req, res) {
+   registrarSaida = async (req, res) => {
       console.log('Requisição recebida em registrarSaida:', req.body);
       const {
          tombos,
@@ -824,16 +824,14 @@ class EstoqueController {
          nome_do_recebedor,
          observacao,
       } = req.body;
-
-      // Log para verificar req.user antes de acessar
+   
       console.log('req.user no registrarSaida:', req.user);
-
-      // Obtendo informações do usuário logado
+   
       const usuarioLogado = req.user;
       const nomeResponsavel = usuarioLogado?.nome_completo;
       const mfResponsavel = usuarioLogado?.matricula;
       const postoGradResponsavel = usuarioLogado?.posto_grad;
-
+   
       try {
          // Validação dos campos obrigatórios
          if (
@@ -860,8 +858,7 @@ class EstoqueController {
                .status(400)
                .json({ error: 'Preencha todos os campos obrigatórios' });
          }
-
-         // Validação dos dados do usuário logado
+   
          if (!nomeResponsavel || !mfResponsavel || !postoGradResponsavel) {
             console.log('Dados do usuário logado incompletos:', {
                nomeResponsavel,
@@ -872,32 +869,52 @@ class EstoqueController {
                error: 'Usuário autenticado não possui informações completas',
             });
          }
-
+   
          const dataDeSaida = new Date();
          const doc = new jsPDF();
-
+   
          console.log('Iniciando geração do PDF...');
          doc.setDrawColor(0);
          doc.setLineWidth(0.5);
-
-         // Desenha a borda na primeira página (será redesenhada em outras páginas via didDrawPage)
+   
+         // Desenha a borda na primeira página
          doc.rect(
             5,
             5,
             doc.internal.pageSize.width - 10,
             doc.internal.pageSize.height - 10
          );
-
-         doc.setFontSize(11);
+   
+         // Carregar a imagem
+         const imagePath = path.join(__dirname, '../../public/images/cabeçalho pmce.png');
+         const imageData = fs.readFileSync(imagePath).toString('base64');
+         const imgProps = {
+            format: 'PNG',
+            width: 80, // Largura da imagem em mm
+            height: 20, // Altura da imagem em mm
+         };
+   
+         // Adicionar a imagem ao PDF
+         doc.addImage(
+            imageData,
+            imgProps.format,
+            67.5, // Posição X
+            8, // Posição Y
+            imgProps.width,
+            imgProps.height
+         );
+   
+         // Título do documento (ajustado para não sobrepor a imagem)
+         doc.setFontSize(10);
          doc.text(
             'TERMO DE RECEBIMENTO E RESPONSABILIDADE - CEGPA/COLOG',
             105,
-            20,
+            12 + imgProps.height,
             { align: 'center' }
          );
          doc.setFontSize(10);
-
-         const headerYStart = 30;
+   
+         const headerYStart = 20 + imgProps.height;
          const headerData = [
             `Nº Termo: ${doc_saida}`,
             `Data: ${dataDeSaida.toLocaleDateString('pt-BR')}`,
@@ -908,24 +925,24 @@ class EstoqueController {
             `Referência: ${referencia}`,
             `Observações: ${(observacao || 'Nenhuma').toUpperCase()}`,
          ];
-
+   
          headerData.forEach((line, index) => {
             doc.text(line, 14, headerYStart + index * 5);
          });
-
+   
          let ordem = 1;
          const items = [];
-
+   
          console.log('Processando tombos:', tombos);
          for (const tombo of tombos) {
             console.log(`Buscando item com tombo ${tombo}...`);
             const itemEstoque = await estoqueModel.getInfoByTombo(tombo);
-
+   
             if (!itemEstoque) {
                console.warn(`Tombo ${tombo} não encontrado`);
                continue;
             }
-
+   
             console.log(`Item encontrado para tombo ${tombo}:`, itemEstoque);
             items.push([
                ordem++,
@@ -935,7 +952,7 @@ class EstoqueController {
                   .replace('RETAINGLIAR', 'RETANGULAR'),
                itemEstoque.situacao.toUpperCase(),
             ]);
-
+   
             console.log(`Registrando saída para tombo ${tombo}...`);
             await estoqueModel.createSaida(
                itemEstoque.id,
@@ -952,22 +969,22 @@ class EstoqueController {
                observacao,
                itemEstoque.descricao
             );
-
+   
             console.log(`Marcando tombo ${tombo} como pago...`);
             await estoqueModel.markAsPaid(itemEstoque.id);
          }
-
+   
          if (items.length === 0) {
             console.log('Nenhum item válido encontrado para gerar o termo.');
             return res.status(400).json({
                error: 'Nenhum item válido encontrado para gerar o termo.',
             });
          }
-
+   
          // Renderiza a tabela
-         let finalY = 70; // Posição Y inicial para a tabela
+         let finalY = 60 + imgProps.height;
          doc.autoTable({
-            startY: 70,
+            startY: finalY,
             head: [['ORD.', 'TOMBO', 'DESCRIÇÃO', 'SITUAÇÃO']],
             body: items,
             styles: {
@@ -989,7 +1006,6 @@ class EstoqueController {
             margin: { left: 13, right: 7 },
             tableWidth: 'wrap',
             didDrawPage: (data) => {
-               // Desenha a borda em todas as páginas
                doc.rect(
                   5,
                   5,
@@ -998,46 +1014,40 @@ class EstoqueController {
                );
             },
          });
-
-         // Após a tabela ser renderizada, obtém a posição Y final
-         finalY = doc.lastAutoTable.finalY || 70;
-
-         // Alterna para a última página para desenhar o bloco de assinaturas
+   
+         finalY = doc.lastAutoTable.finalY || finalY;
+   
          const totalPages = doc.internal.getNumberOfPages();
          doc.setPage(totalPages);
-
-         // Garante que o bloco de assinaturas seja desenhado abaixo da tabela, próximo ao rodapé
+   
          const pageHeight = doc.internal.pageSize.height;
          const signatureY = Math.max(finalY + 20, pageHeight - 20);
          const lineLength = 50;
          const gapBetweenBlocks = 10;
-
+   
          const totalBlockWidth = lineLength * 3 + gapBetweenBlocks * 2;
          const startX = 5 + (200 - totalBlockWidth) / 2;
-
-         // Calcula as posições dos três blocos de assinatura
+   
          const leftPos = startX + lineLength / 2;
          const centerPos = leftPos + lineLength + gapBetweenBlocks;
          const rightPos = centerPos + lineLength + gapBetweenBlocks;
-
+   
          doc.setLineWidth(0.3);
-
-         // Desenha as linhas de assinatura
-         doc.line(startX, signatureY, startX + lineLength, signatureY); // Linha à esquerda
+   
+         doc.line(startX, signatureY, startX + lineLength, signatureY);
          doc.line(
             centerPos - lineLength / 2,
             signatureY,
             centerPos + lineLength / 2,
             signatureY
-         ); // Linha central
+         );
          doc.line(
             rightPos - lineLength / 2,
             signatureY,
             rightPos + lineLength / 2,
             signatureY
-         ); // Linha à direita
-
-         // Texto do recebedor
+         );
+   
          doc.setFontSize(6);
          doc.text(
             `${postoGrad.toUpperCase()} ${nome_do_recebedor.toUpperCase()}\nMF: ${mf_recebedor}`,
@@ -1049,8 +1059,7 @@ class EstoqueController {
          doc.text('(Recebedor)', leftPos, signatureY + 8.5, {
             align: 'center',
          });
-
-         // Texto do comandante
+   
          doc.setFontSize(6);
          doc.text(
             'TEN. CEL. ALLAN KARDEK\nMF: 135.907-1-0',
@@ -1062,8 +1071,7 @@ class EstoqueController {
          doc.text('Comandante CEGPA', centerPos, signatureY + 8.5, {
             align: 'center',
          });
-
-         // Texto do responsável pela entrega
+   
          doc.setFontSize(6);
          doc.text(
             `${postoGradResponsavel.toUpperCase()} ${nomeResponsavel.toUpperCase()}\nMF: ${mfResponsavel}`,
@@ -1075,20 +1083,20 @@ class EstoqueController {
          doc.text('(Responsável pela entrega)', rightPos, signatureY + 8.5, {
             align: 'center',
          });
-
+   
          console.log('Salvando PDF...');
          const fileName = `Termo_${doc_saida.replace(/\//g, '-')}.pdf`;
          const pdfPath = path.join(__dirname, '../../pdfs', fileName);
-
+   
          if (!fs.existsSync(path.dirname(pdfPath))) {
             fs.mkdirSync(path.dirname(pdfPath), { recursive: true });
          }
-
+   
          doc.save(pdfPath);
-
+   
          console.log('Atualizando sequência...');
          await sequenciaModel.incrementarSequencia(new Date().getFullYear());
-
+   
          console.log('Enviando resposta de sucesso...');
          res.status(200).json({
             success: true,
@@ -1104,7 +1112,7 @@ class EstoqueController {
          });
       }
    }
-   
+ 
    // Método para visualizar um item pago específico
    visualizarItemPago = async (req, res) => {
       const { id } = req.params;
