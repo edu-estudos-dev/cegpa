@@ -1,22 +1,12 @@
 import sequenciaModel from '../models/sequenciaModel.js';
 
 class SequenciaController {
+   // Gera o termo atual sem incrementar
    gerarTermoResponsabilidade = async (req, res) => {
       try {
          const anoAtual = new Date().getFullYear();
-
-         // 1. Garante que a sequência existe para o ano atual
-         await sequenciaModel.getSequencia(anoAtual);
-
-         // 2. Incrementa e obtém a nova sequência
-         const novaSequencia = await sequenciaModel.incrementarSequencia(
-            anoAtual
-         );
-
-         // 3. Formata o número do termo
-         const doc_saida = `${novaSequencia
-            .toString()
-            .padStart(5, '0')}/${anoAtual}`;
+         const sequenciaAtual = await sequenciaModel.getSequenciaAtual(anoAtual);
+         const doc_saida = `${sequenciaAtual.toString().padStart(5, '0')}/${anoAtual}`;
 
          res.status(200).json({
             success: true,
@@ -32,10 +22,11 @@ class SequenciaController {
       }
    };
 
+   // (Opcional) Consulta sequência por ano
    consultarSequencia = async (req, res) => {
       try {
          const { ano } = req.params;
-         const sequencia = await sequenciaModel.getSequencia(ano);
+         const sequencia = await sequenciaModel.getSequenciaAtual(ano);
 
          res.status(200).json({
             ano,

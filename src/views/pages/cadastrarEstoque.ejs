@@ -3,567 +3,502 @@
 
 <%- include('../partials/head', { title: 'Formulário de Entrada' }) %>
 
-   <style>
-      * {
-         margin: 0;
-         padding: 0;
-      }
+<style>
+   * {
+      margin: 0;
+      padding: 0;
+   }
 
-      body {
-         display: flex;
-         align-items: center;
-         padding-top: 2.5rem;
-      }
-   </style>
+   body {
+      display: flex;
+      align-items: center;
+      padding-top: 2.5rem;
+   }
+</style>
 
-   <body>
+<body>
    <%- include('../partials/header') %>
-      <div class="caixa w-90 p-4 mx-auto">
-         <div class="border caixa-externa p-4 shadow-sm rounded">
-            <form id="formulario-entrada" action="/entrada" method="post">
-               <input id="id" type="hidden">
-            
-               <div class="row align-items-center mb-3 px-3">
-                  <h2 style="border-bottom: 4px solid orange;" class=" text-white py-2 mt-0 fw-bold bg-success">Formulário de Entrada</h2>
-               </div>
-            
-               <!-- Linha 1: Campos principais -->
-               <div id="row1" class="row">
-                  <div class="col-md-2">
-                     <div id="data_de_entrada-div" class="mb-3 ">
-                        <label class="form-label fw-bold">Entrada</label>
-                        <input id="data_de_entrada" type="date" class="form-control" name="data_de_entrada" onchange="atualizarTomboInicial()">
-                     </div>
-                  </div>
-            
-                  <div class="col-md-1">
-                     <div id="qtd-div" class="mb-3 ">
-                        <label class="form-label fw-bold">Qtde.</label>
-                        <input id="qtd" type="number" class="form-control" name="quantidade_visible" onchange="atualizarTomboInicial()" min="1" value="1">
-                        <!-- Campo oculto para garantir que o valor seja enviado -->
-                        <input id="quantidade_hidden" type="hidden" name="quantidade" value="1">
-                     </div>
-                  </div>
-            
-                  <div class="col-md-2">
-                     <div id="tipo_tombo-div" class="mb-3 ">
-                        <label class="form-label fw-bold">Tipo de Tombo</label>
-                        <select id="tipo_tombo" class="form-select" name="tipo_tombo" onchange="toggleTomboInput()">
-                           <option value="AUTO" selected>Automático</option>
-                           <option value="MANUAL">Manual</option>
-                           <option value="LOTE_MANUAL">Lote Manual</option>
-                        </select>
-                     </div>
-                  </div>
-            
-                  <div class="col-md-2">
-                     <div id="tombo_inicial-div" class="mb-3 ">
-                        <label class="form-label fw-bold">Tombo Inicial</label>
-                        <input id="tombo_inicial" type="text" class="form-control" name="tombo_inicial" readonly>
-                     </div>
-                     <div id="tombo_manual-div" class="mb-3 " style="display: none;">
-                        <label class="form-label fw-bold">Tombo Manual</label>
-                        <input id="tombo_manual" type="number" class="form-control" name="tombo_manual" disabled>
-                     </div>
-                     <!-- Campos ocultos para Lote Manual -->
-                     <input id="tombo_lote_inicial" type="hidden" name="tombo_lote_inicial">
-                     <input id="tombo_lote_final" type="hidden" name="tombo_lote_final">
-                  </div>
-            
-                  <div class="col-md-2">
-                     <div id="categoria-div" class="mb-3 ">
-                        <label class="form-label fw-bold">Categoria</label>
-                        <select id="categoria" class="form-select" name="categoria">
-                           <option selected>Selecione...</option>
-                           <option value="mesa">MESA</option>
-                           <option value="ar-condicionado">AR-CONDICIONADO</option>
-                           <option value="automovel">AUTOMÓVEL</option>
-                           <option value="bicicleta">BICICLETA</option>
-                           <option value="tv">TV</option>
-                           <option value="cadeira">CADEIRA</option>
-                           <option value="gaveteiro">GAVETEIRO</option>
-                           <option value="armario">ARMÁRIO</option>
-                           <option value="estante">ESTANTE</option>
-                           <option value="desktop">DESKTOP</option>
-                           <option value="arquivo">ARQUIVO</option>
-                           <option value="beliche">BELICHE</option>
-                           <option value="lousa">LOUSA</option>
-                           <option value="monitor">MONITOR</option>
-                        </select>
-                     </div>
-                  </div>
-            
-                  <div class="col-md-3">
-                     <div id="doc_origem-div" class="mb-3 ">
-                        <label class="form-label fw-bold">Doc. de Origem</label>
-                        <input id="doc_origem" type="text" class="form-control" placeholder="Nota Fiscal, etc..." name="doc_origem">
-                     </div>
+   <div class="caixa w-90 p-4 mx-auto">
+      <div class="border caixa-externa p-4 shadow-sm rounded">
+         <form id="formulario-entrada" action="/entrada" method="post">
+            <input id="id" type="hidden">
+
+            <div class="row align-items-center mb-3 px-3">
+               <h2 style="border-bottom: 4px solid orange;" class="text-white py-2 mt-0 fw-bold bg-success">Formulário de Entrada</h2>
+            </div>
+
+            <!-- Linha 1: Campos principais -->
+            <div id="row1" class="row">
+               <div class="col-md-2">
+                  <div id="data_de_entrada-div" class="mb-3">
+                     <label class="form-label fw-bold">Entrada</label>
+                     <input id="data_de_entrada" type="date" class="form-control" name="data_de_entrada" onchange="atualizarTomboInicial()">
                   </div>
                </div>
-            
-               <!-- Linha 2: Valor, Descrição e Conservação -->
-               <div id="row2" class="row">
-                  <div class="col-md-2">
-                     <div class="mb-3 ">
-                        <label class="form-label fw-bold">Valor Unitário</label>
-                        <div class="input-group">
-                           <span class="input-group-text">R$</span>
-                           <input id="valor" type="number" class="form-control" name="valor" step="0.01">
-                        </div>
-                     </div>
-                  </div>
-            
-                  <div class="col-md-7">
-                     <div id="observacao-div" class="mb-3">
-                        <label class="form-label fw-bold">Descrição</label>
-                        <input placeholder="Descreva o item em detalhes." id="descricao" name="descricao" type="text" class="form-control">
-                     </div>
-                  </div>
-            
-                  <div class="col-md-3">
-                     <div id="situacao-div" class="mb-3 ">
-                        <label class="form-label fw-bold">Conservação</label>
-                        <select id="situacao" class="form-select" name="situacao">
-                           <option selected>Escolha uma opção...</option>
-                           <option value="novo">Novo</option>
-                           <option value="otimo">Ótimo</option>
-                           <option value="bom">Bom</option>
-                           <option value="regular">Regular</option>
-                           <option value="ruim">Ruim</option>
-                           <option value="inservivel">Inservível</option>
-                        </select>
-                     </div>
+
+               <div class="col-md-1">
+                  <div id="qtd-div" class="mb-3">
+                     <label class="form-label fw-bold">Qtde.</label>
+                     <input id="qtd" type="number" class="form-control" name="quantidade_visible" onchange="atualizarTomboInicial()" min="1" value="1">
+                     <input id="quantidade_hidden" type="hidden" name="quantidade" value="1">
                   </div>
                </div>
-            
-               <!-- Linha 3: Conta Contábil e Estoque -->
-               <div id="row3" class="row">
-                  <div class="col-md-9 ">
-                     <div id="conta_contabil-div" class="mb-3">
-                        <label class="form-label fw-bold">Conta Contábil</label>
-                        <select id="conta_contabil" class="form-select" name="conta_contabil">
-                           <option selected>Escolha uma opção...</option>
-                           <option value="medicao">APARELHOS DE MEDIÇÃO E ORIENTAÇÃO</option>
-                           <option value="aeronaves">AERONAVES</option>
-                           <option value="almoxarifado">ALMOXARIFADO DE MATERIAIS A SEREM APLICADOS EM BENS EM ANDAMENTO</option>
-                           <option value="comunicacao">APARELHOS E EQUIPAMENTOS DE COMUNICAÇÃO</option>
-                           <option value="esportes">APARELHOS E EQUIPAMENTOS PARA ESPORTES E DIVERSÕES</option>
-                           <option value="domesticos">APARELHOS E UTENSÍLIOS DOMÉSTICOS</option>
-                           <option value="medicos">APARELHOS, EQUIPAMENTOS E UTENSÍLIOS MÉDICOS, ODONTOLÓGICOS, LABORATORIAIS E HOSPITALARES</option>
-                           <option value="armamentos">ARMAMENTOS</option>
-                           <option value="poder_outro">BENS EM PODER DE OUTRA UNIDADE OU TERCEIROS</option>
-                           <option value="alienar">BENS MÓVEIS A ALIENAR</option>
-                           <option value="classificar">BENS MÓVEIS A CLASSIFICAR</option>
-                           <option value="reparar">BENS MÓVEIS A REPARAR</option>
-                           <option value="movel_elaboracao">BENS MÓVEIS EM ELABORAÇÃO</option>
-                           <option value="inserviveis">BENS MÓVEIS INSERVÍVEIS</option>
-                           <option value="combate">CARROS DE COMBATE</option>
-                           <option value="colecoes">COLEÇÕES E MATERIAIS BIBLIOGRÁFICOS</option>
-                           <option value="discotecas">DISCOTECAS E FILMOTECAS</option>
-                           <option value="embarcacoes">EMBARCAÇÕES</option>
-                           <option value="protecao">EQUIPAMENTO DE PROTEÇÃO, SEGURANÇA E SOCORRO</option>
-                           <option value="manobras">EQUIPAMENTOS DE MANOBRAS E PATRULHAMENTO</option>
-                           <option value="mergulho">EQUIPAMENTOS DE MERGULHO E SALVAMENTO</option>
-                           <option value="montaria">EQUIPAMENTOS DE MONTARIA</option>
-                           <option value="dados">EQUIPAMENTOS DE PROCESSAMENTO DE DADOS</option>
-                           <option value="vigilancia">EQUIPAMENTOS DE PROTEÇÃO E VIGILÂNCIA AMBIENTAL</option>
-                           <option value="tecnologia">EQUIPAMENTOS DE TECNOLOGIA DA INFORMAÇÃO</option>
-                           <option value="sigiloso">EQUIPAMENTOS E MATERIAL SIGILOSO E RESERVADO</option>
-                           <option value="hidraulicos">EQUIPAMENTOS HIDRÁULICOS E ELÉTRICOS</option>
-                           <option value="audio_video">EQUIPAMENTOS PARA ÁUDIO, VÍDEO E FOTO</option>
-                           <option value="aeronauticos">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS AERONÁUTICOS</option>
-                           <option value="protecao_voo">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS DE PROTEÇÃO AO VOO</option>
-                           <option value="maritimos">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS MARÍTIMOS</option>
-                           <option value="automoveis">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS PARA AUTOMÓVEIS</option>
-                           <option value="estoque_interno">ESTOQUE INTERNO</option>
-                           <option value="importacoes">IMPORTAÇÕES EM ANDAMENTO</option>
-                           <option value="instrumentos">INSTRUMENTOS MUSICAIS E ARTÍSTICOS</option>
-                           <option value="energeticos">MÁQUINAS E EQUIPAMENTOS ENERGÉTICOS</option>
-                           <option value="graficos">MÁQUINAS E EQUIPAMENTOS GRÁFICOS</option>
-                           <option value="industriais">MÁQUINAS E EQUIPAMENTOS INDUSTRIAIS</option>
-                           <option value="escritorio">MÁQUINAS E UTENSÍLIOS DE ESCRITÓRIO</option>
-                           <option value="agropecuarios">MÁQUINAS, EQUIPAMENTOS E UTENSÍLIOS AGROPECUÁRIOS</option>
-                           <option value="rodoviarios">MÁQUINAS, EQUIPAMENTOS E UTENSÍLIOS RODOVIÁRIOS</option>
-                           <option value="oficina">MÁQUINAS, FERRAMENTAS E UTENSÍLIOS DE OFICINA</option>
-                           <option value="mobiliario">MOBILIÁRIO EM GERAL</option>
-                           <option value="obras_arte">OBRAS DE ARTE E PEÇAS PARA EXPOSIÇÃO</option>
-                           <option value="outras_maquinas">OUTRAS MÁQUINAS, APARELHOS, EQUIPAMENTOS E FERRAMENTAS</option>
-                           <option value="outros_bens">OUTROS BENS MÓVEIS</option>
-                           <option value="outros_culturais">OUTROS MATERIAIS CULTURAIS, EDUCACIONAIS E DE COMUNICAÇÃO</option>
-                           <option value="pecas_reposicao">PEÇAS E CONJUNTOS DE REPOSIÇÃO</option>
-                           <option value="semoventes">SEMOVENTES</option>
-                           <option value="utensilios">UTENSÍLIOS EM GERAL</option>
-                           <option value="mecanica">VEÍCULOS DE TRAÇÃO MECÂNICA</option>
-                           <option value="veiculos_geral">VEÍCULOS EM GERAL</option>
-                           <option value="ferroviarios">VEÍCULOS FERROVIÁRIOS</option>
-                        </select>
-                     </div>
-                  </div>
-            
-                  <div class="col-md-3">
-                     <div id="estoque-div" class="mb-3 ">
-                        <label class="form-label fw-bold">Estoque</label>
-                        <select id="estoque" class="form-select" name="estoque">
-                           <option selected>Escolha uma opção...</option>
-                           <option value="galpao">ESTOQUE COLOG - GALPÃO</option>
-                           <option value="sala">ESTOQUE COLOG - SALA</option>
-                           <option value="cabemce">ESTOQUE COLOG - CABEMCE</option>
-                        </select>
-                     </div>
+
+               <div class="col-md-2">
+                  <div id="tipo_tombo-div" class="mb-3">
+                     <label class="form-label fw-bold">Tipo de Tombo</label>
+                     <select id="tipo_tombo" class="form-select" name="tipo_tombo" onchange="toggleTomboInput()">
+                        <option value="AUTO" selected>Automático</option>
+                        <option value="MANUAL">Manual</option>
+                        <option value="LOTE_MANUAL">Lote Manual</option>
+                     </select>
                   </div>
                </div>
-            
-               <!-- Linha 4: Observação -->
-               <div id="row4" class="row">
-                  <div class="col-md-12">
-                     <div id="observacao-div" class="mb-3">
-                        <label class="form-label fw-bold">Observação</label>
-                        <textarea id="observacao" type="text" class="form-control" name="observacao"></textarea>
-                     </div>
+
+               <div class="col-md-2">
+                  <div id="tombo_inicial-div" class="mb-3">
+                     <label class="form-label fw-bold">Tombo Inicial</label>
+                     <input id="tombo_inicial" type="text" class="form-control" name="tombo_inicial" readonly>
+                  </div>
+                  <div id="tombo_manual-div" class="mb-3" style="display: none;">
+                     <label class="form-label fw-bold">Tombo Manual</label>
+                     <input id="tombo_manual" type="number" class="form-control" name="tombo_manual" disabled>
+                  </div>
+                  <input id="tombo_lote_manual" type="hidden" name="tombo_lote_manual">
+               </div>
+
+               <div class="col-md-2">
+                  <div id="categoria-div" class="mb-3">
+                     <label class="form-label fw-bold">Categoria</label>
+                     <select id="categoria" class="form-select" name="categoria">
+                        <option selected>Selecione...</option>
+                        <option value="mesa">MESA</option>
+                        <option value="ar-condicionado">AR-CONDICIONADO</option>
+                        <option value="automovel">AUTOMÓVEL</option>
+                        <option value="bicicleta">BICICLETA</option>
+                        <option value="tv">TV</option>
+                        <option value="cadeira">CADEIRA</option>
+                        <option value="gaveteiro">GAVETEIRO</option>
+                        <option value="armario">ARMÁRIO</option>
+                        <option value="estante">ESTANTE</option>
+                        <option value="desktop">DESKTOP</option>
+                        <option value="arquivo">ARQUIVO</option>
+                        <option value="beliche">BELICHE</option>
+                        <option value="lousa">LOUSA</option>
+                        <option value="monitor">MONITOR</option>
+                     </select>
                   </div>
                </div>
-            
-               <div class="d-flex justify-content-around m-3">
-                  <button id="btnRegistrar" type="submit" class="btn btn-success w-10">Registrar Entrada</button>
-               </div>
-            </form>
-            
-            <!-- Modal para Lote Manual -->
-            <div class="modal fade" id="loteManualModal" tabindex="-1" aria-labelledby="loteManualModalLabel" aria-hidden="true">
-               <div class="modal-dialog">
-                  <div class="modal-content">
-                     <div class="modal-header">
-                        <h5 class="modal-title" id="loteManualModalLabel">Definir Faixa de Tombos</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                     </div>
-                     <div class="modal-body">
-                        <div class="row">
-                           <div class="col-md-6">
-                              <div class="mb-3">
-                                 <label for="modal_tombo_lote_inicial" class="form-label fw-bold">T. Inicial</label>
-                                 <input type="number" class="form-control" id="modal_tombo_lote_inicial" min="1">
-                              </div>
-                           </div>
-                           <div class="col-md-6">
-                              <div class="mb-3">
-                                 <label for="modal_tombo_lote_final" class="form-label fw-bold">T. Final</label>
-                                 <input type="number" class="form-control" id="modal_tombo_lote_final" min="1">
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-primary" id="confirmarLoteBtn">Confirmar</button>
-                     </div>
+
+               <div class="col-md-3">
+                  <div id="doc_origem-div" class="mb-3">
+                     <label class="form-label fw-bold">Doc. de Origem</label>
+                     <input id="doc_origem" type="text" class="form-control" placeholder="Nota Fiscal, etc..." name="doc_origem">
                   </div>
                </div>
             </div>
-       
-         </div>
-      </div>
 
-      <!-- Modal de Alerta -->
-      <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-         <div class="modal-dialog">
-            <div class="modal-content">
-               <div class="modal-header">
-                  <h5 class="modal-title" id="errorModalLabel">Erro de Validação</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <!-- Linha 2: Valor, Descrição e Conservação -->
+            <div id="row2" class="row">
+               <div class="col-md-2">
+                  <div class="mb-3">
+                     <label class="form-label fw-bold">Valor Unitário</label>
+                     <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input id="valor" type="number" class="form-control" name="valor" step="0.01">
+                     </div>
+                  </div>
                </div>
-               <div class="modal-body">
-                  <p id="errorMessage"></p>
+
+               <div class="col-md-7">
+                  <div id="observacao-div" class="mb-3">
+                     <label class="form-label fw-bold">Descrição</label>
+                     <input placeholder="Descreva o item em detalhes." id="descricao" name="descricao" type="text" class="form-control">
+                  </div>
                </div>
-               <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+
+               <div class="col-md-3">
+                  <div id="situacao-div" class="mb-3">
+                     <label class="form-label fw-bold">Conservação</label>
+                     <select id="situacao" class="form-select" name="situacao">
+                        <option selected>Escolha uma opção...</option>
+                        <option value="novo">Novo</option>
+                        <option value="otimo">Ótimo</option>
+                        <option value="bom">Bom</option>
+                        <option value="regular">Regular</option>
+                        <option value="ruim">Ruim</option>
+                        <option value="inservivel">Inservível</option>
+                     </select>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Linha 3: Conta Contábil e Estoque -->
+            <div id="row3" class="row">
+               <div class="col-md-9">
+                  <div id="conta_contabil-div" class="mb-3">
+                     <label class="form-label fw-bold">Conta Contábil</label>
+                     <select id="conta_contabil" class="form-select" name="conta_contabil">
+                        <option selected>Escolha uma opção...</option>
+                        <option value="medicao">APARELHOS DE MEDIÇÃO E ORIENTAÇÃO</option>
+                        <option value="aeronaves">AERONAVES</option>
+                        <option value="almoxarifado">ALMOXARIFADO DE MATERIAIS A SEREM APLICADOS EM BENS EM ANDAMENTO</option>
+                        <option value="comunicacao">APARELHOS E EQUIPAMENTOS DE COMUNICAÇÃO</option>
+                        <option value="esportes">APARELHOS E EQUIPAMENTOS PARA ESPORTES E DIVERSÕES</option>
+                        <option value="domesticos">APARELHOS E UTENSÍLIOS DOMÉSTICOS</option>
+                        <option value="medicos">APARELHOS, EQUIPAMENTOS E UTENSÍLIOS MÉDICOS, ODONTOLÓGICOS, LABORATORIAIS E HOSPITALARES</option>
+                        <option value="armamentos">ARMAMENTOS</option>
+                        <option value="poder_outro">BENS EM PODER DE OUTRA UNIDADE OU TERCEIROS</option>
+                        <option value="alienar">BENS MÓVEIS A ALIENAR</option>
+                        <option value="classificar">BENS MÓVEIS A CLASSIFICAR</option>
+                        <option value="reparar">BENS MÓVEIS A REPARAR</option>
+                        <option value="movel_elaboracao">BENS MÓVEIS EM ELABORAÇÃO</option>
+                        <option value="inserviveis">BENS MÓVEIS INSERVÍVEIS</option>
+                        <option value="combate">CARROS DE COMBATE</option>
+                        <option value="colecoes">COLEÇÕES E MATERIAIS BIBLIOGRÁFICOS</option>
+                        <option value="discotecas">DISCOTECAS E FILMOTECAS</option>
+                        <option value="embarcacoes">EMBARCAÇÕES</option>
+                        <option value="protecao">EQUIPAMENTO DE PROTEÇÃO, SEGURANÇA E SOCORRO</option>
+                        <option value="manobras">EQUIPAMENTOS DE MANOBRAS E PATRULHAMENTO</option>
+                        <option value="mergulho">EQUIPAMENTOS DE MERGULHO E SALVAMENTO</option>
+                        <option value="montaria">EQUIPAMENTOS DE MONTARIA</option>
+                        <option value="dados">EQUIPAMENTOS DE PROCESSAMENTO DE DADOS</option>
+                        <option value="vigilancia">EQUIPAMENTOS DE PROTEÇÃO E VIGILÂNCIA AMBIENTAL</option>
+                        <option value="tecnologia">EQUIPAMENTOS DE TECNOLOGIA DA INFORMAÇÃO</option>
+                        <option value="sigiloso">EQUIPAMENTOS E MATERIAL SIGILOSO E RESERVADO</option>
+                        <option value="hidraulicos">EQUIPAMENTOS HIDRÁULICOS E ELÉTRICOS</option>
+                        <option value="audio_video">EQUIPAMENTOS PARA ÁUDIO, VÍDEO E FOTO</option>
+                        <option value="aeronauticos">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS AERONÁUTICOS</option>
+                        <option value="protecao_voo">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS DE PROTEÇÃO AO VOO</option>
+                        <option value="maritimos">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS MARÍTIMOS</option>
+                        <option value="automoveis">EQUIPAMENTOS, PEÇAS E ACESSÓRIOS PARA AUTOMÓVEIS</option>
+                        <option value="estoque_interno">ESTOQUE INTERNO</option>
+                        <option value="importacoes">IMPORTAÇÕES EM ANDAMENTO</option>
+                        <option value="instrumentos">INSTRUMENTOS MUSICAIS E ARTÍSTICOS</option>
+                        <option value="energeticos">MÁQUINAS E EQUIPAMENTOS ENERGÉTICOS</option>
+                        <option value="graficos">MÁQUINAS E EQUIPAMENTOS GRÁFICOS</option>
+                        <option value="industriais">MÁQUINAS E EQUIPAMENTOS INDUSTRIAIS</option>
+                        <option value="escritorio">MÁQUINAS E UTENSÍLIOS DE ESCRITÓRIO</option>
+                        <option value="agropecuarios">MÁQUINAS, EQUIPAMENTOS E UTENSÍLIOS AGROPECUÁRIOS</option>
+                        <option value="rodoviarios">MÁQUINAS, EQUIPAMENTOS E UTENSÍLIOS RODOVIÁRIOS</option>
+                        <option value="oficina">MÁQUINAS, FERRAMENTAS E UTENSÍLIOS DE OFICINA</option>
+                        <option value="mobiliario">MOBILIÁRIO EM GERAL</option>
+                        <option value="obras_arte">OBRAS DE ARTE E PEÇAS PARA EXPOSIÇÃO</option>
+                        <option value="outras_maquinas">OUTRAS MÁQUINAS, APARELHOS, EQUIPAMENTOS E FERRAMENTAS</option>
+                        <option value="outros_bens">OUTROS BENS MÓVEIS</option>
+                        <option value="outros_culturais">OUTROS MATERIAIS CULTURAIS, EDUCACIONAIS E DE COMUNICAÇÃO</option>
+                        <option value="pecas_reposicao">PEÇAS E CONJUNTOS DE REPOSIÇÃO</option>
+                        <option value="semoventes">SEMOVENTES</option>
+                        <option value="utensilios">UTENSÍLIOS EM GERAL</option>
+                        <option value="mecanica">VEÍCULOS DE TRAÇÃO MECÂNICA</option>
+                        <option value="veiculos_geral">VEÍCULOS EM GERAL</option>
+                        <option value="ferroviarios">VEÍCULOS FERROVIÁRIOS</option>
+                     </select>
+                  </div>
+               </div>
+
+               <div class="col-md-3">
+                  <div id="estoque-div" class="mb-3">
+                     <label class="form-label fw-bold">Estoque</label>
+                     <select id="estoque" class="form-select" name="estoque">
+                        <option selected>Escolha uma opção...</option>
+                        <option value="galpao">ESTOQUE COLOG - GALPÃO</option>
+                        <option value="sala">ESTOQUE COLOG - SALA</option>
+                        <option value="cabemce">ESTOQUE COLOG - CABEMCE</option>
+                     </select>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Linha 4: Observação -->
+            <div id="row4" class="row">
+               <div class="col-md-12">
+                  <div id="observacao-div" class="mb-3">
+                     <label class="form-label fw-bold">Observação</label>
+                     <textarea id="observacao" type="text" class="form-control" name="observacao"></textarea>
+                  </div>
+               </div>
+            </div>
+
+            <div class="d-flex justify-content-around m-3">
+               <button id="btnRegistrar" type="submit" class="btn btn-success w-10">Registrar Entrada</button>
+            </div>
+         </form>
+
+         <!-- Modal para Lote Manual -->
+         <div class="modal fade" id="loteManualModal" tabindex="-1" aria-labelledby="loteManualModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h5 class="modal-title" id="loteManualModalLabel">Definir Tombos do Lote Manual</h5>
+                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                     <div class="mb-3">
+                        <label for="qtd_itens_lote" class="form-label fw-bold">Quantos itens serão inseridos?</label>
+                        <input type="number" class="form-control" id="qtd_itens_lote" min="1" value="1">
+                     </div>
+                     <div id="tombo_inputs_container" class="mt-3">
+                        <!-- Inputs de tombos serão gerados dinamicamente aqui -->
+                     </div>
+                  </div>
+                  <div class="modal-footer">
+                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                     <button type="button" class="btn btn-primary" id="confirmarLoteBtn">Confirmar</button>
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         <!-- Modal de Alerta -->
+         <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h5 class="modal-title" id="errorModalLabel">Erro de Validação</h5>
+                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                     <p id="errorMessage"></p>
+                  </div>
+                  <div class="modal-footer">
+                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                  </div>
                </div>
             </div>
          </div>
       </div>
+   </div>
 
-      <!-- Scripts necessários para o modal -->
-      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-         integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
-         </script>
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-         </script>
+   <!-- Scripts necessários para o modal -->
+   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+      integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
-      <!-- Script ajustado -->
-      <script>
-         // Função para atualizar o tombo inicial no modo "Automático"
-         async function atualizarTomboInicial() {
-            const tipoTombo = document.getElementById('tipo_tombo').value;
-            if (tipoTombo === 'AUTO') {
-               try {
-                  const response = await fetch('/ultimo-tombo');
-                  const data = await response.json();
-                  const ultimoTombo = data.ultimoTombo || 70149; // Fallback para 70149 se não houver tombo
-                  const qtd = parseInt(document.getElementById('qtd').value) || 1;
-                  document.getElementById('tombo_inicial').value = ultimoTombo + 1;
-                  document.getElementById('quantidade_hidden').value = qtd;
-               } catch (error) {
-                  console.error('Erro ao buscar último tombo:', error);
-                  alert('Erro ao buscar o último tombo. Verifique a conexão com o servidor.');
-               }
+   <!-- Script ajustado -->
+   <script>
+      // Função para atualizar o tombo inicial no modo "Automático"
+      async function atualizarTomboInicial() {
+         const tipoTombo = document.getElementById('tipo_tombo').value;
+         if (tipoTombo === 'AUTO') {
+            try {
+               const response = await fetch('/ultimo-tombo');
+               const data = await response.json();
+               const ultimoTombo = data.ultimoTombo || 70149; // Fallback para 70149 se não houver tombo
+               const qtd = parseInt(document.getElementById('qtd').value) || 1;
+               document.getElementById('tombo_inicial').value = ultimoTombo + 1;
+               document.getElementById('quantidade_hidden').value = qtd;
+            } catch (error) {
+               console.error('Erro ao buscar último tombo:', error);
+               alert('Erro ao buscar o último tombo. Verifique a conexão com o servidor.');
             }
          }
-      
-         // Função para alternar os campos de tombo com base no tipo selecionado
-         function toggleTomboInput() {
-            const tipoTombo = document.getElementById('tipo_tombo').value;
-            const tomboInicialDiv = document.getElementById('tombo_inicial-div');
-            const tomboInicialInput = document.getElementById('tombo_inicial');
-            const tomboManualDiv = document.getElementById('tombo_manual-div');
-            const tomboManualInput = document.getElementById('tombo_manual');
-            const tomboLoteInicialInput = document.getElementById('tombo_lote_inicial');
-            const tomboLoteFinalInput = document.getElementById('tombo_lote_final');
-            const qtdInput = document.getElementById('qtd');
-            const quantidadeHidden = document.getElementById('quantidade_hidden');
-      
-            // Resetar estados
-            tomboInicialDiv.style.display = 'none';
+      }
+
+      // Função para alternar os campos de tombo com base no tipo selecionado
+      function toggleTomboInput() {
+         const tipoTombo = document.getElementById('tipo_tombo').value;
+         const tomboInicialDiv = document.getElementById('tombo_inicial-div');
+         const tomboInicialInput = document.getElementById('tombo_inicial');
+         const tomboManualDiv = document.getElementById('tombo_manual-div');
+         const tomboManualInput = document.getElementById('tombo_manual');
+         const tomboLoteManualInput = document.getElementById('tombo_lote_manual');
+         const qtdInput = document.getElementById('qtd');
+         const quantidadeHidden = document.getElementById('quantidade_hidden');
+
+         // Resetar estados
+         tomboInicialDiv.style.display = 'none';
+         tomboInicialInput.disabled = true;
+         tomboInicialInput.value = '';
+         tomboManualDiv.style.display = 'none';
+         tomboManualInput.disabled = true;
+         tomboManualInput.value = '';
+         tomboLoteManualInput.value = '';
+
+         // Controlar o campo Qtde. com base no modo
+         if (tipoTombo === 'MANUAL') {
+            qtdInput.value = 1;
+            quantidadeHidden.value = 1;
+            qtdInput.disabled = true;
+            tomboManualDiv.style.display = 'block';
+            tomboManualInput.disabled = false;
+         } else if (tipoTombo === 'AUTO') {
+            qtdInput.disabled = false;
+            tomboInicialDiv.style.display = 'block';
+            tomboInicialInput.disabled = true;
+            atualizarTomboInicial();
+         } else if (tipoTombo === 'LOTE_MANUAL') {
+            qtdInput.disabled = false;
+            tomboInicialDiv.style.display = 'block';
             tomboInicialInput.disabled = true;
             tomboInicialInput.value = '';
-            tomboManualDiv.style.display = 'none';
-            tomboManualInput.disabled = true;
-            tomboLoteInicialInput.value = '';
-            tomboLoteFinalInput.value = '';
-      
-            // Controlar o campo Qtde. com base no modo
-            if (tipoTombo === 'MANUAL') {
-               // No modo Manual, fixar a quantidade em 1 e desabilitar o campo
-               qtdInput.value = 1;
-               quantidadeHidden.value = 1;
-               qtdInput.disabled = true;
-               tomboManualDiv.style.display = 'block';
-               tomboManualInput.disabled = false;
-            } else if (tipoTombo === 'AUTO') {
-               // No modo Automático, permitir edição da quantidade
-               qtdInput.disabled = false;
-               tomboInicialDiv.style.display = 'block';
-               tomboInicialInput.disabled = true;
-               atualizarTomboInicial();
-            } else if (tipoTombo === 'LOTE_MANUAL') {
-               // No modo Lote Manual, permitir edição da quantidade (será calculada pelo modal)
-               qtdInput.disabled = false;
-               tomboInicialDiv.style.display = 'block';
-               tomboInicialInput.disabled = true;
-               tomboInicialInput.value = ''; // Inicialmente vazio até o modal ser preenchido
-               // Abrir o modal para Lote Manual
-               const loteModal = new bootstrap.Modal(document.getElementById('loteManualModal'));
-               loteModal.show();
+            const loteModal = new bootstrap.Modal(document.getElementById('loteManualModal'));
+            loteModal.show();
+            gerarInputsTombo(1); // Inicializa com 1 input
+         }
+      }
+
+      // Função para gerar inputs dinâmicos de tombos
+      function gerarInputsTombo(qtd) {
+         const container = document.getElementById('tombo_inputs_container');
+         container.innerHTML = '';
+         for (let i = 0; i < qtd; i++) {
+            const div = document.createElement('div');
+            div.className = 'mb-3';
+            div.innerHTML = `
+               <label class="form-label fw-bold">Tombo ${i + 1}</label>
+               <input type="number" class="form-control tombo_lote_input" min="1" data-index="${i}">
+            `;
+            container.appendChild(div);
+         }
+      }
+
+      // Evento para atualizar os inputs quando a quantidade mudar
+      document.getElementById('qtd_itens_lote').addEventListener('input', function () {
+         const qtd = parseInt(this.value) || 1;
+         gerarInputsTombo(qtd);
+      });
+
+      // Evento para o botão "Confirmar" do modal
+      document.getElementById('confirmarLoteBtn').addEventListener('click', function () {
+         const inputs = document.querySelectorAll('.tombo_lote_input');
+         const tombos = Array.from(inputs).map(input => parseInt(input.value)).filter(val => !isNaN(val));
+
+         // Validação dos campos
+         if (tombos.length === 0 || tombos.length !== inputs.length) {
+            alert('Por favor, preencha todos os campos de tombo.');
+            return;
+         }
+
+         // Verificar duplicatas nos tombos
+         const uniqueTombos = new Set(tombos);
+         if (uniqueTombos.size !== tombos.length) {
+            alert('Os tombos inseridos não podem ser duplicados.');
+            return;
+         }
+
+         // Atualizar o formulário principal
+         const qtd = tombos.length;
+         document.getElementById('qtd').value = qtd;
+         document.getElementById('quantidade_hidden').value = qtd;
+         document.getElementById('tombo_inicial').value = tombos[0]; // Mostra o primeiro tombo
+         document.getElementById('tombo_lote_manual').value = JSON.stringify(tombos);
+
+         // Fechar o modal
+         const loteModal = bootstrap.Modal.getInstance(document.getElementById('loteManualModal'));
+         loteModal.hide();
+      });
+
+      // Limpar os campos do modal ao fechá-lo sem confirmar
+      document.getElementById('loteManualModal').addEventListener('hidden.bs.modal', function () {
+         document.getElementById('qtd_itens_lote').value = '1';
+         document.getElementById('tombo_inputs_container').innerHTML = '';
+         if (!document.getElementById('tombo_lote_manual').value) {
+            document.getElementById('tombo_inicial').value = '';
+            document.getElementById('qtd').value = 1;
+            document.getElementById('quantidade_hidden').value = 1;
+         }
+      });
+
+      // Sincronizar o campo visível "quantidade_visible" com o campo oculto "quantidade"
+      document.getElementById('qtd').addEventListener('input', function () {
+         const qtd = this.value;
+         document.getElementById('quantidade_hidden').value = qtd;
+         atualizarTomboInicial();
+      });
+
+      // Validação do formulário e envio assíncrono
+      document.getElementById('formulario-entrada').addEventListener('submit', async function (event) {
+         event.preventDefault();
+
+         const tipoTombo = document.getElementById('tipo_tombo').value;
+         const dataEntrada = document.getElementById('data_de_entrada').value;
+         const qtd = document.getElementById('qtd').value;
+         const categoria = document.getElementById('categoria').value;
+         const docOrigem = document.getElementById('doc_origem').value;
+         const valor = document.getElementById('valor').value;
+         const descricao = document.getElementById('descricao').value;
+         const situacao = document.getElementById('situacao').value;
+         const contaContabil = document.getElementById('conta_contabil').value;
+         const estoque = document.getElementById('estoque').value;
+         const tomboManual = document.getElementById('tombo_manual').value;
+         const tomboLoteManual = document.getElementById('tombo_lote_manual').value;
+         const observacao = document.getElementById('observacao').value;
+
+         // Validação básica no frontend
+         if (!dataEntrada) return alert('Por favor, preencha a Data de Entrada.');
+         if (!qtd || qtd < 1) return alert('A quantidade deve ser maior ou igual a 1.');
+         if (tipoTombo === 'MANUAL' && !tomboManual) return alert('Por favor, preencha o T. Manual.');
+         if (tipoTombo === 'LOTE_MANUAL' && !tomboLoteManual) return alert('Por favor, defina os tombos no modo Lote Manual.');
+         if (categoria === 'Selecione...') return alert('Por favor, selecione uma Categoria.');
+         if (!docOrigem) return alert('Por favor, preencha o Documento de Origem.');
+         if (!valor || valor <= 0) return alert('Por favor, preencha um Valor Unitário válido.');
+         if (!descricao) return alert('Por favor, preencha a Descrição.');
+         if (situacao === 'Escolha uma opção...') return alert('Por favor, selecione a Conservação.');
+         if (contaContabil === 'Escolha uma opção...') return alert('Por favor, selecione a Conta Contábil.');
+         if (estoque === 'Escolha uma opção...') return alert('Por favor, selecione o Estoque.');
+
+         // Criar um objeto com os dados do formulário
+         const formDataObj = {
+            data_de_entrada: dataEntrada,
+            quantidade: qtd,
+            tipo_tombo: tipoTombo,
+            tombo_inicial: document.getElementById('tombo_inicial').value,
+            tombo_manual: tomboManual,
+            tombo_lote_manual: tomboLoteManual, // Envia como JSON string
+            categoria: categoria,
+            doc_origem: docOrigem,
+            valor: valor,
+            descricao: descricao,
+            situacao: situacao,
+            conta_contabil: contaContabil,
+            estoque: estoque,
+            observacao: observacao
+         };
+
+         // Converter o objeto para URLSearchParams
+         const formDataParams = new URLSearchParams();
+         for (const [key, value] of Object.entries(formDataObj)) {
+            if (value !== undefined && value !== null && value !== '') {
+               formDataParams.append(key, value);
             }
          }
-      
-         // Sincronizar o campo visível "quantidade_visible" com o campo oculto "quantidade"
-         document.getElementById('qtd').addEventListener('input', function () {
-            const qtd = this.value;
-            document.getElementById('quantidade_hidden').value = qtd;
-            atualizarTomboInicial(); // Atualizar o tombo inicial se necessário
-         });
-      
-         // Evento para o botão "Confirmar" do modal
-         document.getElementById('confirmarLoteBtn').addEventListener('click', function () {
-            const tomboLoteInicial = document.getElementById('modal_tombo_lote_inicial').value;
-            const tomboLoteFinal = document.getElementById('modal_tombo_lote_final').value;
-      
-            // Validação dos campos do modal
-            if (!tomboLoteInicial || !tomboLoteFinal) {
-               alert('Por favor, preencha os campos T. Inicial e T. Final.');
-               return;
-            }
-            if (parseInt(tomboLoteFinal) < parseInt(tomboLoteInicial)) {
-               alert('O T. Final deve ser maior ou igual ao T. Inicial.');
-               return;
-            }
-      
-            // Calcular a quantidade (intervalo inclusivo: T. Final - T. Inicial + 1)
-            const quantidade = parseInt(tomboLoteFinal) - parseInt(tomboLoteInicial) + 1;
-      
-            // Transferir os valores para os campos ocultos do formulário
-            document.getElementById('tombo_lote_inicial').value = tomboLoteInicial;
-            document.getElementById('tombo_lote_final').value = tomboLoteFinal;
-      
-            // Preencher o campo T. Inicial (apenas para exibição)
-            document.getElementById('tombo_inicial').value = tomboLoteInicial;
-      
-            // Atualizar o campo Qtde. com a quantidade calculada
-            document.getElementById('qtd').value = quantidade;
-            document.getElementById('quantidade_hidden').value = quantidade;
-      
-            // Fechar o modal
-            const loteModal = bootstrap.Modal.getInstance(document.getElementById('loteManualModal'));
-            loteModal.hide();
-         });
-      
-         // Limpar os campos do modal e o campo T. Inicial ao fechá-lo
-         document.getElementById('loteManualModal').addEventListener('hidden.bs.modal', function () {
-            document.getElementById('modal_tombo_lote_inicial').value = '';
-            document.getElementById('modal_tombo_lote_final').value = '';
-            // Limpar os campos ocultos, o campo T. Inicial e a quantidade se o modal for fechado sem confirmar
-            if (!document.getElementById('tombo_lote_inicial').value) {
-               document.getElementById('tombo_inicial').value = '';
-               document.getElementById('tombo_lote_inicial').value = '';
-               document.getElementById('tombo_lote_final').value = '';
-               document.getElementById('qtd').value = 1; // Resetar a quantidade para 1
-               document.getElementById('quantidade_hidden').value = 1;
-            }
-         });
-      
-         // Validação do formulário e envio assíncrono
-         document.getElementById('formulario-entrada').addEventListener('submit', async function (event) {
-            event.preventDefault(); // Impedir o envio padrão do formulário
-      
-            const tipoTombo = document.getElementById('tipo_tombo').value;
-            const dataEntrada = document.getElementById('data_de_entrada').value;
-            const qtd = document.getElementById('qtd').value;
-            const categoria = document.getElementById('categoria').value;
-            const docOrigem = document.getElementById('doc_origem').value;
-            const valor = document.getElementById('valor').value;
-            const descricao = document.getElementById('descricao').value;
-            const situacao = document.getElementById('situacao').value;
-            const contaContabil = document.getElementById('conta_contabil').value;
-            const estoque = document.getElementById('estoque').value;
-            const tomboManual = document.getElementById('tombo_manual').value;
-            const tomboLoteInicial = document.getElementById('tombo_lote_inicial').value;
-            const tomboLoteFinal = document.getElementById('tombo_lote_final').value;
-            const observacao = document.getElementById('observacao').value;
-      
-            // Logar os valores dos campos antes de criar o FormData
-            console.log('Valores dos campos antes do envio:');
-            console.log('Tipo de Tombo:', tipoTombo);
-            console.log('Data de Entrada:', dataEntrada);
-            console.log('Quantidade:', qtd);
-            console.log('Categoria:', categoria);
-            console.log('Doc. de Origem:', docOrigem);
-            console.log('Valor:', valor);
-            console.log('Descrição:', descricao);
-            console.log('Conservação:', situacao);
-            console.log('Conta Contábil:', contaContabil);
-            console.log('Estoque:', estoque);
-            console.log('Tombo Manual:', tomboManual);
-            console.log('Tombo Lote Inicial:', tomboLoteInicial);
-            console.log('Tombo Lote Final:', tomboLoteFinal);
-            console.log('Observação:', observacao);
-      
-            // Validação básica no frontend
-            if (!dataEntrada) {
-               alert('Por favor, preencha a Data de Entrada.');
-               return;
-            }
-            if (!qtd || qtd < 1) {
-               alert('A quantidade deve ser maior ou igual a 1.');
-               return;
-            }
-            if (tipoTombo === 'MANUAL' && !tomboManual) {
-               alert('Por favor, preencha o T. Manual.');
-               return;
-            }
-            if (tipoTombo === 'LOTE_MANUAL') {
-               if (!tomboLoteInicial || !tomboLoteFinal) {
-                  alert('Por favor, defina a faixa de tombos no modo Lote Manual.');
+
+         // Logar os dados enviados
+         console.log('Dados enviados ao backend:', formDataParams.toString());
+
+         // Enviar o formulário assincronamente
+         try {
+            const response = await fetch('/entrada', {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+               },
+               body: formDataParams
+            });
+
+            if (!response.ok) {
+               const errorData = await response.json();
+               if (errorData.error && errorData.error.includes('já existe no sistema')) {
+                  alert(errorData.error);
                   return;
                }
+               throw new Error('Erro ao registrar a entrada: ' + (errorData.error || 'Erro desconhecido'));
             }
-            if (categoria === 'Selecione...') {
-               alert('Por favor, selecione uma Categoria.');
-               return;
-            }
-            if (!docOrigem) {
-               alert('Por favor, preencha o Documento de Origem.');
-               return;
-            }
-            if (!valor || valor <= 0) {
-               alert('Por favor, preencha um Valor Unitário válido.');
-               return;
-            }
-            if (!descricao) {
-               alert('Por favor, preencha a Descrição.');
-               return;
-            }
-            if (situacao === 'Escolha uma opção...') {
-               alert('Por favor, selecione a Conservação.');
-               return;
-            }
-            if (contaContabil === 'Escolha uma opção...') {
-               alert('Por favor, selecione a Conta Contábil.');
-               return;
-            }
-            if (estoque === 'Escolha uma opção...') {
-               alert('Por favor, selecione o Estoque.');
-               return;
-            }
-      
-            // Criar um objeto com os dados do formulário
-            const formDataObj = {
-               data_de_entrada: dataEntrada,
-               quantidade: qtd,
-               tipo_tombo: tipoTombo,
-               tombo_inicial: document.getElementById('tombo_inicial').value,
-               tombo_manual: tomboManual,
-               tombo_lote_inicial: tomboLoteInicial,
-               tombo_lote_final: tomboLoteFinal,
-               categoria: categoria,
-               doc_origem: docOrigem,
-               valor: valor,
-               descricao: descricao,
-               situacao: situacao,
-               conta_contabil: contaContabil,
-               estoque: estoque,
-               observacao: observacao
-            };
-      
-            // Converter o objeto para URLSearchParams (formato application/x-www-form-urlencoded)
-            const formDataParams = new URLSearchParams();
-            for (const [key, value] of Object.entries(formDataObj)) {
-               if (value !== undefined && value !== null && value !== '') {
-                  formDataParams.append(key, value);
-               }
-            }
-      
-            // Logar os dados que estão sendo enviados
-            console.log('Dados enviados ao backend (URLSearchParams):', formDataParams.toString());
-      
-            // Enviar o formulário assincronamente
-            try {
-               const response = await fetch('/entrada', {
-                  method: 'POST',
-                  headers: {
-                     'Content-Type': 'application/x-www-form-urlencoded'
-                  },
-                  body: formDataParams
-               });
-      
-               console.log('Resposta do backend:', response);
-      
-               if (!response.ok) {
-                  const errorData = await response.json();
-                  console.log('Erro retornado pelo backend:', errorData);
-                  if (errorData.error && errorData.error.includes('já existe no sistema')) {
-                     alert(errorData.error); // Ex.: "O tombo 70150 já existe no sistema."
-                     return;
-                  }
-                  throw new Error('Erro ao registrar a entrada: ' + (errorData.error || 'Erro desconhecido'));
-               }
-      
-               // Se o envio for bem-sucedido, redirecionar ou mostrar mensagem de sucesso
-               alert('Entrada registrada com sucesso!');
-               window.location.href = '/tabela/estoqueatual'; // Redirecionar para a página de estoque
-            } catch (error) {
-               console.error('Erro ao enviar o formulário:', error);
-               alert(error.message || 'Erro ao registrar a entrada. Verifique os dados e tente novamente.');
-            }
-         });
-      
-         // Inicializar o formulário ao carregar a página
-         document.addEventListener('DOMContentLoaded', function () {
-            atualizarTomboInicial();
-         });
-      </script>
-    
 
-      <!-- Bootstrap JS (incluindo Popper.js) -->
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-   </body>
+            alert('Entrada registrada com sucesso!');
+            window.location.href = '/tabela/estoqueatual';
+         } catch (error) {
+            console.error('Erro ao enviar o formulário:', error);
+            alert(error.message || 'Erro ao registrar a entrada.');
+         }
+      });
+
+      // Inicializar o formulário ao carregar a página
+      document.addEventListener('DOMContentLoaded', function () {
+         atualizarTomboInicial();
+      });
+   </script>
+</body>
 </html>
