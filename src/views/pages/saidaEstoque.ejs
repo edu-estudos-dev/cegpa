@@ -31,8 +31,9 @@
    }
 
    #selected-tombos-container {
-      height: 20vh; /* Ajustado para ser proporcional */
-      max-height: 20vh;
+      height: 34vh; /* Ajustado para ser proporcional */
+      max-height: 31vh;
+      min-height: 36vh;
    }
 
    .w-90 {
@@ -92,10 +93,14 @@
    <%- include('../partials/header') %>
    <div class="caixa w-90 p-4 mx-auto">
       <div class="border caixa-externa p-4 shadow-sm rounded">
+
          <div class="row align-items-center mb-3 px-3">
-            <div class="header-container">
-               <h2>Formulário de Saída</h2>
-               <button id="submit-btn" type="submit" class="btn btn-success">Registrar Saída</button>
+            <div class="col d-flex justify-content-between align-items-center bg-success py-2 rounded"
+               style="border-bottom: 4px solid orange;">
+               <h2 class="text-white mt-0 fw-bold flex-grow-1 text-center">Formulário de Saída</h2>
+               <div class="d-flex align-items-center">
+                  <button id="submit-btn" type="submit" class="btn btn-outline-light btn-header fw-bold">Registrar Saída</button>
+               </div>
             </div>
          </div>
 
