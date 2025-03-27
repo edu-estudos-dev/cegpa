@@ -22,6 +22,7 @@
       overflow-y: auto;
       overflow-x: hidden;
       min-height: 72vh;
+      padding-top: 0; /* Remove padding extra no topo, se necessário */
    }
 
    .table-container table {
@@ -39,7 +40,7 @@
 
    .table-container thead th {
       position: sticky;
-      top: 0;
+      top: 61px; /* Ajuste este valor conforme a altura da barra de pesquisa */
       background-color: rgb(231, 161, 9);
       color: white;
       border-left: 1px solid white !important;
@@ -47,6 +48,14 @@
       border-top: none !important;
       border-bottom: 1px solid white !important;
       z-index: 1;
+   }
+
+   .search-bar {
+      position: sticky;
+      top: 0;
+      background-color: #fff; /* Fundo branco para evitar transparência */
+      z-index: 2; /* Fica acima do cabeçalho da tabela (z-index: 1) */
+      padding: 10px 0; /* Espaçamento interno para melhor estética */
    }
 
    .table-container thead th:last-child {
@@ -94,7 +103,7 @@
    /* Ajuste das colunas */
    .table-container th:nth-child(1), /* ID */
    .table-container td:nth-child(1) {
-      width: 3%;
+      width: 4%;
    }
 
    .table-container th:nth-child(2), /* Data de entrada */
@@ -104,12 +113,12 @@
 
    .table-container th:nth-child(3), /* Descrição */
    .table-container td:nth-child(3) {
-      width: 35%;
+      width: 20%;
    }
 
    .table-container th:nth-child(4), /* tombo */
    .table-container td:nth-child(4) {
-      width: 6%;
+      width: 7%;
    }
 
    .table-container th:nth-child(5), /* Categoria */
@@ -119,12 +128,12 @@
 
    .table-container th:nth-child(6), /* Estoque */
    .table-container td:nth-child(6) {
-      width: 6%;
+      width: 7%;
    }
 
    .table-container th:nth-child(7), /* Conservação */
    .table-container td:nth-child(7) {
-      width: 6%;
+      width: 7%;
    }
 
    .table-container th:nth-child(8), /* Doc. de Origem */
@@ -208,9 +217,8 @@
 
 <body>
    <%- include('../partials/header') %>
-   <div class="caixa w-90 p-4 mx-auto">
+   <div class="caixa p-4 mx-auto">
       <div class="border caixa-externa p-4 shadow-sm rounded">
-         
          <div class="row align-items-center mb-3 px-3">
             <div class="col d-flex justify-content-between align-items-center bg-success py-2 rounded"
                style="border-bottom: 4px solid orange;">
@@ -227,15 +235,17 @@
          </div>
 
          <div class="table-container">
-            <div class="d-flex justify-content-end align-items-center mb-2">
-               <label for="searchTombo" class="me-2 fw-bold">Pesquisar:</label>
-               <input type="text" id="searchTombo" placeholder="Digite o número do tombo, categoria, descrição ou conservação" style="width: 450px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; margin-right: 10px;">
-               <button id="clearSearch" class="btn btn-secondary btn-md me-2">Limpar</button>
+            <div class="search-bar sticky-top">
+               <div class="d-flex justify-content-end align-items-center mb-2">
+                  <label for="searchTombo" class="me-2 fw-bold">Pesquisar:</label>
+                  <input type="text" id="searchTombo" placeholder="Digite o número do tombo, categoria, descrição, doc de origem ou conservação" style="width: 520px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; margin-right: 10px;">
+                  <button id="clearSearch" class="btn btn-secondary btn-md me-2">Limpar</button>
+               </div>
             </div>
             <table id="estoqueTable" class="table table-striped table-hover mb-0">
                <thead class="thead-success">
                   <tr class="table-borderless">
-                     <th class="text-center table-borderless px-0">ID</th>
+                     <th class="text-center table-borderless px-0 sortable" data-col="0">ID</th>
                      <th class="text-center table-borderless px-0 sortable" data-col="1">Entrada</th>
                      <th class="ps-4 table-borderless px-0 sortable" data-col="2">Descrição</th>
                      <th class="text-center table-borderless px-0 sortable" data-col="3">Tombo</th>
@@ -406,13 +416,13 @@
             });
          });
    
-         // Script para pesquisa por tombo, categoria, descrição, conservação e estoque
+          // Script para pesquisa por tombo, categoria, descrição, conservação, estoque e doc_origem
          document.getElementById('searchTombo').addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase().trim();
             console.log('Termo digitado:', searchTerm);
             filterRows(searchTerm);
          });
-   
+         
          // Script para o botão "Limpar"
          document.getElementById('clearSearch').addEventListener('click', () => {
             document.getElementById('searchTombo').value = '';
@@ -425,7 +435,7 @@
    
             for (let i = 1; i < rows.length; i++) {
                const cells = rows[i].getElementsByTagName('td');
-               if (cells.length < 7) {
+               if (cells.length < 8) {
                   rows[i].classList.add('hidden');
                   continue;
                }
@@ -435,48 +445,54 @@
                const categoriaCell = cells[4].textContent.toLowerCase().trim();
                const estoqueCell = cells[5].textContent.toLowerCase().trim();
                const conservacaoCell = cells[6].textContent.toLowerCase().trim();
+               const docOrigemCell = cells[7].textContent.toLowerCase().trim();
                console.log(`Comparando descricaoCell: ${descricaoCell}, tomboCell: ${tomboCell}, categoriaCell: ${categoriaCell}, estoqueCell: ${estoqueCell}, conservacaoCell: ${conservacaoCell} com termo: ${searchTerm}`);
    
                const matches = descricaoCell.includes(searchTerm) || 
-                              tomboCell.includes(searchTerm) || 
-                              categoriaCell.includes(searchTerm) || 
-                              estoqueCell.includes(searchTerm) || 
-                              conservacaoCell.includes(searchTerm);
+                        tomboCell.includes(searchTerm) || 
+                        categoriaCell.includes(searchTerm) || 
+                        estoqueCell.includes(searchTerm) || 
+                        conservacaoCell.includes(searchTerm) || 
+                        docOrigemCell.includes(searchTerm); 
    
-               if (searchTerm === '' || matches) {
-                  rows[i].classList.remove('hidden');
-                  console.log(`Linha ${i} mostrada: descricao=${descricaoCell}, tombo=${tomboCell}, categoria=${categoriaCell}, estoque=${estoqueCell}, conservacao=${conservacaoCell}`);
-               } else {
-                  rows[i].classList.add('hidden');
-               }
-            }
-         }
-   
+                        if (searchTerm === '' || matches) {
+                           rows[i].classList.remove('hidden');
+                           console.log(`Linha ${i} mostrada: descricao=${descricaoCell}, tombo=${tomboCell}, categoria=${categoriaCell}, estoque=${estoqueCell}, conservacao=${conservacaoCell}, docOrigem=${docOrigemCell}`);
+                        } else {
+                           rows[i].classList.add('hidden');
+                        }
+                     }
+                  }
+                  
          // Estado para rastrear a direção da ordenação por coluna
          const sortStates = {};
-   
+
          // Função para ordenar a tabela
          function sortTable(columnIndex, isNumeric = false) {
             const table = document.getElementById('estoqueTable');
             const tbody = table.querySelector('tbody');
             const rows = Array.from(tbody.getElementsByTagName('tr')).filter(row => !row.classList.contains('hidden'));
             const th = document.querySelector(`th[data-col="${columnIndex}"]`);
-   
+
             const currentState = sortStates[columnIndex] || 'none';
             const newState = currentState === 'asc' ? 'desc' : 'asc';
             sortStates[columnIndex] = newState;
-   
+
             document.querySelectorAll('.sortable').forEach(header => {
                header.classList.remove('sort-asc', 'sort-desc');
             });
-   
+
             th.classList.add(newState === 'asc' ? 'sort-asc' : 'sort-desc');
-   
+
             rows.sort((a, b) => {
                let aValue = a.cells[columnIndex].textContent.trim();
                let bValue = b.cells[columnIndex].textContent.trim();
-   
-               if (columnIndex === 1) {
+
+               if (columnIndex === 0 || columnIndex === 3) { // ID (0) e Tombo (3) são numéricos
+                  aValue = parseInt(aValue) || 0;
+                  bValue = parseInt(bValue) || 0;
+                  return newState === 'asc' ? aValue - bValue : bValue - aValue;
+               } else if (columnIndex === 1) { // Data de Entrada
                   const parseDate = (dateStr) => {
                      const [day, month, year] = dateStr.split('/').map(Number);
                      return new Date(year, month - 1, day);
@@ -484,25 +500,21 @@
                   const aDate = parseDate(aValue);
                   const bDate = parseDate(bValue);
                   return newState === 'asc' ? aDate - bDate : bDate - aDate;
-               } else if (isNumeric) {
-                  aValue = parseFloat(aValue) || 0;
-                  bValue = parseFloat(bValue) || 0;
-                  return newState === 'asc' ? aValue - bValue : bValue - aValue;
-               } else {
+               } else { // Outras colunas (textuais)
                   return newState === 'asc'
                      ? aValue.localeCompare(bValue, 'pt-BR')
                      : bValue.localeCompare(aValue, 'pt-BR');
                }
             });
-   
+
             rows.forEach(row => tbody.appendChild(row));
          }
-       
+
+         // Evento de clique para colunas ordenáveis (já inclui o novo th de ID)
          document.querySelectorAll('.sortable').forEach(th => {
             th.addEventListener('click', () => {
                const columnIndex = parseInt(th.getAttribute('data-col'));
-               const isNumeric = columnIndex === 3;
-               sortTable(columnIndex, isNumeric);
+               sortTable(columnIndex);
             });
          });
       });

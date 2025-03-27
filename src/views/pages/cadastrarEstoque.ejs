@@ -14,6 +14,10 @@
          align-items: center;
          padding-top: 2.5rem;
       }
+
+      .w-90{
+         width: 90%;
+      }
    </style>
 </head>
 
@@ -25,7 +29,7 @@
             <input id="id" type="hidden">
 
             <div class="row align-items-center mb-3 px-3">
-               <h2 style="border-bottom: 4px solid orange;" class="text-white py-2 mt-0 fw-bold bg-success">Formulário de Entrada</h2>
+               <h2 style="border-bottom: 4px solid orange;" class="text-white py-2 mt-0 fw-bold bg-success text-center">Formulário de Entrada</h2>
             </div>
 
             <!-- Linha 1: Campos principais -->
@@ -55,7 +59,7 @@
                   </div>
                </div>
 
-               <div class="col-md-2">
+               <div class="col-md-1">
                   <div id="tombo_inicial-div" class="mb-3">
                      <label class="form-label fw-bold">Tombo Inicial</label>
                      <input id="tombo_inicial" type="text" class="form-control" name="tombo_inicial" readonly>
@@ -63,7 +67,7 @@
                   <input id="tombo_lote_manual" type="hidden" name="tombo_lote_manual">
                </div>
 
-               <div class="col-md-2">
+               <div class="col-md-3">
                   <div id="categoria-div" class="mb-3">
                      <label class="form-label fw-bold">Categoria</label>
                      <select id="categoria" class="form-select" name="categoria">
@@ -82,6 +86,7 @@
                         <option value="beliche">BELICHE</option>
                         <option value="lousa">LOUSA</option>
                         <option value="monitor">MONITOR</option>
+                        <option value="mobiliário">MOBILIÁRIO EM GERAL</option>
                      </select>
                   </div>
                </div>
@@ -281,7 +286,8 @@
             try {
                const response = await fetch('/ultimo-tombo');
                const data = await response.json();
-               const ultimoTombo = data.ultimoTombo || 70149; // Fallback para 70149 se não houver tombo
+               const ultimoTombo = data.ultimoTombo || 108702
+               ; // Fallback para 108702 se não houver tombo
                const quantidade = parseInt(document.getElementById('qtd').value) || 1;
                document.getElementById('tombo_inicial').value = ultimoTombo + 1;
                document.getElementById('quantidade_hidden').value = quantidade;

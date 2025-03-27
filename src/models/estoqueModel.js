@@ -183,7 +183,7 @@ class EstoqueModel {
          console.log('Resultado da query para maior tombo:', results);
          if (!results || results.length === 0) {
             console.log('Nenhum tombo encontrado, usando 70149 como fallback.');
-            return 70149;  // Ajuste para iniciar a partir do último tombo 
+            return 108701;  // Ajuste para iniciar a partir do último tombo 
          }
          const ultimoTombo = results[0].tombo;
          console.log('Maior tombo encontrado no banco:', ultimoTombo);

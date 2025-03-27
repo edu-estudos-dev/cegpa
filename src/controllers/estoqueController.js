@@ -455,14 +455,14 @@ class EstoqueController {
    // Método privado para geração de relatórios gerais (PDF ou Excel)
    _generateReport = async (res, data, title, formato) => {
       const columns = [
-         { header: 'ID', dataKey: 'id', width: 12 },
-         { header: 'Entrada', dataKey: 'data_entrada', width: 20 },
-         { header: 'Descrição', dataKey: 'descricao', width: 80 },
+         { header: 'ID', dataKey: 'id', width: 10 },
+         { header: 'Entrada', dataKey: 'data_entrada', width: 18 },
+         { header: 'Descrição', dataKey: 'descricao', width: 120 },
          { header: 'Tombo', dataKey: 'tombo', width: 20 },
-         { header: 'Categoria', dataKey: 'categoria', width: 35 },
-         { header: 'Estoque', dataKey: 'estoque', width: 30 },
-         { header: 'Situação', dataKey: 'situacao', width: 30 },
-         { header: 'Valor', dataKey: 'valor', width: 30 },
+         { header: 'Categoria', dataKey: 'categoria', width: 30 },
+         { header: 'Estoque', dataKey: 'estoque', width: 20 },
+         { header: 'Situação', dataKey: 'situacao', width: 20 },
+         { header: 'Valor', dataKey: 'valor', width: 20 },
          { header: 'Doc Origem', dataKey: 'doc_origem', width: 30 },
       ];
 
