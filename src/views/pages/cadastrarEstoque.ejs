@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 
-<%- include('../partials/head', { title: 'Formulário de Entrada' }) %>
+<head>
+   <%- include('../partials/head', { title: 'Formulário de Entrada' }) %>
+   <style>
+      * {
+         margin: 0;
+         padding: 0;
+      }
 
-<style>
-   * {
-      margin: 0;
-      padding: 0;
-   }
-
-   body {
-      display: flex;
-      align-items: center;
-      padding-top: 2.5rem;
-   }
-</style>
+      body {
+         display: flex;
+         align-items: center;
+         padding-top: 2.5rem;
+      }
+   </style>
+</head>
 
 <body>
    <%- include('../partials/header') %>
@@ -31,14 +32,14 @@
             <div id="row1" class="row">
                <div class="col-md-2">
                   <div id="data_de_entrada-div" class="mb-3">
-                     <label class="form-label fw-bold">Entrada</label>
+                     <label class="form-label fw-bold">Data de Entrada</label>
                      <input id="data_de_entrada" type="date" class="form-control" name="data_de_entrada" onchange="atualizarTomboInicial()">
                   </div>
                </div>
 
                <div class="col-md-1">
                   <div id="qtd-div" class="mb-3">
-                     <label class="form-label fw-bold">Qtde.</label>
+                     <label class="form-label fw-bold">Quantidade</label>
                      <input id="qtd" type="number" class="form-control" name="quantidade_visible" onchange="atualizarTomboInicial()" min="1" value="1">
                      <input id="quantidade_hidden" type="hidden" name="quantidade" value="1">
                   </div>
@@ -49,7 +50,6 @@
                      <label class="form-label fw-bold">Tipo de Tombo</label>
                      <select id="tipo_tombo" class="form-select" name="tipo_tombo" onchange="toggleTomboInput()">
                         <option value="AUTO" selected>Automático</option>
-                        <option value="MANUAL">Manual</option>
                         <option value="LOTE_MANUAL">Lote Manual</option>
                      </select>
                   </div>
@@ -60,10 +60,6 @@
                      <label class="form-label fw-bold">Tombo Inicial</label>
                      <input id="tombo_inicial" type="text" class="form-control" name="tombo_inicial" readonly>
                   </div>
-                  <div id="tombo_manual-div" class="mb-3" style="display: none;">
-                     <label class="form-label fw-bold">Tombo Manual</label>
-                     <input id="tombo_manual" type="number" class="form-control" name="tombo_manual" disabled>
-                  </div>
                   <input id="tombo_lote_manual" type="hidden" name="tombo_lote_manual">
                </div>
 
@@ -71,7 +67,7 @@
                   <div id="categoria-div" class="mb-3">
                      <label class="form-label fw-bold">Categoria</label>
                      <select id="categoria" class="form-select" name="categoria">
-                        <option selected>Selecione...</option>
+                        <option selected>Selecione uma categoria...</option>
                         <option value="mesa">MESA</option>
                         <option value="ar-condicionado">AR-CONDICIONADO</option>
                         <option value="automovel">AUTOMÓVEL</option>
@@ -92,8 +88,8 @@
 
                <div class="col-md-3">
                   <div id="doc_origem-div" class="mb-3">
-                     <label class="form-label fw-bold">Doc. de Origem</label>
-                     <input id="doc_origem" type="text" class="form-control" placeholder="Nota Fiscal, etc..." name="doc_origem">
+                     <label class="form-label fw-bold">Documento de Origem</label>
+                     <input id="doc_origem" type="text" class="form-control" placeholder="Nota Fiscal, Termo de Doação, etc..." name="doc_origem">
                   </div>
                </div>
             </div>
@@ -119,7 +115,7 @@
 
                <div class="col-md-3">
                   <div id="situacao-div" class="mb-3">
-                     <label class="form-label fw-bold">Conservação</label>
+                     <label class="form-label fw-bold">Estado de Conservação</label>
                      <select id="situacao" class="form-select" name="situacao">
                         <option selected>Escolha uma opção...</option>
                         <option value="novo">Novo</option>
@@ -199,7 +195,7 @@
 
                <div class="col-md-3">
                   <div id="estoque-div" class="mb-3">
-                     <label class="form-label fw-bold">Estoque</label>
+                     <label class="form-label fw-bold">Local de Estoque</label>
                      <select id="estoque" class="form-select" name="estoque">
                         <option selected>Escolha uma opção...</option>
                         <option value="galpao">ESTOQUE COLOG - GALPÃO</option>
@@ -286,9 +282,9 @@
                const response = await fetch('/ultimo-tombo');
                const data = await response.json();
                const ultimoTombo = data.ultimoTombo || 70149; // Fallback para 70149 se não houver tombo
-               const qtd = parseInt(document.getElementById('qtd').value) || 1;
+               const quantidade = parseInt(document.getElementById('qtd').value) || 1;
                document.getElementById('tombo_inicial').value = ultimoTombo + 1;
-               document.getElementById('quantidade_hidden').value = qtd;
+               document.getElementById('quantidade_hidden').value = quantidade;
             } catch (error) {
                console.error('Erro ao buscar último tombo:', error);
                alert('Erro ao buscar o último tombo. Verifique a conexão com o servidor.');
@@ -301,49 +297,31 @@
          const tipoTombo = document.getElementById('tipo_tombo').value;
          const tomboInicialDiv = document.getElementById('tombo_inicial-div');
          const tomboInicialInput = document.getElementById('tombo_inicial');
-         const tomboManualDiv = document.getElementById('tombo_manual-div');
-         const tomboManualInput = document.getElementById('tombo_manual');
          const tomboLoteManualInput = document.getElementById('tombo_lote_manual');
-         const qtdInput = document.getElementById('qtd');
+         const quantidadeInput = document.getElementById('qtd');
          const quantidadeHidden = document.getElementById('quantidade_hidden');
 
          // Resetar estados
-         tomboInicialDiv.style.display = 'none';
+         tomboInicialDiv.style.display = 'block';
          tomboInicialInput.disabled = true;
          tomboInicialInput.value = '';
-         tomboManualDiv.style.display = 'none';
-         tomboManualInput.disabled = true;
-         tomboManualInput.value = '';
          tomboLoteManualInput.value = '';
+         quantidadeInput.disabled = false;
 
-         // Controlar o campo Qtde. com base no modo
-         if (tipoTombo === 'MANUAL') {
-            qtdInput.value = 1;
-            quantidadeHidden.value = 1;
-            qtdInput.disabled = true;
-            tomboManualDiv.style.display = 'block';
-            tomboManualInput.disabled = false;
-         } else if (tipoTombo === 'AUTO') {
-            qtdInput.disabled = false;
-            tomboInicialDiv.style.display = 'block';
-            tomboInicialInput.disabled = true;
+         if (tipoTombo === 'AUTO') {
             atualizarTomboInicial();
          } else if (tipoTombo === 'LOTE_MANUAL') {
-            qtdInput.disabled = false;
-            tomboInicialDiv.style.display = 'block';
-            tomboInicialInput.disabled = true;
-            tomboInicialInput.value = '';
             const loteModal = new bootstrap.Modal(document.getElementById('loteManualModal'));
             loteModal.show();
             gerarInputsTombo(1); // Inicializa com 1 input
          }
       }
 
-      // Função para gerar inputs dinâmicos de tombos
-      function gerarInputsTombo(qtd) {
+      // Função para gerar inputs dinâmicos de tombos no modal
+      function gerarInputsTombo(quantidade) {
          const container = document.getElementById('tombo_inputs_container');
          container.innerHTML = '';
-         for (let i = 0; i < qtd; i++) {
+         for (let i = 0; i < quantidade; i++) {
             const div = document.createElement('div');
             div.className = 'mb-3';
             div.innerHTML = `
@@ -354,16 +332,16 @@
          }
       }
 
-      // Evento para atualizar os inputs quando a quantidade mudar
+      // Evento para atualizar os inputs quando a quantidade no modal mudar
       document.getElementById('qtd_itens_lote').addEventListener('input', function () {
-         const qtd = parseInt(this.value) || 1;
-         gerarInputsTombo(qtd);
+         const quantidade = parseInt(this.value) || 1;
+         gerarInputsTombo(quantidade);
       });
 
       // Evento para o botão "Confirmar" do modal
       document.getElementById('confirmarLoteBtn').addEventListener('click', function () {
          const inputs = document.querySelectorAll('.tombo_lote_input');
-         const tombos = Array.from(inputs).map(input => parseInt(input.value)).filter(val => !isNaN(val));
+         const tombos = Array.from(inputs).map(input => parseInt(input.value)).filter(valor => !isNaN(valor));
 
          // Validação dos campos
          if (tombos.length === 0 || tombos.length !== inputs.length) {
@@ -372,16 +350,16 @@
          }
 
          // Verificar duplicatas nos tombos
-         const uniqueTombos = new Set(tombos);
-         if (uniqueTombos.size !== tombos.length) {
+         const tombosUnicos = new Set(tombos);
+         if (tombosUnicos.size !== tombos.length) {
             alert('Os tombos inseridos não podem ser duplicados.');
             return;
          }
 
          // Atualizar o formulário principal
-         const qtd = tombos.length;
-         document.getElementById('qtd').value = qtd;
-         document.getElementById('quantidade_hidden').value = qtd;
+         const quantidade = tombos.length;
+         document.getElementById('qtd').value = quantidade;
+         document.getElementById('quantidade_hidden').value = quantidade;
          document.getElementById('tombo_inicial').value = tombos[0]; // Mostra o primeiro tombo
          document.getElementById('tombo_lote_manual').value = JSON.stringify(tombos);
 
@@ -403,8 +381,8 @@
 
       // Sincronizar o campo visível "quantidade_visible" com o campo oculto "quantidade"
       document.getElementById('qtd').addEventListener('input', function () {
-         const qtd = this.value;
-         document.getElementById('quantidade_hidden').value = qtd;
+         const quantidade = this.value;
+         document.getElementById('quantidade_hidden').value = quantidade;
          atualizarTomboInicial();
       });
 
@@ -414,41 +392,38 @@
 
          const tipoTombo = document.getElementById('tipo_tombo').value;
          const dataEntrada = document.getElementById('data_de_entrada').value;
-         const qtd = document.getElementById('qtd').value;
+         const quantidade = document.getElementById('qtd').value;
          const categoria = document.getElementById('categoria').value;
-         const docOrigem = document.getElementById('doc_origem').value;
+         const documentoOrigem = document.getElementById('doc_origem').value;
          const valor = document.getElementById('valor').value;
          const descricao = document.getElementById('descricao').value;
          const situacao = document.getElementById('situacao').value;
          const contaContabil = document.getElementById('conta_contabil').value;
          const estoque = document.getElementById('estoque').value;
-         const tomboManual = document.getElementById('tombo_manual').value;
          const tomboLoteManual = document.getElementById('tombo_lote_manual').value;
          const observacao = document.getElementById('observacao').value;
 
          // Validação básica no frontend
          if (!dataEntrada) return alert('Por favor, preencha a Data de Entrada.');
-         if (!qtd || qtd < 1) return alert('A quantidade deve ser maior ou igual a 1.');
-         if (tipoTombo === 'MANUAL' && !tomboManual) return alert('Por favor, preencha o T. Manual.');
+         if (!quantidade || quantidade < 1) return alert('A quantidade deve ser maior ou igual a 1.');
          if (tipoTombo === 'LOTE_MANUAL' && !tomboLoteManual) return alert('Por favor, defina os tombos no modo Lote Manual.');
-         if (categoria === 'Selecione...') return alert('Por favor, selecione uma Categoria.');
-         if (!docOrigem) return alert('Por favor, preencha o Documento de Origem.');
+         if (categoria === 'Selecione uma categoria...') return alert('Por favor, selecione uma Categoria.');
+         if (!documentoOrigem) return alert('Por favor, preencha o Documento de Origem.');
          if (!valor || valor <= 0) return alert('Por favor, preencha um Valor Unitário válido.');
          if (!descricao) return alert('Por favor, preencha a Descrição.');
-         if (situacao === 'Escolha uma opção...') return alert('Por favor, selecione a Conservação.');
+         if (situacao === 'Escolha uma opção...') return alert('Por favor, selecione o Estado de Conservação.');
          if (contaContabil === 'Escolha uma opção...') return alert('Por favor, selecione a Conta Contábil.');
-         if (estoque === 'Escolha uma opção...') return alert('Por favor, selecione o Estoque.');
+         if (estoque === 'Escolha uma opção...') return alert('Por favor, selecione o Local de Estoque.');
 
          // Criar um objeto com os dados do formulário
          const formDataObj = {
             data_de_entrada: dataEntrada,
-            quantidade: qtd,
+            quantidade: quantidade,
             tipo_tombo: tipoTombo,
             tombo_inicial: document.getElementById('tombo_inicial').value,
-            tombo_manual: tomboManual,
-            tombo_lote_manual: tomboLoteManual, // Envia como JSON string
+            tombo_lote_manual: tomboLoteManual,
             categoria: categoria,
-            doc_origem: docOrigem,
+            doc_origem: documentoOrigem,
             valor: valor,
             descricao: descricao,
             situacao: situacao,

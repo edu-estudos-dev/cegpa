@@ -99,7 +99,7 @@
 
    .table-container th:nth-child(2), /* Data de entrada */
    .table-container td:nth-child(2) {
-      width: 5%;
+      width: 6%;
    }
 
    .table-container th:nth-child(3), /* Descrição */
@@ -109,7 +109,7 @@
 
    .table-container th:nth-child(4), /* tombo */
    .table-container td:nth-child(4) {
-      width: 5%;
+      width: 6%;
    }
 
    .table-container th:nth-child(5), /* Categoria */
@@ -155,37 +155,54 @@
 
    /* Estilo para cabeçalhos ordenáveis */
    .sortable {
-   cursor: pointer;
-   position: relative;
-   padding-right: 25px; /* Mais espaço para a seta */
+      cursor: pointer;
+      position: relative;
+      padding-right: 30px; /* Mais espaço para duas setas */
    }
 
+   /* Define as duas setas (cima e baixo) */
+   .sortable::before,
    .sortable::after {
       content: '';
       position: absolute;
       right: 5px;
-      top: 50%;
-      transform: translateY(-50%);
       width: 0;
       height: 0;
-      border-left: 8px solid transparent; /* Aumenta o tamanho da seta */
-      border-right: 8px solid transparent;
-      opacity: 0.5; /* Leve transparência quando não ordenado */
-      transition: opacity 0.3s ease; /* Transição suave */
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      opacity: 0.7;
+      transition: opacity 0.3s ease, border-color 0.3s ease;
    }
 
+   .sortable::before {
+      border-bottom: 6px solid #ffffff; /* Seta para cima, branca */
+      top: 8px;
+   }
+
+   .sortable::after {
+      border-top: 6px solid #ffffff; /* Seta para baixo, branca */
+      bottom: 8px;
+   }
+
+   .sortable:hover::before,
    .sortable:hover::after {
-      opacity: 0.8; /* Aumenta a visibilidade ao passar o mouse */
+      opacity: 1;
    }
 
+   .sort-asc::before {
+      border-bottom-color: #122dc4; /* Azul para ascendente */
+      opacity: 1;
+   }
    .sort-asc::after {
-      border-bottom: 8px solid #122dc4 !important; /* Seta para cima, branca e maior */
-      opacity: 1; /* Totalmente visível quando ordenado */
+      opacity: 0.7;
    }
 
    .sort-desc::after {
-      border-top: 8px solid #d40a0a !important; /* Seta para baixo, branca e maior */
-      opacity: 1; /* Totalmente visível quando ordenado */
+      border-top-color: #d40a0a; /* Vermelho para descendente */
+      opacity: 1;
+   }
+   .sort-desc::before {
+      opacity: 0.7;
    }
 </style>
 
@@ -220,7 +237,7 @@
                   <tr class="table-borderless">
                      <th class="text-center table-borderless px-0">ID</th>
                      <th class="text-center table-borderless px-0 sortable" data-col="1">Entrada</th>
-                     <th class=" ps-4 table-borderless px-0 sortable" data-col="2">Descrição</th>
+                     <th class="ps-4 table-borderless px-0 sortable" data-col="2">Descrição</th>
                      <th class="text-center table-borderless px-0 sortable" data-col="3">Tombo</th>
                      <th class="text-center table-borderless px-0">Categoria</th>
                      <th class="text-center table-borderless px-0">Estoque</th>
@@ -391,8 +408,8 @@
    
          // Script para pesquisa por tombo, categoria, descrição, conservação e estoque
          document.getElementById('searchTombo').addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase().trim(); // Converte para minúsculas e remove espaços extras
-            console.log('Termo digitado:', searchTerm); // Log para depuração
+            const searchTerm = this.value.toLowerCase().trim();
+            console.log('Termo digitado:', searchTerm);
             filterRows(searchTerm);
          });
    
@@ -406,23 +423,20 @@
             const table = document.getElementById('estoqueTable');
             const rows = table.getElementsByTagName('tr');
    
-            // Percorre as linhas, começando do índice 1 para pular o cabeçalho
             for (let i = 1; i < rows.length; i++) {
                const cells = rows[i].getElementsByTagName('td');
-               // Verifica se a linha tem células suficientes (evita erro em linhas como "Ainda não há itens")
                if (cells.length < 7) {
-                  rows[i].classList.add('hidden'); // Oculta linhas inválidas
+                  rows[i].classList.add('hidden');
                   continue;
                }
    
-               const descricaoCell = cells[2].textContent.toLowerCase().trim(); // Coluna "Descrição" (índice 2)
-               const tomboCell = cells[3].textContent.toLowerCase().trim(); // Coluna "Tombo" (índice 3)
-               const categoriaCell = cells[4].textContent.toLowerCase().trim(); // Coluna "Categoria" (índice 4)
-               const estoqueCell = cells[5].textContent.toLowerCase().trim(); // Coluna "Estoque" (índice 5)
-               const conservacaoCell = cells[6].textContent.toLowerCase().trim(); // Coluna "Conservação" (índice 6)
-               console.log(`Comparando descricaoCell: ${descricaoCell}, tomboCell: ${tomboCell}, categoriaCell: ${categoriaCell}, estoqueCell: ${estoqueCell}, conservacaoCell: ${conservacaoCell} com termo: ${searchTerm}`); // Log para depuração
+               const descricaoCell = cells[2].textContent.toLowerCase().trim();
+               const tomboCell = cells[3].textContent.toLowerCase().trim();
+               const categoriaCell = cells[4].textContent.toLowerCase().trim();
+               const estoqueCell = cells[5].textContent.toLowerCase().trim();
+               const conservacaoCell = cells[6].textContent.toLowerCase().trim();
+               console.log(`Comparando descricaoCell: ${descricaoCell}, tomboCell: ${tomboCell}, categoriaCell: ${categoriaCell}, estoqueCell: ${estoqueCell}, conservacaoCell: ${conservacaoCell} com termo: ${searchTerm}`);
    
-               // Verifica se o termo digitado corresponde à descrição, tombo, categoria, estoque ou conservação
                const matches = descricaoCell.includes(searchTerm) || 
                               tomboCell.includes(searchTerm) || 
                               categoriaCell.includes(searchTerm) || 
@@ -430,10 +444,10 @@
                               conservacaoCell.includes(searchTerm);
    
                if (searchTerm === '' || matches) {
-                  rows[i].classList.remove('hidden'); // Mostra a linha
-                  console.log(`Linha ${i} mostrada: descricao=${descricaoCell}, tombo=${tomboCell}, categoria=${categoriaCell}, estoque=${estoqueCell}, conservacao=${conservacaoCell}`); // Log para confirmar
+                  rows[i].classList.remove('hidden');
+                  console.log(`Linha ${i} mostrada: descricao=${descricaoCell}, tombo=${tomboCell}, categoria=${categoriaCell}, estoque=${estoqueCell}, conservacao=${conservacaoCell}`);
                } else {
-                  rows[i].classList.add('hidden'); // Oculta a linha
+                  rows[i].classList.add('hidden');
                }
             }
          }
@@ -445,33 +459,27 @@
          function sortTable(columnIndex, isNumeric = false) {
             const table = document.getElementById('estoqueTable');
             const tbody = table.querySelector('tbody');
-            const rows = Array.from(tbody.getElementsByTagName('tr')).filter(row => !row.classList.contains('hidden')); // Apenas linhas visíveis
+            const rows = Array.from(tbody.getElementsByTagName('tr')).filter(row => !row.classList.contains('hidden'));
             const th = document.querySelector(`th[data-col="${columnIndex}"]`);
    
-            // Determina a direção da ordenação
             const currentState = sortStates[columnIndex] || 'none';
             const newState = currentState === 'asc' ? 'desc' : 'asc';
             sortStates[columnIndex] = newState;
    
-            // Remove classes de ordenação de todos os cabeçalhos
             document.querySelectorAll('.sortable').forEach(header => {
                header.classList.remove('sort-asc', 'sort-desc');
             });
    
-            // Adiciona a classe correspondente ao cabeçalho clicado
             th.classList.add(newState === 'asc' ? 'sort-asc' : 'sort-desc');
    
-            // Função de comparação
             rows.sort((a, b) => {
                let aValue = a.cells[columnIndex].textContent.trim();
                let bValue = b.cells[columnIndex].textContent.trim();
    
-               // Verifica se é a coluna de data (índice 1 - "Entrada")
                if (columnIndex === 1) {
-                  // Converte a data do formato DD/MM/YYYY para um objeto Date
                   const parseDate = (dateStr) => {
                      const [day, month, year] = dateStr.split('/').map(Number);
-                     return new Date(year, month - 1, day); // Mês é 0-based no JavaScript
+                     return new Date(year, month - 1, day);
                   };
                   const aDate = parseDate(aValue);
                   const bDate = parseDate(bValue);
@@ -487,15 +495,13 @@
                }
             });
    
-            // Reinsere as linhas ordenadas no tbody
             rows.forEach(row => tbody.appendChild(row));
          }
        
-         // Adiciona eventos de clique aos cabeçalhos ordenáveis
          document.querySelectorAll('.sortable').forEach(th => {
             th.addEventListener('click', () => {
                const columnIndex = parseInt(th.getAttribute('data-col'));
-               const isNumeric = columnIndex === 3; // "Tombo" é numérico
+               const isNumeric = columnIndex === 3;
                sortTable(columnIndex, isNumeric);
             });
          });

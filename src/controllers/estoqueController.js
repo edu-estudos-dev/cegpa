@@ -25,17 +25,21 @@ class EstoqueController {
             return res.status(404).json({ error: 'Item não encontrado' });
          }
          // Ajustar formato da data para o input type="date" (YYYY-MM-DD)
-         item.data_de_entrada = new Date(item.data_de_entrada).toISOString().split('T')[0];
+         item.data_de_entrada = new Date(item.data_de_entrada)
+            .toISOString()
+            .split('T')[0];
          // Garantir que o valor seja um número puro
          item.valor = parseFloat(item.valor).toFixed(2);
          item.categoria = item.categoria.toLowerCase();
-         item.estoque = item.estoque.toLowerCase(); 
-         item.situacao = item.situacao.toLowerCase(); 
+         item.estoque = item.estoque.toLowerCase();
+         item.situacao = item.situacao.toLowerCase();
          item.conta_contabil = item.conta_contabil.toLowerCase();
          res.render('formEdit', { item });
       } catch (error) {
          console.error('Erro ao carregar o item para edição:', error);
-         res.status(500).json({ error: 'Erro ao carregar o item para edição.' });
+         res.status(500).json({
+            error: 'Erro ao carregar o item para edição.',
+         });
       }
    };
 
@@ -54,23 +58,40 @@ class EstoqueController {
          situacao,
          observacao,
       } = req.body;
-   
+
       // Validações básicas
-      if (!data_de_entrada) return res.status(400).json({ error: 'A data de entrada é obrigatória.' });
-      if (!descricao) return res.status(400).json({ error: 'A descrição é obrigatória.' });
+      if (!data_de_entrada)
+         return res
+            .status(400)
+            .json({ error: 'A data de entrada é obrigatória.' });
+      if (!descricao)
+         return res.status(400).json({ error: 'A descrição é obrigatória.' });
       if (!tombo || !Number.isInteger(Number(tombo)) || tombo < 0) {
-         return res.status(400).json({ error: 'O tombo deve ser um número inteiro válido.' });
+         return res
+            .status(400)
+            .json({ error: 'O tombo deve ser um número inteiro válido.' });
       }
-      if (!categoria || categoria === 'Selecione...') return res.status(400).json({ error: 'A categoria é obrigatória.' });
+      if (!categoria || categoria === 'Selecione...')
+         return res.status(400).json({ error: 'A categoria é obrigatória.' });
       if (!conta_contabil || conta_contabil === 'Escolha uma opção...') {
-         return res.status(400).json({ error: 'A conta contábil é obrigatória.' });
+         return res
+            .status(400)
+            .json({ error: 'A conta contábil é obrigatória.' });
       }
-      if (!estoque || estoque === 'Escolha uma opção...') return res.status(400).json({ error: 'O estoque é obrigatório.' });
-      if (!doc_origem) return res.status(400).json({ error: 'O documento de origem é obrigatório.' });
-      if (!valor || valor <= 0) return res.status(400).json({ error: 'O valor deve ser maior que zero.' });
-      if (!situacao || situacao === 'Escolha uma opção...') return res.status(400).json({ error: 'A situação é obrigatória.' });
+      if (!estoque || estoque === 'Escolha uma opção...')
+         return res.status(400).json({ error: 'O estoque é obrigatório.' });
+      if (!doc_origem)
+         return res
+            .status(400)
+            .json({ error: 'O documento de origem é obrigatório.' });
+      if (!valor || valor <= 0)
+         return res
+            .status(400)
+            .json({ error: 'O valor deve ser maior que zero.' });
+      if (!situacao || situacao === 'Escolha uma opção...')
+         return res.status(400).json({ error: 'A situação é obrigatória.' });
       // Removida a validação: if (observacao && observacao.trim() === '')
-   
+
       const safeData = {
          data_de_entrada,
          descricao: descricao.toUpperCase(),
@@ -83,9 +104,12 @@ class EstoqueController {
          situacao: situacao.toUpperCase(),
          observacao: observacao ? observacao.toUpperCase() : null,
       };
-   
+
       try {
-         console.log('Dados recebidos no controlador para atualização:', safeData); // Log para depuração
+         console.log(
+            'Dados recebidos no controlador para atualização:',
+            safeData
+         ); // Log para depuração
          const affectedRows = await estoqueModel.updateEstoque(id, safeData);
          if (affectedRows === 0) {
             return res.status(404).json({ error: 'Item não encontrado.' });
@@ -97,10 +121,12 @@ class EstoqueController {
             data: safeData,
             id,
          });
-         res.status(500).json({ error: `Erro ao atualizar o item no estoque: ${error.message}` });
+         res.status(500).json({
+            error: `Erro ao atualizar o item no estoque: ${error.message}`,
+         });
       }
    };
-   
+
    // Método para renderizar a tabela com os itens novos
    showItensNovos = async (_req, res) => {
       try {
@@ -167,7 +193,7 @@ class EstoqueController {
       res.render('cadastrarEstoque');
    };
 
-   // Método para criar um novo item no estoque (Atualizado)
+   // Método para criar um novo item no estoque
    create = async (req, res) => {
       console.log('Dados recebidos no método create (req.body):', req.body);
 
@@ -177,8 +203,7 @@ class EstoqueController {
             quantidade,
             tipo_tombo,
             tombo_inicial,
-            tombo_manual,
-            tombo_lote_manual, // Agora é uma string JSON com a lista de tombos
+            tombo_lote_manual,
             categoria,
             doc_origem,
             valor,
@@ -186,20 +211,46 @@ class EstoqueController {
             situacao,
             conta_contabil,
             estoque,
-            observacao
+            observacao,
          } = req.body;
 
          // Validação básica
-         if (!data_de_entrada) return res.status(400).json({ error: 'A data de entrada é obrigatória.' });
-         if (!quantidade || Number(quantidade) <= 0) return res.status(400).json({ error: 'A quantidade deve ser maior que zero.' });
-         if (!tipo_tombo) return res.status(400).json({ error: 'O tipo de tombo é obrigatório.' });
-         if (!categoria || categoria === 'Selecione...') return res.status(400).json({ error: 'A categoria é obrigatória.' });
-         if (!doc_origem) return res.status(400).json({ error: 'O documento de origem é obrigatório.' });
-         if (!valor || Number(valor) <= 0) return res.status(400).json({ error: 'O valor deve ser maior que zero.' });
-         if (!descricao) return res.status(400).json({ error: 'A descrição é obrigatória.' });
-         if (!situacao || situacao === 'Escolha uma opção...') return res.status(400).json({ error: 'A situação é obrigatória.' });
-         if (!conta_contabil || conta_contabil === 'Escolha uma opção...') return res.status(400).json({ error: 'A conta contábil é obrigatória.' });
-         if (!estoque || estoque === 'Escolha uma opção...') return res.status(400).json({ error: 'O estoque é obrigatório.' });
+         if (!data_de_entrada)
+            return res
+               .status(400)
+               .json({ error: 'A data de entrada é obrigatória.' });
+         if (!quantidade || Number(quantidade) <= 0)
+            return res
+               .status(400)
+               .json({ error: 'A quantidade deve ser maior que zero.' });
+         if (!tipo_tombo)
+            return res
+               .status(400)
+               .json({ error: 'O tipo de tombo é obrigatório.' });
+         if (!categoria || categoria === 'Selecione...')
+            return res
+               .status(400)
+               .json({ error: 'A categoria é obrigatória.' });
+         if (!doc_origem)
+            return res
+               .status(400)
+               .json({ error: 'O documento de origem é obrigatório.' });
+         if (!valor || Number(valor) <= 0)
+            return res
+               .status(400)
+               .json({ error: 'O valor deve ser maior que zero.' });
+         if (!descricao)
+            return res
+               .status(400)
+               .json({ error: 'A descrição é obrigatória.' });
+         if (!situacao || situacao === 'Escolha uma opção...')
+            return res.status(400).json({ error: 'A situação é obrigatória.' });
+         if (!conta_contabil || conta_contabil === 'Escolha uma opção...')
+            return res
+               .status(400)
+               .json({ error: 'A conta contábil é obrigatória.' });
+         if (!estoque || estoque === 'Escolha uma opção...')
+            return res.status(400).json({ error: 'O estoque é obrigatório.' });
 
          const safeData = {
             data_de_entrada,
@@ -222,20 +273,26 @@ class EstoqueController {
             for (let i = 0; i < safeData.quantidade; i++) {
                tombos.push(tomboInicial + 1 + i);
             }
-         } else if (safeData.tipo_tombo === 'MANUAL') {
-            const tombo = Number(tombo_manual);
-            const tomboExistente = await estoqueModel.getInfoByTombo(tombo);
-            if (tomboExistente) return res.status(400).json({ error: `O tombo ${tombo} já existe no sistema.` });
-            tombos.push(tombo);
          } else if (safeData.tipo_tombo === 'LOTE_MANUAL') {
-            if (!tombo_lote_manual) return res.status(400).json({ error: 'A lista de tombos do lote é obrigatória.' });
-            tombos = JSON.parse(tombo_lote_manual); // Converte a string JSON em array
-            if (tombos.length !== safeData.quantidade) return res.status(400).json({ error: 'A quantidade de tombos não corresponde à quantidade informada.' });
+            if (!tombo_lote_manual)
+               return res
+                  .status(400)
+                  .json({ error: 'A lista de tombos do lote é obrigatória.' });
+            tombos = JSON.parse(tombo_lote_manual);
+            if (tombos.length !== safeData.quantidade)
+               return res
+                  .status(400)
+                  .json({
+                     error: 'A quantidade de tombos não corresponde à quantidade informada.',
+                  });
 
             // Verificar duplicatas no banco
             for (const tombo of tombos) {
                const tomboExistente = await estoqueModel.getInfoByTombo(tombo);
-               if (tomboExistente) return res.status(400).json({ error: `O tombo ${tombo} já existe no sistema.` });
+               if (tomboExistente)
+                  return res
+                     .status(400)
+                     .json({ error: `O tombo ${tombo} já existe no sistema.` });
             }
          }
 
@@ -245,7 +302,7 @@ class EstoqueController {
                safeData.data_de_entrada,
                safeData.descricao,
                tombo,
-               1, // Quantidade fixa como 1 por tombo
+               1,
                safeData.categoria,
                safeData.conta_contabil,
                safeData.doc_origem,
@@ -259,11 +316,17 @@ class EstoqueController {
 
          res.status(200).json({ message: 'Entrada registrada com sucesso!' });
       } catch (error) {
-         console.error('Erro ao registrar entrada:', error.message, error.stack);
-         res.status(500).json({ error: 'Erro interno ao registrar a entrada.' });
+         console.error(
+            'Erro ao registrar entrada:',
+            error.message,
+            error.stack
+         );
+         res.status(500).json({
+            error: 'Erro interno ao registrar a entrada.',
+         });
       }
    };
-   
+
    // Método para obter o último tombo (endpoint para o frontend)
    fetchUltimoTombo = async (req, res) => {
       try {
@@ -723,14 +786,14 @@ class EstoqueController {
          nome_do_recebedor,
          observacao,
       } = req.body;
-   
+
       console.log('req.user no registrarSaida:', req.user);
-   
+
       const usuarioLogado = req.user;
       const nomeResponsavel = usuarioLogado?.nome_completo;
       const mfResponsavel = usuarioLogado?.matricula;
       const postoGradResponsavel = usuarioLogado?.posto_grad;
-   
+
       try {
          // Validação dos campos obrigatórios
          if (
@@ -757,7 +820,7 @@ class EstoqueController {
                .status(400)
                .json({ error: 'Preencha todos os campos obrigatórios' });
          }
-   
+
          if (!nomeResponsavel || !mfResponsavel || !postoGradResponsavel) {
             console.log('Dados do usuário logado incompletos:', {
                nomeResponsavel,
@@ -768,14 +831,14 @@ class EstoqueController {
                error: 'Usuário autenticado não possui informações completas',
             });
          }
-   
+
          const dataDeSaida = new Date();
          const doc = new jsPDF();
-   
+
          console.log('Iniciando geração do PDF...');
          doc.setDrawColor(0);
          doc.setLineWidth(0.5);
-   
+
          // Desenha a borda na primeira página
          doc.rect(
             5,
@@ -783,16 +846,19 @@ class EstoqueController {
             doc.internal.pageSize.width - 10,
             doc.internal.pageSize.height - 10
          );
-   
+
          // Carregar a imagem
-         const imagePath = path.join(__dirname, '../../public/images/cabeçalho pmce.png');
+         const imagePath = path.join(
+            __dirname,
+            '../../public/images/cabeçalho pmce.png'
+         );
          const imageData = fs.readFileSync(imagePath).toString('base64');
          const imgProps = {
             format: 'PNG',
-            width: 80, // Largura da imagem em mm
-            height: 20, // Altura da imagem em mm
+            width: 70, // Largura da imagem em mm
+            height: 15, // Altura da imagem em mm
          };
-   
+
          // Adicionar a imagem ao PDF
          doc.addImage(
             imageData,
@@ -802,7 +868,7 @@ class EstoqueController {
             imgProps.width,
             imgProps.height
          );
-   
+
          // Título do documento (ajustado para não sobrepor a imagem)
          doc.setFontSize(10);
          doc.text(
@@ -812,7 +878,7 @@ class EstoqueController {
             { align: 'center' }
          );
          doc.setFontSize(10);
-   
+
          const headerYStart = 20 + imgProps.height;
          const headerData = [
             `Nº Termo: ${doc_saida}`,
@@ -824,24 +890,24 @@ class EstoqueController {
             `Referência: ${referencia}`,
             `Observações: ${(observacao || 'Nenhuma').toUpperCase()}`,
          ];
-   
+
          headerData.forEach((line, index) => {
             doc.text(line, 14, headerYStart + index * 5);
          });
-   
+
          let ordem = 1;
          const items = [];
-   
+
          console.log('Processando tombos:', tombos);
          for (const tombo of tombos) {
             console.log(`Buscando item com tombo ${tombo}...`);
             const itemEstoque = await estoqueModel.getInfoByTombo(tombo);
-   
+
             if (!itemEstoque) {
                console.warn(`Tombo ${tombo} não encontrado`);
                continue;
             }
-   
+
             console.log(`Item encontrado para tombo ${tombo}:`, itemEstoque);
             items.push([
                ordem++,
@@ -851,7 +917,7 @@ class EstoqueController {
                   .replace('RETAINGLIAR', 'RETANGULAR'),
                itemEstoque.situacao.toUpperCase(),
             ]);
-   
+
             console.log(`Registrando saída para tombo ${tombo}...`);
             await estoqueModel.createSaida(
                itemEstoque.id,
@@ -868,18 +934,18 @@ class EstoqueController {
                observacao,
                itemEstoque.descricao
             );
-   
+
             console.log(`Marcando tombo ${tombo} como pago...`);
             await estoqueModel.markAsPaid(itemEstoque.id);
          }
-   
+
          if (items.length === 0) {
             console.log('Nenhum item válido encontrado para gerar o termo.');
             return res.status(400).json({
                error: 'Nenhum item válido encontrado para gerar o termo.',
             });
          }
-   
+
          // Renderiza a tabela
          let finalY = 60 + imgProps.height;
          doc.autoTable({
@@ -913,26 +979,26 @@ class EstoqueController {
                );
             },
          });
-   
+
          finalY = doc.lastAutoTable.finalY || finalY;
-   
+
          const totalPages = doc.internal.getNumberOfPages();
          doc.setPage(totalPages);
-   
+
          const pageHeight = doc.internal.pageSize.height;
          const signatureY = Math.max(finalY + 20, pageHeight - 20);
          const lineLength = 50;
          const gapBetweenBlocks = 10;
-   
+
          const totalBlockWidth = lineLength * 3 + gapBetweenBlocks * 2;
          const startX = 5 + (200 - totalBlockWidth) / 2;
-   
+
          const leftPos = startX + lineLength / 2;
          const centerPos = leftPos + lineLength + gapBetweenBlocks;
          const rightPos = centerPos + lineLength + gapBetweenBlocks;
-   
+
          doc.setLineWidth(0.3);
-   
+
          doc.line(startX, signatureY, startX + lineLength, signatureY);
          doc.line(
             centerPos - lineLength / 2,
@@ -946,7 +1012,7 @@ class EstoqueController {
             rightPos + lineLength / 2,
             signatureY
          );
-   
+
          doc.setFontSize(6);
          doc.text(
             `${postoGrad.toUpperCase()} ${nome_do_recebedor.toUpperCase()}\nMF: ${mf_recebedor}`,
@@ -954,11 +1020,11 @@ class EstoqueController {
             signatureY + 4,
             { align: 'center' }
          );
-         doc.setFontSize(5);
+         doc.setFontSize(6);
          doc.text('(Recebedor)', leftPos, signatureY + 8.5, {
             align: 'center',
          });
-   
+
          doc.setFontSize(6);
          doc.text(
             'TEN. CEL. ALLAN KARDEK\nMF: 135.907-1-0',
@@ -966,11 +1032,11 @@ class EstoqueController {
             signatureY + 4,
             { align: 'center' }
          );
-         doc.setFontSize(5);
+         doc.setFontSize(6);
          doc.text('Comandante CEGPA', centerPos, signatureY + 8.5, {
             align: 'center',
          });
-   
+
          doc.setFontSize(6);
          doc.text(
             `${postoGradResponsavel.toUpperCase()} ${nomeResponsavel.toUpperCase()}\nMF: ${mfResponsavel}`,
@@ -978,24 +1044,24 @@ class EstoqueController {
             signatureY + 4,
             { align: 'center' }
          );
-         doc.setFontSize(5);
+         doc.setFontSize(6);
          doc.text('(Responsável pela entrega)', rightPos, signatureY + 8.5, {
             align: 'center',
          });
-   
+
          console.log('Salvando PDF...');
          const fileName = `Termo_${doc_saida.replace(/\//g, '-')}.pdf`;
          const pdfPath = path.join(__dirname, '../../pdfs', fileName);
-   
+
          if (!fs.existsSync(path.dirname(pdfPath))) {
             fs.mkdirSync(path.dirname(pdfPath), { recursive: true });
          }
-   
+
          doc.save(pdfPath);
-   
+
          console.log('Atualizando sequência...');
          await sequenciaModel.incrementarSequencia(new Date().getFullYear());
-   
+
          console.log('Enviando resposta de sucesso...');
          res.status(200).json({
             success: true,
@@ -1010,8 +1076,8 @@ class EstoqueController {
             details: error.message,
          });
       }
-   }
- 
+   };
+
    // Método para visualizar um item pago específico
    visualizarItemPago = async (req, res) => {
       const { id } = req.params;
