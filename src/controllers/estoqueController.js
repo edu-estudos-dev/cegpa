@@ -468,9 +468,7 @@ class EstoqueController {
 
       const rows = data.map((item) => ({
          id: item.id,
-         data_entrada: new Date(item.data_de_entrada).toLocaleDateString(
-            'pt-BR'
-         ),
+         data_entrada: new Date(item.data_de_entrada).toLocaleDateString('pt-BR'),
          descricao: item.descricao,
          tombo: item.tombo,
          categoria: item.categoria,
@@ -478,9 +476,9 @@ class EstoqueController {
          situacao: item.situacao,
          valor: item.valor
             ? parseFloat(item.valor).toLocaleString('pt-BR', {
-                 style: 'currency',
-                 currency: 'BRL',
-              })
+               style: 'currency',
+               currency: 'BRL',
+            })
             : 'N/A',
          doc_origem: item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A',
       }));
@@ -495,14 +493,10 @@ class EstoqueController {
          doc.setFontSize(16);
          doc.text(title, 10, 15);
          doc.setFontSize(10);
-         doc.text(
-            `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
-            10,
-            22
-         );
+         doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 10, 22);
 
          doc.autoTable({
-            startY: 30,
+            startY: 28,
             margin: { left: 5, right: 5 },
             head: [columns.map((col) => col.header)],
             body: rows.map((row) => columns.map((col) => row[col.dataKey])),
@@ -521,6 +515,14 @@ class EstoqueController {
                acc[index] = { cellWidth: col.width };
                return acc;
             }, {}),
+            
+            // Adicionar números de página
+            didDrawPage: function (data) {
+               const pageNumber = doc.internal.getNumberOfPages();
+               const pageStr = `Página ${data.pageNumber} de ${pageNumber}`;
+               doc.setFontSize(8);
+               doc.text(pageStr, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 8, { align: 'center' });
+            },
          });
 
          const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
@@ -536,14 +538,12 @@ class EstoqueController {
 
          // Adicionar o título e mesclar as células
          const titleRow = worksheet.addRow([title]);
-         worksheet.mergeCells(`A1:I1`); // Mesclar células diretamente no worksheet
+         worksheet.mergeCells(`A1:I1`);
          worksheet.getCell('A1').alignment = { horizontal: 'center' };
          worksheet.getCell('A1').font = { size: 16, bold: true };
 
          // Adicionar a data de geração
-         worksheet.addRow([
-            `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
-         ]);
+         worksheet.addRow([`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`]);
 
          // Adicionar o cabeçalho
          worksheet.addRow(columns.map((col) => col.header)).eachCell((cell) => {
@@ -562,7 +562,7 @@ class EstoqueController {
          });
 
          // Ajustar a largura das colunas
-         worksheet.columns = columns.map((col) => ({ width: col.width / 6 })); // Ajuste proporcional
+         worksheet.columns = columns.map((col) => ({ width: col.width / 6 }));
 
          const excelBuffer = await workbook.xlsx.writeBuffer();
          res.setHeader(
@@ -580,7 +580,7 @@ class EstoqueController {
          });
       }
    };
-
+   
    // Método para Gerar Relatório de Itens Pagos (PDF ou Excel)
    generatePDFItensPagos = async (req, res) => {
       try {

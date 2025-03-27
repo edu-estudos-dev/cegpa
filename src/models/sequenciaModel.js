@@ -4,8 +4,8 @@ class SequenciaModel {
    // Consulta a sequência atual sem incrementar
    getSequenciaAtual = async (ano) => {
       try {
-         // Define o valor inicial como 42 para 2025, e 1 para outros anos
-         const initialValue = ano === 2025 ? 42 : 1;
+         // Define o valor inicial como 143 para 2025, e 1 para outros anos
+         const initialValue = ano === 2025 ? 143 : 1;
          const insertQuery = `
             INSERT INTO doc_sequencia (ano, sequencia)
             VALUES (?, ?)

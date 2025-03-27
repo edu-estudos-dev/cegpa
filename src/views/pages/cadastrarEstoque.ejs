@@ -16,7 +16,7 @@
       }
 
       .w-90{
-         width: 90%;
+         width: 95%;
       }
    </style>
 </head>
@@ -54,7 +54,7 @@
                      <label class="form-label fw-bold">Tipo de Tombo</label>
                      <select id="tipo_tombo" class="form-select" name="tipo_tombo" onchange="toggleTomboInput()">
                         <option value="AUTO" selected>Automático</option>
-                        <option value="LOTE_MANUAL">Lote Manual</option>
+                        <option value="LOTE_MANUAL">Manual</option>
                      </select>
                   </div>
                </div>
@@ -231,7 +231,7 @@
             <div class="modal-dialog">
                <div class="modal-content">
                   <div class="modal-header">
-                     <h5 class="modal-title" id="loteManualModalLabel">Definir Tombos do Lote Manual</h5>
+                     <h5 class="modal-title" id="loteManualModalLabel">Definir Tombos Manualmente</h5>
                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
@@ -277,209 +277,219 @@
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
-   <!-- Script ajustado -->
-   <script>
-      // Função para atualizar o tombo inicial no modo "Automático"
-      async function atualizarTomboInicial() {
-         const tipoTombo = document.getElementById('tipo_tombo').value;
-         if (tipoTombo === 'AUTO') {
-            try {
-               const response = await fetch('/ultimo-tombo');
-               const data = await response.json();
-               const ultimoTombo = data.ultimoTombo || 108702
-               ; // Fallback para 108702 se não houver tombo
-               const quantidade = parseInt(document.getElementById('qtd').value) || 1;
-               document.getElementById('tombo_inicial').value = ultimoTombo + 1;
-               document.getElementById('quantidade_hidden').value = quantidade;
-            } catch (error) {
-               console.error('Erro ao buscar último tombo:', error);
-               alert('Erro ao buscar o último tombo. Verifique a conexão com o servidor.');
-            }
+      <script>
+         // Função para definir a data atual no formato YYYY-MM-DD (compatível com input type="date" e backend)
+         function setDataAtual() {
+            const hoje = new Date();
+            const ano = hoje.getFullYear();
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0'); // +1 porque meses começam em 0
+            const dia = String(hoje.getDate()).padStart(2, '0');
+            const dataFormatada = `${ano}-${mes}-${dia}`; // Formato ISO 8601 (YYYY-MM-DD)
+            document.getElementById('data_de_entrada').value = dataFormatada;
+            console.log('Data definida no campo:', dataFormatada); // Log para depuração
          }
-      }
-
-      // Função para alternar os campos de tombo com base no tipo selecionado
-      function toggleTomboInput() {
-         const tipoTombo = document.getElementById('tipo_tombo').value;
-         const tomboInicialDiv = document.getElementById('tombo_inicial-div');
-         const tomboInicialInput = document.getElementById('tombo_inicial');
-         const tomboLoteManualInput = document.getElementById('tombo_lote_manual');
-         const quantidadeInput = document.getElementById('qtd');
-         const quantidadeHidden = document.getElementById('quantidade_hidden');
-
-         // Resetar estados
-         tomboInicialDiv.style.display = 'block';
-         tomboInicialInput.disabled = true;
-         tomboInicialInput.value = '';
-         tomboLoteManualInput.value = '';
-         quantidadeInput.disabled = false;
-
-         if (tipoTombo === 'AUTO') {
-            atualizarTomboInicial();
-         } else if (tipoTombo === 'LOTE_MANUAL') {
-            const loteModal = new bootstrap.Modal(document.getElementById('loteManualModal'));
-            loteModal.show();
-            gerarInputsTombo(1); // Inicializa com 1 input
-         }
-      }
-
-      // Função para gerar inputs dinâmicos de tombos no modal
-      function gerarInputsTombo(quantidade) {
-         const container = document.getElementById('tombo_inputs_container');
-         container.innerHTML = '';
-         for (let i = 0; i < quantidade; i++) {
-            const div = document.createElement('div');
-            div.className = 'mb-3';
-            div.innerHTML = `
-               <label class="form-label fw-bold">Tombo ${i + 1}</label>
-               <input type="number" class="form-control tombo_lote_input" min="1" data-index="${i}">
-            `;
-            container.appendChild(div);
-         }
-      }
-
-      // Evento para atualizar os inputs quando a quantidade no modal mudar
-      document.getElementById('qtd_itens_lote').addEventListener('input', function () {
-         const quantidade = parseInt(this.value) || 1;
-         gerarInputsTombo(quantidade);
-      });
-
-      // Evento para o botão "Confirmar" do modal
-      document.getElementById('confirmarLoteBtn').addEventListener('click', function () {
-         const inputs = document.querySelectorAll('.tombo_lote_input');
-         const tombos = Array.from(inputs).map(input => parseInt(input.value)).filter(valor => !isNaN(valor));
-
-         // Validação dos campos
-         if (tombos.length === 0 || tombos.length !== inputs.length) {
-            alert('Por favor, preencha todos os campos de tombo.');
-            return;
-         }
-
-         // Verificar duplicatas nos tombos
-         const tombosUnicos = new Set(tombos);
-         if (tombosUnicos.size !== tombos.length) {
-            alert('Os tombos inseridos não podem ser duplicados.');
-            return;
-         }
-
-         // Atualizar o formulário principal
-         const quantidade = tombos.length;
-         document.getElementById('qtd').value = quantidade;
-         document.getElementById('quantidade_hidden').value = quantidade;
-         document.getElementById('tombo_inicial').value = tombos[0]; // Mostra o primeiro tombo
-         document.getElementById('tombo_lote_manual').value = JSON.stringify(tombos);
-
-         // Fechar o modal
-         const loteModal = bootstrap.Modal.getInstance(document.getElementById('loteManualModal'));
-         loteModal.hide();
-      });
-
-      // Limpar os campos do modal ao fechá-lo sem confirmar
-      document.getElementById('loteManualModal').addEventListener('hidden.bs.modal', function () {
-         document.getElementById('qtd_itens_lote').value = '1';
-         document.getElementById('tombo_inputs_container').innerHTML = '';
-         if (!document.getElementById('tombo_lote_manual').value) {
-            document.getElementById('tombo_inicial').value = '';
-            document.getElementById('qtd').value = 1;
-            document.getElementById('quantidade_hidden').value = 1;
-         }
-      });
-
-      // Sincronizar o campo visível "quantidade_visible" com o campo oculto "quantidade"
-      document.getElementById('qtd').addEventListener('input', function () {
-         const quantidade = this.value;
-         document.getElementById('quantidade_hidden').value = quantidade;
-         atualizarTomboInicial();
-      });
-
-      // Validação do formulário e envio assíncrono
-      document.getElementById('formulario-entrada').addEventListener('submit', async function (event) {
-         event.preventDefault();
-
-         const tipoTombo = document.getElementById('tipo_tombo').value;
-         const dataEntrada = document.getElementById('data_de_entrada').value;
-         const quantidade = document.getElementById('qtd').value;
-         const categoria = document.getElementById('categoria').value;
-         const documentoOrigem = document.getElementById('doc_origem').value;
-         const valor = document.getElementById('valor').value;
-         const descricao = document.getElementById('descricao').value;
-         const situacao = document.getElementById('situacao').value;
-         const contaContabil = document.getElementById('conta_contabil').value;
-         const estoque = document.getElementById('estoque').value;
-         const tomboLoteManual = document.getElementById('tombo_lote_manual').value;
-         const observacao = document.getElementById('observacao').value;
-
-         // Validação básica no frontend
-         if (!dataEntrada) return alert('Por favor, preencha a Data de Entrada.');
-         if (!quantidade || quantidade < 1) return alert('A quantidade deve ser maior ou igual a 1.');
-         if (tipoTombo === 'LOTE_MANUAL' && !tomboLoteManual) return alert('Por favor, defina os tombos no modo Lote Manual.');
-         if (categoria === 'Selecione uma categoria...') return alert('Por favor, selecione uma Categoria.');
-         if (!documentoOrigem) return alert('Por favor, preencha o Documento de Origem.');
-         if (!valor || valor <= 0) return alert('Por favor, preencha um Valor Unitário válido.');
-         if (!descricao) return alert('Por favor, preencha a Descrição.');
-         if (situacao === 'Escolha uma opção...') return alert('Por favor, selecione o Estado de Conservação.');
-         if (contaContabil === 'Escolha uma opção...') return alert('Por favor, selecione a Conta Contábil.');
-         if (estoque === 'Escolha uma opção...') return alert('Por favor, selecione o Local de Estoque.');
-
-         // Criar um objeto com os dados do formulário
-         const formDataObj = {
-            data_de_entrada: dataEntrada,
-            quantidade: quantidade,
-            tipo_tombo: tipoTombo,
-            tombo_inicial: document.getElementById('tombo_inicial').value,
-            tombo_lote_manual: tomboLoteManual,
-            categoria: categoria,
-            doc_origem: documentoOrigem,
-            valor: valor,
-            descricao: descricao,
-            situacao: situacao,
-            conta_contabil: contaContabil,
-            estoque: estoque,
-            observacao: observacao
-         };
-
-         // Converter o objeto para URLSearchParams
-         const formDataParams = new URLSearchParams();
-         for (const [key, value] of Object.entries(formDataObj)) {
-            if (value !== undefined && value !== null && value !== '') {
-               formDataParams.append(key, value);
-            }
-         }
-
-         // Logar os dados enviados
-         console.log('Dados enviados ao backend:', formDataParams.toString());
-
-         // Enviar o formulário assincronamente
-         try {
-            const response = await fetch('/entrada', {
-               method: 'POST',
-               headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded'
-               },
-               body: formDataParams
-            });
-
-            if (!response.ok) {
-               const errorData = await response.json();
-               if (errorData.error && errorData.error.includes('já existe no sistema')) {
-                  alert(errorData.error);
-                  return;
+      
+         // Função para atualizar o tombo inicial no modo "Automático"
+         async function atualizarTomboInicial() {
+            const tipoTombo = document.getElementById('tipo_tombo').value;
+            if (tipoTombo === 'AUTO') {
+               try {
+                  const response = await fetch('/ultimo-tombo');
+                  const data = await response.json();
+                  const ultimoTombo = data.ultimoTombo || 108702; // Fallback para 108702 se não houver tombo
+                  const quantidade = parseInt(document.getElementById('qtd').value) || 1;
+                  document.getElementById('tombo_inicial').value = ultimoTombo + 1;
+                  document.getElementById('quantidade_hidden').value = quantidade;
+               } catch (error) {
+                  console.error('Erro ao buscar último tombo:', error);
+                  alert('Erro ao buscar o último tombo. Verifique a conexão com o servidor.');
                }
-               throw new Error('Erro ao registrar a entrada: ' + (errorData.error || 'Erro desconhecido'));
             }
-
-            alert('Entrada registrada com sucesso!');
-            window.location.href = '/tabela/estoqueatual';
-         } catch (error) {
-            console.error('Erro ao enviar o formulário:', error);
-            alert(error.message || 'Erro ao registrar a entrada.');
          }
-      });
-
-      // Inicializar o formulário ao carregar a página
-      document.addEventListener('DOMContentLoaded', function () {
-         atualizarTomboInicial();
-      });
+      
+         // Função para alternar os campos de tombo com base no tipo selecionado
+         function toggleTomboInput() {
+            const tipoTombo = document.getElementById('tipo_tombo').value;
+            const tomboInicialDiv = document.getElementById('tombo_inicial-div');
+            const tomboInicialInput = document.getElementById('tombo_inicial');
+            const tomboLoteManualInput = document.getElementById('tombo_lote_manual');
+            const quantidadeInput = document.getElementById('qtd');
+            const quantidadeHidden = document.getElementById('quantidade_hidden');
+      
+            // Resetar estados
+            tomboInicialDiv.style.display = 'block';
+            tomboInicialInput.disabled = true;
+            tomboInicialInput.value = '';
+            tomboLoteManualInput.value = '';
+            quantidadeInput.disabled = false;
+      
+            if (tipoTombo === 'AUTO') {
+               atualizarTomboInicial();
+            } else if (tipoTombo === 'LOTE_MANUAL') {
+               const loteModal = new bootstrap.Modal(document.getElementById('loteManualModal'));
+               loteModal.show();
+               gerarInputsTombo(1); // Inicializa com 1 input
+            }
+         }
+      
+         // Função para gerar inputs dinâmicos de tombos no modal
+         function gerarInputsTombo(quantidade) {
+            const container = document.getElementById('tombo_inputs_container');
+            container.innerHTML = '';
+            for (let i = 0; i < quantidade; i++) {
+               const div = document.createElement('div');
+               div.className = 'mb-3';
+               div.innerHTML = `
+                  <label class="form-label fw-bold">Tombo ${i + 1}</label>
+                  <input type="number" class="form-control tombo_lote_input" min="1" data-index="${i}">
+               `;
+               container.appendChild(div);
+            }
+         }
+      
+         // Evento para atualizar os inputs quando a quantidade no modal mudar
+         document.getElementById('qtd_itens_lote').addEventListener('input', function () {
+            const quantidade = parseInt(this.value) || 1;
+            gerarInputsTombo(quantidade);
+         });
+      
+         // Evento para o botão "Confirmar" do modal
+         document.getElementById('confirmarLoteBtn').addEventListener('click', function () {
+            const inputs = document.querySelectorAll('.tombo_lote_input');
+            const tombos = Array.from(inputs).map(input => parseInt(input.value)).filter(valor => !isNaN(valor));
+      
+            // Validação dos campos
+            if (tombos.length === 0 || tombos.length !== inputs.length) {
+               alert('Por favor, preencha todos os campos de tombo.');
+               return;
+            }
+      
+            // Verificar duplicatas nos tombos
+            const tombosUnicos = new Set(tombos);
+            if (tombosUnicos.size !== tombos.length) {
+               alert('Os tombos inseridos não podem ser duplicados.');
+               return;
+            }
+      
+            // Atualizar o formulário principal
+            const quantidade = tombos.length;
+            document.getElementById('qtd').value = quantidade;
+            document.getElementById('quantidade_hidden').value = quantidade;
+            document.getElementById('tombo_inicial').value = tombos[0]; // Mostra o primeiro tombo
+            document.getElementById('tombo_lote_manual').value = JSON.stringify(tombos);
+      
+            // Fechar o modal
+            const loteModal = bootstrap.Modal.getInstance(document.getElementById('loteManualModal'));
+            loteModal.hide();
+         });
+      
+         // Limpar os campos do modal ao fechá-lo sem confirmar
+         document.getElementById('loteManualModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('qtd_itens_lote').value = '1';
+            document.getElementById('tombo_inputs_container').innerHTML = '';
+            if (!document.getElementById('tombo_lote_manual').value) {
+               document.getElementById('tombo_inicial').value = '';
+               document.getElementById('qtd').value = 1;
+               document.getElementById('quantidade_hidden').value = 1;
+            }
+         });
+      
+         // Sincronizar o campo visível "quantidade_visible" com o campo oculto "quantidade"
+         document.getElementById('qtd').addEventListener('input', function () {
+            const quantidade = this.value;
+            document.getElementById('quantidade_hidden').value = quantidade;
+            atualizarTomboInicial();
+         });
+      
+         // Validação do formulário e envio assíncrono
+         document.getElementById('formulario-entrada').addEventListener('submit', async function (event) {
+            event.preventDefault();
+      
+            const tipoTombo = document.getElementById('tipo_tombo').value;
+            const dataEntrada = document.getElementById('data_de_entrada').value; // Formato YYYY-MM-DD
+            const quantidade = document.getElementById('qtd').value;
+            const categoria = document.getElementById('categoria').value;
+            const documentoOrigem = document.getElementById('doc_origem').value;
+            const valor = document.getElementById('valor').value;
+            const descricao = document.getElementById('descricao').value;
+            const situacao = document.getElementById('situacao').value;
+            const contaContabil = document.getElementById('conta_contabil').value;
+            const estoque = document.getElementById('estoque').value;
+            const tomboLoteManual = document.getElementById('tombo_lote_manual').value;
+            const observacao = document.getElementById('observacao').value;
+      
+            // Validação básica no frontend
+            if (!dataEntrada) return alert('Por favor, preencha a Data de Entrada.');
+            if (!quantidade || quantidade < 1) return alert('A quantidade deve ser maior ou igual a 1.');
+            if (tipoTombo === 'LOTE_MANUAL' && !tomboLoteManual) return alert('Por favor, defina os tombos no modo Lote Manual.');
+            if (categoria === 'Selecione uma categoria...') return alert('Por favor, selecione uma Categoria.');
+            if (!documentoOrigem) return alert('Por favor, preencha o Documento de Origem.');
+            if (!valor || valor <= 0) return alert('Por favor, preencha um Valor Unitário válido.');
+            if (!descricao) return alert('Por favor, preencha a Descrição.');
+            if (situacao === 'Escolha uma opção...') return alert('Por favor, selecione o Estado de Conservação.');
+            if (contaContabil === 'Escolha uma opção...') return alert('Por favor, selecione a Conta Contábil.');
+            if (estoque === 'Escolha uma opção...') return alert('Por favor, selecione o Local de Estoque.');
+      
+            // Criar um objeto com os dados do formulário
+            const formDataObj = {
+               data_de_entrada: dataEntrada, // Enviado como YYYY-MM-DD
+               quantidade: quantidade,
+               tipo_tombo: tipoTombo,
+               tombo_inicial: document.getElementById('tombo_inicial').value,
+               tombo_lote_manual: tomboLoteManual,
+               categoria: categoria,
+               doc_origem: documentoOrigem,
+               valor: valor,
+               descricao: descricao,
+               situacao: situacao,
+               conta_contabil: contaContabil,
+               estoque: estoque,
+               observacao: observacao
+            };
+      
+            // Converter o objeto para URLSearchParams
+            const formDataParams = new URLSearchParams();
+            for (const [key, value] of Object.entries(formDataObj)) {
+               if (value !== undefined && value !== null && value !== '') {
+                  formDataParams.append(key, value);
+               }
+            }
+      
+            // Logar os dados enviados
+            console.log('Dados enviados ao backend:', formDataParams.toString());
+      
+            // Enviar o formulário assincronamente
+            try {
+               const response = await fetch('/entrada', {
+                  method: 'POST',
+                  headers: {
+                     'Content-Type': 'application/x-www-form-urlencoded'
+                  },
+                  body: formDataParams
+               });
+      
+               if (!response.ok) {
+                  const errorData = await response.json();
+                  if (errorData.error && errorData.error.includes('já existe no sistema')) {
+                     alert(errorData.error);
+                     return;
+                  }
+                  throw new Error('Erro ao registrar a entrada: ' + (errorData.error || 'Erro desconhecido'));
+               }
+      
+               alert('Entrada registrada com sucesso!');
+               window.location.href = '/tabela/estoqueatual';
+            } catch (error) {
+               console.error('Erro ao enviar o formulário:', error);
+               alert(error.message || 'Erro ao registrar a entrada.');
+            }
+         });
+      
+         // Inicializar o formulário ao carregar a página
+         document.addEventListener('DOMContentLoaded', function () {
+            setDataAtual(); // Define a data atual no campo no formato YYYY-MM-DD
+            atualizarTomboInicial(); // Atualiza o tombo inicial
+         });
    </script>
 </body>
 </html>
