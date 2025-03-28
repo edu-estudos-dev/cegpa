@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<%- include('../partials/head', { title: title }) %>
+<body class="bg-light">
+  <div class="container mt-5">
+    <div class="card shadow">
+      <div class="card-header bg-danger text-white">
+        <h2 class="mb-0"><%= title %></h2>
+      </div>
+      <div class="card-body">
+        <h3 class="text-danger"><%= message %></h3>
+        <% if (stack) { %>
+          <div class="mt-4">
+            <h4>Detalhes do erro:</h4>
+            <pre class="alert alert-secondary"><%= stack %></pre>
+          </div>
+        <% } %>
+        <a href="/" class="btn btn-primary">Voltar à página inicial</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

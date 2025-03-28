@@ -18,4 +18,10 @@ router.post("/login", loginLogoutController.login);
 // Rota GET para encerrar sessão do usuário
 router.get("/logout", loginLogoutController.logout);
 
+// Novas rotas para recuperação de senha
+router.get("/forgot-password", loginLogoutController.renderForgotPasswordForm);
+router.post("/forgot-password", loginLogoutController.handleForgotPassword);
+router.get("/reset-password/:token", loginLogoutController.renderResetPasswordForm);
+router.post("/reset-password/:token", loginLogoutController.handleResetPassword);
+
 export default router;
