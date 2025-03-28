@@ -24,6 +24,7 @@ class LoginLogoutController {
             // Also populate req.user for consistency
             req.user = req.session.user;
             console.log('Sessão iniciada para:', req.session.user);
+            console.log('Dados salvos na sessão antes de salvar:', req.session.user); // Novo log
             console.log('ID da sessão após definir user:', req.sessionID);
             // Salvar a sessão explicitamente antes do redirecionamento
             req.session.save((err) => {

@@ -45,14 +45,20 @@ app.use(
   })
 );
 
+// Log de sessão antes de qualquer rota
+app.use((req, res, next) => {
+   console.log(`Rota acessada: ${req.path}, Session ID: ${req.sessionID}, User: ${JSON.stringify(req.session.user)}`);
+   next();
+});
+
 // Rotas que não precisam de autenticação
 app.use("/", loginLogoutRoutes);
 
-// Aplicando o middleware de autenticação apenas às rotas protegidas
-app.use("/painel", painelRoutes);
-app.use("/", isAuthenticated, estoqueRoutes); 
-app.use("/", isAuthenticated, pesquisaRoutes); 
-app.use("/", isAuthenticated, sequenciaRoutes); 
+// Aplicando o middleware de autenticação explicitamente para /painel
+app.use("/painel", isAuthenticated, painelRoutes); // Alteração aqui
+app.use("/", isAuthenticated, estoqueRoutes);
+app.use("/", isAuthenticated, pesquisaRoutes);
+app.use("/", isAuthenticated, sequenciaRoutes);
 
 app.use((req, res, next) => {
   res.status(404).render("404");
