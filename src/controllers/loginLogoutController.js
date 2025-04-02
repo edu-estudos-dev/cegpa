@@ -7,16 +7,19 @@ import dotenv from 'dotenv';
 // Carrega variáveis de ambiente
 dotenv.config();
 
-// Configuração do serviço de e-mail
+// Configuração do serviço de e-mail com OAuth2
 const transporter = nodemailer.createTransport({
-   host: 'smtp.gmail.com',
-   port: 465,
-   secure: true, // Usar SSL
-   auth: {
-     user: process.env.EMAIL_USER,
-     pass: process.env.EMAIL_PASS
-   }
- });
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // Usar SSL
+  auth: {
+    type: 'OAuth2',
+    user: process.env.EMAIL_USER,
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    refreshToken: process.env.GOOGLE_REFRESH_TOKEN
+  }
+});
 
 class LoginLogoutController {
   // Exibe formulário de login
@@ -145,29 +148,22 @@ class LoginLogoutController {
   // Processa solicitação de recuperação
   handleForgotPassword = async (req, res) => {
     const { email } = req.body;
-    
+  
     try {
       const user = await loginLogoutModel.findUserByEmail(email);
-      
       if (!user) {
         return res.render('forgot-password', {
           erro: 'E-mail não encontrado',
           success: ''
         });
       }
-
-      // Gera token seguro
+  
       const resetToken = crypto.randomBytes(20).toString('hex');
-      const resetTokenExpires = Date.now() + 3600000; // 1 hora
-
-      await loginLogoutModel.setResetToken(
-        user.matricula, 
-        resetToken, 
-        resetTokenExpires
-      );
-
-      // Configura e-mail
-      const resetUrl = `http://${req.headers.host}/reset-password/${resetToken}`;
+      const resetTokenExpires = Date.now() + 3600000;
+  
+      await loginLogoutModel.setResetToken(user.matricula, resetToken, resetTokenExpires);
+  
+      const resetUrl = `http://localhost:8080/reset-password/${resetToken}`; // Para testes locais
       const mailOptions = {
         from: `"Suporte do Sistema" <${process.env.EMAIL_USER}>`,
         to: email,
@@ -179,15 +175,21 @@ class LoginLogoutController {
           <p><em>O link expira em 1 hora</em></p>
         `
       };
-
-      // Envia e-mail
-      await transporter.sendMail(mailOptions);
-      
-      res.render('forgot-password', {
-        success: 'Instruções enviadas para seu e-mail',
-        erro: ''
-      });
-
+  
+      try {
+        await transporter.sendMail(mailOptions);
+        console.log(`E-mail enviado para ${email} com token ${resetToken}`);
+        res.render('forgot-password', {
+          success: 'Instruções enviadas para seu e-mail',
+          erro: ''
+        });
+      } catch (mailError) {
+        console.error('Erro detalhado ao enviar e-mail:', mailError);
+        return res.render('forgot-password', {
+          erro: `Erro ao enviar e-mail: ${mailError.message}`,
+          success: ''
+        });
+      }
     } catch (error) {
       console.error('Erro na recuperação:', error);
       res.render('forgot-password', {
@@ -196,7 +198,7 @@ class LoginLogoutController {
       });
     }
   };
-
+  
   // Exibe formulário de redefinição de senha
   renderResetPasswordForm = async (req, res) => {
     const { token } = req.params;

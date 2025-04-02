@@ -28,7 +28,6 @@ app.use(methodOverride("_method"));
 // Middleware para logar todas as requisições
 app.use((req, res, next) => {
    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-   console.log('Cabeçalhos da requisição:', req.headers);
    next();
 });
 

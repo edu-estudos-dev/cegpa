@@ -117,8 +117,8 @@
                         <label for="searchInput" class="form-label fw-bold">Pesquisar:</label>
                         <div class="search-container">
                            <input type="text" id="searchInput" class="form-control" placeholder="Digite o número do tombo ou uma palavra da descrição">
-                           <button id="searchBtn" class="btn btn-primary btn-md w-15">Pesquisar</button>
-                           <button id="clearSearch" class="btn btn-secondary btn-md w-15">Limpar</button>
+                           <button id="searchBtn" class="btn btn-secondary btn-md w-15">Pesquisar</button>
+                           <button id="clearSearch" class="btn btn-warning btn-md w-15">Limpar</button>
                         </div>
                      </div>
                      <div id="tombo_div" class="mb-2">
@@ -535,16 +535,41 @@
                   searchAndHighlight();
                }
             });
-      
             const clearSearch = () => {
                const searchInput = document.getElementById('searchInput');
                searchInput.value = '';
                const tomboItems = document.querySelectorAll('#tombos-list .form-check');
+               const selectedTombos = document.getElementById('selected-tombos');
+
+               // Limpar destaques
                tomboItems.forEach(item => {
                   item.classList.remove('tombo-highlighted');
                });
+
+               // Desmarcar todos os checkboxes
+               const checkboxes = document.querySelectorAll('#tombos-list input[type="checkbox"]');
+               checkboxes.forEach(checkbox => {
+                  checkbox.checked = false;
+               });
+
+               // Limpar a lista de itens selecionados
+               selectedTombos.innerHTML = '';
+
+               // Limpar o textarea de observação
+               document.getElementById('observacao').value = '';
+
+               // Limpar os outros campos de input
+               document.getElementById('referencia').value = ''; // NUP (Suite)
+               document.getElementById('destino').value = ''; // Destino
+               document.getElementById('postoGrad').value = ''; // Posto/Graduação
+               document.getElementById('mf_recebedor').value = ''; // Mat. Funcional
+               document.getElementById('tel_recebedor').value = ''; // Telefone
+               document.getElementById('nome_do_recebedor').value = ''; // Nome Completo
+
+               // O campo "Termo de Responsabilidade" (doc_saida) é readonly e gerado automaticamente,
+               // então não precisa ser limpo manualmente aqui, mas será recarregado ao recarregar a página
             };
-      
+                  
             document.getElementById('clearSearch').addEventListener('click', clearSearch);
          });
       </script>

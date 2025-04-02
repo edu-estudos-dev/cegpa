@@ -196,136 +196,139 @@ class EstoqueController {
    // Método para criar um novo item no estoque
    create = async (req, res) => {
       console.log('Dados recebidos no método create (req.body):', req.body);
-
+  
       try {
-         const {
-            data_de_entrada,
-            quantidade,
-            tipo_tombo,
-            tombo_inicial,
-            tombo_lote_manual,
-            categoria,
-            doc_origem,
-            valor,
-            descricao,
-            situacao,
-            conta_contabil,
-            estoque,
-            observacao,
-         } = req.body;
-
-         // Validação básica
-         if (!data_de_entrada)
-            return res
-               .status(400)
-               .json({ error: 'A data de entrada é obrigatória.' });
-         if (!quantidade || Number(quantidade) <= 0)
-            return res
-               .status(400)
-               .json({ error: 'A quantidade deve ser maior que zero.' });
-         if (!tipo_tombo)
-            return res
-               .status(400)
-               .json({ error: 'O tipo de tombo é obrigatório.' });
-         if (!categoria || categoria === 'Selecione...')
-            return res
-               .status(400)
-               .json({ error: 'A categoria é obrigatória.' });
-         if (!doc_origem)
-            return res
-               .status(400)
-               .json({ error: 'O documento de origem é obrigatório.' });
-         if (!valor || Number(valor) <= 0)
-            return res
-               .status(400)
-               .json({ error: 'O valor deve ser maior que zero.' });
-         if (!descricao)
-            return res
-               .status(400)
-               .json({ error: 'A descrição é obrigatória.' });
-         if (!situacao || situacao === 'Escolha uma opção...')
-            return res.status(400).json({ error: 'A situação é obrigatória.' });
-         if (!conta_contabil || conta_contabil === 'Escolha uma opção...')
-            return res
-               .status(400)
-               .json({ error: 'A conta contábil é obrigatória.' });
-         if (!estoque || estoque === 'Escolha uma opção...')
-            return res.status(400).json({ error: 'O estoque é obrigatório.' });
-
-         const safeData = {
-            data_de_entrada,
-            quantidade: Number(quantidade),
-            tipo_tombo: tipo_tombo || 'AUTO',
-            categoria: categoria.toUpperCase(),
-            doc_origem: doc_origem.toUpperCase(),
-            valor: Number(valor),
-            descricao: descricao.toUpperCase(),
-            situacao: situacao.toUpperCase(),
-            conta_contabil: conta_contabil.toUpperCase(),
-            estoque: estoque.toUpperCase(),
-            observacao: observacao ? observacao.toUpperCase() : null,
-         };
-
-         let tombos = [];
-         if (safeData.tipo_tombo === 'AUTO') {
-            const ultimoTombo = await estoqueModel.getUltimoTombo();
-            const tomboInicial = ultimoTombo;
-            for (let i = 0; i < safeData.quantidade; i++) {
-               tombos.push(tomboInicial + 1 + i);
-            }
-         } else if (safeData.tipo_tombo === 'LOTE_MANUAL') {
-            if (!tombo_lote_manual)
-               return res
-                  .status(400)
-                  .json({ error: 'A lista de tombos do lote é obrigatória.' });
-            tombos = JSON.parse(tombo_lote_manual);
-            if (tombos.length !== safeData.quantidade)
-               return res
-                  .status(400)
-                  .json({
-                     error: 'A quantidade de tombos não corresponde à quantidade informada.',
+          const {
+              data_de_entrada,
+              quantidade,
+              tipo_tombo,
+              tombo_inicial,
+              tombo_final, 
+              tombo_lote_manual,
+              categoria,
+              doc_origem,
+              valor,
+              descricao,
+              situacao,
+              conta_contabil,
+              estoque,
+              observacao,
+          } = req.body;
+  
+          // Validação básica
+          if (!data_de_entrada)
+              return res.status(400).json({ error: 'A data de entrada é obrigatória.' });
+          if (!quantidade || Number(quantidade) <= 0)
+              return res.status(400).json({ error: 'A quantidade deve ser maior que zero.' });
+          if (!tipo_tombo)
+              return res.status(400).json({ error: 'O tipo de tombo é obrigatório.' });
+          if (!categoria || categoria === 'Selecione...')
+              return res.status(400).json({ error: 'A categoria é obrigatória.' });
+          if (!doc_origem)
+              return res.status(400).json({ error: 'O documento de origem é obrigatório.' });
+          if (!valor || Number(valor) <= 0)
+              return res.status(400).json({ error: 'O valor deve ser maior que zero.' });
+          if (!descricao)
+              return res.status(400).json({ error: 'A descrição é obrigatória.' });
+          if (!situacao || situacao === 'Escolha uma opção...')
+              return res.status(400).json({ error: 'A situação é obrigatória.' });
+          if (!conta_contabil || conta_contabil === 'Escolha uma opção...')
+              return res.status(400).json({ error: 'A conta contábil é obrigatória.' });
+          if (!estoque || estoque === 'Escolha uma opção...')
+              return res.status(400).json({ error: 'O estoque é obrigatório.' });
+  
+          const safeData = {
+              data_de_entrada,
+              quantidade: Number(quantidade),
+              tipo_tombo: tipo_tombo || 'AUTO',
+              categoria: categoria.toUpperCase(),
+              doc_origem: doc_origem.toUpperCase(),
+              valor: Number(valor),
+              descricao: descricao.toUpperCase(),
+              situacao: situacao.toUpperCase(),
+              conta_contabil: conta_contabil.toUpperCase(),
+              estoque: estoque.toUpperCase(),
+              observacao: observacao ? observacao.toUpperCase() : null,
+          };
+  
+          let tombos = [];
+          if (safeData.tipo_tombo === 'AUTO') {
+              const ultimoTombo = await estoqueModel.getUltimoTombo();
+              const tomboInicial = ultimoTombo;
+              for (let i = 0; i < safeData.quantidade; i++) {
+                  tombos.push(tomboInicial + 1 + i);
+              }
+          } else if (safeData.tipo_tombo === 'LOTE_MANUAL') {
+              if (!tombo_lote_manual)
+                  return res.status(400).json({ error: 'A lista de tombos do lote é obrigatória.' });
+              tombos = JSON.parse(tombo_lote_manual);
+              if (tombos.length !== safeData.quantidade)
+                  return res.status(400).json({
+                      error: 'A quantidade de tombos não corresponde à quantidade informada.',
                   });
-
-            // Verificar duplicatas no banco
-            for (const tombo of tombos) {
-               const tomboExistente = await estoqueModel.getInfoByTombo(tombo);
-               if (tomboExistente)
-                  return res
-                     .status(400)
-                     .json({ error: `O tombo ${tombo} já existe no sistema.` });
-            }
-         }
-
-         // Inserir os itens no banco de dados
-         for (const tombo of tombos) {
-            await estoqueModel.createEstoque(
-               safeData.data_de_entrada,
-               safeData.descricao,
-               tombo,
-               1,
-               safeData.categoria,
-               safeData.conta_contabil,
-               safeData.doc_origem,
-               safeData.estoque,
-               safeData.valor,
-               safeData.situacao,
-               safeData.observacao,
-               safeData.tipo_tombo
-            );
-         }
-
-         res.status(200).json({ message: 'Entrada registrada com sucesso!' });
+  
+              // Verificar duplicatas no banco
+              for (const tombo of tombos) {
+                  const tomboExistente = await estoqueModel.getInfoByTombo(tombo);
+                  if (tomboExistente)
+                      return res.status(400).json({ error: `O tombo ${tombo} já existe no sistema.` });
+              }
+          } else if (safeData.tipo_tombo === 'LOTE') {
+              if (!tombo_inicial || !tombo_final) {
+                  return res.status(400).json({ error: 'Tombo inicial e final são obrigatórios para o tipo LOTE.' });
+              }
+  
+              const inicio = Number(tombo_inicial);
+              const fim = Number(tombo_final);
+  
+              if (inicio >= fim) {
+                  return res.status(400).json({ error: 'O tombo inicial deve ser menor que o tombo final.' });
+              }
+  
+              if ((fim - inicio + 1) !== safeData.quantidade) {
+                  return res.status(400).json({
+                      error: 'A quantidade informada não corresponde ao intervalo de tombos.'
+                  });
+              }
+  
+              // Verificar duplicatas no banco
+              for (let tombo = inicio; tombo <= fim; tombo++) {
+                  const tomboExistente = await estoqueModel.getInfoByTombo(tombo);
+                  if (tomboExistente) {
+                      return res.status(400).json({ error: `O tombo ${tombo} já existe no sistema.` });
+                  }
+                  tombos.push(tombo);
+              }
+          }
+  
+          // Preparar os itens para inserção em lote
+          const itens = tombos.map(tombo => ({
+              data_de_entrada: safeData.data_de_entrada,
+              descricao: safeData.descricao,
+              tombo,
+              quantidade: 1,
+              categoria: safeData.categoria,
+              conta_contabil: safeData.conta_contabil,
+              doc_origem: safeData.doc_origem,
+              estoque: safeData.estoque,
+              valor: safeData.valor,
+              situacao: safeData.situacao,
+              observacao: safeData.observacao,
+              tipo_tombo: safeData.tipo_tombo
+          }));
+  
+          // Inserir todos os itens de uma vez usando createEstoqueLote
+          await estoqueModel.createEstoqueLote(itens);
+  
+          res.status(200).json({ message: 'Entrada registrada com sucesso!' });
       } catch (error) {
-         console.error(
-            'Erro ao registrar entrada:',
-            error.message,
-            error.stack
-         );
-         res.status(500).json({
-            error: 'Erro interno ao registrar a entrada.',
-         });
+          console.error('Erro ao registrar entrada:', error.message, error.stack);
+          res.status(500).json({
+              error: 'Erro interno ao registrar a entrada.',
+          });
       }
-   };
+  };
+   
 
    // Método para obter o último tombo (endpoint para o frontend)
    fetchUltimoTombo = async (req, res) => {

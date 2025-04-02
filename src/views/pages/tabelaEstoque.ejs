@@ -18,10 +18,10 @@
    }
 
    .table-container {
-      max-height: 72vh;
+      max-height: 75vh;
       overflow-y: auto;
       overflow-x: hidden;
-      min-height: 72vh;
+      min-height: 75vh;
       padding-top: 0; /* Remove padding extra no topo, se necessário */
    }
 
@@ -81,23 +81,6 @@
 
    .w-90 {
       width: 90% !important;
-   }
-
-   @media (max-width: 1366px) {
-      .caixa-externa {
-         max-height: 73vh;
-      }
-
-      .table-container {
-         max-height: 55vh;
-         overflow-y: auto;
-         overflow-x: hidden;
-         min-height: 55vh;
-      }
-
-      .botoes {
-         margin-bottom: 1rem;
-      }
    }
 
    /* Ajuste das colunas */
@@ -213,6 +196,15 @@
    .sort-desc::before {
       opacity: 0.7;
    }
+
+   @media (max-width: 1024) {
+      .caixa-externa {
+         background-color: #d40a0a;
+      }
+   }
+
+
+
 </style>
 
 <body>
@@ -236,7 +228,7 @@
 
          <div class="table-container">
             <div class="search-bar sticky-top">
-               <div class="d-flex justify-content-end align-items-center mb-2">
+               <div style="background-color: transparent;"  class="d-flex justify-content-end align-items-center mb-2">
                   <label for="searchTombo" class="me-2 fw-bold">Pesquisar:</label>
                   <input type="text" id="searchTombo" placeholder="Digite o número do tombo, categoria, descrição, doc de origem ou conservação" style="width: 520px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; margin-right: 10px;">
                   <button id="clearSearch" class="btn btn-secondary btn-md me-2">Limpar</button>
