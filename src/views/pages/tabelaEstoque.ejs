@@ -202,9 +202,6 @@
          background-color: #d40a0a;
       }
    }
-
-
-
 </style>
 
 <body>
@@ -228,7 +225,7 @@
 
          <div class="table-container">
             <div class="search-bar sticky-top">
-               <div style="background-color: transparent;"  class="d-flex justify-content-end align-items-center mb-2">
+               <div style="background-color: transparent;" class="d-flex justify-content-end align-items-center mb-2">
                   <label for="searchTombo" class="me-2 fw-bold">Pesquisar:</label>
                   <input type="text" id="searchTombo" placeholder="Digite o número do tombo, categoria, descrição, doc de origem ou conservação" style="width: 520px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; margin-right: 10px;">
                   <button id="clearSearch" class="btn btn-secondary btn-md me-2">Limpar</button>
@@ -281,6 +278,9 @@
    </div>
 
    <script>
+      // Passa o role do usuário do backend para o JavaScript
+      const userRole = '<%= userRole %>';
+
       document.addEventListener('DOMContentLoaded', () => {
          // Função para formatar valores no padrão de moeda brasileira
          const formatarMoeda = (valor) => {
@@ -289,8 +289,8 @@
                currency: 'BRL'
             });
          };
-   
-         // Seleciona todas as células da coluna "Valor" e formata os valores
+
+         // Formata os valores na coluna "Valor"
          const valorCells = document.querySelectorAll('.valor-cell');
          valorCells.forEach(cell => {
             const valor = cell.getAttribute('data-valor');
@@ -298,174 +298,163 @@
                cell.textContent = formatarMoeda(valor);
             }
          });
-   
+
          // Script para o botão "Detalhes"
          const viewButtons = document.querySelectorAll('.btn-details');
          viewButtons.forEach(button => {
             button.addEventListener('click', async (event) => {
                const itemId = event.target.getAttribute('data-id');
-               const url = `/visualizar/${itemId}`;
+               const url = `/visualizar/${itemId}`; // Ajustado para remover o prefixo /estoque
                try {
-                  console.log("Fetching data for item ID:", itemId);
                   const response = await fetch(url);
-                  if (!response.ok) {
-                     const errorText = await response.text();
-                     console.error('Erro na resposta do servidor:', response.status, errorText);
-                     throw new Error(`ERRO: ${response.status} - ${response.statusText.toUpperCase()}`);
-                  }
+                  if (!response.ok) throw new Error(`Erro: ${response.status}`);
                   const item = await response.json();
-                  console.log("Data fetched:", item);
-                  if (item) {
-                     const modalHtml = `
-                        <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
-                           <div class="modal-dialog modal-dialog-centered" style="transform: scale(1);">
-                              <div class="modal-content">
-                                 <div class="modal-header bg-success text-white d-flex justify-content-between">
-                                    <h3 class="modal-title ms-3" id="infoTomboModalLabel">Informações do Tombo</h3>
-                                    <button type="button" class="btn text-white" data-bs-dismiss="modal" aria-label="Close">
-                                       <i class="fa fa-times fa-lg"></i>
-                                    </button>
-                                 </div>
-                                 <div class="modal-body">
-                                    <div class="card">
-                                       <div class="card-body pb-0">
-                                          <h5 class="card-title">${item.descricao || 'N/A'}</h5>
-                                          <p class="card-text">
-                                             <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
-                                             <strong>ID:</strong> ${item.id || 'N/A'} <br/>
-                                             <strong>Tombo:</strong> ${item.tombo || 'N/A'} <br/>
-                                             <strong>Data de Entrada:</strong> ${item.data_de_entrada || 'N/A'} <br/>
-                                             <strong>Categoria:</strong> ${item.categoria || 'N/A'} <br/>
-                                             <strong>Doc Origem:</strong> ${item.doc_origem || 'N/A'} <br/>
-                                             <strong>Estoque:</strong> ${item.estoque || 'N/A'} <br/>
-                                             <strong>Valor:</strong> ${formatarMoeda(item.valor) || 'N/A'} <br/>
-                                             <strong>Situação:</strong> ${item.situacao || 'N/A'} <br/>
-                                             <strong>Observação:</strong> ${item.observacao || 'N/A'} <br/>
-                                          </p>
-                                       </div>
+                  const modalHtml = `
+                     <div class="modal fade show" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                           <div class="modal-content">
+                              <div class="modal-header bg-success text-white d-flex justify-content-between">
+                                 <h3 class="modal-title ms-3" id="infoTomboModalLabel">Informações do Tombo</h3>
+                                 <button type="button" class="btn text-white" data-bs-dismiss="modal" aria-label="Close">
+                                    <i class="fa fa-times fa-lg"></i>
+                                 </button>
+                              </div>
+                              <div class="modal-body">
+                                 <div class="card">
+                                    <div class="card-body pb-0">
+                                       <h5 class="card-title">${item.descricao || 'N/A'}</h5>
+                                       <p class="card-text">
+                                          <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
+                                          <strong>ID:</strong> ${item.id || 'N/A'} <br/>
+                                          <strong>Tombo:</strong> ${item.tombo || 'N/A'} <br/>
+                                          <strong>Data de Entrada:</strong> ${item.data_de_entrada || 'N/A'} <br/>
+                                          <strong>Categoria:</strong> ${item.categoria || 'N/A'} <br/>
+                                          <strong>Doc Origem:</strong> ${item.doc_origem || 'N/A'} <br/>
+                                          <strong>Estoque:</strong> ${item.estoque || 'N/A'} <br/>
+                                          <strong>Valor:</strong> ${formatarMoeda(item.valor) || 'N/A'} <br/>
+                                          <strong>Situação:</strong> ${item.situacao || 'N/A'} <br/>
+                                          <strong>Observação:</strong> ${item.observacao || 'N/A'} <br/>
+                                       </p>
                                     </div>
                                  </div>
                               </div>
                            </div>
-                        </div>`;
-                     const modalDiv = document.createElement('div');
-                     modalDiv.innerHTML = modalHtml;
-                     document.body.appendChild(modalDiv);
-   
-                     const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
-                        backdrop: true,
-                        focus: true
-                     });
-                     infoTomboModal.show();
-   
-                     infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
-                        modalDiv.remove();
-                     });
-                  } else {
-                     throw new Error('Item não retornado pelo servidor.');
-                  }
+                        </div>
+                     </div>`;
+                  const modalDiv = document.createElement('div');
+                  modalDiv.innerHTML = modalHtml;
+                  document.body.appendChild(modalDiv);
+
+                  const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'));
+                  infoTomboModal.show();
+
+                  infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
+                     modalDiv.remove();
+                  });
                } catch (error) {
-                  console.error('ERRO AO BUSCAR INFORMAÇÕES DO ITEM:', error.message.toUpperCase());
-                  alert(`Erro ao carregar os detalhes: ${error.message}. Verifique o console para mais informações.`);
+                  console.error('Erro ao buscar detalhes:', error);
+                  alert('Erro ao carregar os detalhes do item.');
                }
             });
          });
-   
+
          // Script para o botão "Exportar Relatório"
          const exportarBtn = document.getElementById('exportarBtn');
          exportarBtn.addEventListener('click', (event) => {
             event.preventDefault();
             const formato = document.getElementById('formato').value;
-            window.location.href = `/relatorio/geral?formato=${formato}`;
+            window.location.href = `/relatorio/geral?formato=${formato}`; // Ajustado para remover /estoque
          });
-   
-         // Script para o botão "Excluir"
+
+         // Script para os botões "Editar" e "Excluir" com alerta para não-admin
+         const editButtons = document.querySelectorAll('.btn-edit');
          const deleteButtons = document.querySelectorAll('.btn-delete');
-         deleteButtons.forEach(button => {
-            button.addEventListener('click', async (event) => {
-               event.preventDefault();
-   
-               const confirmation = confirm("Você tem certeza que deseja excluir este item? Esse processo é irreversível.");
-               if (!confirmation) {
-                  return;
-               }
-   
-               const url = event.target.href;
-               try {
-                  const response = await fetch(url, { method: 'DELETE' });
-                  const result = await response.json();
-   
-                  if (response.ok) {
-                     alert('Item deletado com sucesso!');
-                     location.reload();
-                  } else {
-                     alert(result.msg);
-                  }
-               } catch (error) {
-                  console.error('Erro ao deletar item:', error);
-                  alert('Erro ao deletar o item');
+
+         editButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+               console.log('userRole ao clicar em Editar:', userRole); // Adicionado para debug
+               if (userRole !== 'admin') {
+                  event.preventDefault();
+                  alert('Você não tem permissão para editar itens. Apenas administradores podem realizar esta ação.');
                }
             });
          });
-   
-          // Script para pesquisa por tombo, categoria, descrição, conservação, estoque e doc_origem
+
+         deleteButtons.forEach(button => {
+            button.addEventListener('click', async (event) => {
+               if (userRole !== 'admin') {
+                  event.preventDefault();
+                  alert('Você não tem permissão para excluir itens. Apenas administradores podem realizar esta ação.');
+               } else {
+                  event.preventDefault();
+                  const confirmation = confirm("Você tem certeza que deseja excluir este item? Esse processo é irreversível.");
+                  if (!confirmation) return;
+
+                  const url = event.target.href;
+                  try {
+                     const response = await fetch(url, { method: 'DELETE' });
+                     const result = await response.json();
+                     if (response.ok) {
+                        alert('Item deletado com sucesso!');
+                        location.reload();
+                     } else {
+                        alert(result.msg);
+                     }
+                  } catch (error) {
+                     console.error('Erro ao deletar item:', error);
+                     alert('Erro ao deletar o item');
+                  }
+               }
+            });
+         });
+
+         // Script para pesquisa (permanece igual)
          document.getElementById('searchTombo').addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase().trim();
-            console.log('Termo digitado:', searchTerm);
             filterRows(searchTerm);
          });
-         
-         // Script para o botão "Limpar"
+
          document.getElementById('clearSearch').addEventListener('click', () => {
             document.getElementById('searchTombo').value = '';
             filterRows('');
          });
-   
+
          function filterRows(searchTerm) {
             const table = document.getElementById('estoqueTable');
             const rows = table.getElementsByTagName('tr');
-   
             for (let i = 1; i < rows.length; i++) {
                const cells = rows[i].getElementsByTagName('td');
                if (cells.length < 8) {
                   rows[i].classList.add('hidden');
                   continue;
                }
-   
                const descricaoCell = cells[2].textContent.toLowerCase().trim();
                const tomboCell = cells[3].textContent.toLowerCase().trim();
                const categoriaCell = cells[4].textContent.toLowerCase().trim();
                const estoqueCell = cells[5].textContent.toLowerCase().trim();
                const conservacaoCell = cells[6].textContent.toLowerCase().trim();
                const docOrigemCell = cells[7].textContent.toLowerCase().trim();
-               console.log(`Comparando descricaoCell: ${descricaoCell}, tomboCell: ${tomboCell}, categoriaCell: ${categoriaCell}, estoqueCell: ${estoqueCell}, conservacaoCell: ${conservacaoCell} com termo: ${searchTerm}`);
-   
-               const matches = descricaoCell.includes(searchTerm) || 
-                        tomboCell.includes(searchTerm) || 
-                        categoriaCell.includes(searchTerm) || 
-                        estoqueCell.includes(searchTerm) || 
-                        conservacaoCell.includes(searchTerm) || 
-                        docOrigemCell.includes(searchTerm); 
-   
-                        if (searchTerm === '' || matches) {
-                           rows[i].classList.remove('hidden');
-                           console.log(`Linha ${i} mostrada: descricao=${descricaoCell}, tombo=${tomboCell}, categoria=${categoriaCell}, estoque=${estoqueCell}, conservacao=${conservacaoCell}, docOrigem=${docOrigemCell}`);
-                        } else {
-                           rows[i].classList.add('hidden');
-                        }
-                     }
-                  }
-                  
-         // Estado para rastrear a direção da ordenação por coluna
-         const sortStates = {};
+               const matches = descricaoCell.includes(searchTerm) ||
+                              tomboCell.includes(searchTerm) ||
+                              categoriaCell.includes(searchTerm) ||
+                              estoqueCell.includes(searchTerm) ||
+                              conservacaoCell.includes(searchTerm) ||
+                              docOrigemCell.includes(searchTerm);
+               if (searchTerm === '' || matches) {
+                  rows[i].classList.remove('hidden');
+               } else {
+                  rows[i].classList.add('hidden');
+               }
+            }
+         }
 
-         // Função para ordenar a tabela
+         // Script para ordenação (permanece igual)
+         const sortStates = {};
          function sortTable(columnIndex, isNumeric = false) {
             const table = document.getElementById('estoqueTable');
             const tbody = table.querySelector('tbody');
             const rows = Array.from(tbody.getElementsByTagName('tr')).filter(row => !row.classList.contains('hidden'));
             const th = document.querySelector(`th[data-col="${columnIndex}"]`);
-
             const currentState = sortStates[columnIndex] || 'none';
             const newState = currentState === 'asc' ? 'desc' : 'asc';
             sortStates[columnIndex] = newState;
@@ -473,18 +462,16 @@
             document.querySelectorAll('.sortable').forEach(header => {
                header.classList.remove('sort-asc', 'sort-desc');
             });
-
             th.classList.add(newState === 'asc' ? 'sort-asc' : 'sort-desc');
 
             rows.sort((a, b) => {
                let aValue = a.cells[columnIndex].textContent.trim();
                let bValue = b.cells[columnIndex].textContent.trim();
-
-               if (columnIndex === 0 || columnIndex === 3) { // ID (0) e Tombo (3) são numéricos
+               if (columnIndex === 0 || columnIndex === 3) {
                   aValue = parseInt(aValue) || 0;
                   bValue = parseInt(bValue) || 0;
                   return newState === 'asc' ? aValue - bValue : bValue - aValue;
-               } else if (columnIndex === 1) { // Data de Entrada
+               } else if (columnIndex === 1) {
                   const parseDate = (dateStr) => {
                      const [day, month, year] = dateStr.split('/').map(Number);
                      return new Date(year, month - 1, day);
@@ -492,7 +479,7 @@
                   const aDate = parseDate(aValue);
                   const bDate = parseDate(bValue);
                   return newState === 'asc' ? aDate - bDate : bDate - aDate;
-               } else { // Outras colunas (textuais)
+               } else {
                   return newState === 'asc'
                      ? aValue.localeCompare(bValue, 'pt-BR')
                      : bValue.localeCompare(aValue, 'pt-BR');
@@ -502,7 +489,6 @@
             rows.forEach(row => tbody.appendChild(row));
          }
 
-         // Evento de clique para colunas ordenáveis (já inclui o novo th de ID)
          document.querySelectorAll('.sortable').forEach(th => {
             th.addEventListener('click', () => {
                const columnIndex = parseInt(th.getAttribute('data-col'));
@@ -511,5 +497,7 @@
          });
       });
    </script>
+
+
 </body>
 </html>

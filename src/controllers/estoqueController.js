@@ -180,13 +180,17 @@ class EstoqueController {
    // Método para listar todos os itens no estoque
    getAllEstoque = async (req, res) => {
       try {
-         const estoque = await estoqueModel.getAllEstoque();
-         res.status(200).render('tabelaEstoque', { estoque });
+        const estoque = await estoqueModel.getAllEstoque();
+        console.log('req.session.user:', req.session.user); // Debug
+        res.status(200).render('tabelaEstoque', {
+          estoque,
+          userRole: req.session.user.role
+        });
       } catch (error) {
-         console.error('Erro ao carregar o estoque:', error);
-         res.status(500).json({ error: 'Erro ao carregar o estoque.' });
+        console.error('Erro ao carregar o estoque:', error);
+        res.status(500).json({ error: 'Erro ao carregar o estoque.' });
       }
-   };
+    };
 
    // Método para renderizar o formulário de cadastro de estoque
    renderEntradaForm = (_, res) => {

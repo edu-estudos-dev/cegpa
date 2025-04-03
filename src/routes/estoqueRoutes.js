@@ -1,5 +1,7 @@
 import express from 'express';
 import estoqueController from '../controllers/estoqueController.js';
+import isAuthenticated from '../middleware/auth.js'; // Middleware de autenticação
+import checkRole from '../middleware/checkRole.js'; // Middleware de permissão
 
 const router = express.Router();
 
@@ -15,11 +17,17 @@ router.use((req, res, next) => {
                   Rotas para a ENTRADA de itens no Estoque
 *********************************************************************************/
 
-// Rota para renderizar o formulário de edição
-router.get('/editar/:id', estoqueController.renderEditForm);
+// // Rota para renderizar o formulário de edição
+// router.get('/editar/:id', estoqueController.renderEditForm);
 
-// Rota para atualizar os dados do item
-router.put('/editar/:id', estoqueController.update);
+// // Rota para atualizar os dados do item
+// router.put('/editar/:id', estoqueController.update);
+
+// Rota para renderizar o formulário de edição (apenas admin)
+router.get('/editar/:id', isAuthenticated, checkRole(['admin']), estoqueController.renderEditForm);
+
+// Rota para atualizar os dados do item (apenas admin)
+router.put('/editar/:id', isAuthenticated, checkRole(['admin']), estoqueController.update);
 
 // Rota para listar apenas os itens novos do estoque
 router.get('/itens-novos', estoqueController.getItensNovos);
@@ -42,8 +50,11 @@ router.post('/entrada', estoqueController.create);
 // Rota para obter o último tombo
 router.get('/ultimo-tombo', estoqueController.fetchUltimoTombo);
 
-// Rota para mostrar tabela com estoque atual
-router.get('/tabela/estoqueatual', estoqueController.getAllEstoque);
+// // Rota para mostrar tabela com estoque atual
+// router.get('/tabela/estoqueatual', estoqueController.getAllEstoque);
+
+// Rota para mostrar tabela com estoque atual (acessível a todos autenticados)
+router.get('/tabela/estoqueatual', isAuthenticated, estoqueController.getAllEstoque);
 
 // Rota para visualizar item específico (entrada)
 router.get('/visualizar/:id', estoqueController.visualizarItem);
@@ -51,8 +62,12 @@ router.get('/visualizar/:id', estoqueController.visualizarItem);
 // Rota para mostrar quantidade única de itens no estoque
 router.get('/qtde-unica', estoqueController.getQtdeUnicaEstoque);
 
-// Rota para excluir um item do estoque
-router.delete('/excluir/:id', estoqueController.destroy);
+// // Rota para excluir um item do estoque
+// router.delete('/excluir/:id', estoqueController.destroy);
+
+// Rota para excluir um item do estoque (apenas admin)
+router.delete('/excluir/:id', isAuthenticated, checkRole(['admin']), estoqueController.destroy);
+
 
 /* ********************************************************************************
                   Rotas para a SAÍDA de itens no Estoque

@@ -11,7 +11,7 @@ dotenv.config();
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
-  secure: true, // Usar SSL
+  secure: true,
   auth: {
     type: 'OAuth2',
     user: process.env.EMAIL_USER,
@@ -22,7 +22,6 @@ const transporter = nodemailer.createTransport({
 });
 
 class LoginLogoutController {
-  // Exibe formulário de login
   renderLoginForm = (_, res, success) => {
     res.render('login', { 
       erro: '', 
@@ -30,7 +29,6 @@ class LoginLogoutController {
     });
   };
 
-  // Exibe formulário de registro
   renderRegisterForm = (req, res) => {
     res.render('register', { 
       erro: '', 
@@ -38,7 +36,6 @@ class LoginLogoutController {
     });
   };
 
-  // Processa o login
   login = async (req, res) => {
     const { matricula, senha } = req.body;
     const lowerCaseMatricula = matricula.toLowerCase().trim();
@@ -51,6 +48,7 @@ class LoginLogoutController {
           matricula: user.matricula,
           nome_completo: user.nome_completo,
           posto_grad: user.posto_grad,
+          role: user.role // Adiciona o role à sessão
         };
 
         req.session.save((err) => {
@@ -60,6 +58,7 @@ class LoginLogoutController {
               erro: 'Erro interno ao iniciar sessão' 
             });
           }
+          console.log('Sessão salva com sucesso:', req.session.user);
           res.redirect('/painel');
         });
       } else {
@@ -75,7 +74,6 @@ class LoginLogoutController {
     }
   };
 
-  // Processa logout
   logout = (req, res) => {
     req.session.destroy((err) => {
       if (err) {
@@ -87,12 +85,10 @@ class LoginLogoutController {
     });
   };
 
-  // Processa registro de novo usuário
   createUser = async (req, res) => {
     const { matricula, nome_completo, postoGrad, senha, email } = req.body;
     
     try {
-      // Validação de campos obrigatórios
       if (!matricula || !nome_completo || !postoGrad || !senha || !email) {
         return res.render('register', {
           erro: 'Todos os campos são obrigatórios',
@@ -100,7 +96,6 @@ class LoginLogoutController {
         });
       }
 
-      // Validação de formato de e-mail
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         return res.render('register', {
@@ -124,12 +119,10 @@ class LoginLogoutController {
 
     } catch (error) {
       console.error('Erro no registro:', error);
-      
       let errorMessage = 'Erro no cadastro';
       if (error.message.includes('Duplicate entry')) {
         errorMessage = 'Matrícula ou e-mail já cadastrados';
       }
-
       res.render('register', {
         erro: errorMessage,
         success: ''
@@ -137,7 +130,6 @@ class LoginLogoutController {
     }
   };
 
-  // Exibe formulário de recuperação de senha
   renderForgotPasswordForm = (req, res) => {
     res.render('forgot-password', {
       erro: req.query.erro || '',
@@ -145,7 +137,6 @@ class LoginLogoutController {
     });
   };
 
-  // Processa solicitação de recuperação
   handleForgotPassword = async (req, res) => {
     const { email } = req.body;
   
@@ -163,7 +154,7 @@ class LoginLogoutController {
   
       await loginLogoutModel.setResetToken(user.matricula, resetToken, resetTokenExpires);
   
-      const resetUrl = `http://localhost:8080/reset-password/${resetToken}`; // Para testes locais
+      const resetUrl = `http://localhost:8080/reset-password/${resetToken}`;
       const mailOptions = {
         from: `"Suporte do Sistema" <${process.env.EMAIL_USER}>`,
         to: email,
@@ -176,20 +167,12 @@ class LoginLogoutController {
         `
       };
   
-      try {
-        await transporter.sendMail(mailOptions);
-        console.log(`E-mail enviado para ${email} com token ${resetToken}`);
-        res.render('forgot-password', {
-          success: 'Instruções enviadas para seu e-mail',
-          erro: ''
-        });
-      } catch (mailError) {
-        console.error('Erro detalhado ao enviar e-mail:', mailError);
-        return res.render('forgot-password', {
-          erro: `Erro ao enviar e-mail: ${mailError.message}`,
-          success: ''
-        });
-      }
+      await transporter.sendMail(mailOptions);
+      console.log(`E-mail enviado para ${email} com token ${resetToken}`);
+      res.render('forgot-password', {
+        success: 'Instruções enviadas para seu e-mail',
+        erro: ''
+      });
     } catch (error) {
       console.error('Erro na recuperação:', error);
       res.render('forgot-password', {
@@ -199,7 +182,6 @@ class LoginLogoutController {
     }
   };
   
-  // Exibe formulário de redefinição de senha
   renderResetPasswordForm = async (req, res) => {
     const { token } = req.params;
     
@@ -219,7 +201,6 @@ class LoginLogoutController {
         erro: '',
         success: ''
       });
-
     } catch (error) {
       console.error('Erro ao validar token:', error);
       res.render('reset-password', {
@@ -229,13 +210,11 @@ class LoginLogoutController {
     }
   };
 
-  // Processa redefinição de senha
   handleResetPassword = async (req, res) => {
     const { token } = req.params;
     const { senha } = req.body;
     
     try {
-      // Validação de força da senha
       if (senha.trim().length < 6) {
         return res.render('reset-password', {
           token,
@@ -258,14 +237,12 @@ class LoginLogoutController {
       await loginLogoutModel.updatePassword(user.matricula, hashedPassword);
       await loginLogoutModel.clearResetToken(user.matricula);
 
-      // Encerra todas as sessões existentes
       req.session.destroy(() => {
         res.render('login', {
           success: 'Senha redefinida com sucesso! Faça login',
           erro: ''
         });
       });
-
     } catch (error) {
       console.error('Erro na redefinição:', error);
       res.render('reset-password', {
