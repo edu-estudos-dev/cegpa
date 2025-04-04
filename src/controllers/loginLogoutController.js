@@ -15,19 +15,16 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  },
-  logger: true,
-  debug: true
+  }
 });
 
 // Verifica a conexão com o servidor SMTP ao iniciar
-transporter.verify((error, success) => {
+transporter.verify((error) => {
   if (error) {
     console.error('Erro ao verificar o transporter:', error);
-  } else {
-    console.log('Transporter configurado com sucesso:', success);
   }
 });
+
 // Verifica a conexão com o servidor SMTP ao iniciar
 transporter.verify((error, success) => {
   if (error) {
@@ -38,6 +35,7 @@ transporter.verify((error, success) => {
 });
 
 class LoginLogoutController {
+  // Método para renderizar o form de login
   renderLoginForm = (req, res, success) => {
     res.render('login', { 
       erro: '', 
@@ -45,6 +43,7 @@ class LoginLogoutController {
     });
   };
 
+  // Método para renderizar o form de registro
   renderRegisterForm = (req, res) => {
     res.render('register', { 
       erro: '', 
@@ -52,6 +51,7 @@ class LoginLogoutController {
     });
   };
 
+  // Método para fazer o login
   login = async (req, res) => {
     const { matricula, senha } = req.body;
     const lowerCaseMatricula = matricula.toLowerCase().trim();
@@ -66,7 +66,7 @@ class LoginLogoutController {
           posto_grad: user.posto_grad,
           role: user.role
         };
-
+  
         req.session.save((err) => {
           if (err) {
             console.error('Erro ao salvar sessão:', err);
@@ -74,7 +74,6 @@ class LoginLogoutController {
               erro: 'Erro interno ao iniciar sessão' 
             });
           }
-          console.log('Sessão salva com sucesso:', req.session.user);
           res.redirect('/painel');
         });
       } else {
@@ -90,6 +89,7 @@ class LoginLogoutController {
     }
   };
 
+    // Método para fazer o logout
   logout = (req, res) => {
     req.session.destroy((err) => {
       if (err) {
@@ -101,6 +101,7 @@ class LoginLogoutController {
     });
   };
 
+  // Método criar um usuário
   createUser = async (req, res) => {
     const { matricula, nome_completo, postoGrad, senha, email } = req.body;
     
@@ -146,6 +147,7 @@ class LoginLogoutController {
     }
   };
 
+    // Método para renderizar o form de recuperação de senha
   renderForgotPasswordForm = (req, res) => {
     res.render('forgot-password', {
       erro: req.query.erro || '',
@@ -153,10 +155,10 @@ class LoginLogoutController {
     });
   };
 
-
+  // Método para processa a solicitação de recuperação de senha
   handleForgotPassword = async (req, res) => {
     const { email } = req.body;
-  
+
     try {
       const user = await loginLogoutModel.findUserByEmail(email);
       if (!user) {
@@ -165,12 +167,12 @@ class LoginLogoutController {
           success: ''
         });
       }
-  
+
       const resetToken = crypto.randomBytes(20).toString('hex');
       const resetTokenExpires = Date.now() + 3600000;
-  
+
       await loginLogoutModel.setResetToken(user.matricula, resetToken, resetTokenExpires);
-  
+
       const resetUrl = `http://localhost:8080/reset-password/${resetToken}`;
       const mailOptions = {
         from: `"Suporte do Sistema" <${process.env.EMAIL_USER}>`,
@@ -183,9 +185,8 @@ class LoginLogoutController {
           <p><em>O link expira em 1 hora</em></p>
         `
       };
-  
+
       await transporter.sendMail(mailOptions);
-      console.log(`E-mail enviado para ${email} com token ${resetToken}`);
       res.render('forgot-password', {
         success: 'Instruções enviadas para seu e-mail',
         erro: ''
@@ -205,6 +206,7 @@ class LoginLogoutController {
     }
   };
 
+  /// Método para resetar a senha
   renderResetPasswordForm = async (req, res) => {
     const { token } = req.params;
     
@@ -233,6 +235,7 @@ class LoginLogoutController {
     }
   };
 
+  // Método para resetar a senha
   handleResetPassword = async (req, res) => {
     const { token } = req.params;
     const { senha } = req.body;

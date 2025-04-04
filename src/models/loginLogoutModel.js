@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import connection from '../../db_config/connection.js';
 
 class LoginModel {
+  // Método: verifyUser - Verifica se o usuário existe e se a senha está correta
   verifyUser = async (matricula, senha) => {
     const query = `SELECT * FROM usuarios WHERE matricula = ?`;
     matricula = matricula.toLowerCase().trim();
@@ -20,7 +21,6 @@ class LoginModel {
           };
         }
       }
-      console.log('Matrícula não encontrada ou senha incorreta');
       return null;
     } catch (error) {
       console.error('Erro ao verificar usuário:', error);
@@ -28,6 +28,7 @@ class LoginModel {
     }
   };
 
+  // Método: createUser - Cria um novo usuário no banco de dados
   createUser = async (matricula, nome_completo, postoGrad, senha, email) => {
     const query = `
       INSERT INTO usuarios 
@@ -39,8 +40,8 @@ class LoginModel {
       const hashedPassword = await bcrypt.hash(senha.trim(), 10);
       await connection.execute(query, [
         matricula,
-        nome_completo.trim(),
-        postoGrad.trim(),
+        nome_completo.trim().toUpperCase(),
+        postoGrad.trim().toUpperCase(),
         hashedPassword,
         email.toLowerCase().trim()
       ]);
@@ -51,28 +52,33 @@ class LoginModel {
     }
   };
 
+  // Método: findUserByEmail - Busca um usuário pelo email
   findUserByEmail = async (email) => {
     const query = 'SELECT * FROM usuarios WHERE email = ?';
     const [results] = await connection.execute(query, [email]);
     return results[0];
   };
 
+  // Método: setResetToken - Define o token de redefinição de senha e sua expiração
   setResetToken = async (matricula, token, expires) => {
     const query = 'UPDATE usuarios SET reset_token = ?, reset_token_expires = ? WHERE matricula = ?';
     await connection.execute(query, [token, new Date(expires), matricula]);
   };
 
+  // Método: findUserByResetToken - Busca um usuário pelo token de redefinição
   findUserByResetToken = async (token) => {
     const query = 'SELECT * FROM usuarios WHERE reset_token = ?';
     const [results] = await connection.execute(query, [token]);
     return results[0];
   };
 
+  // Método: updatePassword - Atualiza a senha do usuário
   updatePassword = async (matricula, newPassword) => {
     const query = 'UPDATE usuarios SET senha_hash = ? WHERE matricula = ?';
     await connection.execute(query, [newPassword, matricula]);
   };
 
+  // Método: clearResetToken - Limpa o token de redefinição de senha
   clearResetToken = async (matricula) => {
     const query = 'UPDATE usuarios SET reset_token = NULL, reset_token_expires = NULL WHERE matricula = ?';
     await connection.execute(query, [matricula]);

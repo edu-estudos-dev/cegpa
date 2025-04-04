@@ -333,7 +333,6 @@ class EstoqueController {
       }
   };
    
-
    // Método para obter o último tombo (endpoint para o frontend)
    fetchUltimoTombo = async (req, res) => {
       try {
