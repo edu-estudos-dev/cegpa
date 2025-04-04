@@ -7,22 +7,38 @@ import dotenv from 'dotenv';
 // Carrega variáveis de ambiente
 dotenv.config();
 
-// Configuração do serviço de e-mail com OAuth2
+// Configuração do serviço de e-mail com o Gmail
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false, // Usa TLS
   auth: {
-    type: 'OAuth2',
     user: process.env.EMAIL_USER,
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    refreshToken: process.env.GOOGLE_REFRESH_TOKEN
+    pass: process.env.EMAIL_PASS
+  },
+  logger: true,
+  debug: true
+});
+
+// Verifica a conexão com o servidor SMTP ao iniciar
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('Erro ao verificar o transporter:', error);
+  } else {
+    console.log('Transporter configurado com sucesso:', success);
+  }
+});
+// Verifica a conexão com o servidor SMTP ao iniciar
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('Erro ao verificar o transporter:', error);
+  } else {
+    console.log('Transporter configurado com sucesso:', success);
   }
 });
 
 class LoginLogoutController {
-  renderLoginForm = (_, res, success) => {
+  renderLoginForm = (req, res, success) => {
     res.render('login', { 
       erro: '', 
       success: success || '' 
@@ -48,7 +64,7 @@ class LoginLogoutController {
           matricula: user.matricula,
           nome_completo: user.nome_completo,
           posto_grad: user.posto_grad,
-          role: user.role // Adiciona o role à sessão
+          role: user.role
         };
 
         req.session.save((err) => {
@@ -137,6 +153,7 @@ class LoginLogoutController {
     });
   };
 
+
   handleForgotPassword = async (req, res) => {
     const { email } = req.body;
   
@@ -175,13 +192,19 @@ class LoginLogoutController {
       });
     } catch (error) {
       console.error('Erro na recuperação:', error);
+      let errorMessage = 'Falha ao processar solicitação';
+      if (error.code === 'EAUTH') {
+        errorMessage = 'Erro de autenticação: verifique o email e a senha no .env';
+      } else if (error.code === 'ECONNREFUSED') {
+        errorMessage = 'Erro de conexão: verifique sua rede ou o servidor SMTP';
+      }
       res.render('forgot-password', {
-        erro: 'Falha ao processar solicitação',
+        erro: errorMessage,
         success: ''
       });
     }
   };
-  
+
   renderResetPasswordForm = async (req, res) => {
     const { token } = req.params;
     
