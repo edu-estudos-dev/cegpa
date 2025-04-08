@@ -526,7 +526,7 @@ class EstoqueController {
             didDrawPage: function (data) {
                const pageNumber = doc.internal.getNumberOfPages();
                const pageStr = `Página ${data.pageNumber} de ${pageNumber}`;
-               doc.setFontSize(8);
+               doc.setFontSize(6);
                doc.text(pageStr, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 8, { align: 'center' });
             },
          });
@@ -644,9 +644,9 @@ class EstoqueController {
             format: 'a4',
          });
 
-         doc.setFontSize(16);
+         doc.setFontSize(15);
          doc.text(title, 10, 15);
-         doc.setFontSize(10);
+         doc.setFontSize(9);
          doc.text(
             `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
             10,

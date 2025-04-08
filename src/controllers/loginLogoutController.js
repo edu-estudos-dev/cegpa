@@ -66,6 +66,7 @@ class LoginLogoutController {
           posto_grad: user.posto_grad,
           role: user.role
         };
+        console.log('Sessão definida com sucesso:', req.session.user);
   
         req.session.save((err) => {
           if (err) {
@@ -74,6 +75,7 @@ class LoginLogoutController {
               erro: 'Erro interno ao iniciar sessão' 
             });
           }
+          console.log('Sessão salva, redirecionando para /painel');
           res.redirect('/painel');
         });
       } else {
