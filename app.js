@@ -27,14 +27,15 @@ app.use(methodOverride("_method"));
 
 app.use(
   session({
-    secret: "sua_chave_secreta",
-    resave: false,
-    saveUninitialized: false,
+    secret: 'sua_chave_secreta_aqui', // Use uma chave forte e única
+    resave: false,                   // Não salva a sessão se não houver alterações
+    saveUninitialized: false,        // Não cria sessão para usuários não autenticados
     cookie: {
-      secure: false, // Defina como true se usar HTTPS
-      maxAge: 24 * 60 * 60 * 1000, // 24 horas
-      httpOnly: true,
-    },
+      secure: false,                // Use `true` apenas em HTTPS
+      maxAge: 24 * 60 * 60 * 1000,  // Sessão válida por 24 horas
+      httpOnly: true,               // Impede acesso ao cookie via JavaScript
+      sameSite: 'lax'               // Controla o envio do cookie em requisições cross-site
+    }
   })
 );
 

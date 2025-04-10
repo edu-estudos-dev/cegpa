@@ -471,7 +471,7 @@ class EstoqueController {
          { header: 'Valor', dataKey: 'valor', width: 20 },
          { header: 'Doc Origem', dataKey: 'doc_origem', width: 30 },
       ];
-
+   
       const rows = data.map((item) => ({
          id: item.id,
          data_entrada: new Date(item.data_de_entrada).toLocaleDateString('pt-BR'),
@@ -488,26 +488,32 @@ class EstoqueController {
             : 'N/A',
          doc_origem: item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A',
       }));
-
+   
       if (formato === 'pdf') {
          const doc = new jsPDF({
             orientation: 'landscape',
             unit: 'mm',
             format: 'a4',
          });
-
+   
+         // Definir o título do relatório
          doc.setFontSize(16);
          doc.text(title, 10, 15);
          doc.setFontSize(10);
-         doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 10, 22);
-
+   
+         // Texto "Gerado em" e número da página na mesma linha (apenas na primeira página inicialmente)
+         const generatedText = `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`;
+         const pageNumberText = `Página 1`;
+         doc.text(generatedText, 10, 22);
+         doc.text(pageNumberText, doc.internal.pageSize.width - 10, 22, { align: 'right' });
+   
          doc.autoTable({
-            startY: 28,
-            margin: { left: 5, right: 5 },
+            startY: 25, // Início da tabela na primeira página
+            margin: { left: 5, right: 5, top: 25 }, // Reservar espaço no topo de todas as páginas
             head: [columns.map((col) => col.header)],
             body: rows.map((row) => columns.map((col) => row[col.dataKey])),
             styles: {
-               fontSize: 8,
+               fontSize: 7,
                cellPadding: 2,
                halign: 'center',
                overflow: 'linebreak',
@@ -521,16 +527,17 @@ class EstoqueController {
                acc[index] = { cellWidth: col.width };
                return acc;
             }, {}),
-            
-            // Adicionar números de página
             didDrawPage: function (data) {
-               const pageNumber = doc.internal.getNumberOfPages();
-               const pageStr = `Página ${data.pageNumber} de ${pageNumber}`;
-               doc.setFontSize(6);
-               doc.text(pageStr, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 8, { align: 'center' });
+               // Reimprimir o título e o texto "Gerado em" em todas as páginas
+               doc.setFontSize(16);
+               doc.text(title, 10, 15);
+               doc.setFontSize(10);
+               const pageStr = `Página ${data.pageNumber}`;
+               doc.text(generatedText, 10, 22);
+               doc.text(pageStr, doc.internal.pageSize.width - 10, 22, { align: 'right' });
             },
          });
-
+   
          const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
          res.setHeader('Content-Type', 'application/pdf');
          res.setHeader(
@@ -541,16 +548,16 @@ class EstoqueController {
       } else if (formato === 'excel') {
          const workbook = new ExcelJS.Workbook();
          const worksheet = workbook.addWorksheet(title);
-
+   
          // Adicionar o título e mesclar as células
          const titleRow = worksheet.addRow([title]);
          worksheet.mergeCells(`A1:I1`);
          worksheet.getCell('A1').alignment = { horizontal: 'center' };
          worksheet.getCell('A1').font = { size: 16, bold: true };
-
+   
          // Adicionar a data de geração
          worksheet.addRow([`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`]);
-
+   
          // Adicionar o cabeçalho
          worksheet.addRow(columns.map((col) => col.header)).eachCell((cell) => {
             cell.fill = {
@@ -561,15 +568,15 @@ class EstoqueController {
             cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
             cell.alignment = { horizontal: 'center' };
          });
-
+   
          // Adicionar os dados
          rows.forEach((row) => {
             worksheet.addRow(columns.map((col) => row[col.dataKey]));
          });
-
+   
          // Ajustar a largura das colunas
          worksheet.columns = columns.map((col) => ({ width: col.width / 6 }));
-
+   
          const excelBuffer = await workbook.xlsx.writeBuffer();
          res.setHeader(
             'Content-Type',
@@ -606,132 +613,140 @@ class EstoqueController {
 
    // Método privado para geração de relatórios de itens pagos (PDF ou Excel)
    _generatePDFItensPagos = async (res, data, title, formato) => {
-      const columns = [
-         { header: 'ID', dataKey: 'id', width: 10 },
-         { header: 'Saída', dataKey: 'data_de_saida', width: 20 },
-         { header: 'Descrição', dataKey: 'descricao', width: 65 },
-         { header: 'Tombo', dataKey: 'tombo_estoqueatual', width: 25 },
-         { header: 'Destino', dataKey: 'destino', width: 30 },
-         { header: 'NUP (Suite)', dataKey: 'referencia', width: 50 },
-         { header: 'Doc Saída', dataKey: 'doc_saida', width: 25 },
-         { header: 'Doc Origem', dataKey: 'doc_origem', width: 30 },
-         { header: 'Valor', dataKey: 'valor', width: 22 },
-      ];
+   const columns = [
+      { header: 'ID', dataKey: 'id', width: 10 },
+      { header: 'Saída', dataKey: 'data_de_saida', width: 18 },
+      { header: 'Descrição', dataKey: 'descricao', width: 111 },
+      { header: 'Tombo', dataKey: 'tombo_estoqueatual', width: 17 },
+      { header: 'Destino', dataKey: 'destino', width: 28 },
+      { header: 'NUP (Suite)', dataKey: 'referencia', width: 22 },
+      { header: 'Doc Saída', dataKey: 'doc_saida', width: 20 },
+      { header: 'Doc Origem', dataKey: 'doc_origem', width: 35 },
+      { header: 'Valor', dataKey: 'valor', width: 20 },
+   ];
 
-      const rows = data.map((item) => ({
-         id: item.id,
-         data_de_saida: new Date(item.data_de_saida).toLocaleDateString(
-            'pt-BR'
-         ),
-         descricao: item.descricao ? item.descricao.toUpperCase() : 'N/A',
-         tombo_estoqueatual: item.tombo_estoqueatual || 'N/A',
-         destino: item.destino ? item.destino.toUpperCase() : 'N/A',
-         referencia: item.referencia ? item.referencia.toUpperCase() : 'N/A',
-         doc_saida: item.doc_saida || 'N/A',
-         doc_origem: item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A',
-         valor: item.valor
-            ? parseFloat(item.valor).toLocaleString('pt-BR', {
-                 style: 'currency',
-                 currency: 'BRL',
-              })
-            : 'N/A',
-      }));
+   const rows = data.map((item) => ({
+      id: item.id,
+      data_de_saida: new Date(item.data_de_saida).toLocaleDateString('pt-BR'),
+      descricao: item.descricao ? item.descricao.toUpperCase() : 'N/A',
+      tombo_estoqueatual: item.tombo_estoqueatual || 'N/A',
+      destino: item.destino ? item.destino.toUpperCase() : 'N/A',
+      referencia: item.referencia ? item.referencia.toUpperCase() : 'N/A',
+      doc_saida: item.doc_saida || 'N/A',
+      doc_origem: item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A',
+      valor: item.valor
+         ? parseFloat(item.valor).toLocaleString('pt-BR', {
+              style: 'currency',
+              currency: 'BRL',
+           })
+         : 'N/A',
+   }));
 
-      if (formato === 'pdf') {
-         const doc = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: 'a4',
-         });
+   if (formato === 'pdf') {
+      const doc = new jsPDF({
+         orientation: 'landscape',
+         unit: 'mm',
+         format: 'a4',
+      });
 
-         doc.setFontSize(15);
-         doc.text(title, 10, 15);
-         doc.setFontSize(9);
-         doc.text(
-            `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
-            10,
-            22
-         );
+      // Definir o título do relatório
+      doc.setFontSize(15);
+      doc.text(title, 10, 15);
+      doc.setFontSize(9);
 
-         doc.autoTable({
-            startY: 30,
-            margin: { left: 10, right: 10 },
-            head: [columns.map((col) => col.header)],
-            body: rows.map((row) => columns.map((col) => row[col.dataKey])),
-            styles: {
-               fontSize: 8,
-               cellPadding: 2,
-               halign: 'center',
-               overflow: 'linebreak',
-            },
-            headStyles: {
-               fillColor: [34, 139, 34],
-               textColor: 255,
-               fontStyle: 'bold',
-            },
-            columnStyles: columns.reduce((acc, col, index) => {
-               acc[index] = { cellWidth: col.width };
-               return acc;
-            }, {}),
-         });
+      // Texto "Gerado em" e número da página na mesma linha (apenas na primeira página inicialmente)
+      const generatedText = `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`;
+      const pageNumberText = `Página 1`;
+      doc.text(generatedText, 10, 22);
+      doc.text(pageNumberText, doc.internal.pageSize.width - 10, 22, { align: 'right' });
 
-         const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
-         res.setHeader('Content-Type', 'application/pdf');
-         res.setHeader(
-            'Content-Disposition',
-            `attachment; filename=${title.replace(/ /g, '_')}.pdf`
-         );
-         res.send(pdfBuffer);
-      } else if (formato === 'excel') {
-         const workbook = new ExcelJS.Workbook();
-         const worksheet = workbook.addWorksheet(title);
+      doc.autoTable({
+         startY: 25, // Início da tabela na primeira página
+         margin: { left: 8, right: 8, top: 25 }, // Reservar espaço no topo de todas as páginas
+         head: [columns.map((col) => col.header)],
+         body: rows.map((row) => columns.map((col) => row[col.dataKey])),
+         styles: {
+            fontSize: 7,
+            cellPadding: 2,
+            halign: 'center',
+            overflow: 'linebreak',
+         },
+         headStyles: {
+            fillColor: [34, 139, 34],
+            textColor: 255,
+            fontStyle: 'bold',
+         },
+         columnStyles: columns.reduce((acc, col, index) => {
+            acc[index] = { cellWidth: col.width };
+            return acc;
+         }, {}),
+         didDrawPage: function (data) {
+            // Reimprimir o título e o texto "Gerado em" em todas as páginas
+            doc.setFontSize(15);
+            doc.text(title, 10, 15);
+            doc.setFontSize(9);
+            const pageStr = `Página ${data.pageNumber}`;
+            doc.text(generatedText, 10, 22);
+            doc.text(pageStr, doc.internal.pageSize.width - 10, 22, { align: 'right' });
+         },
+      });
 
-         // Adicionar o título e mesclar as células
-         const titleRow = worksheet.addRow([title]); // Adiciona a linha do título
-         worksheet.mergeCells('A1:I1'); // Mescla as células diretamente no worksheet
-         worksheet.getCell('A1').alignment = { horizontal: 'center' };
-         worksheet.getCell('A1').font = { size: 16, bold: true };
+      const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader(
+         'Content-Disposition',
+         `attachment; filename=${title.replace(/ /g, '_')}.pdf`
+      );
+      res.send(pdfBuffer);
+   } else if (formato === 'excel') {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet(title);
 
-         // Adicionar a data de geração
-         worksheet.addRow([
-            `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
-         ]);
+      // Adicionar o título e mesclar as células
+      const titleRow = worksheet.addRow([title]);
+      worksheet.mergeCells('A1:I1');
+      worksheet.getCell('A1').alignment = { horizontal: 'center' };
+      worksheet.getCell('A1').font = { size: 16, bold: true };
 
-         // Adicionar o cabeçalho
-         worksheet.addRow(columns.map((col) => col.header)).eachCell((cell) => {
-            cell.fill = {
-               type: 'pattern',
-               pattern: 'solid',
-               fgColor: { argb: 'FF228B22' },
-            };
-            cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
-            cell.alignment = { horizontal: 'center' };
-         });
+      // Adicionar a data de geração
+      worksheet.addRow([`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`]);
 
-         // Adicionar os dados
-         rows.forEach((row) => {
-            worksheet.addRow(columns.map((col) => row[col.dataKey]));
-         });
+      // Adicionar o cabeçalho
+      worksheet.addRow(columns.map((col) => col.header)).eachCell((cell) => {
+         cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF228B22' },
+         };
+         cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+         cell.alignment = { horizontal: 'center' };
+      });
 
-         // Ajustar a largura das colunas
-         worksheet.columns = columns.map((col) => ({ width: col.width / 6 }));
+      // Adicionar os dados
+      rows.forEach((row) => {
+         worksheet.addRow(columns.map((col) => row[col.dataKey]));
+      });
 
-         const excelBuffer = await workbook.xlsx.writeBuffer();
-         res.setHeader(
-            'Content-Type',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-         );
-         res.setHeader(
-            'Content-Disposition',
-            `attachment; filename=${title.replace(/ /g, '_')}.xlsx`
-         );
-         res.send(excelBuffer);
-      } else {
-         res.status(400).json({
-            error: 'Formato inválido. Use "pdf" ou "excel".',
-         });
-      }
-   };
+      // Ajustar a largura das colunas
+      worksheet.columns = columns.map((col) => ({ width: col.width / 6 }));
+
+      const excelBuffer = await workbook.xlsx.writeBuffer();
+      res.setHeader(
+         'Content-Type',
+         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      );
+      res.setHeader(
+         'Content-Disposition',
+         `attachment; filename=${title.replace(/ /g, '_')}.xlsx`
+      );
+      res.send(excelBuffer);
+   } else {
+      res.status(400).json({
+         error: 'Formato inválido. Use "pdf" ou "excel".',
+      });
+   }
+};
+  
 
    /* ********************************************************************************
                   Métodos para a SAÍDA de itens no Estoque

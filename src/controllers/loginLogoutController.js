@@ -67,7 +67,7 @@ class LoginLogoutController {
           role: user.role
         };
         console.log('Sessão definida com sucesso:', req.session.user);
-  
+
         req.session.save((err) => {
           if (err) {
             console.error('Erro ao salvar sessão:', err);
@@ -91,7 +91,7 @@ class LoginLogoutController {
     }
   };
 
-    // Método para fazer o logout
+  // Método para fazer o logout
   logout = (req, res) => {
     req.session.destroy((err) => {
       if (err) {

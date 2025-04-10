@@ -33,7 +33,7 @@
 
 // export default isAuthenticated;
 
-import connection from '../../db_config/connection.js';
+// import connection from '../../db_config/connection.js';
 
 const isAuthenticated = (req, res, next) => {
   if (req.session && req.session.user) {
