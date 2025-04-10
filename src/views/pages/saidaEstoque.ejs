@@ -91,6 +91,35 @@
       background-color: #218838; /* Verde mais escuro no hover */
       border-color: #1e7e34;
    }
+
+   @media (max-width: 1366px) {
+      *{
+         font-size: 0.83rem;
+         overflow: hidden;
+      }
+
+      #tombos-container {
+         height: 52vh;
+         max-height: 52vh;
+      }
+
+      #selected-tombos-container {
+         height: 200px !important; /* Ajustado para ser proporcional */
+         max-height: 5vh;
+         min-height: 13vh;
+      }
+
+      .caixa-externa{
+         margin: 0 auto;
+         height: 84vh;
+         max-height: 84vh;
+         padding: 0.5rem !important;
+      }
+   
+      .w-10{
+         width: 12%;
+      }
+   }
 </style>
 
 <body>
@@ -103,7 +132,7 @@
                style="border-bottom: 4px solid orange;">
                <h2 class="text-white mt-0 fw-bold flex-grow-1 text-center">Formulário de Saída</h2>
                <div class="d-flex align-items-center">
-                  <button id="submit-btn" type="submit" class="btn btn-outline-light btn-header fw-bold">Registrar Saída</button>
+                  <button id="submit-btn" type="submit" class="btn btn-outline-light  fw-bold">Registrar Saída</button>
                </div>
             </div>
          </div>
