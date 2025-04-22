@@ -169,8 +169,7 @@ class EstoqueModel {
       // Logar todos os tombos para depuração
       const queryAll = `SELECT tombo FROM estoqueatual ORDER BY tombo ASC`;
       const [allResults] = await connection.execute(queryAll);
-      console.log('Todos os tombos no banco:', allResults);
-
+    
       // Consulta para obter o maior tombo
       const query = `
          SELECT tombo

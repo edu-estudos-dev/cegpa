@@ -68,12 +68,6 @@
       opacity: 1;
    }
 
-   @media (max-width: 1920px) {
-      .table-container {
-         max-height: 56vh;
-      }
-   }
-
    /* Ajuste das colunas */
    .table-container th:nth-child(1), /* ID */
    .table-container td:nth-child(1) {
@@ -82,12 +76,12 @@
 
    .table-container th:nth-child(2), /* Saida */
    .table-container td:nth-child(2) {
-      width: 6%;
+      width: 5%;
    }
 
    .table-container th:nth-child(3), /* Descrição */
    .table-container td:nth-child(3) {
-      width: 43%;
+      width: 15%; /* Aumentado de 5% para 10% */
    }
 
    .table-container th:nth-child(4), /* Tombo */
@@ -97,33 +91,43 @@
 
    .table-container th:nth-child(5), /* Destino */
    .table-container td:nth-child(5) {
-      width: 10%;
+      width: 5%;
    }
 
    .table-container th:nth-child(6), /* NUP */
    .table-container td:nth-child(6) {
-      width: 8%;
+      width: 5%;
    }
 
    .table-container th:nth-child(7), /* Termo de entrega */
    .table-container td:nth-child(7) {
-      width: 8%;
-   }
-
-   .table-container th:nth-child(8), /* Doc de Origem */
-   .table-container td:nth-child(8) {
       width: 5%;
+   }
+   .table-container th:nth-child(8), /* Doc Origem */
+   .table-container td:nth-child(8) {
+      width: 6% !important; /* Mantendo a largura reduzida */
+      min-width: 50px; /* Definindo um min-width pequeno para evitar que a coluna fique muito estreita */
+      max-width: 60px; /* Limitando a largura máxima */
+      overflow: hidden; /* Esconde o conteúdo que ultrapassar */
+      text-overflow: ellipsis; /* Adiciona "..." se o texto for cortado */
    }
 
    .table-container th:nth-child(9), /* Valor */
    .table-container td:nth-child(9) {
-      width: 6%;
+      width: 5%;
    }
 
    .table-container th:last-child, /* Ações */
    .table-container td:last-child {
-      width: 8%;
+      width: 5%;
    }
+
+   @media (max-width: 1920px) {
+      .table-container {
+         max-height: 56vh;
+      }
+   }
+
 </style>
 
 <body>

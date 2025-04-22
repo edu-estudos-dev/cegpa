@@ -508,14 +508,14 @@ class EstoqueController {
          doc.text(pageNumberText, doc.internal.pageSize.width - 10, 22, { align: 'right' });
    
          doc.autoTable({
-            startY: 25, // Início da tabela na primeira página
-            margin: { left: 5, right: 5, top: 25 }, // Reservar espaço no topo de todas as páginas
+            startY: 25,
+            margin: { left: 5, right: 5, top: 25 },
             head: [columns.map((col) => col.header)],
             body: rows.map((row) => columns.map((col) => row[col.dataKey])),
             styles: {
-               fontSize: 7,
+               fontSize: 6,
                cellPadding: 2,
-               halign: 'center',
+               halign: 'center', // Alinhamento padrão centralizado
                overflow: 'linebreak',
             },
             headStyles: {
@@ -524,11 +524,13 @@ class EstoqueController {
                fontStyle: 'bold',
             },
             columnStyles: columns.reduce((acc, col, index) => {
-               acc[index] = { cellWidth: col.width };
+               acc[index] = {
+                  cellWidth: col.width,
+                  halign: index === 2 ? 'left' : 'center', // Alinha "Descrição" à esquerda
+               };
                return acc;
             }, {}),
             didDrawPage: function (data) {
-               // Reimprimir o título e o texto "Gerado em" em todas as páginas
                doc.setFontSize(16);
                doc.text(title, 10, 15);
                doc.setFontSize(10);
@@ -537,7 +539,6 @@ class EstoqueController {
                doc.text(pageStr, doc.internal.pageSize.width - 10, 22, { align: 'right' });
             },
          });
-   
          const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
          res.setHeader('Content-Type', 'application/pdf');
          res.setHeader(
@@ -614,14 +615,14 @@ class EstoqueController {
    // Método privado para geração de relatórios de itens pagos (PDF ou Excel)
    _generatePDFItensPagos = async (res, data, title, formato) => {
    const columns = [
-      { header: 'ID', dataKey: 'id', width: 10 },
-      { header: 'Saída', dataKey: 'data_de_saida', width: 18 },
-      { header: 'Descrição', dataKey: 'descricao', width: 111 },
-      { header: 'Tombo', dataKey: 'tombo_estoqueatual', width: 17 },
-      { header: 'Destino', dataKey: 'destino', width: 28 },
-      { header: 'NUP (Suite)', dataKey: 'referencia', width: 22 },
-      { header: 'Doc Saída', dataKey: 'doc_saida', width: 20 },
-      { header: 'Doc Origem', dataKey: 'doc_origem', width: 35 },
+      { header: 'ID', dataKey: 'id', width: 9 },
+      { header: 'Saída', dataKey: 'data_de_saida', width: 17 },
+      { header: 'Descrição', dataKey: 'descricao', width: 115, halign: 'left' },
+      { header: 'Tombo', dataKey: 'tombo_estoqueatual', width: 15 },
+      { header: 'Destino', dataKey: 'destino', width: 25 },
+      { header: 'NUP (Suite)', dataKey: 'referencia', width: 32 },
+      { header: 'Doc Saída', dataKey: 'doc_saida', width: 17 },
+      { header: 'Doc Origem', dataKey: 'doc_origem', width: 28 },
       { header: 'Valor', dataKey: 'valor', width: 20 },
    ];
 
@@ -652,7 +653,7 @@ class EstoqueController {
       // Definir o título do relatório
       doc.setFontSize(15);
       doc.text(title, 10, 15);
-      doc.setFontSize(9);
+      doc.setFontSize(8);
 
       // Texto "Gerado em" e número da página na mesma linha (apenas na primeira página inicialmente)
       const generatedText = `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`;
@@ -661,14 +662,14 @@ class EstoqueController {
       doc.text(pageNumberText, doc.internal.pageSize.width - 10, 22, { align: 'right' });
 
       doc.autoTable({
-         startY: 25, // Início da tabela na primeira página
-         margin: { left: 8, right: 8, top: 25 }, // Reservar espaço no topo de todas as páginas
+         startY: 25,
+         margin: { left: 8, right: 8, top: 25 },
          head: [columns.map((col) => col.header)],
          body: rows.map((row) => columns.map((col) => row[col.dataKey])),
          styles: {
-            fontSize: 7,
+            fontSize: 6,
             cellPadding: 2,
-            halign: 'center',
+            halign: 'center', // Alinhamento padrão centralizado
             overflow: 'linebreak',
          },
          headStyles: {
@@ -677,20 +678,21 @@ class EstoqueController {
             fontStyle: 'bold',
          },
          columnStyles: columns.reduce((acc, col, index) => {
-            acc[index] = { cellWidth: col.width };
+            acc[index] = {
+               cellWidth: col.width,
+               halign: col.halign || 'center', // Respeita o halign definido em columns
+            };
             return acc;
          }, {}),
          didDrawPage: function (data) {
-            // Reimprimir o título e o texto "Gerado em" em todas as páginas
             doc.setFontSize(15);
             doc.text(title, 10, 15);
-            doc.setFontSize(9);
+            doc.setFontSize(8);
             const pageStr = `Página ${data.pageNumber}`;
             doc.text(generatedText, 10, 22);
             doc.text(pageStr, doc.internal.pageSize.width - 10, 22, { align: 'right' });
          },
       });
-
       const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader(
@@ -745,7 +747,7 @@ class EstoqueController {
          error: 'Formato inválido. Use "pdf" ou "excel".',
       });
    }
-};
+   };
   
 
    /* ********************************************************************************
@@ -807,14 +809,14 @@ class EstoqueController {
          nome_do_recebedor,
          observacao,
       } = req.body;
-
+   
       console.log('req.user no registrarSaida:', req.user);
-
+   
       const usuarioLogado = req.user;
       const nomeResponsavel = usuarioLogado?.nome_completo;
       const mfResponsavel = usuarioLogado?.matricula;
       const postoGradResponsavel = usuarioLogado?.posto_grad;
-
+   
       try {
          // Validação dos campos obrigatórios
          if (
@@ -841,7 +843,7 @@ class EstoqueController {
                .status(400)
                .json({ error: 'Preencha todos os campos obrigatórios' });
          }
-
+   
          if (!nomeResponsavel || !mfResponsavel || !postoGradResponsavel) {
             console.log('Dados do usuário logado incompletos:', {
                nomeResponsavel,
@@ -852,14 +854,14 @@ class EstoqueController {
                error: 'Usuário autenticado não possui informações completas',
             });
          }
-
+   
          const dataDeSaida = new Date();
          const doc = new jsPDF();
-
+   
          console.log('Iniciando geração do PDF...');
          doc.setDrawColor(0);
          doc.setLineWidth(0.5);
-
+   
          // Desenha a borda na primeira página
          doc.rect(
             5,
@@ -867,7 +869,7 @@ class EstoqueController {
             doc.internal.pageSize.width - 10,
             doc.internal.pageSize.height - 10
          );
-
+   
          // Carregar a imagem
          const imagePath = path.join(
             __dirname,
@@ -879,7 +881,7 @@ class EstoqueController {
             width: 70, // Largura da imagem em mm
             height: 15, // Altura da imagem em mm
          };
-
+   
          // Adicionar a imagem ao PDF
          doc.addImage(
             imageData,
@@ -889,7 +891,7 @@ class EstoqueController {
             imgProps.width,
             imgProps.height
          );
-
+   
          // Título do documento (ajustado para não sobrepor a imagem)
          doc.setFontSize(10);
          doc.text(
@@ -899,7 +901,7 @@ class EstoqueController {
             { align: 'center' }
          );
          doc.setFontSize(10);
-
+   
          const headerYStart = 20 + imgProps.height;
          const headerData = [
             `Nº Termo: ${doc_saida}`,
@@ -911,24 +913,24 @@ class EstoqueController {
             `Referência: ${referencia}`,
             `Observações: ${(observacao || 'Nenhuma').toUpperCase()}`,
          ];
-
+   
          headerData.forEach((line, index) => {
             doc.text(line, 14, headerYStart + index * 5);
          });
-
+   
          let ordem = 1;
          const items = [];
-
+   
          console.log('Processando tombos:', tombos);
          for (const tombo of tombos) {
             console.log(`Buscando item com tombo ${tombo}...`);
             const itemEstoque = await estoqueModel.getInfoByTombo(tombo);
-
+   
             if (!itemEstoque) {
                console.warn(`Tombo ${tombo} não encontrado`);
                continue;
             }
-
+   
             console.log(`Item encontrado para tombo ${tombo}:`, itemEstoque);
             items.push([
                ordem++,
@@ -938,7 +940,7 @@ class EstoqueController {
                   .replace('RETAINGLIAR', 'RETANGULAR'),
                itemEstoque.situacao.toUpperCase(),
             ]);
-
+   
             console.log(`Registrando saída para tombo ${tombo}...`);
             await estoqueModel.createSaida(
                itemEstoque.id,
@@ -955,20 +957,21 @@ class EstoqueController {
                observacao,
                itemEstoque.descricao
             );
-
+   
             console.log(`Marcando tombo ${tombo} como pago...`);
             await estoqueModel.markAsPaid(itemEstoque.id);
          }
-
+   
          if (items.length === 0) {
             console.log('Nenhum item válido encontrado para gerar o termo.');
             return res.status(400).json({
                error: 'Nenhum item válido encontrado para gerar o termo.',
             });
          }
-
+   
          // Renderiza a tabela
-         let finalY = 60 + imgProps.height;
+         console.log('Total de itens na tabela:', items.length);
+         let finalY = 60 + imgProps.height; // Ajustado para dar mais espaço
          doc.autoTable({
             startY: finalY,
             head: [['ORD.', 'TOMBO', 'DESCRIÇÃO', 'SITUAÇÃO']],
@@ -977,6 +980,7 @@ class EstoqueController {
                fontSize: 8,
                halign: 'center',
                cellPadding: 1.5,
+               overflow: 'linebreak', // Garante que textos longos sejam quebrados
             },
             headStyles: {
                fillColor: [34, 139, 34],
@@ -989,9 +993,11 @@ class EstoqueController {
                2: { cellWidth: 130, halign: 'left' },
                3: { cellWidth: 20 },
             },
-            margin: { left: 13, right: 7 },
+            margin: { left: 13, right: 7, bottom: 10 }, // Adiciona margem inferior
             tableWidth: 'wrap',
+            pageBreak: 'auto', // Garante quebra automática de página
             didDrawPage: (data) => {
+               console.log('Desenhando página:', data.pageNumber);
                doc.rect(
                   5,
                   5,
@@ -1000,26 +1006,31 @@ class EstoqueController {
                );
             },
          });
-
+   
+         console.log('Total de páginas geradas:', doc.internal.getNumberOfPages());
+   
+         // Após a tabela ser renderizada
          finalY = doc.lastAutoTable.finalY || finalY;
-
+         const pageHeight = doc.internal.pageSize.height;
+   
+         // Garante que estamos na última página
          const totalPages = doc.internal.getNumberOfPages();
          doc.setPage(totalPages);
-
-         const pageHeight = doc.internal.pageSize.height;
-         const signatureY = Math.max(finalY + 20, pageHeight - 20);
+   
+         // Define a posição Y das assinaturas fixas na parte inferior da página
+         const signatureY = pageHeight - 20; // 20 mm acima da borda inferior para acomodar texto e linhas
          const lineLength = 50;
          const gapBetweenBlocks = 10;
-
+   
          const totalBlockWidth = lineLength * 3 + gapBetweenBlocks * 2;
          const startX = 5 + (200 - totalBlockWidth) / 2;
-
+   
          const leftPos = startX + lineLength / 2;
          const centerPos = leftPos + lineLength + gapBetweenBlocks;
          const rightPos = centerPos + lineLength + gapBetweenBlocks;
-
+   
          doc.setLineWidth(0.3);
-
+   
          doc.line(startX, signatureY, startX + lineLength, signatureY);
          doc.line(
             centerPos - lineLength / 2,
@@ -1033,7 +1044,7 @@ class EstoqueController {
             rightPos + lineLength / 2,
             signatureY
          );
-
+   
          doc.setFontSize(6);
          doc.text(
             `${postoGrad.toUpperCase()} ${nome_do_recebedor.toUpperCase()}\nMF: ${mf_recebedor}`,
@@ -1042,10 +1053,8 @@ class EstoqueController {
             { align: 'center' }
          );
          doc.setFontSize(6);
-         doc.text('(Recebedor)', leftPos, signatureY + 8.5, {
-            align: 'center',
-         });
-
+         doc.text('(Recebedor)', leftPos, signatureY + 8.5, { align: 'center' });
+   
          doc.setFontSize(6);
          doc.text(
             'TEN. CEL. ALLAN KARDEK\nMF: 135.907-1-0',
@@ -1057,7 +1066,7 @@ class EstoqueController {
          doc.text('Comandante CEGPA', centerPos, signatureY + 8.5, {
             align: 'center',
          });
-
+   
          doc.setFontSize(6);
          doc.text(
             `${postoGradResponsavel.toUpperCase()} ${nomeResponsavel.toUpperCase()}\nMF: ${mfResponsavel}`,
@@ -1069,20 +1078,20 @@ class EstoqueController {
          doc.text('(Responsável pela entrega)', rightPos, signatureY + 8.5, {
             align: 'center',
          });
-
+   
          console.log('Salvando PDF...');
          const fileName = `Termo_${doc_saida.replace(/\//g, '-')}.pdf`;
          const pdfPath = path.join(__dirname, '../../pdfs', fileName);
-
+   
          if (!fs.existsSync(path.dirname(pdfPath))) {
             fs.mkdirSync(path.dirname(pdfPath), { recursive: true });
          }
-
+   
          doc.save(pdfPath);
-
+   
          console.log('Atualizando sequência...');
          await sequenciaModel.incrementarSequencia(new Date().getFullYear());
-
+   
          console.log('Enviando resposta de sucesso...');
          res.status(200).json({
             success: true,
@@ -1098,7 +1107,6 @@ class EstoqueController {
          });
       }
    };
-
    // Método para visualizar um item pago específico
    visualizarItemPago = async (req, res) => {
       const { id } = req.params;
