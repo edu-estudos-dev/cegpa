@@ -9,6 +9,7 @@ import pesquisaRoutes from "./src/routes/pesquisaRoutes.js";
 import loginLogoutRoutes from "./src/routes/loginLogoutRoutes.js";
 import painelRoutes from "./src/routes/painelRoutes.js";
 import sequenciaRoutes from "./src/routes/sequenciaRoutes.js";
+import solicitacaoRoutes from "./src/routes/solicitacaoRoutes.js";
 import isAuthenticated from "./src/middleware/auth.js";
 
 const app = express();
@@ -53,6 +54,7 @@ app.use("/painel", isAuthenticated, painelRoutes);
 app.use("/", isAuthenticated, estoqueRoutes); // Prefixo /estoque aplicado aqui
 app.use("/", isAuthenticated, pesquisaRoutes);
 app.use("/", isAuthenticated, sequenciaRoutes);
+app.use("/", isAuthenticated, solicitacaoRoutes);
 
 // Tratamento de erro 404
 app.use((req, res, next) => {

@@ -5,13 +5,13 @@ import checkRole from '../middleware/checkRole.js'; // Middleware de permissão
 
 const router = express.Router();
 
-// Middleware para logar os dados recebidos em todas as rotas
-router.use((req, res, next) => {
-   console.log(`[${new Date().toISOString()}] Rota acessada: ${req.method} ${req.originalUrl}`);
-   console.log('Dados recebidos (req.body):', req.body);
-   console.log('Dados recebidos (req.query):', req.query);
-   next();
-});
+// // Middleware para logar os dados recebidos em todas as rotas
+// router.use((req, res, next) => {
+//    console.log(`[${new Date().toISOString()}] Rota acessada: ${req.method} ${req.originalUrl}`);
+//    console.log('Dados recebidos (req.body):', req.body);
+//    console.log('Dados recebidos (req.query):', req.query);
+//    next();
+// });
 
 /* ********************************************************************************
                   Rotas para a ENTRADA de itens no Estoque
@@ -50,9 +50,6 @@ router.post('/entrada', estoqueController.create);
 // Rota para obter o último tombo
 router.get('/ultimo-tombo', estoqueController.fetchUltimoTombo);
 
-// // Rota para mostrar tabela com estoque atual
-// router.get('/tabela/estoqueatual', estoqueController.getAllEstoque);
-
 // Rota para mostrar tabela com estoque atual (acessível a todos autenticados)
 router.get('/tabela/estoqueatual', isAuthenticated, estoqueController.getAllEstoque);
 
@@ -61,9 +58,6 @@ router.get('/visualizar/:id', estoqueController.visualizarItem);
 
 // Rota para mostrar quantidade única de itens no estoque
 router.get('/qtde-unica', estoqueController.getQtdeUnicaEstoque);
-
-// // Rota para excluir um item do estoque
-// router.delete('/excluir/:id', estoqueController.destroy);
 
 // Rota para excluir um item do estoque (apenas admin)
 router.delete('/excluir/:id', isAuthenticated, checkRole(['admin']), estoqueController.destroy);
