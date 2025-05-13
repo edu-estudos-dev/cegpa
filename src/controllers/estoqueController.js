@@ -139,17 +139,17 @@ class EstoqueController {
    };
 
    // Método para listar todos os itens NOVOS no estoque
-   getItensNovos = async (req, res) => {
-      try {
-         const itensNovos = await estoqueModel.getAllItensNovos();
-         res.status(200).render('tabelaItensNovos', {
-            novos: itensNovos,
-         });
-      } catch (error) {
-         console.error('Erro ao carregar o estoque:', error);
-         res.status(500).json({ error: 'Erro ao carregar o estoque.' });
-      }
-   };
+   // getItensNovos = async (req, res) => {
+   //    try {
+   //       const itensNovos = await estoqueModel.getAllItensNovos();
+   //       res.status(200).render('tabelaItensNovos', {
+   //          novos: itensNovos,
+   //       });
+   //    } catch (error) {
+   //       console.error('Erro ao carregar o estoque:', error);
+   //       res.status(500).json({ error: 'Erro ao carregar o estoque.' });
+   //    }
+   // };
 
    // Método para renderizar a tabela com os itens Usados
    showItensUsados = async (_req, res) => {
@@ -337,7 +337,6 @@ class EstoqueController {
    fetchUltimoTombo = async (req, res) => {
       try {
          const ultimoTombo = await estoqueModel.getUltimoTombo();
-         console.log('Tombo retornado para o frontend:', ultimoTombo);
          res.json({ ultimoTombo });
       } catch (error) {
          console.error('Erro ao obter o último tombo:', error);
@@ -1107,6 +1106,7 @@ class EstoqueController {
          });
       }
    };
+   
    // Método para visualizar um item pago específico
    visualizarItemPago = async (req, res) => {
       const { id } = req.params;

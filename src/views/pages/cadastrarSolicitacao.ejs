@@ -1,197 +1,213 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
-<head>
-   <%- include('../partials/head', { title: title }) %>
-   <style>
-      * {
-         margin: 0;
-         padding: 0;
-      }
-
-      body {
-         display: flex;
-         align-items: center;
-         padding-top: 2.5rem;
-      }
-
-      .w-10 {
-         width: 12%;
-      }
-
-      .w-95 {
-         width: 75%;
-      }
-
-      @media (max-width: 1366px) {
+   <head>
+      <%- include('../partials/head', { title: title }) %>
+      <style>
          * {
-            font-size: 0.83rem;
+            margin: 0;
+            padding: 0;
          }
 
-         .caixa-externa {
-            margin: 0 auto;
+         body {
+            display: flex;
+            align-items: center;
+            padding-top: 2.5rem;
          }
-         
+
          .w-10 {
             width: 12%;
          }
-      }
-   </style>
-</head>
 
-<body>
-   <%- include('../partials/header') %>
-   <div class="caixa w-95 p-4 mx-auto">
-      <div class="border caixa-externa p-4 shadow-sm rounded">
-         <form id="formulario-entrada" action="/cadastrar-solicitacao" method="post">
-            <div class="row align-items-center mb-3 px-3">
-               <h2 style="border-bottom: 4px solid orange;" class="text-white py-2 mt-0 fw-bold bg-success text-center">Formulário de Solicitação</h2>
-            </div>
+         .w-95 {
+            width: 75%;
+         }
 
-            <div id="row1" class="row">
-               <div class="col-md-2">
-                  <div id="data_da_solicitacao-div" class="mb-3">
-                     <label class="form-label fw-bold">Data de Solicitação</label>
-                     <input id="data_da_solicitacao" type="date" class="form-control" name="data_da_solicitacao">
-                  </div>
+         @media (max-width: 1366px) {
+            * {
+               font-size: 0.83rem;
+            }
+
+            .caixa-externa {
+               margin: 0 auto;
+            }
+
+            .w-10 {
+               width: 12%;
+            }
+         }
+      </style>
+   </head>
+
+   <body>
+      <%- include('../partials/header') %>
+      <div class="caixa w-95 p-4 mx-auto">
+         <div class="border caixa-externa p-4 shadow-sm rounded">
+            <form
+               id="formulario-entrada"
+               action="/form-solicitacao"
+               method="post"
+            >
+               <div class="row align-items-center mb-3 px-3">
+                  <h2
+                     style="border-bottom: 4px solid orange"
+                     class="text-white py-2 mt-0 fw-bold bg-success text-center"
+                  >
+                     Formulário de Solicitação
+                  </h2>
                </div>
 
-               <div class="col-md-8">
-                  <div id="solicitante-div" class="mb-3">
-                     <label class="form-label fw-bold">Solicitante</label>
-                     <input id="solicitante" name="solicitante" type="text" class="form-control">
+               <!-- Exibir mensagem de erro, se houver -->
+               <% if (typeof error !== 'undefined' && error) { %>
+                  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                     <%= error %>
+                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>
-               </div>
-               
-               <div class="col-md-2">
-                  <div id="situacao-div" class="mb-3">
-                     <label class="form-label fw-bold">Situação</label>
-                     <select id="situacao" class="form-select" name="situacao">
-                        <option value="PENDENTE" selected>Pendente</option>
-                        <option value="CONCLUÍDO">Concluído</option>
-                     </select>
-                  </div>
-               </div>
+               <% } %>
 
-               <div class="col-md-10">
-                  <div id="descricao-div" class="mb-3">
-                     <label class="form-label fw-bold">Descrição</label>
-                     <input id="descricao" type="text" class="form-control" name="descricao">
+               <div id="row1" class="row">
+                  <div class="col-md-2">
+                     <div id="data_da_solicitacao-div" class="mb-3">
+                        <label class="form-label fw-bold"
+                           >Data de Solicitação</label
+                        >
+                        <input
+                           id="data_da_solicitacao"
+                           type="date"
+                           class="form-control"
+                           name="data_da_solicitacao"
+                           value="<%= typeof data_da_solicitacao !== 'undefined' ? data_da_solicitacao : '' %>"
+                        />
+                     </div>
                   </div>
-               </div>
 
-               <div class="col-md-2">
-                  <div id="qtd-div" class="mb-3">
-                     <label class="form-label fw-bold">Quantidade</label>
-                     <input id="qtd" type="number" class="form-control" name="qtd">
+                  <div class="col-md-9">
+                     <div id="solicitante-div" class="mb-3">
+                        <label class="form-label fw-bold">Solicitante</label>
+                        <input
+                           id="solicitante"
+                           name="solicitante"
+                           type="text"
+                           class="form-control"
+                           value="<%= typeof solicitante !== 'undefined' ? solicitante : '' %>"
+                        />
+                     </div>
                   </div>
-               </div>
 
-               <div class="col-md-12">
-                  <div id="observacao-div" class="mb-3">
-                     <label class="form-label fw-bold">Observação</label>
-                     <textarea id="observacao" type="text" class="form-control" name="observacao"></textarea>
+                  <div class="col-md-1">
+                     <div id="qtd-div" class="mb-3">
+                        <label class="form-label fw-bold">Quantidade</label>
+                        <input
+                           id="qtd"
+                           type="number"
+                           class="form-control"
+                           name="qtd"
+                           value="<%= typeof qtd !== 'undefined' ? qtd : '' %>"
+                        />
+                     </div>
                   </div>
-               </div>
 
-               <div class="col-md-12 d-flex justify-content-center mt-4">
-                  <button id="btnRegistrar" type="submit" class="w-10 btn btn-success mx-1">Registrar Solicitação</button>
-                  <button id="btnLimpar" type="button" class="w-10 btn btn-warning mx-1">Limpar</button>
-               </div>
-            </div>
-         </form>
+                  <div class="col-md-9">
+                     <div id="descricao-div" class="mb-3">
+                        <label class="form-label fw-bold">Descrição</label>
+                        <input
+                           id="descricao"
+                           type="text"
+                           class="form-control"
+                           name="descricao"
+                           value="<%= typeof descricao !== 'undefined' ? descricao : '' %>"
+                        />
+                     </div>
+                  </div>
 
-         <!-- Modal de Erro -->
-         <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-               <div class="modal-content">
-                  <div class="modal-header">
-                     <h5 class="modal-title" id="errorModalLabel">Erro de Validação</h5>
-                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <div class="col-md-3">
+                     <div id="nup-div" class="mb-3">
+                        <label class="form-label fw-bold">NUP</label>
+                        <input
+                           id="nup"
+                           type="text"
+                           class="form-control"
+                           name="nup"
+                           value="<%= typeof nup !== 'undefined' ? nup : '' %>"
+                        />
+                     </div>
                   </div>
-                  <div class="modal-body">
-                     <p id="errorMessage"></p>
-                  </div>
-                  <div class="modal-footer">
-                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                  </div>
-               </div>
-            </div>
-         </div>
 
-         <!-- Modal de Sucesso -->
-         <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-               <div class="modal-content">
-                  <div class="modal-header">
-                     <h5 class="modal-title" id="successModalLabel">Sucesso</h5>
-                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  <div class="col-md-12">
+                     <div id="observacao-div" class="mb-3">
+                        <label class="form-label fw-bold">Observação</label>
+                        <textarea
+                           id="observacao"
+                           type="text"
+                           class="form-control"
+                           name="observacao"
+                        ><%= typeof observacao !== 'undefined' ? observacao : '' %></textarea>
+                     </div>
                   </div>
-                  <div class="modal-body">
-                     <p id="successMessage"></p>
-                  </div>
-                  <div class="modal-footer">
-                     <button type="button" class="btn btn-success" data-bs-dismiss="modal">Fechar</button>
+
+                  <div class="col-md-12 d-flex justify-content-center mt-4">
+                     <button
+                        id="btnRegistrar"
+                        type="submit"
+                        class="w-10 btn btn-success mx-1"
+                     >
+                        Registrar Solicitação
+                     </button>
+                     <button
+                        id="btnLimpar"
+                        type="button"
+                        class="w-10 btn btn-warning mx-1"
+                     >
+                        Limpar
+                     </button>
                   </div>
                </div>
-            </div>
+            </form>
          </div>
       </div>
-   </div>
 
-   <!-- Scripts necessários para o modal -->
-   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-      integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+      <!-- Scripts necessários para o Bootstrap -->
+      <script
+         src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+         integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+         crossorigin="anonymous"
+      ></script>
+      <script
+         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+         crossorigin="anonymous"
+      ></script>
 
-   <!-- Validação do formulário e exibição do modal de sucesso -->
-   <script>
-      // Validação do formulário no frontend
-      document.getElementById('formulario-entrada').addEventListener('submit', function (e) {
-         const data = document.getElementById('data_da_solicitacao').value;
-         const solicitante = document.getElementById('solicitante').value;
-         const qtd = document.getElementById('qtd').value;
-         const descricao = document.getElementById('descricao').value;
+      <!-- Validação do formulário e formatação do NUP -->
+      <script>
+         document.addEventListener('DOMContentLoaded', function () {
+            // Função para formatar o NUP
+            const formatarReferencia = (value) => {
+               value = value.replace(/\D/g, ''); // Remove tudo que não é dígito
+               value = value.slice(0, 17); // Limita a 17 dígitos
+               const parts = [
+                  value.slice(0, 5), // Primeira parte: 5 dígitos (ex.: 65465)
+                  value.slice(5, 11), // Segunda parte: 6 dígitos (ex.: 465446)
+                  value.slice(11, 15), // Terceira parte: 4 dígitos (ex.: 5465)
+                  value.slice(15, 17), // Quarta parte: 2 dígitos (ex.: 46)
+               ];
+               return `NUP ${parts[0]}${parts[1] ? `.${parts[1]}` : ''}${
+                  parts[2] ? `/${parts[2]}` : ''
+               }${parts[3] ? `-${parts[3]}` : ''}`;
+            };
 
-         const errors = [];
+            // Aplica formatação ao campo NUP
+            const nupInput = document.getElementById('nup');
+            nupInput.addEventListener('input', (e) => {
+               e.target.value = formatarReferencia(e.target.value);
+            });
 
-         if (!data) {
-            errors.push('O campo data de solicitação é obrigatório.');
-         }
-         if (!solicitante) {
-            errors.push('O campo solicitante é obrigatório.');
-         }
-         if (!qtd) {
-            errors.push('O campo quantidade é obrigatório.');
-         } else if (qtd <= 0) {
-            errors.push('A quantidade deve ser maior que zero.');
-         }
-         if (!descricao) {
-            errors.push('O campo descrição é obrigatório.');
-         }
-
-         if (errors.length > 0) {
-            e.preventDefault();
-            document.getElementById('errorMessage').innerHTML = errors.join('<br>');
-            new bootstrap.Modal(document.getElementById('errorModal')).show();
-         }
-      });
-
-      // Função para limpar o formulário
-      document.getElementById('btnLimpar').addEventListener('click', function () {
-         document.getElementById('formulario-entrada').reset();
-      });
-
-      // Exibir modal de sucesso se houver mensagem na URL
-      window.addEventListener('load', function () {
-         const urlParams = new URLSearchParams(window.location.search);
-         const successMessage = urlParams.get('success');
-         if (successMessage) {
-            document.getElementById('successMessage').textContent = decodeURIComponent(successMessage);
-            new bootstrap.Modal(document.getElementById('successModal')).show();
-         }
-      });
-   </script>
-</body>
+            // Função para limpar o formulário
+            document
+               .getElementById('btnLimpar')
+               .addEventListener('click', function () {
+                  document.getElementById('formulario-entrada').reset();
+               });
+         });
+      </script>
+   </body>
 </html>

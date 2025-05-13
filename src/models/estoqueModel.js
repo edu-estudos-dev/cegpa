@@ -177,12 +177,14 @@ class EstoqueModel {
          ORDER BY tombo DESC
          LIMIT 1;
       `;
+
+      // ultimo tombo disponivel
       try {
          const [results] = await connection.execute(query);
          console.log('Resultado da query para maior tombo:', results);
          if (!results || results.length === 0) {
-            console.log('Nenhum tombo encontrado, usando 70149 como fallback.');
-            return 108701;  // Ajuste para iniciar a partir do último tombo 
+            console.log('Nenhum tombo encontrado, usando 130328 como fallback.');
+            return 130328;  // Ajuste para iniciar a partir do último tombo 
          }
          const ultimoTombo = results[0].tombo;
          console.log('Maior tombo encontrado no banco:', ultimoTombo);

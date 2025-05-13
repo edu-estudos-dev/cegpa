@@ -5,23 +5,9 @@ import checkRole from '../middleware/checkRole.js'; // Middleware de permissão
 
 const router = express.Router();
 
-// // Middleware para logar os dados recebidos em todas as rotas
-// router.use((req, res, next) => {
-//    console.log(`[${new Date().toISOString()}] Rota acessada: ${req.method} ${req.originalUrl}`);
-//    console.log('Dados recebidos (req.body):', req.body);
-//    console.log('Dados recebidos (req.query):', req.query);
-//    next();
-// });
-
 /* ********************************************************************************
                   Rotas para a ENTRADA de itens no Estoque
 *********************************************************************************/
-
-// // Rota para renderizar o formulário de edição
-// router.get('/editar/:id', estoqueController.renderEditForm);
-
-// // Rota para atualizar os dados do item
-// router.put('/editar/:id', estoqueController.update);
 
 // Rota para renderizar o formulário de edição (apenas admin)
 router.get('/editar/:id', isAuthenticated, checkRole(['admin']), estoqueController.renderEditForm);
@@ -30,7 +16,7 @@ router.get('/editar/:id', isAuthenticated, checkRole(['admin']), estoqueControll
 router.put('/editar/:id', isAuthenticated, checkRole(['admin']), estoqueController.update);
 
 // Rota para listar apenas os itens novos do estoque
-router.get('/itens-novos', estoqueController.getItensNovos);
+// router.get('/itens-novos', estoqueController.getItensNovos);
 
 // Rota para renderizar a tabela apenas os itens novos do estoque
 router.get('/tabela/itens-novos', estoqueController.showItensNovos);

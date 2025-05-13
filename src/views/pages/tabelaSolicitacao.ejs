@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<%- include('../partials/head', { title: 'Tabela de Solicitação' }) %>
+
+<style>
+   * {
+      margin: 0;
+      padding: 0;
+   }
+
+   body {
+      padding-top: 2.5rem;
+   }
+
+   .caixa-externa {
+      max-width: 98%;
+   }
+
+   .table-container {
+      max-height: 75vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 75vh;
+   }
+
+   .table-container table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+   }
+
+   .table-container th,
+   .table-container td {
+      word-wrap: break-word;
+      white-space: nowrap;
+      border: none !important;
+   }
+
+   .table-container thead th {
+      position: sticky;
+      top: 0;
+      background-color: rgb(231, 161, 9);
+      color: white;
+      border-left: 1px solid white !important;
+      border-right: none !important;
+      border-top: none !important;
+      border-bottom: 1px solid white !important;
+      z-index: 1;
+   }
+
+   .table-container thead th:last-child {
+      border-right: none !important;
+   }
+
+   .btn-action {
+      width: 70px;
+   }
+
+   .modal.fade .modal-dialog {
+      transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
+      transform: translateY(-10%);
+      opacity: 0;
+   }
+
+   .modal.show .modal-dialog {
+      transform: translateY(0);
+      opacity: 1;
+   }
+
+   /* Ajuste das colunas */
+   .table-container th:nth-child(1),
+   .table-container td:nth-child(1) {
+      width: 3%;
+   }
+
+   .table-container th:nth-child(2),
+   .table-container td:nth-child(2) {
+      width: 5%;
+   }
+
+   .table-container th:nth-child(3),
+   .table-container td:nth-child(3) {
+      width: 15%;
+   }
+
+   .table-container th:nth-child(4),
+   .table-container td:nth-child(4) {
+      width: 5%;
+   }
+
+   .table-container th:nth-child(5),
+   .table-container td:nth-child(5) {
+      width: 5%;
+   }
+
+   .table-container th:nth-child(6),
+   .table-container td:nth-child(6) {
+      width: 5%;
+   }
+
+   .table-container th:nth-child(7),
+   .table-container td:nth-child(7) {
+      width: 5%;
+   }
+
+   .table-container th:nth-child(8),
+   .table-container td:nth-child(8) {
+      width: 6%;
+   }
+
+   .table-container th:last-child,
+   .table-container td:last-child {
+      width: 5%;
+   }
+
+   @media (max-width: 1920px) {
+      .table-container {
+         max-height: 56vh;
+      }
+   }
+</style>
+
+<body>
+   <%- include('../partials/header') %>
+   <div class="caixa p-4 mx-auto">
+      <div class="border caixa-externa p-4 shadow-sm rounded">
+         <div class="row align-items-center mb-3 px-3">
+            <div class="col d-flex justify-content-between align-items-center bg-success py-2 rounded" style="border-bottom: 4px solid orange;">
+               <h2 class="text-white mt-0 fw-bold flex-grow-1 text-center">Tabela de Solicitação</h2>
+               <div class="d-flex align-items-center">
+                  <input type="text" id="searchInput" class="form-control me-2" placeholder="Pesquisar..." style="width: 200px;">
+                  <label for="formato" class="text-white me-2">Formato:</label>
+                  <select id="formato" class="form-select form-select-md me-2" style="width: auto;">
+                     <option value="pdf">PDF</option>
+                     <option value="excel">Excel</option>
+                  </select>
+                  <a href="#" id="exportarBtn" class="btn btn-outline-light btn-header fw-bold">Exportar</a>
+               </div>
+            </div>
+         </div>
+         <div class="table-container">
+            <table class="table table-striped table-hover mb-0" id="solicitacaoTable">
+               <thead>
+                  <tr>
+                     <th class="text-center px-0 align-middle">ID</th>
+                     <th class="text-center px-0 align-middle">Data</th>
+                     <th class="text-center px-0 align-middle">Descrição</th>
+                     <th class="text-center px-0 align-middle">Quantidade</th>
+                     <th class="text-center px-0 align-middle">Solicitante</th>
+                     <th class="text-center px-0 align-middle">Situação</th>
+                     <th class="text-center px-0 align-middle">NUP</th>
+                     <th class="text-center px-0 align-middle">Observação</th>
+                     <th class="text-center px-0 align-middle">Detalhes</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <% if (solicitacao.length > 0) { %>
+                     <% solicitacao.forEach(function(item) { %>
+                        <tr>
+                           <td class="py-1 text-center align-middle"><%= item.id %></td>
+                           <td class="py-1 text-center align-middle"><%= new Date(item.data_da_solicitacao).toLocaleDateString('pt-BR') %></td>
+                           <td class="py-1 text-center align-middle"><%= item.descricao %></td>
+                           <td class="py-1 text-center align-middle"><%= item.quantidade %></td>
+                           <td class="py-1 text-center align-middle"><%= item.solicitante %></td>
+                           <td class="py-1 text-center align-middle">
+                              <% if (userRole === 'ADMIN') { %>
+                                 <select class="form-select form-select-sm situacao-select" data-id="<%= item.id %>" data-original-value="<%= item.situacao %>">
+                                    <option value="PENDENTE" <%= item.situacao === 'PENDENTE' ? 'selected' : '' %>>Pendente</option>
+                                    <option value="ADQUIRIDO" <%= item.situacao === 'ADQUIRIDO' ? 'selected' : '' %>>Adquirido</option>
+                                 </select>
+                              <% } else { %>
+                                 <%= item.situacao %>
+                              <% } %>
+                           </td>
+                           <td class="py-1 align-middle text-center">
+                              <% if (item.nup) { %>
+                                 <%= item.nup %>
+                              <% } else { %>
+                                 [NUP não disponível]
+                              <% } %>
+                           </td>
+                           <td class="py-1 text-center align-middle">
+                              <%= item.observacao ? item.observacao : 'N/A' %>
+                           </td>
+                           <td class="py-1 text-center align-middle">
+                              <button type="button" class="btn btn-secondary btn-sm btn-details btn-action" data-id="<%= item.id %>">Detalhes</button>
+                           </td>
+                        </tr>
+                     <% }); %>
+                  <% } else { %>
+                     <tr>
+                        <td colspan="9" class="text-center align-middle">Nenhuma solicitação encontrada.</td>
+                     </tr>
+                  <% } %>
+               </tbody>
+            </table>
+         </div>
+      </div>
+   </div>
+
+   <!-- Incluindo o SweetAlert2 via CDN -->
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+   <!-- Scripts para Bootstrap -->
+   <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+      integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+      crossorigin="anonymous"
+   ></script>
+   <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+   ></script>
+
+   <!-- Scripts para funcionalidades da tabela -->
+   <script>
+      document.addEventListener('DOMContentLoaded', () => {
+         // Função para filtrar linhas com base no termo de pesquisa
+         function filterRows(searchTerm) {
+            const table = document.getElementById('solicitacaoTable');
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+               const cells = row.querySelectorAll('td');
+               const descricao = cells[2].textContent.toLowerCase();
+               const solicitante = cells[4].textContent.toLowerCase();
+               const situacao = cells[5].querySelector('select') ? cells[5].querySelector('select').value.toLowerCase() : cells[5].textContent.toLowerCase();
+               const nup = cells[6].textContent.toLowerCase();
+               const observacao = cells[7].textContent.toLowerCase();
+               const matches = 
+                  descricao.includes(searchTerm) ||
+                  solicitante.includes(searchTerm) ||
+                  situacao.includes(searchTerm) ||
+                  nup.includes(searchTerm) ||
+                  observacao.includes(searchTerm);
+               row.classList.toggle('hidden', !matches);
+            });
+         }
+
+         // Evento de busca
+         const searchInput = document.getElementById('searchInput');
+         searchInput.addEventListener('input', (event) => {
+            const searchTerm = event.target.value.toLowerCase();
+            filterRows(searchTerm);
+         });
+
+         // Botão "Detalhes"
+         document.querySelectorAll('.btn-details').forEach(button => {
+            button.addEventListener('click', async (event) => {
+               const solicitacaoId = event.target.getAttribute('data-id');
+               try {
+                  const response = await fetch(`/solicitacao/${solicitacaoId}`);
+                  const item = await response.json();
+                  const modalHtml = `
+                     <div class="modal fade show" id="infoSolicitacaoModal" tabindex="-1" aria-labelledby="infoSolicitacaoModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                           <div class="modal-content">
+                              <div class="modal-header bg-success text-white d-flex justify-content-between">
+                                 <h3 class="modal-title ms-3" id="infoSolicitacaoModalLabel">Informações da Solicitação</h3>
+                                 <button type="button" class="btn text-white" data-bs-dismiss="modal" aria-label="Close">
+                                    <i class="fa fa-times fa-lg"></i>
+                                 </button>
+                              </div>
+                              <div class="modal-body">
+                                 <div class="card">
+                                    <div class="card-body pb-0">
+                                       <h5 class="card-title">${item.descricao || 'N/A'}</h5>
+                                       <p class="card-text">
+                                          <h5 class="bg-primary text-white p-2">Dados da Solicitação</h5>
+                                          <strong>ID:</strong> ${item.id || 'N/A'} <br/>
+                                          <strong>Data da Solicitação:</strong> ${new Date(item.data_da_solicitacao).toLocaleDateString('pt-BR') || 'N/A'} <br/>
+                                          <strong>Quantidade:</strong> ${item.quantidade || 'N/A'} <br/>
+                                          <strong>Solicitante:</strong> ${item.solicitante || 'N/A'} <br/>
+                                          <strong>Situação:</strong> ${item.situacao || 'N/A'} <br/>
+                                          <strong>NUP:</strong> ${item.nup || 'N/A'} <br/>
+                                          <strong>Observação:</strong> ${item.observacao || 'N/A'} <br/>
+                                       </p>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>`;
+                  const modalDiv = document.createElement('div');
+                  modalDiv.innerHTML = modalHtml;
+                  document.body.appendChild(modalDiv);
+                  const infoSolicitacaoModal = new bootstrap.Modal(document.getElementById('infoSolicitacaoModal'), {
+                     backdrop: true,
+                     focus: true
+                  });
+                  infoSolicitacaoModal.show();
+                  infoSolicitacaoModal._element.addEventListener('hidden.bs.modal', () => {
+                     modalDiv.remove();
+                  });
+               } catch (error) {
+                  console.error('ERRO AO BUSCAR INFORMAÇÕES DA SOLICITAÇÃO:', error.message.toUpperCase());
+               }
+            });
+         });
+
+         // Botão "Exportar"
+         const exportarBtn = document.getElementById('exportarBtn');
+         exportarBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            const formato = document.getElementById('formato').value;
+            window.location.href = `/relatorio/solicitacoes?formato=${formato}`;
+         });
+
+         // Atualizar situação
+         document.querySelectorAll('.situacao-select').forEach(select => {
+            select.addEventListener('change', async (event) => {
+               const solicitacaoId = event.target.getAttribute('data-id');
+               const novaSituacao = event.target.value;
+               try {
+                  const response = await fetch(`/solicitacao/${solicitacaoId}/situacao`, {
+                     method: 'PUT',
+                     headers: {
+                        'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify({ situacao: novaSituacao }),
+                  });
+                  if (!response.ok) {
+                     throw new Error('Erro ao atualizar situação');
+                  }
+                  alert('Situação atualizada com sucesso!');
+               } catch (error) {
+                  console.error('Erro ao atualizar situação:', error);
+                  alert('Erro ao atualizar situação');
+                  event.target.value = event.target.getAttribute('data-original-value');
+               }
+            });
+         });
+      });
+   </script>
+
+   <!-- Script separado para o SweetAlert2 -->
+   <% if (typeof success !== 'undefined' && success) { %>
+      <script>
+         Swal.fire({
+            icon: 'success',
+            title: 'Sucesso!',
+            text: '<%= success %>',
+            timer: 3000, // Fecha automaticamente após 3 segundos
+            timerProgressBar: true, // Mostra uma barra de progresso
+            showConfirmButton: false // Não mostra o botão de confirmação
+         });
+      </script>
+   <% } %>
+
+</body>
+</html>

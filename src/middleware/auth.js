@@ -38,7 +38,6 @@
 const isAuthenticated = (req, res, next) => {
   if (req.session && req.session.user) {
     req.user = req.session.user;
-    console.log('Usuário autenticado:', req.user);
     return next();
   } else {
     console.log('Sessão não encontrada, redirecionando para /login');
