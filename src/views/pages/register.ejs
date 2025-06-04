@@ -19,20 +19,8 @@
          <div class="border p-4 py-5 rounded shadow-lg caixa-externa">
             <h1 class="text-center display-6 fw-bold mb-4 text-success">Registrar</h1>
             <hr>
-            <% if (erro) { %>
-               <div class="alert alert-danger">
-                  <%= erro %>
-               </div>
-            <% } %>
-            <% if (success) { %>
-               <div class="alert alert-success">
-                  <%= success %>
-               </div>
-               <script>
-                  setTimeout(function () {
-                     window.location.href = "/login";
-                  }, 2000);  // 2 segundos antes de redirecionar
-               </script>
+            <% if (success || erro) { %>
+               <!-- Mensagens de sucesso e erro serão exibidas via SweetAlert2 -->
             <% } else { %>
                <form action="/register" method="POST">
                   <div class="form-group mb-3">
@@ -108,6 +96,10 @@
             <% } %>
          </div>
       </div>
+
+      <!-- Incluindo o SweetAlert2 via CDN -->
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
       <script>
          window.onload = function () {
@@ -154,5 +146,32 @@
             this.value = formatarMatricula(this.value);
          });
       </script>
+
+      <!-- Script para exibir mensagens de sucesso e erro com SweetAlert2 -->
+      <% if (typeof success !== 'undefined' && success) { %>
+         <script>
+            Swal.fire({
+               icon: 'success',
+               title: 'Sucesso!',
+               text: '<%= success %>',
+               timer: 2000, // Fecha automaticamente após 2 segundos
+               timerProgressBar: true, // Mostra uma barra de progresso
+               showConfirmButton: false // Não mostra o botão de confirmação
+            }).then(() => {
+               window.location.href = "/login"; // Redireciona após o SweetAlert2 fechar
+            });
+         </script>
+      <% } else if (typeof erro !== 'undefined' && erro) { %>
+         <script>
+            Swal.fire({
+               icon: 'error',
+               title: 'Erro!',
+               text: '<%= erro %>',
+               timer: 3000, // Fecha automaticamente após 3 segundos
+               timerProgressBar: true,
+               showConfirmButton: false
+            });
+         </script>
+      <% } %>
    </body>
 </html>

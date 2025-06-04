@@ -75,8 +75,9 @@ class LoginLogoutController {
               erro: 'Erro interno ao iniciar sessão' 
             });
           }
-          console.log('Sessão salva, redirecionando para /painel');
-          res.redirect('/painel');
+          console.log('Sessão salva, redirecionando para /painel com mensagem de sucesso');
+          // Redirecionar para /painel com mensagem de sucesso na query string
+          res.redirect('/painel?success=' + encodeURIComponent('Login realizado com sucesso!'));
         });
       } else {
         res.render('login', { 
@@ -149,7 +150,7 @@ class LoginLogoutController {
     }
   };
 
-    // Método para renderizar o form de recuperação de senha
+  // Método para renderizar o form de recuperação de senha
   renderForgotPasswordForm = (req, res) => {
     res.render('forgot-password', {
       erro: req.query.erro || '',
@@ -157,7 +158,7 @@ class LoginLogoutController {
     });
   };
 
-  // Método para processa a solicitação de recuperação de senha
+  // Método para processar a solicitação de recuperação de senha
   handleForgotPassword = async (req, res) => {
     const { email } = req.body;
 
@@ -208,7 +209,7 @@ class LoginLogoutController {
     }
   };
 
-  /// Método para resetar a senha
+  // Método para renderizar o form de redefinição de senha
   renderResetPasswordForm = async (req, res) => {
     const { token } = req.params;
     

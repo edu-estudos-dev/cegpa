@@ -211,30 +211,24 @@
    }
 
    @media (max-width: 1366px) {
-
-        body{
+        body {
             height: 100vh !important;
         }
 
-        .caixa-externa-painel{
+        .caixa-externa-painel {
             height: 60vh !important;
-            /* margin: 3rem auto  !important; */
             margin-top: 4rem !important;
             padding: 0 !important;
-            /* background-color: #e605059a !important; */
         }
 
        .system-box {
            flex: 0 0 calc(33.333% - 1rem);
            max-width: 250px;
            height: 100px !important;
-           /* background-color: #990000; */
            padding: 0 !important;
        }
 
-       .systems-grid{
-            /* padding-bottom: 0 !important; */
-            
+       .systems-grid {
             background-color: #f8fff29a;
             margin: 2rem auto !important;
        }
@@ -260,17 +254,15 @@
             padding-bottom: 2rem !important;
         }
 
-        h3{
+        h3 {
             font-size: 1.3rem;
         }
 
-        h5{
+        h5 {
             padding-bottom: 3rem;
         }
         
         footer {
-            /* margin-block: auto; */
-        
             background: linear-gradient(to right, #00621D, #0BA23D);
             border-top: 4px solid orange;
             padding: 0.5rem;
@@ -284,37 +276,6 @@
             padding: 1rem  !important;
         }
     }
-
-   /* @media (max-width: 992px) {
-       main {
-           width: 95%;
-       }
-
-       .system-box {
-           flex: 0 0 calc(50% - 1rem);
-           max-width: 300px;
-       }
-   }
-
-   @media (max-width: 768px) {
-       .system-box {
-           flex: 0 0 100%;
-           max-width: 100%;
-           margin: 0.5rem 0;
-       }
-
-       .system-box h4 {
-           font-size: 1rem;
-       }
-
-       .system-box p {
-           font-size: 0.8rem;
-       }
-
-       .header-content {
-           padding: 0.25rem 1rem !important;
-       }
-   } */
 </style>
 
 <body>
@@ -379,10 +340,38 @@
 
    <footer>
        <div class="footer-content my-0">
-           <h4 class="m-0 fs-5 fw-bold">COLOG - Comando Logistico da PMCE</h4>
+           <h4 class="m-0 fs-5 fw-bold">COLOG - Comando Logístico da PMCE</h4>
            <h5 class="m-1">CEGPA / NUCPA</h5>
        </div>
    </footer>
-</body>
 
+   <!-- Scripts do Bootstrap -->
+   <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+      integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+      crossorigin="anonymous"
+   ></script>
+   <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+   ></script>
+   <!-- Script do SweetAlert2 -->
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script>
+      // Verifica a mensagem de sucesso e exibe o popup do SweetAlert2
+      const successMessage = '<%= success %>';
+      if (successMessage) {
+         Swal.fire({
+            icon: 'success',
+            title: 'Sucesso!',
+            text: successMessage,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#00621D', // Cor primária do tema
+            background: '#f8fff2', // Fundo claro do tema
+            iconColor: '#28a745' // Cor do ícone de sucesso
+         });
+      }
+   </script>
+</body>
 </html>
