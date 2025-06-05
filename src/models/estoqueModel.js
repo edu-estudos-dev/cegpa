@@ -22,7 +22,9 @@ class EstoqueModel {
 
       for (const field of requiredFields) {
          if (data[field] === undefined || data[field] === null) {
-            throw new Error(`Campo obrigatório '${field}' está ausente ou nulo.`);
+            throw new Error(
+               `Campo obrigatório '${field}' está ausente ou nulo.`
+            );
          }
       }
 
@@ -61,12 +63,14 @@ class EstoqueModel {
          console.error('Erro ao atualizar o item no estoque:', {
             error: error.message,
             data,
-            id
+            id,
          });
-         throw new Error(`Erro ao atualizar o item no estoque: ${error.message}`);
+         throw new Error(
+            `Erro ao atualizar o item no estoque: ${error.message}`
+         );
       }
    };
-      
+
    // Método para obter todo o estoque
    getAllEstoque = async () => {
       const query = `SELECT * FROM estoqueatual WHERE pago = FALSE ORDER BY descricao ASC`;
@@ -140,7 +144,7 @@ class EstoqueModel {
          ) VALUES ?
       `;
       // Formato esperado: [[valor1, valor2, ...], [valor1, valor2, ...], ...]
-      const values = itens.map(item => [
+      const values = itens.map((item) => [
          item.data_de_entrada,
          item.descricao,
          item.tombo,
@@ -152,7 +156,7 @@ class EstoqueModel {
          item.valor,
          item.situacao,
          item.observacao,
-         item.tipo_tombo
+         item.tipo_tombo,
       ]);
 
       try {
@@ -163,13 +167,13 @@ class EstoqueModel {
          throw error;
       }
    };
-   
+
    // Método para obter o último tombo
    getUltimoTombo = async () => {
       // Logar todos os tombos para depuração
       const queryAll = `SELECT tombo FROM estoqueatual ORDER BY tombo ASC`;
       const [allResults] = await connection.execute(queryAll);
-    
+
       // Consulta para obter o maior tombo
       const query = `
          SELECT tombo
@@ -183,8 +187,10 @@ class EstoqueModel {
          const [results] = await connection.execute(query);
          console.log('Resultado da query para maior tombo:', results);
          if (!results || results.length === 0) {
-            console.log('Nenhum tombo encontrado, usando 130328 como fallback.');
-            return 130328;  // Ajuste para iniciar a partir do último tombo 
+            console.log(
+               'Nenhum tombo encontrado, usando 130328 como fallback.'
+            );
+            return 130328; // Ajuste para iniciar a partir do último tombo
          }
          const ultimoTombo = results[0].tombo;
          console.log('Maior tombo encontrado no banco:', ultimoTombo);
@@ -232,7 +238,10 @@ class EstoqueModel {
          const [results] = await connection.execute(query);
          return results;
       } catch (error) {
-         console.error('Erro ao buscar quantidade única de itens no estoque:', error);
+         console.error(
+            'Erro ao buscar quantidade única de itens no estoque:',
+            error
+         );
          throw error;
       }
    };
@@ -254,52 +263,94 @@ class EstoqueModel {
    };
 
    // Método para obter os itens que saíram do estoque
-   getItensPagos = async () => {
-      const query = `
+   // Dentro da classe EstoqueModel
+   getItensPagos = async (data_inicial, data_final) => {
+      // Validação das datas
+      if (data_inicial && data_final) {
+         const dataInicialDate = new Date(data_inicial);
+         const dataFinalDate = new Date(data_final);
+         if (
+            isNaN(dataInicialDate.getTime()) ||
+            isNaN(dataFinalDate.getTime())
+         ) {
+            throw new Error(
+               'Formato de data inválido para data_inicial ou data_final.'
+            );
+         }
+         if (dataInicialDate > dataFinalDate) {
+            throw new Error(
+               'Data inicial não pode ser posterior à data final.'
+            );
+         }
+      }
+
+      let query = `
       SELECT 
-        ip.id,
-        ip.data_de_saida,
-        ip.descricao,
-        ea.tombo AS tombo_estoqueatual,
-        ip.destino,
-        ip.referencia,
-        ip.doc_saida,
-        ea.doc_origem,
-        ea.valor
+         ip.id,
+         ip.data_de_saida,
+         ip.descricao,
+         ea.tombo AS tombo_estoqueatual,
+         ip.destino,
+         ip.referencia,
+         ip.doc_saida,
+         ea.doc_origem,
+         ea.valor
       FROM itenspagos ip
       JOIN estoqueatual ea ON ip.estoqueatual_id = ea.id
-      ORDER BY ip.data_de_saida DESC;
-    `;
+   `;
+      const params = [];
+
+      if (data_inicial && data_final) {
+         const dataFinalAjustada = `${data_final} 23:59:59`;
+         query += ` WHERE ip.data_de_saida BETWEEN ? AND ?`;
+         params.push(data_inicial, dataFinalAjustada);
+      }
+
+      query += ` ORDER BY ip.data_de_saida DESC`;
+
       try {
-         const [results] = await connection.execute(query);
-         console.log('Resultados de getItensPagos:', results);
+         const [results] = await connection.execute(query, params);
          return results;
       } catch (error) {
-         console.error('Erro ao buscar itens pagos:', error);
-         throw error;
+         console.error('Erro ao buscar itens pagos:', {
+            message: error.message,
+            stack: error.stack,
+            queryParams: { data_inicial, data_final },
+         });
+         throw new Error(`Erro ao buscar itens pagos: ${error.message}`);
       }
    };
 
    // Método para obter os itens pagos formatados para o PDF
-   getItensPagosForPDF = async () => {
-      const query = `
-         SELECT 
-            ip.id,
-            ip.data_de_saida,
-            ip.descricao,
-            ea.tombo AS tombo_estoqueatual,
-            ip.destino,
-            ip.referencia,
-            ip.doc_saida,
-            ea.doc_origem,  -- Adicionado o campo doc_origem
-            ea.valor
-         FROM itenspagos ip
-         JOIN estoqueatual ea ON ip.estoqueatual_id = ea.id
-         ORDER BY ip.data_de_saida DESC;
-      `;
+   getItensPagosForPDF = async (data_inicial, data_final) => {
+      let query = `
+      SELECT 
+         ip.id,
+         ip.data_de_saida,
+         ip.descricao,
+         ea.tombo AS tombo_estoqueatual,
+         ip.destino,
+         ip.referencia,
+         ip.doc_saida,
+         ea.doc_origem,
+         ea.valor
+      FROM itenspagos ip
+      JOIN estoqueatual ea ON ip.estoqueatual_id = ea.id
+   `;
+      const params = [];
+
+      if (data_inicial && data_final) {
+         const dataFinalAjustada = `${data_final} 23:59:59`;
+         query += ` WHERE ip.data_de_saida BETWEEN ? AND ?`;
+         params.push(data_inicial, dataFinalAjustada);
+      }
+
+      query += ` ORDER BY ip.data_de_saida DESC`;
+
+      // Correção aqui: data_de_sida -> data_de_saida
+
       try {
-         const [results] = await connection.execute(query);
-         console.log('Resultados de getItensPagosForPDF:', results);
+         const [results] = await connection.execute(query, params);
          return results;
       } catch (error) {
          console.error('Erro ao trazer itens pagos para PDF:', error);
@@ -368,7 +419,7 @@ class EstoqueModel {
             observacao,
             descricao,
          });
-   
+
          const [result] = await connection.execute(query, [
             estoqueatual_id,
             tombo,
@@ -384,17 +435,17 @@ class EstoqueModel {
             observacao,
             descricao,
          ]);
-   
+
          const updateQuery = `UPDATE estoqueatual SET pago = 1 WHERE id = ?`;
          await connection.execute(updateQuery, [estoqueatual_id]);
-   
+
          return result.insertId;
       } catch (error) {
          console.error('Erro ao inserir dados na tabela itenspagos:', error);
          throw error;
       }
    };
-  
+
    // Método para marcar item que saiu do estoque atual como 'pago'
    markAsPaid = async (id) => {
       const query = `UPDATE estoqueatual SET pago = 1 WHERE id = ?`;
@@ -463,7 +514,10 @@ class EstoqueModel {
          const [results] = await connection.execute(query, [id]);
          return results.length > 0 ? results[0] : null;
       } catch (error) {
-         console.error('Erro ao buscar informações do item pago pelo ID:', error);
+         console.error(
+            'Erro ao buscar informações do item pago pelo ID:',
+            error
+         );
          throw error;
       }
    };

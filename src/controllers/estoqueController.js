@@ -637,8 +637,11 @@ class EstoqueController {
    // Método para Gerar Relatório de Itens Pagos (PDF ou Excel)
    generatePDFItensPagos = async (req, res) => {
       try {
-         const { formato = 'pdf' } = req.query;
-         const itensPagos = await estoqueModel.getItensPagosForPDF();
+         const { formato = 'pdf', data_inicial, data_final } = req.query;
+         const itensPagos = await estoqueModel.getItensPagosForPDF(
+            data_inicial,
+            data_final
+         );
          await this._generatePDFItensPagos(
             res,
             itensPagos,
@@ -824,13 +827,53 @@ class EstoqueController {
    };
 
    // Método para mostrar todos os itens pagos
-   getAllItensPagos = async (_, res) => {
+   getAllItensPagos = async (req, res) => {
       try {
+         const { data_inicial, data_final } = req.query;
+         console.log('Requisição recebida em /estoque/itenspagos:', {
+            data_inicial,
+            data_final,
+         });
+
+         // Verificar se ambas as datas foram fornecidas
+         if (data_inicial && data_final) {
+            const itensPagos = await estoqueModel.getItensPagos(
+               data_inicial,
+               data_final
+            );
+            console.log('Itens pagos retornados do modelo:', itensPagos.length);
+
+            const userRole = req.user ? req.user.role : 'user';
+            return res.render('tabelaSaidaEstoque', {
+               itensPagos,
+               userRole,
+               data_inicial,
+               data_final,
+            });
+         }
+
+         // Se não houver filtro de datas, retornar todos os itens
          const itensPagos = await estoqueModel.getItensPagos();
-         res.render('tabelaSaidaEstoque', { itensPagos });
+         const userRole = req.user ? req.user.role : 'user';
+         res.render('tabelaSaidaEstoque', {
+            itensPagos,
+            userRole,
+            data_inicial: null,
+            data_final: null,
+         });
       } catch (error) {
-         console.error('Erro ao carregar os itens pagos:', error);
-         res.status(500).json({ error: 'Erro ao carregar os itens pagos.' });
+         console.error('Erro ao carregar os itens pagos:', {
+            message: error.message,
+            stack: error.stack,
+            query: req.query,
+         });
+         res.status(500).render('tabelaSaidaEstoque', {
+            itensPagos: [],
+            userRole: req.user ? req.user.role : 'user',
+            data_inicial: null,
+            data_final: null,
+            error: 'Erro ao carregar os itens pagos.',
+         });
       }
    };
 
