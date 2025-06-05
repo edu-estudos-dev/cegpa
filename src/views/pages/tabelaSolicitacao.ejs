@@ -68,6 +68,12 @@
       opacity: 1;
    }
 
+   .situacao-select {
+      width: 100% !important;
+      padding: 2px;
+      font-size: 0.9rem;
+   }
+
    /* Ajuste das colunas */
    .table-container th:nth-child(1),
    .table-container td:nth-child(1) {
@@ -129,9 +135,9 @@
             <div class="col d-flex justify-content-between align-items-center bg-success py-2 rounded" style="border-bottom: 4px solid orange;">
                <h2 class="text-white mt-0 fw-bold flex-grow-1 text-center">Tabela de Solicitação</h2>
                <div class="d-flex align-items-center">
-                  <input type="text" id="searchInput" class="form-control me-2" placeholder="Pesquisar..." style="width: 200px;">
+                  <input type="text" id="searchInput" class="form-control me-2" placeholder="Pesquisar..." style="width: 200px;" aria-label="Pesquisar solicitações">
                   <label for="formato" class="text-white me-2">Formato:</label>
-                  <select id="formato" class="form-select form-select-md me-2" style="width: auto;">
+                  <select id="formato" class="form-select form-select-md me-2" style="width: auto;" aria-label="Formato de exportação">
                      <option value="pdf">PDF</option>
                      <option value="excel">Excel</option>
                   </select>
@@ -155,7 +161,7 @@
                   </tr>
                </thead>
                <tbody>
-                  <% if (solicitacao.length > 0) { %>
+                  <% if (solicitacao && solicitacao.length > 0) { %>
                      <% solicitacao.forEach(function(item) { %>
                         <tr>
                            <td class="py-1 text-center align-middle"><%= item.id %></td>
@@ -164,14 +170,10 @@
                            <td class="py-1 text-center align-middle"><%= item.quantidade %></td>
                            <td class="py-1 text-center align-middle"><%= item.solicitante %></td>
                            <td class="py-1 text-center align-middle">
-                              <% if (userRole === 'ADMIN') { %>
-                                 <select class="form-select form-select-sm situacao-select" data-id="<%= item.id %>" data-original-value="<%= item.situacao %>">
-                                    <option value="PENDENTE" <%= item.situacao === 'PENDENTE' ? 'selected' : '' %>>Pendente</option>
-                                    <option value="ADQUIRIDO" <%= item.situacao === 'ADQUIRIDO' ? 'selected' : '' %>>Adquirido</option>
-                                 </select>
-                              <% } else { %>
-                                 <%= item.situacao %>
-                              <% } %>
+                              <select class="form-select form-select-sm situacao-select" data-id="<%= item.id %>" data-original-value="<%= item.situacao %>" aria-label="Alterar situação da solicitação">
+                                 <option value="PENDENTE" <%= item.situacao === 'PENDENTE' ? 'selected' : '' %>>Pendente</option>
+                                 <option value="ADQUIRIDO" <%= item.situacao === 'ADQUIRIDO' ? 'selected' : '' %>>Adquirido</option>
+                              </select>
                            </td>
                            <td class="py-1 align-middle text-center">
                               <% if (item.nup) { %>
@@ -184,7 +186,7 @@
                               <%= item.observacao ? item.observacao : 'N/A' %>
                            </td>
                            <td class="py-1 text-center align-middle">
-                              <button type="button" class="btn btn-secondary btn-sm btn-details btn-action" data-id="<%= item.id %>">Detalhes</button>
+                              <button type="button" class="btn btn-secondary btn-sm btn-details btn-action" data-id="<%= item.id %>" aria-label="Ver detalhes da solicitação">Detalhes</button>
                            </td>
                         </tr>
                      <% }); %>
@@ -204,8 +206,8 @@
 
    <!-- Scripts para Bootstrap -->
    <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-      integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
       crossorigin="anonymous"
    ></script>
    <script
@@ -234,7 +236,7 @@
                   situacao.includes(searchTerm) ||
                   nup.includes(searchTerm) ||
                   observacao.includes(searchTerm);
-               row.classList.toggle('hidden', !matches);
+               row.style.display = matches ? '' : 'none';
             });
          }
 
@@ -245,15 +247,93 @@
             filterRows(searchTerm);
          });
 
+         // Atualizar situação com confirmação
+         document.querySelectorAll('.situacao-select').forEach(select => {
+            select.addEventListener('change', async (event) => {
+               const selectElement = event.target;
+               const solicitacaoId = selectElement.getAttribute('data-id');
+               const novaSituacao = selectElement.value;
+               const originalValue = selectElement.getAttribute('data-original-value');
+
+               // Evita ação se o valor não mudou
+               if (novaSituacao === originalValue) {
+                  return;
+               }
+
+               // Confirmação com SweetAlert2
+               const result = await Swal.fire({
+                  title: 'Confirmar alteração',
+                  text: `Tem certeza que deseja modificar para "${novaSituacao}"?`,
+                  icon: 'question',
+                  showCancelButton: true,
+                  confirmButtonText: 'Sim',
+                  cancelButtonText: 'Não',
+                  confirmButtonColor: '#28a745',
+                  cancelButtonColor: '#dc3545'
+               });
+
+               if (!result.isConfirmed) {
+                  selectElement.value = originalValue; // Reverte se cancelado
+                  return;
+               }
+
+               try {
+                  const response = await fetch(`/solicitacao/${solicitacaoId}/situacao`, {
+                     method: 'PUT',
+                     headers: {
+                        'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify({ situacao: novaSituacao }),
+                  });
+
+                  if (!response.ok) {
+                     throw new Error('Erro ao atualizar situação');
+                  }
+
+                  // Atualiza o valor original após sucesso
+                  selectElement.setAttribute('data-original-value', novaSituacao);
+
+                  Swal.fire({
+                     icon: 'success',
+                     title: 'Sucesso!',
+                     text: 'Situação atualizada com sucesso!',
+                     timer: 2000,
+                     timerProgressBar: true,
+                     showConfirmButton: false
+                  });
+               } catch (error) {
+                  console.error('Erro ao atualizar situação:', error);
+                  selectElement.value = originalValue; // Reverte em caso de erro
+                  Swal.fire({
+                     icon: 'error',
+                     title: 'Erro!',
+                     text: 'Não foi possível atualizar a situação. Tente novamente.',
+                     timer: 3000,
+                     timerProgressBar: true,
+                     showConfirmButton: false
+                  });
+               }
+            });
+         });
+
+         // Botão "Exportar"
+         const exportarBtn = document.getElementById('exportarBtn');
+         exportarBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            const formato = document.getElementById('formato').value;
+            window.location.href = `/relatorio/solicitacoes?formato=${formato}`;
+         });
+
          // Botão "Detalhes"
          document.querySelectorAll('.btn-details').forEach(button => {
             button.addEventListener('click', async (event) => {
                const solicitacaoId = event.target.getAttribute('data-id');
                try {
                   const response = await fetch(`/solicitacao/${solicitacaoId}`);
+                  if (!response.ok) throw new Error('Erro ao buscar detalhes da solicitação');
                   const item = await response.json();
                   const modalHtml = `
-                     <div class="modal fade show" id="infoSolicitacaoModal" tabindex="-1" aria-labelledby="infoSolicitacaoModalLabel" aria-hidden="true">
+                     <div class="modal fade" id="infoSolicitacaoModal" tabindex="-1" aria-labelledby="infoSolicitacaoModalLabel" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                            <div class="modal-content">
                               <div class="modal-header bg-success text-white d-flex justify-content-between">
@@ -295,58 +375,18 @@
                   });
                } catch (error) {
                   console.error('ERRO AO BUSCAR INFORMAÇÕES DA SOLICITAÇÃO:', error.message.toUpperCase());
-               }
-            });
-         });
-
-         // Botão "Exportar"
-         const exportarBtn = document.getElementById('exportarBtn');
-         exportarBtn.addEventListener('click', (event) => {
-            event.preventDefault();
-            const formato = document.getElementById('formato').value;
-            window.location.href = `/relatorio/solicitacoes?formato=${formato}`;
-         });
-
-         // Atualizar situação
-         document.querySelectorAll('.situacao-select').forEach(select => {
-            select.addEventListener('change', async (event) => {
-               const solicitacaoId = event.target.getAttribute('data-id');
-               const novaSituacao = event.target.value;
-               try {
-                  const response = await fetch(`/solicitacao/${solicitacaoId}/situacao`, {
-                     method: 'PUT',
-                     headers: {
-                        'Content-Type': 'application/json',
-                     },
-                     body: JSON.stringify({ situacao: novaSituacao }),
+                  Swal.fire({
+                     icon: 'error',
+                     title: 'Erro!',
+                     text: 'Não foi possível carregar os detalhes da solicitação.',
+                     timer: 3000,
+                     timerProgressBar: true,
+                     showConfirmButton: false
                   });
-                  if (!response.ok) {
-                     throw new Error('Erro ao atualizar situação');
-                  }
-                  alert('Situação atualizada com sucesso!');
-               } catch (error) {
-                  console.error('Erro ao atualizar situação:', error);
-                  alert('Erro ao atualizar situação');
-                  event.target.value = event.target.getAttribute('data-original-value');
                }
             });
          });
       });
    </script>
-
-   <!-- Script separado para o SweetAlert2 -->
-   <% if (typeof success !== 'undefined' && success) { %>
-      <script>
-         Swal.fire({
-            icon: 'success',
-            title: 'Sucesso!',
-            text: '<%= success %>',
-            timer: 3000, // Fecha automaticamente após 3 segundos
-            timerProgressBar: true, // Mostra uma barra de progresso
-            showConfirmButton: false // Não mostra o botão de confirmação
-         });
-      </script>
-   <% } %>
-
 </body>
 </html>

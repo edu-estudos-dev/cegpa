@@ -128,10 +128,11 @@ class EstoqueController {
    };
 
    // Método para renderizar a tabela com os itens novos
-   showItensNovos = async (_req, res) => {
+   showItensNovos = async (req, res) => {
       try {
          const itensNovos = await estoqueModel.getAllItensNovos();
-         res.render('tabelaItensNovos', { novos: itensNovos });
+         const userRole = req.user ? req.user.role : 'user'; // Extrai o role ou usa 'user' como padrão
+         res.render('tabelaItensNovos', { novos: itensNovos, userRole });
       } catch (error) {
          console.error('Erro ao carregar os itens novos:', error);
          res.status(500).json({ error: 'Erro ao carregar os itens novos.' });
@@ -152,15 +153,14 @@ class EstoqueController {
    // };
 
    // Método para renderizar a tabela com os itens Usados
-   showItensUsados = async (_req, res) => {
+   showItensUsados = async (req, res) => {
       try {
          const itensUsados = await estoqueModel.getAllItensUsados();
-         res.render('tabelaItensUsados', {
-            usados: itensUsados,
-         });
+         const userRole = req.user ? req.user.role : 'user'; // Extrai o role ou usa 'user' como padrão
+         res.render('tabelaItensUsados', { usados: itensUsados, userRole });
       } catch (error) {
-         console.error('Erro ao carregar os itens Usados:', error);
-         res.status(500).json({ error: 'Erro ao carregar os itens Usados.' });
+         console.error('Erro ao carregar os itens usados:', error);
+         res.status(500).json({ error: 'Erro ao carregar os itens usados.' });
       }
    };
 
@@ -180,17 +180,17 @@ class EstoqueController {
    // Método para listar todos os itens no estoque
    getAllEstoque = async (req, res) => {
       try {
-        const estoque = await estoqueModel.getAllEstoque();
-        console.log('req.session.user:', req.session.user); // Debug
-        res.status(200).render('tabelaEstoque', {
-          estoque,
-          userRole: req.session.user.role
-        });
+         const estoque = await estoqueModel.getAllEstoque();
+         console.log('req.session.user:', req.session.user); // Debug
+         res.status(200).render('tabelaEstoque', {
+            estoque,
+            userRole: req.session.user.role,
+         });
       } catch (error) {
-        console.error('Erro ao carregar o estoque:', error);
-        res.status(500).json({ error: 'Erro ao carregar o estoque.' });
+         console.error('Erro ao carregar o estoque:', error);
+         res.status(500).json({ error: 'Erro ao carregar o estoque.' });
       }
-    };
+   };
 
    // Método para renderizar o formulário de cadastro de estoque
    renderEntradaForm = (_, res) => {
@@ -200,139 +200,169 @@ class EstoqueController {
    // Método para criar um novo item no estoque
    create = async (req, res) => {
       console.log('Dados recebidos no método create (req.body):', req.body);
-  
+
       try {
-          const {
-              data_de_entrada,
-              quantidade,
-              tipo_tombo,
-              tombo_inicial,
-              tombo_final, 
-              tombo_lote_manual,
-              categoria,
-              doc_origem,
-              valor,
-              descricao,
-              situacao,
-              conta_contabil,
-              estoque,
-              observacao,
-          } = req.body;
-  
-          // Validação básica
-          if (!data_de_entrada)
-              return res.status(400).json({ error: 'A data de entrada é obrigatória.' });
-          if (!quantidade || Number(quantidade) <= 0)
-              return res.status(400).json({ error: 'A quantidade deve ser maior que zero.' });
-          if (!tipo_tombo)
-              return res.status(400).json({ error: 'O tipo de tombo é obrigatório.' });
-          if (!categoria || categoria === 'Selecione...')
-              return res.status(400).json({ error: 'A categoria é obrigatória.' });
-          if (!doc_origem)
-              return res.status(400).json({ error: 'O documento de origem é obrigatório.' });
-          if (!valor || Number(valor) <= 0)
-              return res.status(400).json({ error: 'O valor deve ser maior que zero.' });
-          if (!descricao)
-              return res.status(400).json({ error: 'A descrição é obrigatória.' });
-          if (!situacao || situacao === 'Escolha uma opção...')
-              return res.status(400).json({ error: 'A situação é obrigatória.' });
-          if (!conta_contabil || conta_contabil === 'Escolha uma opção...')
-              return res.status(400).json({ error: 'A conta contábil é obrigatória.' });
-          if (!estoque || estoque === 'Escolha uma opção...')
-              return res.status(400).json({ error: 'O estoque é obrigatório.' });
-  
-          const safeData = {
-              data_de_entrada,
-              quantidade: Number(quantidade),
-              tipo_tombo: tipo_tombo || 'AUTO',
-              categoria: categoria.toUpperCase(),
-              doc_origem: doc_origem.toUpperCase(),
-              valor: Number(valor),
-              descricao: descricao.toUpperCase(),
-              situacao: situacao.toUpperCase(),
-              conta_contabil: conta_contabil.toUpperCase(),
-              estoque: estoque.toUpperCase(),
-              observacao: observacao ? observacao.toUpperCase() : null,
-          };
-  
-          let tombos = [];
-          if (safeData.tipo_tombo === 'AUTO') {
-              const ultimoTombo = await estoqueModel.getUltimoTombo();
-              const tomboInicial = ultimoTombo;
-              for (let i = 0; i < safeData.quantidade; i++) {
-                  tombos.push(tomboInicial + 1 + i);
-              }
-          } else if (safeData.tipo_tombo === 'LOTE_MANUAL') {
-              if (!tombo_lote_manual)
-                  return res.status(400).json({ error: 'A lista de tombos do lote é obrigatória.' });
-              tombos = JSON.parse(tombo_lote_manual);
-              if (tombos.length !== safeData.quantidade)
-                  return res.status(400).json({
-                      error: 'A quantidade de tombos não corresponde à quantidade informada.',
-                  });
-  
-              // Verificar duplicatas no banco
-              for (const tombo of tombos) {
-                  const tomboExistente = await estoqueModel.getInfoByTombo(tombo);
-                  if (tomboExistente)
-                      return res.status(400).json({ error: `O tombo ${tombo} já existe no sistema.` });
-              }
-          } else if (safeData.tipo_tombo === 'LOTE') {
-              if (!tombo_inicial || !tombo_final) {
-                  return res.status(400).json({ error: 'Tombo inicial e final são obrigatórios para o tipo LOTE.' });
-              }
-  
-              const inicio = Number(tombo_inicial);
-              const fim = Number(tombo_final);
-  
-              if (inicio >= fim) {
-                  return res.status(400).json({ error: 'O tombo inicial deve ser menor que o tombo final.' });
-              }
-  
-              if ((fim - inicio + 1) !== safeData.quantidade) {
-                  return res.status(400).json({
-                      error: 'A quantidade informada não corresponde ao intervalo de tombos.'
-                  });
-              }
-  
-              // Verificar duplicatas no banco
-              for (let tombo = inicio; tombo <= fim; tombo++) {
-                  const tomboExistente = await estoqueModel.getInfoByTombo(tombo);
-                  if (tomboExistente) {
-                      return res.status(400).json({ error: `O tombo ${tombo} já existe no sistema.` });
-                  }
-                  tombos.push(tombo);
-              }
-          }
-  
-          // Preparar os itens para inserção em lote
-          const itens = tombos.map(tombo => ({
-              data_de_entrada: safeData.data_de_entrada,
-              descricao: safeData.descricao,
-              tombo,
-              quantidade: 1,
-              categoria: safeData.categoria,
-              conta_contabil: safeData.conta_contabil,
-              doc_origem: safeData.doc_origem,
-              estoque: safeData.estoque,
-              valor: safeData.valor,
-              situacao: safeData.situacao,
-              observacao: safeData.observacao,
-              tipo_tombo: safeData.tipo_tombo
-          }));
-  
-          // Inserir todos os itens de uma vez usando createEstoqueLote
-          await estoqueModel.createEstoqueLote(itens);
-  
-          res.status(200).json({ message: 'Entrada registrada com sucesso!' });
+         const {
+            data_de_entrada,
+            quantidade,
+            tipo_tombo,
+            tombo_inicial,
+            tombo_final,
+            tombo_lote_manual,
+            categoria,
+            doc_origem,
+            valor,
+            descricao,
+            situacao,
+            conta_contabil,
+            estoque,
+            observacao,
+         } = req.body;
+
+         // Validação básica
+         if (!data_de_entrada)
+            return res
+               .status(400)
+               .json({ error: 'A data de entrada é obrigatória.' });
+         if (!quantidade || Number(quantidade) <= 0)
+            return res
+               .status(400)
+               .json({ error: 'A quantidade deve ser maior que zero.' });
+         if (!tipo_tombo)
+            return res
+               .status(400)
+               .json({ error: 'O tipo de tombo é obrigatório.' });
+         if (!categoria || categoria === 'Selecione...')
+            return res
+               .status(400)
+               .json({ error: 'A categoria é obrigatória.' });
+         if (!doc_origem)
+            return res
+               .status(400)
+               .json({ error: 'O documento de origem é obrigatório.' });
+         if (!valor || Number(valor) <= 0)
+            return res
+               .status(400)
+               .json({ error: 'O valor deve ser maior que zero.' });
+         if (!descricao)
+            return res
+               .status(400)
+               .json({ error: 'A descrição é obrigatória.' });
+         if (!situacao || situacao === 'Escolha uma opção...')
+            return res.status(400).json({ error: 'A situação é obrigatória.' });
+         if (!conta_contabil || conta_contabil === 'Escolha uma opção...')
+            return res
+               .status(400)
+               .json({ error: 'A conta contábil é obrigatória.' });
+         if (!estoque || estoque === 'Escolha uma opção...')
+            return res.status(400).json({ error: 'O estoque é obrigatório.' });
+
+         const safeData = {
+            data_de_entrada,
+            quantidade: Number(quantidade),
+            tipo_tombo: tipo_tombo || 'AUTO',
+            categoria: categoria.toUpperCase(),
+            doc_origem: doc_origem.toUpperCase(),
+            valor: Number(valor),
+            descricao: descricao.toUpperCase(),
+            situacao: situacao.toUpperCase(),
+            conta_contabil: conta_contabil.toUpperCase(),
+            estoque: estoque.toUpperCase(),
+            observacao: observacao ? observacao.toUpperCase() : null,
+         };
+
+         let tombos = [];
+         if (safeData.tipo_tombo === 'AUTO') {
+            const ultimoTombo = await estoqueModel.getUltimoTombo();
+            const tomboInicial = ultimoTombo;
+            for (let i = 0; i < safeData.quantidade; i++) {
+               tombos.push(tomboInicial + 1 + i);
+            }
+         } else if (safeData.tipo_tombo === 'LOTE_MANUAL') {
+            if (!tombo_lote_manual)
+               return res
+                  .status(400)
+                  .json({ error: 'A lista de tombos do lote é obrigatória.' });
+            tombos = JSON.parse(tombo_lote_manual);
+            if (tombos.length !== safeData.quantidade)
+               return res.status(400).json({
+                  error: 'A quantidade de tombos não corresponde à quantidade informada.',
+               });
+
+            // Verificar duplicatas no banco
+            for (const tombo of tombos) {
+               const tomboExistente = await estoqueModel.getInfoByTombo(tombo);
+               if (tomboExistente)
+                  return res
+                     .status(400)
+                     .json({ error: `O tombo ${tombo} já existe no sistema.` });
+            }
+         } else if (safeData.tipo_tombo === 'LOTE') {
+            if (!tombo_inicial || !tombo_final) {
+               return res.status(400).json({
+                  error: 'Tombo inicial e final são obrigatórios para o tipo LOTE.',
+               });
+            }
+
+            const inicio = Number(tombo_inicial);
+            const fim = Number(tombo_final);
+
+            if (inicio >= fim) {
+               return res.status(400).json({
+                  error: 'O tombo inicial deve ser menor que o tombo final.',
+               });
+            }
+
+            if (fim - inicio + 1 !== safeData.quantidade) {
+               return res.status(400).json({
+                  error: 'A quantidade informada não corresponde ao intervalo de tombos.',
+               });
+            }
+
+            // Verificar duplicatas no banco
+            for (let tombo = inicio; tombo <= fim; tombo++) {
+               const tomboExistente = await estoqueModel.getInfoByTombo(tombo);
+               if (tomboExistente) {
+                  return res
+                     .status(400)
+                     .json({ error: `O tombo ${tombo} já existe no sistema.` });
+               }
+               tombos.push(tombo);
+            }
+         }
+
+         // Preparar os itens para inserção em lote
+         const itens = tombos.map((tombo) => ({
+            data_de_entrada: safeData.data_de_entrada,
+            descricao: safeData.descricao,
+            tombo,
+            quantidade: 1,
+            categoria: safeData.categoria,
+            conta_contabil: safeData.conta_contabil,
+            doc_origem: safeData.doc_origem,
+            estoque: safeData.estoque,
+            valor: safeData.valor,
+            situacao: safeData.situacao,
+            observacao: safeData.observacao,
+            tipo_tombo: safeData.tipo_tombo,
+         }));
+
+         // Inserir todos os itens de uma vez usando createEstoqueLote
+         await estoqueModel.createEstoqueLote(itens);
+
+         res.status(200).json({ message: 'Entrada registrada com sucesso!' });
       } catch (error) {
-          console.error('Erro ao registrar entrada:', error.message, error.stack);
-          res.status(500).json({
-              error: 'Erro interno ao registrar a entrada.',
-          });
+         console.error(
+            'Erro ao registrar entrada:',
+            error.message,
+            error.stack
+         );
+         res.status(500).json({
+            error: 'Erro interno ao registrar a entrada.',
+         });
       }
-  };
-   
+   };
+
    // Método para obter o último tombo (endpoint para o frontend)
    fetchUltimoTombo = async (req, res) => {
       try {
@@ -470,10 +500,12 @@ class EstoqueController {
          { header: 'Valor', dataKey: 'valor', width: 20 },
          { header: 'Doc Origem', dataKey: 'doc_origem', width: 30 },
       ];
-   
+
       const rows = data.map((item) => ({
          id: item.id,
-         data_entrada: new Date(item.data_de_entrada).toLocaleDateString('pt-BR'),
+         data_entrada: new Date(item.data_de_entrada).toLocaleDateString(
+            'pt-BR'
+         ),
          descricao: item.descricao,
          tombo: item.tombo,
          categoria: item.categoria,
@@ -481,31 +513,35 @@ class EstoqueController {
          situacao: item.situacao,
          valor: item.valor
             ? parseFloat(item.valor).toLocaleString('pt-BR', {
-               style: 'currency',
-               currency: 'BRL',
-            })
+                 style: 'currency',
+                 currency: 'BRL',
+              })
             : 'N/A',
          doc_origem: item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A',
       }));
-   
+
       if (formato === 'pdf') {
          const doc = new jsPDF({
             orientation: 'landscape',
             unit: 'mm',
             format: 'a4',
          });
-   
+
          // Definir o título do relatório
          doc.setFontSize(16);
          doc.text(title, 10, 15);
          doc.setFontSize(10);
-   
+
          // Texto "Gerado em" e número da página na mesma linha (apenas na primeira página inicialmente)
-         const generatedText = `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`;
+         const generatedText = `Gerado em: ${new Date().toLocaleDateString(
+            'pt-BR'
+         )}`;
          const pageNumberText = `Página 1`;
          doc.text(generatedText, 10, 22);
-         doc.text(pageNumberText, doc.internal.pageSize.width - 10, 22, { align: 'right' });
-   
+         doc.text(pageNumberText, doc.internal.pageSize.width - 10, 22, {
+            align: 'right',
+         });
+
          doc.autoTable({
             startY: 25,
             margin: { left: 5, right: 5, top: 25 },
@@ -535,7 +571,9 @@ class EstoqueController {
                doc.setFontSize(10);
                const pageStr = `Página ${data.pageNumber}`;
                doc.text(generatedText, 10, 22);
-               doc.text(pageStr, doc.internal.pageSize.width - 10, 22, { align: 'right' });
+               doc.text(pageStr, doc.internal.pageSize.width - 10, 22, {
+                  align: 'right',
+               });
             },
          });
          const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
@@ -548,16 +586,18 @@ class EstoqueController {
       } else if (formato === 'excel') {
          const workbook = new ExcelJS.Workbook();
          const worksheet = workbook.addWorksheet(title);
-   
+
          // Adicionar o título e mesclar as células
          const titleRow = worksheet.addRow([title]);
          worksheet.mergeCells(`A1:I1`);
          worksheet.getCell('A1').alignment = { horizontal: 'center' };
          worksheet.getCell('A1').font = { size: 16, bold: true };
-   
+
          // Adicionar a data de geração
-         worksheet.addRow([`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`]);
-   
+         worksheet.addRow([
+            `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
+         ]);
+
          // Adicionar o cabeçalho
          worksheet.addRow(columns.map((col) => col.header)).eachCell((cell) => {
             cell.fill = {
@@ -568,15 +608,15 @@ class EstoqueController {
             cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
             cell.alignment = { horizontal: 'center' };
          });
-   
+
          // Adicionar os dados
          rows.forEach((row) => {
             worksheet.addRow(columns.map((col) => row[col.dataKey]));
          });
-   
+
          // Ajustar a largura das colunas
          worksheet.columns = columns.map((col) => ({ width: col.width / 6 }));
-   
+
          const excelBuffer = await workbook.xlsx.writeBuffer();
          res.setHeader(
             'Content-Type',
@@ -593,7 +633,7 @@ class EstoqueController {
          });
       }
    };
-   
+
    // Método para Gerar Relatório de Itens Pagos (PDF ou Excel)
    generatePDFItensPagos = async (req, res) => {
       try {
@@ -613,141 +653,155 @@ class EstoqueController {
 
    // Método privado para geração de relatórios de itens pagos (PDF ou Excel)
    _generatePDFItensPagos = async (res, data, title, formato) => {
-   const columns = [
-      { header: 'ID', dataKey: 'id', width: 9 },
-      { header: 'Saída', dataKey: 'data_de_saida', width: 17 },
-      { header: 'Descrição', dataKey: 'descricao', width: 115, halign: 'left' },
-      { header: 'Tombo', dataKey: 'tombo_estoqueatual', width: 15 },
-      { header: 'Destino', dataKey: 'destino', width: 25 },
-      { header: 'NUP (Suite)', dataKey: 'referencia', width: 32 },
-      { header: 'Doc Saída', dataKey: 'doc_saida', width: 17 },
-      { header: 'Doc Origem', dataKey: 'doc_origem', width: 28 },
-      { header: 'Valor', dataKey: 'valor', width: 20 },
-   ];
-
-   const rows = data.map((item) => ({
-      id: item.id,
-      data_de_saida: new Date(item.data_de_saida).toLocaleDateString('pt-BR'),
-      descricao: item.descricao ? item.descricao.toUpperCase() : 'N/A',
-      tombo_estoqueatual: item.tombo_estoqueatual || 'N/A',
-      destino: item.destino ? item.destino.toUpperCase() : 'N/A',
-      referencia: item.referencia ? item.referencia.toUpperCase() : 'N/A',
-      doc_saida: item.doc_saida || 'N/A',
-      doc_origem: item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A',
-      valor: item.valor
-         ? parseFloat(item.valor).toLocaleString('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-           })
-         : 'N/A',
-   }));
-
-   if (formato === 'pdf') {
-      const doc = new jsPDF({
-         orientation: 'landscape',
-         unit: 'mm',
-         format: 'a4',
-      });
-
-      // Definir o título do relatório
-      doc.setFontSize(15);
-      doc.text(title, 10, 15);
-      doc.setFontSize(8);
-
-      // Texto "Gerado em" e número da página na mesma linha (apenas na primeira página inicialmente)
-      const generatedText = `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`;
-      const pageNumberText = `Página 1`;
-      doc.text(generatedText, 10, 22);
-      doc.text(pageNumberText, doc.internal.pageSize.width - 10, 22, { align: 'right' });
-
-      doc.autoTable({
-         startY: 25,
-         margin: { left: 8, right: 8, top: 25 },
-         head: [columns.map((col) => col.header)],
-         body: rows.map((row) => columns.map((col) => row[col.dataKey])),
-         styles: {
-            fontSize: 6,
-            cellPadding: 2,
-            halign: 'center', // Alinhamento padrão centralizado
-            overflow: 'linebreak',
+      const columns = [
+         { header: 'ID', dataKey: 'id', width: 9 },
+         { header: 'Saída', dataKey: 'data_de_saida', width: 17 },
+         {
+            header: 'Descrição',
+            dataKey: 'descricao',
+            width: 115,
+            halign: 'left',
          },
-         headStyles: {
-            fillColor: [34, 139, 34],
-            textColor: 255,
-            fontStyle: 'bold',
-         },
-         columnStyles: columns.reduce((acc, col, index) => {
-            acc[index] = {
-               cellWidth: col.width,
-               halign: col.halign || 'center', // Respeita o halign definido em columns
+         { header: 'Tombo', dataKey: 'tombo_estoqueatual', width: 15 },
+         { header: 'Destino', dataKey: 'destino', width: 25 },
+         { header: 'NUP (Suite)', dataKey: 'referencia', width: 32 },
+         { header: 'Doc Saída', dataKey: 'doc_saida', width: 17 },
+         { header: 'Doc Origem', dataKey: 'doc_origem', width: 28 },
+         { header: 'Valor', dataKey: 'valor', width: 20 },
+      ];
+
+      const rows = data.map((item) => ({
+         id: item.id,
+         data_de_saida: new Date(item.data_de_saida).toLocaleDateString(
+            'pt-BR'
+         ),
+         descricao: item.descricao ? item.descricao.toUpperCase() : 'N/A',
+         tombo_estoqueatual: item.tombo_estoqueatual || 'N/A',
+         destino: item.destino ? item.destino.toUpperCase() : 'N/A',
+         referencia: item.referencia ? item.referencia.toUpperCase() : 'N/A',
+         doc_saida: item.doc_saida || 'N/A',
+         doc_origem: item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A',
+         valor: item.valor
+            ? parseFloat(item.valor).toLocaleString('pt-BR', {
+                 style: 'currency',
+                 currency: 'BRL',
+              })
+            : 'N/A',
+      }));
+
+      if (formato === 'pdf') {
+         const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4',
+         });
+
+         // Definir o título do relatório
+         doc.setFontSize(15);
+         doc.text(title, 10, 15);
+         doc.setFontSize(8);
+
+         // Texto "Gerado em" e número da página na mesma linha (apenas na primeira página inicialmente)
+         const generatedText = `Gerado em: ${new Date().toLocaleDateString(
+            'pt-BR'
+         )}`;
+         const pageNumberText = `Página 1`;
+         doc.text(generatedText, 10, 22);
+         doc.text(pageNumberText, doc.internal.pageSize.width - 10, 22, {
+            align: 'right',
+         });
+
+         doc.autoTable({
+            startY: 25,
+            margin: { left: 8, right: 8, top: 25 },
+            head: [columns.map((col) => col.header)],
+            body: rows.map((row) => columns.map((col) => row[col.dataKey])),
+            styles: {
+               fontSize: 6,
+               cellPadding: 2,
+               halign: 'center', // Alinhamento padrão centralizado
+               overflow: 'linebreak',
+            },
+            headStyles: {
+               fillColor: [34, 139, 34],
+               textColor: 255,
+               fontStyle: 'bold',
+            },
+            columnStyles: columns.reduce((acc, col, index) => {
+               acc[index] = {
+                  cellWidth: col.width,
+                  halign: col.halign || 'center', // Respeita o halign definido em columns
+               };
+               return acc;
+            }, {}),
+            didDrawPage: function (data) {
+               doc.setFontSize(15);
+               doc.text(title, 10, 15);
+               doc.setFontSize(8);
+               const pageStr = `Página ${data.pageNumber}`;
+               doc.text(generatedText, 10, 22);
+               doc.text(pageStr, doc.internal.pageSize.width - 10, 22, {
+                  align: 'right',
+               });
+            },
+         });
+         const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+         res.setHeader('Content-Type', 'application/pdf');
+         res.setHeader(
+            'Content-Disposition',
+            `attachment; filename=${title.replace(/ /g, '_')}.pdf`
+         );
+         res.send(pdfBuffer);
+      } else if (formato === 'excel') {
+         const workbook = new ExcelJS.Workbook();
+         const worksheet = workbook.addWorksheet(title);
+
+         // Adicionar o título e mesclar as células
+         const titleRow = worksheet.addRow([title]);
+         worksheet.mergeCells('A1:I1');
+         worksheet.getCell('A1').alignment = { horizontal: 'center' };
+         worksheet.getCell('A1').font = { size: 16, bold: true };
+
+         // Adicionar a data de geração
+         worksheet.addRow([
+            `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
+         ]);
+
+         // Adicionar o cabeçalho
+         worksheet.addRow(columns.map((col) => col.header)).eachCell((cell) => {
+            cell.fill = {
+               type: 'pattern',
+               pattern: 'solid',
+               fgColor: { argb: 'FF228B22' },
             };
-            return acc;
-         }, {}),
-         didDrawPage: function (data) {
-            doc.setFontSize(15);
-            doc.text(title, 10, 15);
-            doc.setFontSize(8);
-            const pageStr = `Página ${data.pageNumber}`;
-            doc.text(generatedText, 10, 22);
-            doc.text(pageStr, doc.internal.pageSize.width - 10, 22, { align: 'right' });
-         },
-      });
-      const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader(
-         'Content-Disposition',
-         `attachment; filename=${title.replace(/ /g, '_')}.pdf`
-      );
-      res.send(pdfBuffer);
-   } else if (formato === 'excel') {
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet(title);
+            cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+            cell.alignment = { horizontal: 'center' };
+         });
 
-      // Adicionar o título e mesclar as células
-      const titleRow = worksheet.addRow([title]);
-      worksheet.mergeCells('A1:I1');
-      worksheet.getCell('A1').alignment = { horizontal: 'center' };
-      worksheet.getCell('A1').font = { size: 16, bold: true };
+         // Adicionar os dados
+         rows.forEach((row) => {
+            worksheet.addRow(columns.map((col) => row[col.dataKey]));
+         });
 
-      // Adicionar a data de geração
-      worksheet.addRow([`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`]);
+         // Ajustar a largura das colunas
+         worksheet.columns = columns.map((col) => ({ width: col.width / 6 }));
 
-      // Adicionar o cabeçalho
-      worksheet.addRow(columns.map((col) => col.header)).eachCell((cell) => {
-         cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FF228B22' },
-         };
-         cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
-         cell.alignment = { horizontal: 'center' };
-      });
-
-      // Adicionar os dados
-      rows.forEach((row) => {
-         worksheet.addRow(columns.map((col) => row[col.dataKey]));
-      });
-
-      // Ajustar a largura das colunas
-      worksheet.columns = columns.map((col) => ({ width: col.width / 6 }));
-
-      const excelBuffer = await workbook.xlsx.writeBuffer();
-      res.setHeader(
-         'Content-Type',
-         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      );
-      res.setHeader(
-         'Content-Disposition',
-         `attachment; filename=${title.replace(/ /g, '_')}.xlsx`
-      );
-      res.send(excelBuffer);
-   } else {
-      res.status(400).json({
-         error: 'Formato inválido. Use "pdf" ou "excel".',
-      });
-   }
+         const excelBuffer = await workbook.xlsx.writeBuffer();
+         res.setHeader(
+            'Content-Type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+         );
+         res.setHeader(
+            'Content-Disposition',
+            `attachment; filename=${title.replace(/ /g, '_')}.xlsx`
+         );
+         res.send(excelBuffer);
+      } else {
+         res.status(400).json({
+            error: 'Formato inválido. Use "pdf" ou "excel".',
+         });
+      }
    };
-  
 
    /* ********************************************************************************
                   Métodos para a SAÍDA de itens no Estoque
@@ -808,14 +862,14 @@ class EstoqueController {
          nome_do_recebedor,
          observacao,
       } = req.body;
-   
+
       console.log('req.user no registrarSaida:', req.user);
-   
+
       const usuarioLogado = req.user;
       const nomeResponsavel = usuarioLogado?.nome_completo;
       const mfResponsavel = usuarioLogado?.matricula;
       const postoGradResponsavel = usuarioLogado?.posto_grad;
-   
+
       try {
          // Validação dos campos obrigatórios
          if (
@@ -842,7 +896,7 @@ class EstoqueController {
                .status(400)
                .json({ error: 'Preencha todos os campos obrigatórios' });
          }
-   
+
          if (!nomeResponsavel || !mfResponsavel || !postoGradResponsavel) {
             console.log('Dados do usuário logado incompletos:', {
                nomeResponsavel,
@@ -853,14 +907,14 @@ class EstoqueController {
                error: 'Usuário autenticado não possui informações completas',
             });
          }
-   
+
          const dataDeSaida = new Date();
          const doc = new jsPDF();
-   
+
          console.log('Iniciando geração do PDF...');
          doc.setDrawColor(0);
          doc.setLineWidth(0.5);
-   
+
          // Desenha a borda na primeira página
          doc.rect(
             5,
@@ -868,7 +922,7 @@ class EstoqueController {
             doc.internal.pageSize.width - 10,
             doc.internal.pageSize.height - 10
          );
-   
+
          // Carregar a imagem
          const imagePath = path.join(
             __dirname,
@@ -880,7 +934,7 @@ class EstoqueController {
             width: 70, // Largura da imagem em mm
             height: 15, // Altura da imagem em mm
          };
-   
+
          // Adicionar a imagem ao PDF
          doc.addImage(
             imageData,
@@ -890,7 +944,7 @@ class EstoqueController {
             imgProps.width,
             imgProps.height
          );
-   
+
          // Título do documento (ajustado para não sobrepor a imagem)
          doc.setFontSize(10);
          doc.text(
@@ -900,7 +954,7 @@ class EstoqueController {
             { align: 'center' }
          );
          doc.setFontSize(10);
-   
+
          const headerYStart = 20 + imgProps.height;
          const headerData = [
             `Nº Termo: ${doc_saida}`,
@@ -912,24 +966,24 @@ class EstoqueController {
             `Referência: ${referencia}`,
             `Observações: ${(observacao || 'Nenhuma').toUpperCase()}`,
          ];
-   
+
          headerData.forEach((line, index) => {
             doc.text(line, 14, headerYStart + index * 5);
          });
-   
+
          let ordem = 1;
          const items = [];
-   
+
          console.log('Processando tombos:', tombos);
          for (const tombo of tombos) {
             console.log(`Buscando item com tombo ${tombo}...`);
             const itemEstoque = await estoqueModel.getInfoByTombo(tombo);
-   
+
             if (!itemEstoque) {
                console.warn(`Tombo ${tombo} não encontrado`);
                continue;
             }
-   
+
             console.log(`Item encontrado para tombo ${tombo}:`, itemEstoque);
             items.push([
                ordem++,
@@ -939,7 +993,7 @@ class EstoqueController {
                   .replace('RETAINGLIAR', 'RETANGULAR'),
                itemEstoque.situacao.toUpperCase(),
             ]);
-   
+
             console.log(`Registrando saída para tombo ${tombo}...`);
             await estoqueModel.createSaida(
                itemEstoque.id,
@@ -956,18 +1010,18 @@ class EstoqueController {
                observacao,
                itemEstoque.descricao
             );
-   
+
             console.log(`Marcando tombo ${tombo} como pago...`);
             await estoqueModel.markAsPaid(itemEstoque.id);
          }
-   
+
          if (items.length === 0) {
             console.log('Nenhum item válido encontrado para gerar o termo.');
             return res.status(400).json({
                error: 'Nenhum item válido encontrado para gerar o termo.',
             });
          }
-   
+
          // Renderiza a tabela
          console.log('Total de itens na tabela:', items.length);
          let finalY = 60 + imgProps.height; // Ajustado para dar mais espaço
@@ -1005,31 +1059,34 @@ class EstoqueController {
                );
             },
          });
-   
-         console.log('Total de páginas geradas:', doc.internal.getNumberOfPages());
-   
+
+         console.log(
+            'Total de páginas geradas:',
+            doc.internal.getNumberOfPages()
+         );
+
          // Após a tabela ser renderizada
          finalY = doc.lastAutoTable.finalY || finalY;
          const pageHeight = doc.internal.pageSize.height;
-   
+
          // Garante que estamos na última página
          const totalPages = doc.internal.getNumberOfPages();
          doc.setPage(totalPages);
-   
+
          // Define a posição Y das assinaturas fixas na parte inferior da página
          const signatureY = pageHeight - 20; // 20 mm acima da borda inferior para acomodar texto e linhas
          const lineLength = 50;
          const gapBetweenBlocks = 10;
-   
+
          const totalBlockWidth = lineLength * 3 + gapBetweenBlocks * 2;
          const startX = 5 + (200 - totalBlockWidth) / 2;
-   
+
          const leftPos = startX + lineLength / 2;
          const centerPos = leftPos + lineLength + gapBetweenBlocks;
          const rightPos = centerPos + lineLength + gapBetweenBlocks;
-   
+
          doc.setLineWidth(0.3);
-   
+
          doc.line(startX, signatureY, startX + lineLength, signatureY);
          doc.line(
             centerPos - lineLength / 2,
@@ -1043,7 +1100,7 @@ class EstoqueController {
             rightPos + lineLength / 2,
             signatureY
          );
-   
+
          doc.setFontSize(6);
          doc.text(
             `${postoGrad.toUpperCase()} ${nome_do_recebedor.toUpperCase()}\nMF: ${mf_recebedor}`,
@@ -1052,8 +1109,10 @@ class EstoqueController {
             { align: 'center' }
          );
          doc.setFontSize(6);
-         doc.text('(Recebedor)', leftPos, signatureY + 8.5, { align: 'center' });
-   
+         doc.text('(Recebedor)', leftPos, signatureY + 8.5, {
+            align: 'center',
+         });
+
          doc.setFontSize(6);
          doc.text(
             'TEN. CEL. ALLAN KARDEK\nMF: 135.907-1-0',
@@ -1065,7 +1124,7 @@ class EstoqueController {
          doc.text('Comandante CEGPA', centerPos, signatureY + 8.5, {
             align: 'center',
          });
-   
+
          doc.setFontSize(6);
          doc.text(
             `${postoGradResponsavel.toUpperCase()} ${nomeResponsavel.toUpperCase()}\nMF: ${mfResponsavel}`,
@@ -1077,20 +1136,20 @@ class EstoqueController {
          doc.text('(Responsável pela entrega)', rightPos, signatureY + 8.5, {
             align: 'center',
          });
-   
+
          console.log('Salvando PDF...');
          const fileName = `Termo_${doc_saida.replace(/\//g, '-')}.pdf`;
          const pdfPath = path.join(__dirname, '../../pdfs', fileName);
-   
+
          if (!fs.existsSync(path.dirname(pdfPath))) {
             fs.mkdirSync(path.dirname(pdfPath), { recursive: true });
          }
-   
+
          doc.save(pdfPath);
-   
+
          console.log('Atualizando sequência...');
          await sequenciaModel.incrementarSequencia(new Date().getFullYear());
-   
+
          console.log('Enviando resposta de sucesso...');
          res.status(200).json({
             success: true,
@@ -1106,7 +1165,7 @@ class EstoqueController {
          });
       }
    };
-   
+
    // Método para visualizar um item pago específico
    visualizarItemPago = async (req, res) => {
       const { id } = req.params;
