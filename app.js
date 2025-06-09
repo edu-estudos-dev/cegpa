@@ -3,7 +3,6 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import methodOverride from "method-override";
-import session from "express-session";
 import estoqueRoutes from "./src/routes/estoqueRoutes.js";
 import pesquisaRoutes from "./src/routes/pesquisaRoutes.js";
 import loginLogoutRoutes from "./src/routes/loginLogoutRoutes.js";
@@ -11,6 +10,9 @@ import painelRoutes from "./src/routes/painelRoutes.js";
 import sequenciaRoutes from "./src/routes/sequenciaRoutes.js";
 import solicitacaoRoutes from "./src/routes/solicitacaoRoutes.js";
 import isAuthenticated from "./src/middleware/auth.js";
+import { createClient } from 'redis';
+import session from "express-session";
+import { RedisStore } from 'connect-redis'; // Corrija esta linha
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -26,16 +28,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
+
+const redisClient = createClient({ url: 'redis://127.0.0.1:6379' });
+redisClient.connect().catch(console.error);
+
 app.use(
   session({
-    secret: 'sua_chave_secreta_aqui', // Use uma chave forte e única
-    resave: false,                   // Não salva a sessão se não houver alterações
-    saveUninitialized: false,        // Não cria sessão para usuários não autenticados
+    store: new RedisStore({ client: redisClient }),
+    secret: 'sua_chave_secreta_aqui',
+    resave: false,
+    saveUninitialized: false,
     cookie: {
-      secure: false,                // Use `true` apenas em HTTPS
-      maxAge: 24 * 60 * 60 * 1000,  // Sessão válida por 24 horas
-      httpOnly: true,               // Impede acesso ao cookie via JavaScript
-      sameSite: 'lax'               // Controla o envio do cookie em requisições cross-site
+      secure: false,
+      maxAge: 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: 'lax'
     }
   })
 );

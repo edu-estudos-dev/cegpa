@@ -77,6 +77,8 @@ router.get('/relatorio/usados', estoqueController.generatePDFUsados);
 // Rota para gerar relatório de itens pagos (PDF ou Excel)
 router.get('/relatorio/itens-pagos', estoqueController.generatePDFItensPagos);
 
+router.get('/relatorio/quantidade-disponivel', estoqueController.generatePDFQuantidadeDisponivel);
+
 // Rota para visualizar um item pago específico
 router.get('/visualizar/itempago/:id', estoqueController.visualizarItemPago);
 

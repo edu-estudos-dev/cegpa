@@ -36,8 +36,8 @@
 
    .table-container thead th {
       position: sticky;
-      top: 61px; /* Ajustado para ficar abaixo da barra de pesquisa */
-      background-color: rgb(231, 161, 9); /* Cor laranja para o cabeçalho */
+      top: 61px;
+      background-color: rgb(231, 161, 9);
       color: white;
       border-left: 1px solid white !important;
       border-right: none !important;
@@ -49,9 +49,9 @@
    .search-bar {
       position: sticky;
       top: 0;
-      background-color: #fff; /* Fundo branco para a barra de pesquisa */
-      z-index: 2; /* Fica acima do cabeçalho da tabela */
-      padding: 10px 0; /* Espaçamento interno */
+      background-color: #fff;
+      z-index: 2;
+      padding: 10px 0;
    }
 
    .table-container thead th:last-child {
@@ -66,23 +66,21 @@
       width: 5%;
    }
 
-   /* Ajuste das colunas */
-   .table-container th:nth-child(1), /* Descrição */
+   .table-container th:nth-child(1),
    .table-container td:nth-child(1) {
       width: 60%;
    }
 
-   .table-container th:nth-child(2), /* Categoria */
+   .table-container th:nth-child(2),
    .table-container td:nth-child(2) {
       width: 7%;
    }
 
-   .table-container th:nth-child(3), /* Quantidade */
+   .table-container th:nth-child(3),
    .table-container td:nth-child(3) {
       width: 4%;
    }
 
-   /* Estilo para linhas ocultas */
    .table-container tbody tr.hidden {
       display: none;
    }
@@ -94,9 +92,18 @@
    <div class="caixa w-90 p-4 mx-auto">
       <div class="border caixa-externa p-4 shadow-sm rounded">
          <div class="row align-items-center mb-3 px-3">
-            <h2 style="border-bottom: 4px solid orange;" class="text-center text-white py-2 mt-0 fw-bold bg-success">
-               Quantidade Disponível
-            </h2>
+            <div class="col d-flex justify-content-between align-items-center bg-success py-2 rounded"
+                 style="border-bottom: 4px solid orange;">
+               <h2 class="text-white mt-0 fw-bold flex-grow-1 text-center">Quantidade Disponível</h2>
+               <div class="d-flex align-items-center">
+                  <label for="formato" class="text-white me-2">Formato:</label>
+                  <select id="formato" class="form-select form-select-md me-2" style="width: auto;">
+                     <option value="pdf">PDF</option>
+                     <option value="excel">Excel</option>
+                  </select>
+                  <a href="#" id="exportarBtn" class="btn btn-outline-light btn-header fw-bold">Gerar Relatório</a>
+               </div>
+            </div>
          </div>
          <div class="table-container">
             <div class="search-bar sticky-top">
@@ -141,20 +148,17 @@
             const table = document.querySelector('.table');
             const rows = table.getElementsByTagName('tr');
 
-            for (let i = 1; i < rows.length; i++) { // Começa em 1 para pular o cabeçalho
+            for (let i = 1; i < rows.length; i++) {
                const cells = rows[i].getElementsByTagName('td');
-               if (cells.length < 3) continue; // Ignora linhas sem células válidas
+               if (cells.length < 3) continue;
 
-               const categoriaCell = cells[1]; // Coluna "Categoria" (índice 1)
-               const descricaoCell = cells[0]; // Coluna "Descrição" (índice 0)
+               const categoriaCell = cells[1];
+               const descricaoCell = cells[0];
 
                const categoria = categoriaCell.textContent.toLowerCase().trim();
                const descricao = descricaoCell.textContent.toLowerCase().trim();
 
-               // Prioriza a pesquisa por categoria
-               if (searchTerm === '' || categoria.includes(searchTerm)) {
-                  rows[i].classList.remove('hidden');
-               } else if (descricao.includes(searchTerm)) {
+               if (searchTerm === '' || categoria.includes(searchTerm) || descricao.includes(searchTerm)) {
                   rows[i].classList.remove('hidden');
                } else {
                   rows[i].classList.add('hidden');
@@ -172,6 +176,14 @@
          document.getElementById('clearSearch').addEventListener('click', () => {
             document.getElementById('searchDescricao').value = '';
             filterRows('');
+         });
+
+         // Script para o botão "Exportar Relatório"
+         const exportarBtn = document.getElementById('exportarBtn');
+         exportarBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            const formato = document.getElementById('formato').value;
+            window.location.href = `/relatorio/quantidade-disponivel?formato=${formato}`;
          });
       });
    </script>
