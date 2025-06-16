@@ -556,7 +556,7 @@ class EstoqueController {
             body: rows.map((row) => columns.map((col) => row[col.dataKey])),
             styles: {
                fontSize: 6,
-               cellPadding: 2, 
+               cellPadding: 2,
                halign: 'center',
                overflow: 'linebreak',
             },
@@ -1321,6 +1321,61 @@ class EstoqueController {
          console.error('Erro ao buscar informações do tombo:', error);
          res.status(500).json({
             error: 'Erro ao buscar informações do tombo.',
+         });
+      }
+   };
+
+   // Método para reverter a saída de um item
+   reverterSaida = async (req, res) => {
+      console.log(
+         `[EstoqueController] Recebida requisição DELETE para reverter saída com ID: ${req.params.id}`
+      );
+      console.log(
+         `[EstoqueController] Usuário autenticado: ${JSON.stringify(
+            req.session.user
+         )}`
+      );
+      const { id } = req.params;
+      try {
+         console.log(`[EstoqueController] Buscando item pago com ID: ${id}`);
+         const item = await estoqueModel.getItemPagoByID(id);
+         if (!item) {
+            console.log(
+               `[EstoqueController] Item pago não encontrado para ID: ${id}`
+            );
+            return res.status(404).json({ error: 'Item pago não encontrado.' });
+         }
+
+         if (!item.estoqueatual_id) {
+            console.log(
+               `[EstoqueController] estoqueatual_id não encontrado para item ID: ${id}`
+            );
+            return res
+               .status(400)
+               .json({
+                  error: 'ID do estoque atual não encontrado para este item.',
+               });
+         }
+
+         console.log(
+            `[EstoqueController] Revertendo saída para item: ${JSON.stringify(
+               item
+            )}`
+         );
+         await estoqueModel.reverterSaida(id, item.estoqueatual_id);
+
+         console.log(
+            `[EstoqueController] Saída revertida com sucesso para ID: ${id}`
+         );
+         res.status(200).json({ message: 'Saída revertida com sucesso!' });
+      } catch (error) {
+         console.error(
+            `[EstoqueController] Erro ao reverter saída para ID ${id}:`,
+            error
+         );
+         res.status(500).json({
+            error: 'Erro ao reverter saída.',
+            details: error.message,
          });
       }
    };

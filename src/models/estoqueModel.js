@@ -263,7 +263,6 @@ class EstoqueModel {
    };
 
    // Método para obter os itens que saíram do estoque
-   // Dentro da classe EstoqueModel
    getItensPagos = async (data_inicial, data_final) => {
       // Validação das datas
       if (data_inicial && data_final) {
@@ -491,31 +490,18 @@ class EstoqueModel {
    // Método para obter informações do item pago pelo ID
    getItemPagoByID = async (id) => {
       const query = `
-        SELECT 
-          ip.id,
-          ip.data_de_saida,
-          ip.descricao,
-          ea.tombo AS tombo_estoqueatual,
-          ip.destino,
-          ip.referencia,
-          ip.doc_saida,
-          ea.doc_origem,
-          ea.valor,
-          ip.nome_completo,
-          ip.posto_graduacao,
-          ip.mat_funcional,
-          ip.telefone,
-          ip.observacao
-        FROM itenspagos ip
-        JOIN estoqueatual ea ON ip.estoqueatual_id = ea.id
-        WHERE ip.id = ?;
-      `;
+      SELECT id, tombo, doc_saida, data_de_saida, quantidade, referencia, destino, 
+             posto_graduacao, mat_funcional, telefone, nome_completo, observacao, 
+             descricao, estoqueatual_id
+      FROM itenspagos 
+      WHERE id = ?
+   `;
       try {
-         const [results] = await connection.execute(query, [id]);
-         return results.length > 0 ? results[0] : null;
+         const [rows] = await connection.execute(query, [id]);
+         return rows[0] || null;
       } catch (error) {
          console.error(
-            'Erro ao buscar informações do item pago pelo ID:',
+            `[EstoqueModel] Erro ao buscar item pago com ID ${id}:`,
             error
          );
          throw error;
@@ -546,6 +532,29 @@ class EstoqueModel {
             'Erro ao buscar dados de saída pelo estoqueatual_id:',
             error
          );
+         throw error;
+      }
+   };
+
+   // Método para reverter a saída de um item
+   reverterSaida = async (itemPagoId, estoqueatualId) => {
+      if (!itemPagoId || !estoqueatualId) {
+         console.error(
+            `[EstoqueModel] Parâmetros inválidos: itemPagoId=${itemPagoId}, estoqueatualId=${estoqueatualId}`
+         );
+         throw new Error(
+            'Parâmetros itemPagoId e estoqueatualId são obrigatórios.'
+         );
+      }
+
+      const deleteQuery = `DELETE FROM itenspagos WHERE id = ?`;
+      const updateQuery = `UPDATE estoqueatual SET pago = 0 WHERE id = ?`;
+      try {
+         await connection.execute(deleteQuery, [itemPagoId]);
+         await connection.execute(updateQuery, [estoqueatualId]);
+         return true;
+      } catch (error) {
+         console.error(`[EstoqueModel] Erro ao reverter saída:`, error);
          throw error;
       }
    };

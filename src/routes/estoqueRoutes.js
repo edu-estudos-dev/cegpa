@@ -15,9 +15,6 @@ router.get('/editar/:id', isAuthenticated, checkRole(['admin']), estoqueControll
 // Rota para atualizar os dados do item (apenas admin)
 router.put('/editar/:id', isAuthenticated, checkRole(['admin']), estoqueController.update);
 
-// Rota para listar apenas os itens novos do estoque
-// router.get('/itens-novos', estoqueController.getItensNovos);
-
 // Rota para renderizar a tabela apenas os itens novos do estoque
 router.get('/tabela/itens-novos', estoqueController.showItensNovos);
 
@@ -78,6 +75,9 @@ router.get('/relatorio/usados', estoqueController.generatePDFUsados);
 router.get('/relatorio/itens-pagos', estoqueController.generatePDFItensPagos);
 
 router.get('/relatorio/quantidade-disponivel', estoqueController.generatePDFQuantidadeDisponivel);
+
+// Rota para reverter um item que já foi pago (apenas admin)
+router.delete('/reverter-saida/:id', isAuthenticated, checkRole(['admin']), estoqueController.reverterSaida);
 
 // Rota para visualizar um item pago específico
 router.get('/visualizar/itempago/:id', estoqueController.visualizarItemPago);
