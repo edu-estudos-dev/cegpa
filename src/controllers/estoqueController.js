@@ -139,19 +139,6 @@ class EstoqueController {
       }
    };
 
-   // Método para listar todos os itens NOVOS no estoque
-   // getItensNovos = async (req, res) => {
-   //    try {
-   //       const itensNovos = await estoqueModel.getAllItensNovos();
-   //       res.status(200).render('tabelaItensNovos', {
-   //          novos: itensNovos,
-   //       });
-   //    } catch (error) {
-   //       console.error('Erro ao carregar o estoque:', error);
-   //       res.status(500).json({ error: 'Erro ao carregar o estoque.' });
-   //    }
-   // };
-
    // Método para renderizar a tabela com os itens Usados
    showItensUsados = async (req, res) => {
       try {
@@ -551,10 +538,10 @@ class EstoqueController {
             doc.text(title, doc.internal.pageSize.width / 2, 15, {
                align: 'center',
             });
-            doc.setFontSize(10);
+            doc.setFontSize(6);
             const pageStr = `Página ${pageNumber}`;
-            doc.text(generatedText, 10, 25);
-            doc.text(pageStr, doc.internal.pageSize.width - 10, 25, {
+            doc.text(generatedText, 10, 22);
+            doc.text(pageStr, doc.internal.pageSize.width - 10, 22, {
                align: 'right',
             });
          };
@@ -563,21 +550,21 @@ class EstoqueController {
          drawHeader(1);
 
          doc.autoTable({
-            startY: 30, // Mantido em 30mm
+            startY: 25, // Mantido em 25mm
             margin: { left: 10, right: 10, top: 30 },
             head: [columns.map((col) => col.header)],
             body: rows.map((row) => columns.map((col) => row[col.dataKey])),
             styles: {
-               fontSize: 8,
-               cellPadding: 2, // Reduzido de 3mm para 2mm, como no modelo
+               fontSize: 6,
+               cellPadding: 2, 
                halign: 'center',
                overflow: 'linebreak',
             },
             headStyles: {
+               fontSize: 7,
                fillColor: [34, 139, 34],
                textColor: 255,
                fontStyle: 'bold',
-               fontSize: 9,
             },
             columnStyles: columns.reduce((acc, col, index) => {
                acc[index] = {
@@ -684,7 +671,9 @@ class EstoqueController {
             res,
             itensPagos,
             'Relatório de Itens Pagos',
-            formato
+            formato,
+            data_inicial,
+            data_final
          );
       } catch (error) {
          console.error('Erro ao gerar relatório:', error);
@@ -693,9 +682,15 @@ class EstoqueController {
    };
 
    // Método privado para geração de relatórios de itens pagos (PDF ou Excel)
-   _generatePDFItensPagos = async (res, data, title, formato) => {
+   _generatePDFItensPagos = async (
+      res,
+      data,
+      title,
+      formato,
+      data_inicial,
+      data_final
+   ) => {
       const columns = [
-         { header: 'ID', dataKey: 'id', width: 9 },
          { header: 'Saída', dataKey: 'data_de_saida', width: 17 },
          {
             header: 'Descrição',
@@ -704,15 +699,14 @@ class EstoqueController {
             halign: 'left',
          },
          { header: 'Tombo', dataKey: 'tombo_estoqueatual', width: 15 },
-         { header: 'Destino', dataKey: 'destino', width: 25 },
+         { header: 'Destino', dataKey: 'destino', width: 30 },
          { header: 'NUP (Suite)', dataKey: 'referencia', width: 32 },
-         { header: 'Doc Saída', dataKey: 'doc_saida', width: 17 },
-         { header: 'Doc Origem', dataKey: 'doc_origem', width: 28 },
-         { header: 'Valor', dataKey: 'valor', width: 20 },
+         { header: 'Doc. Saída', dataKey: 'doc_saida', width: 18 },
+         { header: 'Doc. Origem', dataKey: 'doc_origem', width: 30 },
+         { header: 'Valor', dataKey: 'valor', width: 21 },
       ];
 
       const rows = data.map((item) => ({
-         id: item.id,
          data_de_saida: new Date(item.data_de_saida).toLocaleDateString(
             'pt-BR'
          ),
@@ -730,6 +724,9 @@ class EstoqueController {
             : 'N/A',
       }));
 
+      // Calcular o total de itens pagos (número de linhas)
+      const totalItensPagos = rows.length;
+
       if (formato === 'pdf') {
          const doc = new jsPDF({
             orientation: 'landscape',
@@ -737,12 +734,19 @@ class EstoqueController {
             format: 'a4',
          });
 
-         // Definir o título do relatório
+         // Definir o título do relatório e o intervalo de datas na mesma linha
          doc.setFontSize(15);
-         doc.text(title, 10, 15);
+         const titleWidth = doc.getTextWidth(title);
+         const pageWidth = doc.internal.pageSize.width;
+         doc.text(title, 10, 15); // Título alinhado à esquerda
+         const dateRangeText = `de ${data_inicial} a ${data_final}`;
+         doc.setFontSize(6); // Reduzido para 6, menos destaque
+         const dateRangeWidth = doc.getTextWidth(dateRangeText);
+         doc.text(dateRangeText, pageWidth - dateRangeWidth - 10, 15); // Intervalo alinhado à direita
+
          doc.setFontSize(8);
 
-         // Texto "Gerado em" e número da página na mesma linha (apenas na primeira página inicialmente)
+         // Texto "Gerado em" e número da página na mesma linha
          const generatedText = `Gerado em: ${new Date().toLocaleDateString(
             'pt-BR'
          )}`;
@@ -756,14 +760,28 @@ class EstoqueController {
             startY: 25,
             margin: { left: 8, right: 8, top: 25 },
             head: [columns.map((col) => col.header)],
-            body: rows.map((row) => columns.map((col) => row[col.dataKey])),
+            body: [
+               ...rows.map((row) => columns.map((col) => row[col.dataKey])),
+               // Adicionar linha de total com mesclagem de colunas
+               [
+                  {
+                     content: `Total Itens Pagos: ${totalItensPagos}`,
+                     colSpan: 8, // Mescla todas as 8 colunas
+                     styles: {
+                        halign: 'center',
+                        fontStyle: 'bold', // Negrito para destaque
+                     },
+                  },
+               ],
+            ],
             styles: {
                fontSize: 6,
                cellPadding: 2,
-               halign: 'center', // Alinhamento padrão centralizado
+               halign: 'center',
                overflow: 'linebreak',
             },
             headStyles: {
+               fontSize: 7,
                fillColor: [34, 139, 34],
                textColor: 255,
                fontStyle: 'bold',
@@ -771,13 +789,20 @@ class EstoqueController {
             columnStyles: columns.reduce((acc, col, index) => {
                acc[index] = {
                   cellWidth: col.width,
-                  halign: col.halign || 'center', // Respeita o halign definido em columns
+                  halign: col.halign || 'center',
                };
                return acc;
             }, {}),
             didDrawPage: function (data) {
                doc.setFontSize(15);
-               doc.text(title, 10, 15);
+               const titleWidth = doc.getTextWidth(title);
+               const pageWidth = doc.internal.pageSize.width;
+               doc.text(title, 10, 15); // Título alinhado à esquerda
+               const dateRangeText = `de ${data_inicial} a ${data_final}`;
+               doc.setFontSize(6); // Reduzido para 6, menos destaque
+               const dateRangeWidth = doc.getTextWidth(dateRangeText);
+               doc.text(dateRangeText, pageWidth - dateRangeWidth - 10, 15); // Intervalo alinhado à direita
+
                doc.setFontSize(8);
                const pageStr = `Página ${data.pageNumber}`;
                doc.text(generatedText, 10, 22);
@@ -803,9 +828,11 @@ class EstoqueController {
          worksheet.getCell('A1').alignment = { horizontal: 'center' };
          worksheet.getCell('A1').font = { size: 16, bold: true };
 
-         // Adicionar a data de geração
+         // Adicionar a data de geração e intervalo de datas
          worksheet.addRow([
-            `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
+            `Gerado em: ${new Date().toLocaleDateString(
+               'pt-BR'
+            )} - de ${data_inicial} a ${data_final}`,
          ]);
 
          // Adicionar o cabeçalho
@@ -822,6 +849,16 @@ class EstoqueController {
          // Adicionar os dados
          rows.forEach((row) => {
             worksheet.addRow(columns.map((col) => row[col.dataKey]));
+         });
+
+         // Adicionar linha de total de itens pagos com mesclagem
+         const totalRow = worksheet.addRow([
+            `Total Itens Pagos: ${totalItensPagos}`,
+         ]);
+         worksheet.mergeCells(`A${worksheet.rowCount}:H${worksheet.rowCount}`);
+         totalRow.eachCell((cell) => {
+            cell.font = { bold: true };
+            cell.alignment = { horizontal: 'center' };
          });
 
          // Ajustar a largura das colunas

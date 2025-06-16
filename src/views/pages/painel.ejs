@@ -367,9 +367,14 @@
             title: 'Sucesso!',
             text: successMessage,
             confirmButtonText: 'OK',
-            confirmButtonColor: '#00621D', // Cor primária do tema
-            background: '#f8fff2', // Fundo claro do tema
-            iconColor: '#28a745' // Cor do ícone de sucesso
+            confirmButtonColor: '#00621D',
+            background: '#f8fff2',
+            iconColor: '#28a745'
+         }).then((result) => {
+            if (result.isConfirmed) {
+               // Redireciona para /painel sem query string para evitar reexibição
+               window.location.href = '/painel';
+            }
          });
       }
    </script>
