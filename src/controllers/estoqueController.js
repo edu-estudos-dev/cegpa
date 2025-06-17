@@ -1085,8 +1085,20 @@ class EstoqueController {
             `Observações: ${(observacao || 'Nenhuma').toUpperCase()}`,
          ];
 
+         // Renderiza o cabeçalho com destaque para o Nº Termo
          headerData.forEach((line, index) => {
-            doc.text(line, 14, headerYStart + index * 5);
+            if (line.startsWith('Nº Termo')) {
+               // Configura fonte maior e negrito para o Nº Termo
+               doc.setFont('helvetica', 'bold'); // Define a fonte como negrito
+               doc.setFontSize(12); // Aumenta o tamanho da fonte
+               doc.text(line, 14, headerYStart + index * 5);
+               doc.setFont('helvetica', 'normal'); // Volta para a fonte normal
+               doc.setFontSize(10); // Volta para o tamanho padrão
+            } else {
+               // Mantém o estilo padrão para as outras linhas
+               doc.setFontSize(10);
+               doc.text(line, 14, headerYStart + index * 5);
+            }
          });
 
          let ordem = 1;
@@ -1283,7 +1295,7 @@ class EstoqueController {
          });
       }
    };
-
+   
    // Método para visualizar um item pago específico
    visualizarItemPago = async (req, res) => {
       const { id } = req.params;
@@ -1350,11 +1362,9 @@ class EstoqueController {
             console.log(
                `[EstoqueController] estoqueatual_id não encontrado para item ID: ${id}`
             );
-            return res
-               .status(400)
-               .json({
-                  error: 'ID do estoque atual não encontrado para este item.',
-               });
+            return res.status(400).json({
+               error: 'ID do estoque atual não encontrado para este item.',
+            });
          }
 
          console.log(
