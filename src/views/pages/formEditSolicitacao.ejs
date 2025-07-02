@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+   <head>
+      <%- include('../partials/head', { title: title }) %>
+      <style>
+         * {
+            margin: 0;
+            padding: 0;
+         }
+
+         body {
+            display: flex;
+            align-items: center;
+            padding-top: 2.5rem;
+         }
+
+         .w-10 {
+            width: 12%;
+         }
+
+         .w-95 {
+            width: 75%;
+         }
+
+         @media (max-width: 1366px) {
+            * {
+               font-size: 0.83rem;
+            }
+
+            .caixa-externa {
+               margin: 0 auto;
+            }
+
+            .w-10 {
+               width: 12%;
+            }
+         }
+      </style>
+   </head>
+
+   <body>
+      <%- include('../partials/header') %>
+      <div class="caixa w-95 p-4 mx-auto">
+         <div class="border caixa-externa p-4 shadow-sm rounded">
+            <form id="editSolicitacaoForm" novalidate>
+               <div class="row align-items-center mb-3 px-3">
+                  <h2
+                     style="border-bottom: 4px solid orange"
+                     class="text-white py-2 mt-0 fw-bold bg-success text-center"
+                  >
+                     Editar Solicitação
+                  </h2>
+               </div>
+
+               <!-- Exibir mensagem de erro, se houver -->
+               <% if (typeof error !== 'undefined' && error) { %>
+                  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                     <%= error %>
+                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+               <% } %>
+
+               <!-- Exibir mensagem de sucesso, se houver -->
+               <% if (typeof success !== 'undefined' && success) { %>
+                  <div class="alert alert-success alert-dismissible fade show" role="alert">
+                     <%= success %>
+                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+               <% } %>
+
+               <div id="row1" class="row">
+                  <div class="col-md-2">
+                     <div id="data_da_solicitacao-div" class="mb-3">
+                        <label class="form-label fw-bold">Data de Solicitação</label>
+                        <input
+                           id="data_da_solicitacao"
+                           type="date"
+                           class="form-control"
+                           name="data_da_solicitacao"
+                           value="<%= new Date(item.data_da_solicitacao).toISOString().split('T')[0] %>"
+                           required
+                        />
+                     </div>
+                  </div>
+
+                  <div class="col-md-9">
+                     <div id="solicitante-div" class="mb-3">
+                        <label class="form-label fw-bold">Solicitante</label>
+                        <input
+                           id="solicitante"
+                           name="solicitante"
+                           type="text"
+                           class="form-control"
+                           value="<%= item.solicitante %>"
+                           required
+                        />
+                     </div>
+                  </div>
+
+                  <div class="col-md-1">
+                     <div id="qtd-div" class="mb-3">
+                        <label class="form-label fw-bold">Quantidade</label>
+                        <input
+                           id="qtd"
+                           type="number"
+                           class="form-control"
+                           name="qtd"
+                           value="<%= item.quantidade %>"
+                           required
+                        />
+                     </div>
+                  </div>
+
+                  <div class="col-md-9">
+                     <div id="descricao-div" class="mb-3">
+                        <label class="form-label fw-bold">Descrição</label>
+                        <input
+                           id="descricao"
+                           type="text"
+                           class="form-control"
+                           name="descricao"
+                           value="<%= item.descricao %>"
+                           required
+                        />
+                     </div>
+                  </div>
+
+                  <div class="col-md-3">
+                     <div id="nup-div" class="mb-3">
+                        <label class="form-label fw-bold">NUP</label>
+                        <input
+                           id="nup"
+                           type="text"
+                           class="form-control"
+                           name="nup"
+                           value="<%= item.nup || '' %>"
+                           required
+                        />
+                     </div>
+                  </div>
+
+                  <div class="col-md-12">
+                     <div id="observacao-div" class="mb-3">
+                        <label class="form-label fw-bold">Observação</label>
+                        <textarea
+                           id="observacao"
+                           class="form-control"
+                           name="observacao"
+                        ><%= item.observacao || '' %></textarea>
+                     </div>
+                  </div>
+
+                  <div class="col-md-12">
+                     <div id="situacao-div" class="mb-3">
+                        <label class="form-label fw-bold">Situação</label>
+                        <select id="situacao" name="situacao" class="form-control" required>
+                           <option value="Escolha uma opção..." <%= item.situacao === 'Escolha uma opção...' ? 'selected' : '' %>>Escolha uma opção...</option>
+                           <option value="PENDENTE" <%= item.situacao === 'PENDENTE' ? 'selected' : '' %>>Pendente</option>
+                           <option value="ADQUIRIDO" <%= item.situacao === 'ADQUIRIDO' ? 'selected' : '' %>>Adquirido</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="col-md-12 d-flex justify-content-center mt-4">
+                     <button
+                        id="btnLimpar"
+                        type="button"
+                        class="w-10 btn btn-warning mx-1"
+                     >
+                        Limpar
+                     </button>
+                     <a
+                        href="/solicitacao/tabela/solicitacao"
+                        class="w-10 btn btn-secondary mx-1"
+                     >
+                        Cancelar
+                     </a>
+                     <button
+                        id="btnRegistrar"
+                        type="submit"
+                        class="w-10 btn btn-success mx-1"
+                     >
+                        Salvar
+                     </button>
+                  </div>
+               </div>
+            </form>
+
+            <!-- Modal de Erro -->
+            <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+               <div class="modal-dialog">
+                  <div class="modal-content">
+                     <div class="modal-header">
+                        <h5 class="modal-title" id="errorModalLabel">Erro</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                     </div>
+                     <div class="modal-body">
+                        <p id="errorMessage"></p>
+                     </div>
+                     <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <!-- Incluindo o SweetAlert2 via CDN -->
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+      <!-- Scripts necessários para o Bootstrap -->
+      <script
+         src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+         integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+         crossorigin="anonymous"
+      ></script>
+      <script
+         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+         crossorigin="anonymous"
+      ></script>
+
+      <!-- Validação do formulário e envio -->
+      <script>
+         document.addEventListener('DOMContentLoaded', () => {
+            const editForm = document.getElementById('editSolicitacaoForm');
+            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            const errorMessage = document.getElementById('errorMessage');
+
+            editForm.addEventListener('submit', async (e) => {
+               e.preventDefault();
+
+               // Coleta os dados do formulário
+               const formData = new FormData(editForm);
+               const data = Object.fromEntries(formData.entries());
+
+               // Validação client-side dos campos obrigatórios
+               if (!data.data_da_solicitacao) {
+                  errorMessage.innerText = 'Por favor, preencha a Data da Solicitação.';
+                  errorModal.show();
+                  return;
+               }
+               if (!data.solicitante) {
+                  errorMessage.innerText = 'Por favor, preencha o campo Solicitante.';
+                  errorModal.show();
+                  return;
+               }
+               if (!data.qtd || parseInt(data.qtd) <= 0) {
+                  errorMessage.innerText = 'Por favor, preencha uma Quantidade válida maior que zero.';
+                  errorModal.show();
+                  return;
+               }
+               if (!data.descricao) {
+                  errorMessage.innerText = 'Por favor, preencha o campo Descrição.';
+                  errorModal.show();
+                  return;
+               }
+               if (!data.nup) {
+                  errorMessage.innerText = 'Por favor, preencha o campo NUP.';
+                  errorModal.show();
+                  return;
+               }
+               if (!data.situacao || data.situacao === 'Escolha uma opção...') {
+                  errorMessage.innerText = 'Por favor, selecione a Situação.';
+                  errorModal.show();
+                  return;
+               }
+
+               // Log dos dados para depuração
+               console.log('Dados do formulário antes do envio:', data);
+
+               try {
+                  const solicitacaoId = '<%= item.id %>';
+                  const response = await fetch(`/solicitacao/editar/${solicitacaoId}`, {
+                     method: 'PUT',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify(data),
+                  });
+
+                  if (response.ok) {
+                     Swal.fire({
+                        title: 'Sucesso!',
+                        text: 'Solicitação atualizada com sucesso!',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                     }).then(() => {
+                        window.location.href = '/solicitacao/tabela/solicitacao';
+                     });
+                  } else {
+                     const result = await response.json();
+                     errorMessage.innerText = result.error || 'Erro ao atualizar a solicitação.';
+                     errorModal.show();
+                  }
+               } catch (error) {
+                  console.error('Erro ao atualizar solicitação:', error);
+                  errorMessage.innerText = 'Erro ao atualizar a solicitação: ' + error.message;
+                  errorModal.show();
+               }
+            });
+
+            // Função para limpar o formulário
+            function resetForm() {
+               editForm.reset();
+               document.getElementById('data_da_solicitacao').value = '<%= new Date(item.data_da_solicitacao).toISOString().split("T")[0] %>';
+               document.getElementById('solicitante').value = '<%= item.solicitante %>';
+               document.getElementById('qtd').value = '<%= item.quantidade %>';
+               document.getElementById('descricao').value = '<%= item.descricao %>';
+               document.getElementById('nup').value = '<%= item.nup || "" %>';
+               document.getElementById('situacao').value = '<%= item.situacao %>';
+               document.getElementById('observacao').value = '<%= item.observacao || "" %>';
+            }
+
+            // Adicionar evento ao botão "Limpar"
+            const btnReset = document.getElementById('btnLimpar');
+            if (btnReset) {
+               btnReset.addEventListener('click', resetForm);
+            }
+         });
+      </script>
+   </body>
+</html>

@@ -82,42 +82,43 @@
 
    .table-container th:nth-child(2),
    .table-container td:nth-child(2) {
-      width: 5%;
+      width: 3%;
    }
 
+   /* DESCRIÇÃO */
    .table-container th:nth-child(3),
    .table-container td:nth-child(3) {
       width: 15%;
    }
 
+   /* QUANTIDADE */
    .table-container th:nth-child(4),
    .table-container td:nth-child(4) {
       width: 5%;
    }
 
+   /* SOLICITANTE */
    .table-container th:nth-child(5),
    .table-container td:nth-child(5) {
       width: 5%;
    }
 
+   /* SITUAÇÃO */
    .table-container th:nth-child(6),
    .table-container td:nth-child(6) {
-      width: 5%;
+      width: 15%;
    }
 
+   /* NUP */
    .table-container th:nth-child(7),
    .table-container td:nth-child(7) {
-      width: 5%;
+      width: 12%;
    }
 
-   .table-container th:nth-child(8),
-   .table-container td:nth-child(8) {
-      width: 6%;
-   }
-
+   /* DETALHES */
    .table-container th:last-child,
    .table-container td:last-child {
-      width: 5%;
+      width: 8%;
    }
 
    @media (max-width: 1920px) {
@@ -152,11 +153,10 @@
                      <th class="text-center px-0 align-middle">ID</th>
                      <th class="text-center px-0 align-middle">Data</th>
                      <th class="text-center px-0 align-middle">Descrição</th>
-                     <th class="text-center px-0 align-middle">Quantidade</th>
+                     <th class="text-center px-0 align-middle">Qtde.</th>
                      <th class="text-center px-0 align-middle">Solicitante</th>
                      <th class="text-center px-0 align-middle">Situação</th>
                      <th class="text-center px-0 align-middle">NUP</th>
-                     <th class="text-center px-0 align-middle">Observação</th>
                      <th class="text-center px-0 align-middle">Detalhes</th>
                   </tr>
                </thead>
@@ -166,9 +166,9 @@
                         <tr>
                            <td class="py-1 text-center align-middle"><%= item.id %></td>
                            <td class="py-1 text-center align-middle"><%= new Date(item.data_da_solicitacao).toLocaleDateString('pt-BR') %></td>
-                           <td class="py-1 text-center align-middle"><%= item.descricao %></td>
+                           <td class="py-1 text-left align-middle"><%= item.descricao %></td>
                            <td class="py-1 text-center align-middle"><%= item.quantidade %></td>
-                           <td class="py-1 text-center align-middle"><%= item.solicitante %></td>
+                           <td class="py-1 text-left align-middle"><%= item.solicitante %></td>
                            <td class="py-1 text-center align-middle">
                               <select class="form-select form-select-sm situacao-select" data-id="<%= item.id %>" data-original-value="<%= item.situacao %>" aria-label="Alterar situação da solicitação">
                                  <option value="PENDENTE" <%= item.situacao === 'PENDENTE' ? 'selected' : '' %>>Pendente</option>
@@ -183,16 +183,15 @@
                               <% } %>
                            </td>
                            <td class="py-1 text-center align-middle">
-                              <%= item.observacao ? item.observacao : 'N/A' %>
-                           </td>
-                           <td class="py-1 text-center align-middle">
                               <button type="button" class="btn btn-secondary btn-sm btn-details btn-action" data-id="<%= item.id %>" aria-label="Ver detalhes da solicitação">Detalhes</button>
+                              <a href="/solicitacao/editar/<%= item.id %>" class="btn btn-warning btn-sm btn-edit btn-action">Editar</a>
+                              <a href="/solicitacao/excluir/<%= item.id %>" class="btn btn-danger btn-sm btn-delete btn-action" data-id="<%= item.id %>">Excluir</a>
                            </td>
                         </tr>
                      <% }); %>
                   <% } else { %>
                      <tr>
-                        <td colspan="9" class="text-center align-middle">Nenhuma solicitação encontrada.</td>
+                        <td colspan="8" class="text-center align-middle">Nenhuma solicitação encontrada.</td>
                      </tr>
                   <% } %>
                </tbody>
@@ -229,13 +228,11 @@
                const solicitante = cells[4].textContent.toLowerCase();
                const situacao = cells[5].querySelector('select') ? cells[5].querySelector('select').value.toLowerCase() : cells[5].textContent.toLowerCase();
                const nup = cells[6].textContent.toLowerCase();
-               const observacao = cells[7].textContent.toLowerCase();
                const matches = 
                   descricao.includes(searchTerm) ||
                   solicitante.includes(searchTerm) ||
                   situacao.includes(searchTerm) ||
-                  nup.includes(searchTerm) ||
-                  observacao.includes(searchTerm);
+                  nup.includes(searchTerm);
                row.style.display = matches ? '' : 'none';
             });
          }
@@ -269,7 +266,13 @@
                   confirmButtonText: 'Sim',
                   cancelButtonText: 'Não',
                   confirmButtonColor: '#28a745',
-                  cancelButtonColor: '#dc3545'
+                  cancelButtonColor: '#dc3545',
+                  willClose: () => {
+                     // Remove o backdrop do Bootstrap e classes que bloqueiam interação
+                     document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                     document.body.classList.remove('modal-open');
+                     document.body.style.paddingRight = '';
+                  }
                });
 
                if (!result.isConfirmed) {
@@ -293,24 +296,36 @@
                   // Atualiza o valor original após sucesso
                   selectElement.setAttribute('data-original-value', novaSituacao);
 
-                  Swal.fire({
+                  await Swal.fire({
                      icon: 'success',
                      title: 'Sucesso!',
                      text: 'Situação atualizada com sucesso!',
                      timer: 2000,
                      timerProgressBar: true,
-                     showConfirmButton: false
+                     showConfirmButton: false,
+                     willClose: () => {
+                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
+                        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.paddingRight = '';
+                     }
                   });
                } catch (error) {
                   console.error('Erro ao atualizar situação:', error);
                   selectElement.value = originalValue; // Reverte em caso de erro
-                  Swal.fire({
+                  await Swal.fire({
                      icon: 'error',
                      title: 'Erro!',
                      text: 'Não foi possível atualizar a situação. Tente novamente.',
                      timer: 3000,
                      timerProgressBar: true,
-                     showConfirmButton: false
+                     showConfirmButton: false,
+                     willClose: () => {
+                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
+                        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.paddingRight = '';
+                     }
                   });
                }
             });
@@ -372,16 +387,140 @@
                   infoSolicitacaoModal.show();
                   infoSolicitacaoModal._element.addEventListener('hidden.bs.modal', () => {
                      modalDiv.remove();
+                     // Remove o backdrop do Bootstrap e classes que bloqueiam interação
+                     document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                     document.body.classList.remove('modal-open');
+                     document.body.style.paddingRight = '';
                   });
                } catch (error) {
                   console.error('ERRO AO BUSCAR INFORMAÇÕES DA SOLICITAÇÃO:', error.message.toUpperCase());
-                  Swal.fire({
+                  await Swal.fire({
                      icon: 'error',
                      title: 'Erro!',
                      text: 'Não foi possível carregar os detalhes da solicitação.',
                      timer: 3000,
                      timerProgressBar: true,
-                     showConfirmButton: false
+                     showConfirmButton: false,
+                     willClose: () => {
+                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
+                        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.paddingRight = '';
+                     }
+                  });
+               }
+            });
+         });
+
+         // Scripts para os botões "Editar" e "Excluir"
+         const userRole = '<%= userRole %>';
+         const editButtons = document.querySelectorAll('.btn-edit');
+         const deleteButtons = document.querySelectorAll('.btn-delete');
+
+         editButtons.forEach(button => {
+            button.addEventListener('click', async (event) => {
+               if (userRole !== 'admin') {
+                  event.preventDefault();
+                  await Swal.fire({
+                     icon: 'error',
+                     title: 'Acesso Negado!',
+                     text: 'Você não tem permissão para editar solicitações. Apenas administradores podem realizar esta ação.',
+                     timer: 3000,
+                     timerProgressBar: true,
+                     showConfirmButton: false,
+                     willClose: () => {
+                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
+                        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.paddingRight = '';
+                     }
+                  });
+               }
+            });
+         });
+
+         deleteButtons.forEach(button => {
+            button.addEventListener('click', async (event) => {
+               event.preventDefault();
+               const solicitacaoId = button.getAttribute('data-id');
+               const url = `/solicitacao/excluir/${solicitacaoId}`;
+
+               if (userRole !== 'admin') {
+                  await Swal.fire({
+                     icon: 'error',
+                     title: 'Acesso Negado!',
+                     text: 'Você não tem permissão para excluir solicitações. Apenas administradores podem realizar esta ação.',
+                     timer: 3000,
+                     timerProgressBar: true,
+                     showConfirmButton: false,
+                     willClose: () => {
+                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
+                        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.paddingRight = '';
+                     }
+                  });
+                  return;
+               }
+
+               const result = await Swal.fire({
+                  title: 'Confirmar exclusão',
+                  text: 'Você tem certeza que deseja excluir esta solicitação? Esse processo é irreversível.',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonText: 'Sim',
+                  cancelButtonText: 'Não',
+                  confirmButtonColor: '#28a745',
+                  cancelButtonColor: '#dc3545',
+                  willClose: () => {
+                     // Remove o backdrop do Bootstrap e classes que bloqueiam interação
+                     document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                     document.body.classList.remove('modal-open');
+                     document.body.style.paddingRight = '';
+                  }
+               });
+
+               if (!result.isConfirmed) {
+                  return;
+               }
+
+               try {
+                  const response = await fetch(url, { method: 'DELETE' });
+                  if (!response.ok) {
+                     const result = await response.json();
+                     throw new Error(result.error || 'Erro ao excluir solicitação');
+                  }
+
+                  await Swal.fire({
+                     icon: 'success',
+                     title: 'Sucesso!',
+                     text: 'Solicitação excluída com sucesso!',
+                     timer: 2000,
+                     timerProgressBar: true,
+                     showConfirmButton: false,
+                     willClose: () => {
+                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
+                        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.paddingRight = '';
+                     }
+                  });
+                  location.reload(); // Recarrega a página após o modal fechar
+               } catch (error) {
+                  console.error('Erro ao excluir solicitação:', error);
+                  await Swal.fire({
+                     icon: 'error',
+                     title: 'Erro!',
+                     text: error.message || 'Não foi possível excluir a solicitação. Tente novamente.',
+                     timer: 3000,
+                     timerProgressBar: true,
+                     showConfirmButton: false,
+                     willClose: () => {
+                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
+                        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.paddingRight = '';
+                     }
                   });
                }
             });

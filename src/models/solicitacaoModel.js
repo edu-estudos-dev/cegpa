@@ -1,4 +1,3 @@
-// solicitacaoModel.js
 import connection from '../../db_config/connection.js';
 
 class SolicitacaoModel {
@@ -47,7 +46,6 @@ class SolicitacaoModel {
       }
    }
 
-   // Método para obter todas as solicitações de requisição
    getAllSolicitacaoModel = async () => {
       const query = `
       SELECT 
@@ -58,7 +56,7 @@ class SolicitacaoModel {
          quantidade,
          situacao,
          observacao,
-         NUP AS nup  -- Renomeia a coluna NUP para nup
+         NUP AS nup
       FROM solicitacaoaquisicao
    `;
       try {
@@ -70,14 +68,24 @@ class SolicitacaoModel {
          throw error;
       }
    };
-   // Método para obter uma solicitação por ID
+
    getSolicitacaoById = async (id) => {
-      const query = `SELECT * FROM solicitacaoaquisicao WHERE id = ?`;
       try {
-         const [results] = await connection.execute(query, [id]);
-         return results[0]; // Retorna o primeiro (e único) resultado, ou undefined se não encontrado
+         console.log(`[DEBUG] Executando consulta SQL para ID ${id}`);
+         const [results] = await connection.execute(
+            'SELECT * FROM solicitacaoaquisicao WHERE id = ?',
+            [id]
+         );
+         console.log(
+            `[DEBUG] Resultado da consulta para ID ${id}:`,
+            results[0]
+         );
+         return results[0] || null;
       } catch (error) {
-         console.error('Erro ao buscar solicitação por ID:', error);
+         console.error(
+            `[ERROR] Erro ao buscar solicitação por ID ${id}:`,
+            error
+         );
          throw error;
       }
    };
@@ -89,6 +97,49 @@ class SolicitacaoModel {
          return result;
       } catch (error) {
          console.error('Erro ao atualizar situação:', error);
+         throw error;
+      }
+   }
+
+   // Novo método para atualizar uma solicitação
+   async updateSolicitacao(id, data) {
+      const query = `
+         UPDATE solicitacaoaquisicao 
+         SET 
+            data_da_solicitacao = ?, 
+            quantidade = ?, 
+            solicitante = ?, 
+            situacao = ?, 
+            descricao = ?, 
+            nup = ?, 
+            observacao = ?
+         WHERE id = ?`;
+      try {
+         const [result] = await connection.execute(query, [
+            data.data_da_solicitacao,
+            data.quantidade,
+            data.solicitante,
+            data.situacao,
+            data.descricao,
+            data.nup,
+            data.observacao,
+            id,
+         ]);
+         return result;
+      } catch (error) {
+         console.error('Erro ao atualizar solicitação:', error);
+         throw error;
+      }
+   }
+
+   // Novo método para excluir uma solicitação
+   async deleteSolicitacao(id) {
+      const query = `DELETE FROM solicitacaoaquisicao WHERE id = ?`;
+      try {
+         const [result] = await connection.execute(query, [id]);
+         return result;
+      } catch (error) {
+         console.error('Erro ao excluir solicitação:', error);
          throw error;
       }
    }
