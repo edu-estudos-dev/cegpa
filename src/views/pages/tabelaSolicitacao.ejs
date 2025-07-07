@@ -77,24 +77,27 @@
    /* Ajuste das colunas */
    .table-container th:nth-child(1),
    .table-container td:nth-child(1) {
-      width: 3%;
+      width: 2%;
    }
 
    .table-container th:nth-child(2),
    .table-container td:nth-child(2) {
-      width: 3%;
+      width: 2%;
    }
 
    /* DESCRIÇÃO */
    .table-container th:nth-child(3),
    .table-container td:nth-child(3) {
-      width: 15%;
+      width: 40%;
+      word-break: break-word;
+      white-space: pre-line;
+      max-width: 250px;
    }
 
    /* QUANTIDADE */
    .table-container th:nth-child(4),
    .table-container td:nth-child(4) {
-      width: 5%;
+      width: 3%;
    }
 
    /* SOLICITANTE */
@@ -106,7 +109,7 @@
    /* SITUAÇÃO */
    .table-container th:nth-child(6),
    .table-container td:nth-child(6) {
-      width: 15%;
+      width: 6%;
    }
 
    /* NUP */
@@ -170,10 +173,14 @@
                            <td class="py-1 text-center align-middle"><%= item.quantidade %></td>
                            <td class="py-1 text-left align-middle"><%= item.solicitante %></td>
                            <td class="py-1 text-center align-middle">
-                              <select class="form-select form-select-sm situacao-select" data-id="<%= item.id %>" data-original-value="<%= item.situacao %>" aria-label="Alterar situação da solicitação">
-                                 <option value="PENDENTE" <%= item.situacao === 'PENDENTE' ? 'selected' : '' %>>Pendente</option>
-                                 <option value="ADQUIRIDO" <%= item.situacao === 'ADQUIRIDO' ? 'selected' : '' %>>Adquirido</option>
-                              </select>
+                              <% if (userRole === 'admin') { %>
+                                 <select class="form-select form-select-sm situacao-select" data-id="<%= item.id %>" data-original-value="<%= item.situacao %>" aria-label="Alterar situação da solicitação">
+                                    <option value="PENDENTE" <%= item.situacao === 'PENDENTE' ? 'selected' : '' %>>Pendente</option>
+                                    <option value="ADQUIRIDO" <%= item.situacao === 'ADQUIRIDO' ? 'selected' : '' %>>Adquirido</option>
+                                 </select>
+                              <% } else { %>
+                                 <span><%= item.situacao %></span>
+                              <% } %>
                            </td>
                            <td class="py-1 align-middle text-center">
                               <% if (item.nup) { %>
@@ -244,13 +251,35 @@
             filterRows(searchTerm);
          });
 
-         // Atualizar situação com confirmação
+         // Obter o papel do usuário da sessão
+         const userRole = '<%= userRole %>';
+
+         // Atualizar situação com confirmação e verificação de permissão
          document.querySelectorAll('.situacao-select').forEach(select => {
             select.addEventListener('change', async (event) => {
                const selectElement = event.target;
                const solicitacaoId = selectElement.getAttribute('data-id');
                const novaSituacao = selectElement.value;
                const originalValue = selectElement.getAttribute('data-original-value');
+
+               // Verificar se o usuário é administrador
+               if (userRole !== 'admin') {
+                  selectElement.value = originalValue; // Reverte a seleção
+                  await Swal.fire({
+                     icon: 'error',
+                     title: 'Acesso Negado!',
+                     text: 'Você não tem permissão para alterar a situação. Apenas administradores podem realizar esta ação.',
+                     timer: 3000,
+                     timerProgressBar: true,
+                     showConfirmButton: false,
+                     willClose: () => {
+                        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.paddingRight = '';
+                     }
+                  });
+                  return;
+               }
 
                // Evita ação se o valor não mudou
                if (novaSituacao === originalValue) {
@@ -268,7 +297,6 @@
                   confirmButtonColor: '#28a745',
                   cancelButtonColor: '#dc3545',
                   willClose: () => {
-                     // Remove o backdrop do Bootstrap e classes que bloqueiam interação
                      document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
                      document.body.classList.remove('modal-open');
                      document.body.style.paddingRight = '';
@@ -304,7 +332,6 @@
                      timerProgressBar: true,
                      showConfirmButton: false,
                      willClose: () => {
-                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
                         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
                         document.body.classList.remove('modal-open');
                         document.body.style.paddingRight = '';
@@ -321,7 +348,6 @@
                      timerProgressBar: true,
                      showConfirmButton: false,
                      willClose: () => {
-                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
                         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
                         document.body.classList.remove('modal-open');
                         document.body.style.paddingRight = '';
@@ -387,7 +413,6 @@
                   infoSolicitacaoModal.show();
                   infoSolicitacaoModal._element.addEventListener('hidden.bs.modal', () => {
                      modalDiv.remove();
-                     // Remove o backdrop do Bootstrap e classes que bloqueiam interação
                      document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
                      document.body.classList.remove('modal-open');
                      document.body.style.paddingRight = '';
@@ -402,7 +427,6 @@
                      timerProgressBar: true,
                      showConfirmButton: false,
                      willClose: () => {
-                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
                         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
                         document.body.classList.remove('modal-open');
                         document.body.style.paddingRight = '';
@@ -413,7 +437,6 @@
          });
 
          // Scripts para os botões "Editar" e "Excluir"
-         const userRole = '<%= userRole %>';
          const editButtons = document.querySelectorAll('.btn-edit');
          const deleteButtons = document.querySelectorAll('.btn-delete');
 
@@ -429,7 +452,6 @@
                      timerProgressBar: true,
                      showConfirmButton: false,
                      willClose: () => {
-                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
                         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
                         document.body.classList.remove('modal-open');
                         document.body.style.paddingRight = '';
@@ -454,7 +476,6 @@
                      timerProgressBar: true,
                      showConfirmButton: false,
                      willClose: () => {
-                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
                         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
                         document.body.classList.remove('modal-open');
                         document.body.style.paddingRight = '';
@@ -473,7 +494,6 @@
                   confirmButtonColor: '#28a745',
                   cancelButtonColor: '#dc3545',
                   willClose: () => {
-                     // Remove o backdrop do Bootstrap e classes que bloqueiam interação
                      document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
                      document.body.classList.remove('modal-open');
                      document.body.style.paddingRight = '';
@@ -499,13 +519,12 @@
                      timerProgressBar: true,
                      showConfirmButton: false,
                      willClose: () => {
-                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
                         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
                         document.body.classList.remove('modal-open');
                         document.body.style.paddingRight = '';
                      }
                   });
-                  location.reload(); // Recarrega a página após o modal fechar
+                  location.reload();
                } catch (error) {
                   console.error('Erro ao excluir solicitação:', error);
                   await Swal.fire({
@@ -516,7 +535,6 @@
                      timerProgressBar: true,
                      showConfirmButton: false,
                      willClose: () => {
-                        // Remove o backdrop do Bootstrap e classes que bloqueiam interação
                         document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
                         document.body.classList.remove('modal-open');
                         document.body.style.paddingRight = '';

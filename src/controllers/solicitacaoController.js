@@ -176,14 +176,15 @@ class SolicitacaoController {
       }
    }
 
+   // método para renderizar a tabela de solicitações
    getAllSolicitacaoController = async (req, res) => {
       try {
          console.log('Acessando rota /tabela/solicitacao');
          const solicitacao = await solicitacaoModel.getAllSolicitacaoModel();
-         console.log(
-            'Solicitações retornadas para o EJS (getAllSolicitacaoController):',
-            solicitacao
-         );
+         // console.log(
+         //    'Solicitações retornadas para o EJS (getAllSolicitacaoController):',
+         //    solicitacao
+         // );
          const successMessage = req.query.success || null;
          res.status(200).render('tabelaSolicitacao', {
             solicitacao,
@@ -198,6 +199,7 @@ class SolicitacaoController {
       }
    };
 
+   // método para buscar uma solicitação por ID
    getSolicitacaoById = async (req, res) => {
       try {
          const id = req.params.id;
@@ -214,6 +216,7 @@ class SolicitacaoController {
       }
    };
 
+   // método para atualizar a situação de uma solicitação
    async atualizarSituacao(req, res) {
       try {
          const id = req.params.id;
@@ -237,7 +240,7 @@ class SolicitacaoController {
       }
    }
 
-   // Novo método para renderizar o formulário de edição
+   // método para renderizar o formulário de edição
    renderEditForm = async (req, res) => {
       console.log(`[DEBUG] Acessando renderEditForm para ID: ${req.params.id}`);
       console.log(`[DEBUG] Usuário na sessão:`, req.session.user);
@@ -282,7 +285,7 @@ class SolicitacaoController {
       }
    };
 
-   // Novo método para atualizar uma solicitação
+   // método para atualizar uma solicitação
    updateSolicitacao = async (req, res) => {
       console.log('Recebendo requisição para atualizar solicitação:', req.body);
       try {
@@ -362,7 +365,7 @@ class SolicitacaoController {
       }
    };
 
-   // Novo método para excluir uma solicitação
+   // método para excluir uma solicitação
    async destroy(req, res) {
       try {
          const { id } = req.params;

@@ -1,6 +1,7 @@
 import connection from '../../db_config/connection.js';
 
 class SolicitacaoModel {
+   // Método para criar uma nova solicitação
    async criarSolicitacao(
       data_da_solicitacao,
       quantidade,
@@ -46,6 +47,7 @@ class SolicitacaoModel {
       }
    }
 
+   // Método para buscar todas as solicitações
    getAllSolicitacaoModel = async () => {
       const query = `
       SELECT 
@@ -61,7 +63,6 @@ class SolicitacaoModel {
    `;
       try {
          const [results] = await connection.execute(query);
-         console.log('Dados brutos do banco:', results);
          return results;
       } catch (error) {
          console.error('Erro ao buscar estoque atual:', error);
@@ -69,6 +70,7 @@ class SolicitacaoModel {
       }
    };
 
+   // método para buscar uma solicitação por ID
    getSolicitacaoById = async (id) => {
       try {
          console.log(`[DEBUG] Executando consulta SQL para ID ${id}`);
@@ -90,6 +92,7 @@ class SolicitacaoModel {
       }
    };
 
+   // método para atualizar a situação de uma solicitação
    async atualizarSituacao(id, situacao) {
       const query = `UPDATE solicitacaoaquisicao SET situacao = ? WHERE id = ?`;
       try {
@@ -101,7 +104,7 @@ class SolicitacaoModel {
       }
    }
 
-   // Novo método para atualizar uma solicitação
+   // método para atualizar uma solicitação
    async updateSolicitacao(id, data) {
       const query = `
          UPDATE solicitacaoaquisicao 
@@ -132,7 +135,7 @@ class SolicitacaoModel {
       }
    }
 
-   // Novo método para excluir uma solicitação
+   // método para excluir uma solicitação
    async deleteSolicitacao(id) {
       const query = `DELETE FROM solicitacaoaquisicao WHERE id = ?`;
       try {

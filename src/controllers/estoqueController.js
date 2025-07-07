@@ -1074,6 +1074,9 @@ class EstoqueController {
          doc.setFontSize(10);
 
          const headerYStart = 20 + imgProps.height;
+         const obsText = (observacao || 'Nenhuma').toUpperCase();
+         const obsLines = doc.splitTextToSize(`Observações: ${obsText}`, 170); // aumente de 120 para 170
+
          const headerData = [
             `Nº Termo: ${doc_saida}`,
             `Data: ${dataDeSaida.toLocaleDateString('pt-BR')}`,
@@ -1081,25 +1084,34 @@ class EstoqueController {
             `Responsável: ${postoGrad} ${nome_do_recebedor.toUpperCase()}`,
             `MF: ${mf_recebedor}`,
             `Contato: ${tel_recebedor}`,
-            `Referência: ${referencia}`,
-            `Observações: ${(observacao || 'Nenhuma').toUpperCase()}`,
+            `Referência: ${referencia}`
+            // Observações será renderizado separadamente
          ];
 
          // Renderiza o cabeçalho com destaque para o Nº Termo
+         let headerYOffset = 0;
          headerData.forEach((line, index) => {
             if (line.startsWith('Nº Termo')) {
-               // Configura fonte maior e negrito para o Nº Termo
-               doc.setFont('helvetica', 'bold'); // Define a fonte como negrito
-               doc.setFontSize(12); // Aumenta o tamanho da fonte
-               doc.text(line, 14, headerYStart + index * 5);
-               doc.setFont('helvetica', 'normal'); // Volta para a fonte normal
-               doc.setFontSize(10); // Volta para o tamanho padrão
-            } else {
-               // Mantém o estilo padrão para as outras linhas
+               doc.setFont('helvetica', 'bold');
+               doc.setFontSize(12);
+               doc.text(line, 14, headerYStart + headerYOffset);
+               doc.setFont('helvetica', 'normal');
                doc.setFontSize(10);
-               doc.text(line, 14, headerYStart + index * 5);
+            } else {
+               doc.setFontSize(10);
+               doc.text(line, 14, headerYStart + headerYOffset);
             }
+            headerYOffset += 5;
          });
+         // Renderiza as linhas de observação com quebra automática
+         obsLines.forEach((obsLine) => {
+            doc.setFontSize(10);
+            doc.text(obsLine, 14, headerYStart + headerYOffset);
+            headerYOffset += 5;
+         });
+
+         // Calcula a posição Y final após o cabeçalho e observação
+         const tableStartY = headerYStart + headerYOffset + 2; // +2 para um pequeno espaçamento
 
          let ordem = 1;
          const items = [];
@@ -1154,9 +1166,8 @@ class EstoqueController {
 
          // Renderiza a tabela
          console.log('Total de itens na tabela:', items.length);
-         let finalY = 60 + imgProps.height; // Ajustado para dar mais espaço
          doc.autoTable({
-            startY: finalY,
+            startY: tableStartY,
             head: [['ORD.', 'TOMBO', 'DESCRIÇÃO', 'SITUAÇÃO']],
             body: items,
             styles: {
@@ -1196,7 +1207,6 @@ class EstoqueController {
          );
 
          // Após a tabela ser renderizada
-         finalY = doc.lastAutoTable.finalY || finalY;
          const pageHeight = doc.internal.pageSize.height;
 
          // Garante que estamos na última página
