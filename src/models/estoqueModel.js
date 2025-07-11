@@ -538,19 +538,20 @@ class EstoqueModel {
 
    // Método para reverter a saída de um item
    reverterSaida = async (itemPagoId, estoqueatualId) => {
-      if (!itemPagoId || !estoqueatualId) {
+      if (!estoqueatualId) {
          console.error(
-            `[EstoqueModel] Parâmetros inválidos: itemPagoId=${itemPagoId}, estoqueatualId=${estoqueatualId}`
+            `[EstoqueModel] Parâmetro estoqueatualId inválido: estoqueatualId=${estoqueatualId}`
          );
          throw new Error(
-            'Parâmetros itemPagoId e estoqueatualId são obrigatórios.'
+            'Parâmetro estoqueatualId é obrigatório.'
          );
       }
 
-      const deleteQuery = `DELETE FROM itenspagos WHERE id = ?`;
+      // Remove todos os registros de saída para este estoqueatual_id
+      const deleteQuery = `DELETE FROM itenspagos WHERE estoqueatual_id = ?`;
       const updateQuery = `UPDATE estoqueatual SET pago = 0 WHERE id = ?`;
       try {
-         await connection.execute(deleteQuery, [itemPagoId]);
+         await connection.execute(deleteQuery, [estoqueatualId]);
          await connection.execute(updateQuery, [estoqueatualId]);
          return true;
       } catch (error) {

@@ -88,7 +88,7 @@
    /* DESCRIÇÃO */
    .table-container th:nth-child(3),
    .table-container td:nth-child(3) {
-      width: 40%;
+      width: 48%;
       word-break: break-word;
       white-space: pre-line;
       max-width: 250px;
@@ -103,25 +103,30 @@
    /* SOLICITANTE */
    .table-container th:nth-child(5),
    .table-container td:nth-child(5) {
-      width: 5%;
+      width: 30%;
+      max-width: 120px;
+      word-break: break-word;
+      white-space: pre-line;
+      overflow: hidden;
+      text-overflow: ellipsis;
    }
 
    /* SITUAÇÃO */
    .table-container th:nth-child(6),
    .table-container td:nth-child(6) {
-      width: 6%;
+      width: 8%;
    }
 
    /* NUP */
    .table-container th:nth-child(7),
    .table-container td:nth-child(7) {
-      width: 12%;
+      width: 11%;
    }
 
    /* DETALHES */
-   .table-container th:last-child,
-   .table-container td:last-child {
-      width: 8%;
+   .table-container th:nth-child(8),
+   .table-container td:nth-child(8) {
+      width: 10%;
    }
 
    @media (max-width: 1920px) {
@@ -362,7 +367,7 @@
          exportarBtn.addEventListener('click', (event) => {
             event.preventDefault();
             const formato = document.getElementById('formato').value;
-            window.location.href = `/relatorio/solicitacoes?formato=${formato}`;
+            window.location.href = `/solicitacao/relatorio/solicitacoes?formato=${formato}`;
          });
 
          // Botão "Detalhes"

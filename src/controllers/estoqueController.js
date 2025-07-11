@@ -589,18 +589,14 @@ class EstoqueController {
          );
          res.send(pdfBuffer);
       } else if (formato === 'excel') {
+         console.log('[EXCEL] Título da planilha:', title);
          const workbook = new ExcelJS.Workbook();
          const worksheet = workbook.addWorksheet(title);
-
-         const titleRow = worksheet.addRow([title]);
-         worksheet.mergeCells(
-            `A1:${String.fromCharCode(65 + columns.length - 1)}1`
-         );
+         worksheet.mergeCells(`A1:${String.fromCharCode(65 + columns.length - 1)}1`);
+         worksheet.getCell('A1').value = title;
          worksheet.getCell('A1').alignment = { horizontal: 'center' };
-         worksheet.getCell('A1').font = { size: 14, bold: true };
-
-         worksheet.addRow([`Gerado em: ${new Date().toLocaleString('pt-BR')}`]);
-
+         worksheet.getCell('A1').font = { size: 16, bold: true };
+         worksheet.addRow([`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`]);
          worksheet.addRow(columns.map((col) => col.header)).eachCell((cell) => {
             cell.fill = {
                type: 'pattern',
@@ -610,13 +606,10 @@ class EstoqueController {
             cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
             cell.alignment = { horizontal: 'center' };
          });
-
          rows.forEach((row) => {
             worksheet.addRow(columns.map((col) => row[col.dataKey]));
          });
-
-         worksheet.columns = columns.map((col) => ({ width: col.width / 5 }));
-
+         worksheet.columns = columns.map((col) => ({ width: col.width }));
          const excelBuffer = await workbook.xlsx.writeBuffer();
          res.setHeader(
             'Content-Type',
@@ -823,8 +816,8 @@ class EstoqueController {
          const worksheet = workbook.addWorksheet(title);
 
          // Adicionar o título e mesclar as células
-         const titleRow = worksheet.addRow([title]);
          worksheet.mergeCells('A1:I1');
+         worksheet.getCell('A1').value = title;
          worksheet.getCell('A1').alignment = { horizontal: 'center' };
          worksheet.getCell('A1').font = { size: 16, bold: true };
 
@@ -862,7 +855,7 @@ class EstoqueController {
          });
 
          // Ajustar a largura das colunas
-         worksheet.columns = columns.map((col) => ({ width: col.width / 6 }));
+         worksheet.columns = columns.map((col) => ({ width: col.width }));
 
          const excelBuffer = await workbook.xlsx.writeBuffer();
          res.setHeader(
@@ -1124,6 +1117,13 @@ class EstoqueController {
             if (!itemEstoque) {
                console.warn(`Tombo ${tombo} não encontrado`);
                continue;
+            }
+
+            if (itemEstoque.pago) {
+               // Item já foi pago, não pode sair de novo!
+               return res.status(400).json({
+                  error: `O item com tombo ${tombo} já foi pago e não pode ser retirado novamente.`,
+               });
             }
 
             console.log(`Item encontrado para tombo ${tombo}:`, itemEstoque);

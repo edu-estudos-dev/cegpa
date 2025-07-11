@@ -1,4 +1,8 @@
 import solicitacaoModel from '../models/solicitacaoModel.js';
+import PDFDocument from 'pdfkit';
+import ExcelJS from 'exceljs';
+import fs from 'fs';
+import path from 'path';
 
 class SolicitacaoController {
    renderSolicitacaoForm(req, res) {
@@ -379,6 +383,135 @@ class SolicitacaoController {
       } catch (error) {
          console.error('Erro ao excluir solicitação:', error);
          res.status(500).json({ error: 'Erro ao excluir solicitação.' });
+      }
+   }
+
+   // Método para exportar relatório de solicitações
+   async exportarRelatorioSolicitacoes(req, res) {
+      try {
+         const formato = req.query.formato || 'pdf';
+         const solicitacoes = await solicitacaoModel.getAllSolicitacaoModel();
+         if (formato === 'excel') {
+            const ExcelJS = (await import('exceljs')).default;
+            const workbook = new ExcelJS.Workbook();
+            const title = 'Relatório de Solicitações';
+            const columns = [
+               { header: 'ID', dataKey: 'id', width: 8 },
+               { header: 'Data', dataKey: 'data_da_solicitacao', width: 20 },
+               { header: 'Descrição', dataKey: 'descricao', width: 95 },
+               { header: 'Qtde.', dataKey: 'quantidade', width: 18 },
+               { header: 'Solicitante', dataKey: 'solicitante', width: 76 },
+               { header: 'Situação', dataKey: 'situacao', width: 20 },
+               { header: 'NUP', dataKey: 'nup', width: 40 },
+            ];
+            console.log('[EXCEL] Título da planilha:', title);
+            const worksheet = workbook.addWorksheet(title);
+            worksheet.mergeCells(`A1:${String.fromCharCode(65 + columns.length - 1)}1`);
+            worksheet.getCell('A1').value = title;
+            worksheet.getCell('A1').alignment = { horizontal: 'center' };
+            worksheet.getCell('A1').font = { size: 16, bold: true };
+            worksheet.addRow([`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`]);
+            worksheet.addRow(columns.map((col) => col.header)).eachCell((cell) => {
+               cell.fill = {
+                  type: 'pattern',
+                  pattern: 'solid',
+                  fgColor: { argb: 'FF228B22' },
+               };
+               cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+               cell.alignment = { horizontal: 'center' };
+            });
+            solicitacoes.forEach(item => {
+               worksheet.addRow([
+                  item.id,
+                  new Date(item.data_da_solicitacao).toLocaleDateString('pt-BR'),
+                  item.descricao,
+                  item.quantidade,
+                  item.solicitante,
+                  item.situacao,
+                  item.nup
+               ]);
+            });
+            worksheet.columns = columns.map((col) => ({ width: col.width }));
+            const excelBuffer = await workbook.xlsx.writeBuffer();
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', 'attachment; filename=relatorio_solicitacoes.xlsx');
+            res.send(excelBuffer);
+         } else {
+            // PDF com jsPDF + autotable (importação dinâmica)
+            const { jsPDF } = await import('jspdf');
+            await import('jspdf-autotable');
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            const title = 'Relatório de Solicitações';
+            const columns = [
+               { header: 'ID', dataKey: 'id' },
+               { header: 'Data', dataKey: 'data_da_solicitacao' },
+               { header: 'Descrição', dataKey: 'descricao' },
+               { header: 'Qtde.', dataKey: 'quantidade' },
+               { header: 'Solicitante', dataKey: 'solicitante' },
+               { header: 'Situação', dataKey: 'situacao' },
+               { header: 'NUP', dataKey: 'nup' },
+            ];
+            const rows = solicitacoes.map(item => ({
+               id: item.id,
+               data_da_solicitacao: new Date(item.data_da_solicitacao).toLocaleDateString('pt-BR'),
+               descricao: item.descricao,
+               quantidade: item.quantidade,
+               solicitante: item.solicitante,
+               situacao: item.situacao,
+               nup: item.nup,
+            }));
+            // Cabeçalho (igual padrão dos itens pagos)
+            doc.setFontSize(15);
+            doc.text(title, 10, 15); // Título alinhado à esquerda
+            doc.setFontSize(6);
+            const generatedText = `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`;
+            doc.text(generatedText, 10, 22);
+            const pageNumberText = `Página 1`;
+            doc.text(pageNumberText, doc.internal.pageSize.width - 10, 22, { align: 'right' });
+
+            doc.autoTable({
+               startY: 25,
+               margin: { left: 8, right: 8, top: 25 },
+               head: [columns.map(col => col.header)],
+               body: rows.map(row => columns.map(col => row[col.dataKey])),
+               styles: {
+                  fontSize: 8,
+                  cellPadding: 2,
+                  halign: 'center',
+                  overflow: 'linebreak',
+               },
+               headStyles: {
+                  fontSize: 9,
+                  fillColor: [34, 139, 34],
+                  textColor: 255,
+                  fontStyle: 'bold',
+               },
+               columnStyles: {
+                  0: { cellWidth: 8 }, // ID
+                  1: { cellWidth: 20 }, // Data
+                  2: { cellWidth: 95, halign: 'left' }, // Descrição
+                  3: { cellWidth: 18 }, // Qtde.
+                  4: { cellWidth: 76, halign: 'left' }, // Solicitante
+                  5: { cellWidth: 20 }, // Situação
+                  6: { cellWidth: 40 }, // NUP
+               },
+               didDrawPage: function (data) {
+                  doc.setFontSize(15);
+                  doc.text(title, 10, 15); // Título alinhado à esquerda
+                  doc.setFontSize(6);
+                  doc.text(generatedText, 10, 22);
+                  const pageStr = `Página ${data.pageNumber}`;
+                  doc.text(pageStr, doc.internal.pageSize.width - 10, 22, { align: 'right' });
+               },
+            });
+            const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename=relatorio_solicitacoes.pdf`);
+            res.send(pdfBuffer);
+         }
+      } catch (error) {
+         console.error('Erro ao exportar relatório de solicitações:', error);
+         res.status(500).send('Erro ao exportar relatório de solicitações.');
       }
    }
 }

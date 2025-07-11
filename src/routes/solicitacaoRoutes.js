@@ -29,4 +29,7 @@ router.put('/editar/:id', isAuthenticated, checkRole(['admin']), SolicitacaoCont
 // Rota para excluir uma solicitação
 router.delete('/excluir/:id', isAuthenticated, checkRole(['admin']), SolicitacaoController.destroy);
 
+// Rota para exportar relatório de solicitações
+router.get('/relatorio/solicitacoes', isAuthenticated, SolicitacaoController.exportarRelatorioSolicitacoes);
+
 export default router;
