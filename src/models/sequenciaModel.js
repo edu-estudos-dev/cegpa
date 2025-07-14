@@ -1,11 +1,11 @@
 import connection from '../../db_config/connection.js';
 
 class SequenciaModel {
-   // Consulta a sequência atual sem incrementar
+   // Consulta a sequência atual sem incrementar   
    getSequenciaAtual = async (ano) => {
       try {
-         // Define o valor inicial como 284 para 2025, e 1 para outros anos
-         const initialValue = ano === 2025 ? 284 : 1;
+         // Define o valor inicial como 292 para 2025, e 1 para outros anos
+         const initialValue = ano === 2025 ? 292 : 1;
          const insertQuery = `
             INSERT INTO doc_sequencia (ano, sequencia)
             VALUES (?, ?)
