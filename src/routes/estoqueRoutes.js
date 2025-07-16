@@ -85,4 +85,7 @@ router.get('/visualizar/itempago/:id', estoqueController.visualizarItemPago);
 // Rota para buscar informações de um tombo (restaurada para Pesquisa Avançada)
 router.get('/fetch-info-tombo', estoqueController.fetchInfoTombo);
 
+// Rota para API de auditoria (JSON)
+router.get('/auditoria/api/tombo/:tombo', estoqueController.historicoAuditoriaTomboAPI);
+
 export default router;

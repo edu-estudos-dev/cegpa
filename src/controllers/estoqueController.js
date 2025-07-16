@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import estoqueModel from '../models/estoqueModel.js';
 import sequenciaModel from '../models/sequenciaModel.js';
+import AuditoriaModel from '../models/auditoriaModel.js';
 
 // Configurar __dirname para ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -114,6 +115,15 @@ class EstoqueController {
          if (affectedRows === 0) {
             return res.status(404).json({ error: 'Item não encontrado.' });
          }
+         // Registrar log de auditoria (edição)
+         await AuditoriaModel.registrarLog({
+            usuario: req.user?.nome_completo || 'desconhecido',
+            acao: 'EDIÇÃO',
+            tabela_afetada: 'estoqueatual',
+            id_registro: id,
+            tombo: safeData.tombo,
+            detalhes: { novos_dados: safeData }
+         });
          res.status(200).json({ message: 'Item atualizado com sucesso!' });
       } catch (error) {
          console.error('Erro ao atualizar o item no estoque:', {
@@ -336,7 +346,17 @@ class EstoqueController {
 
          // Inserir todos os itens de uma vez usando createEstoqueLote
          await estoqueModel.createEstoqueLote(itens);
-
+         // Registrar log de auditoria (entrada)
+         for (const item of itens) {
+            await AuditoriaModel.registrarLog({
+               usuario: req.user?.nome_completo || 'desconhecido',
+               acao: 'ENTRADA',
+               tabela_afetada: 'estoqueatual',
+               id_registro: null, // O id só é conhecido após inserção individual, mas o tombo é único
+               tombo: item.tombo,
+               detalhes: { dados: item }
+            });
+         }
          res.status(200).json({ message: 'Entrada registrada com sucesso!' });
       } catch (error) {
          console.error(
@@ -406,8 +426,19 @@ class EstoqueController {
    destroy = async (req, res) => {
       try {
          const { id } = req.params;
+         // Buscar o item antes de deletar para registrar o tombo
+         const item = await estoqueModel.getInfoByID(id);
          const result = await estoqueModel.delete(id);
          if (result > 0) {
+            // Registrar log de auditoria (exclusão)
+            await AuditoriaModel.registrarLog({
+               usuario: req.user?.nome_completo || 'desconhecido',
+               acao: 'EXCLUSÃO',
+               tabela_afetada: 'estoqueatual',
+               id_registro: id,
+               tombo: item?.tombo || null,
+               detalhes: { dados: item }
+            });
             return res.json({
                msg: 'Item deletado com sucesso!',
             });
@@ -1152,6 +1183,25 @@ class EstoqueController {
                observacao,
                itemEstoque.descricao
             );
+            // Registrar log de auditoria (saída)
+            await AuditoriaModel.registrarLog({
+               usuario: req.user?.nome_completo || 'desconhecido',
+               acao: 'SAÍDA',
+               tabela_afetada: 'itenspagos',
+               id_registro: itemEstoque.id,
+               tombo: itemEstoque.tombo,
+               detalhes: {
+                  doc_saida,
+                  referencia,
+                  destino,
+                  postoGrad,
+                  mf_recebedor,
+                  tel_recebedor,
+                  nome_do_recebedor,
+                  observacao,
+                  descricao: itemEstoque.descricao
+               }
+            });
 
             console.log(`Marcando tombo ${tombo} como pago...`);
             await estoqueModel.markAsPaid(itemEstoque.id);
@@ -1383,6 +1433,15 @@ class EstoqueController {
             )}`
          );
          await estoqueModel.reverterSaida(id, item.estoqueatual_id);
+         // Registrar log de auditoria (reversão)
+         await AuditoriaModel.registrarLog({
+            usuario: req.session.user?.nome_completo || 'desconhecido',
+            acao: 'REVERSÃO',
+            tabela_afetada: 'itenspagos',
+            id_registro: id,
+            tombo: item.tombo,
+            detalhes: { motivo: 'Reversão de saída', id_estoqueatual: item.estoqueatual_id }
+         });
 
          console.log(
             `[EstoqueController] Saída revertida com sucesso para ID: ${id}`
@@ -1397,6 +1456,18 @@ class EstoqueController {
             error: 'Erro ao reverter saída.',
             details: error.message,
          });
+      }
+   };
+
+   // API: Retorna histórico de auditoria de um tombo em JSON
+   historicoAuditoriaTomboAPI = async (req, res) => {
+      const { tombo } = req.params;
+      try {
+         const historico = await AuditoriaModel.buscarPorTombo(tombo);
+         res.json({ tombo, historico });
+      } catch (error) {
+         console.error('Erro ao buscar histórico de auditoria (API):', error);
+         res.status(500).json({ error: 'Erro ao buscar histórico de auditoria.' });
       }
    };
 }

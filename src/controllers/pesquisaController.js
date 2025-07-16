@@ -253,8 +253,9 @@ class PesquisaController {
     }
 
     // Método para renderizar a página de pesquisa avançada
-    renderPesquisaAvancada = (_, res) => {
-        res.render('pesquisaAvancada');
+    renderPesquisaAvancada = (req, res) => {
+        const userRole = req.session.user ? req.session.user.role : 'user';
+        res.render('pesquisaAvancada', { userRole });
     };
 
     // Método para buscar e exibir informações do tombo com logs adicionais

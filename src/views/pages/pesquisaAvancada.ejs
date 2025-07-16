@@ -16,7 +16,7 @@
     }
 
     .modal.fade .modal-dialog {
-      transition: transform 1s ease-in-out, opacity 5s ease-in-out;
+      transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
       transform: translateY(-25%);
       opacity: 0;
     }
@@ -34,6 +34,11 @@
     .w-90 {
       width: 15%;
       margin-block: 1rem;
+    }
+    /* Aumentar a largura do modal de auditoria em 25% */
+    #modalAuditoriaTombo .modal-dialog {
+      max-width: 60% !important;
+      width: 60% !important;
     }
   </style>
 
@@ -90,6 +95,9 @@
                 <div class="col-md-12 d-flex justify-content-center mt-4">
                   <button type="button" class="w-90 btn btn-warning mx-1" id="btn-limpar">Limpar</button>
                   <button type="submit" class="w-90 btn btn-secondary mx-1" id="btn-pesquisar">Pesquisar</button>
+                  <% if (userRole === 'admin') { %>
+                  <button type="button" class="w-90 btn btn-info mx-1" id="btn-auditoria-tombo">Auditar Tombo</button>
+                  <% } %>
                 </div>
               </div>
               </form>
@@ -255,6 +263,8 @@
       document.addEventListener('DOMContentLoaded', () => {
         const pesquisaForm = document.getElementById('pesquisa-form');
         const resultadosDiv = document.getElementById('resultados');
+        const tomboInput = document.getElementById('tombo');
+        const btnAuditoriaTombo = document.getElementById('btn-auditoria-tombo');
 
         if (pesquisaForm) {
           pesquisaForm.addEventListener('submit', async (e) => {
@@ -357,7 +367,99 @@
             }
           });
         }
+
+        function renderDetalhes(log) {
+          // EDIÇÃO: mostrar tabela Antes/Depois se possível
+          if (log.acao === 'EDIÇÃO' && log.detalhes && log.detalhes.antes && log.detalhes.depois) {
+            let html = `<table class='table table-bordered table-sm'><thead><tr><th>Campo</th><th>Antes</th><th>Depois</th></tr></thead><tbody>`;
+            const todosCampos = new Set([...Object.keys(log.detalhes.antes), ...Object.keys(log.detalhes.depois)]);
+            todosCampos.forEach(campo => {
+              html += `<tr><td>${campo}</td><td>${log.detalhes.antes[campo] ?? ''}</td><td>${log.detalhes.depois[campo] ?? ''}</td></tr>`;
+            });
+            html += `</tbody></table>`;
+            return html;
+          }
+          // ENTRADA, SAÍDA, EXCLUSÃO, REVERSÃO: mostrar lista amigável
+          if (log.detalhes && typeof log.detalhes === 'object') {
+            let obj = log.detalhes.dados || log.detalhes.novos_dados || log.detalhes || {};
+            // Se for reversão, mostrar motivo
+            if (log.acao === 'REVERSÃO' && log.detalhes.motivo) {
+              return `<ul><li><b>Motivo:</b> ${log.detalhes.motivo}</li><li><b>ID Estoque Atual:</b> ${log.detalhes.id_estoqueatual ?? ''}</li></ul>`;
+            }
+            let html = '<ul>';
+            for (const [k, v] of Object.entries(obj)) {
+              html += `<li><b>${k.replace(/_/g, ' ').toUpperCase()}:</b> ${v}</li>`;
+            }
+            html += '</ul>';
+            return html;
+          }
+          // Fallback: mostrar JSON
+          return `<pre style='white-space:pre-wrap;word-break:break-all;font-size:0.9em;background:#f8f9fa;border:none;'>${JSON.stringify(log.detalhes, null, 2)}</pre>`;
+        }
+
+        if (btnAuditoriaTombo && tomboInput) {
+          btnAuditoriaTombo.addEventListener('click', async () => {
+            const tombo = tomboInput.value.trim();
+            console.log('[AUDITORIA] Tombo digitado:', tombo);
+            if (!tombo) {
+              alert('Digite o número do tombo para consultar a auditoria.');
+              return;
+            }
+            // Buscar auditoria via AJAX
+            const modal = new bootstrap.Modal(document.getElementById('modalAuditoriaTombo'));
+            document.getElementById('modalTombo').textContent = tombo;
+            const conteudo = document.getElementById('modalAuditoriaConteudo');
+            conteudo.innerHTML = '<div class="text-center text-muted">Carregando...</div>';
+            modal.show();
+            try {
+              const url = `/auditoria/api/tombo/${tombo}`;
+              console.log('[AUDITORIA] Buscando auditoria na URL:', url);
+              const resp = await fetch(url);
+              const data = await resp.json();
+              console.log('[AUDITORIA] Resposta recebida:', data);
+              if (data.historico && data.historico.length > 0) {
+                let tabela = `<div class='table-responsive'><table class='table table-striped table-bordered'>`;
+                tabela += `<thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Detalhes</th></tr></thead><tbody>`;
+                data.historico.forEach(log => {
+                  tabela += `<tr>`;
+                  tabela += `<td>${new Date(log.data_hora).toLocaleString('pt-BR')}</td>`;
+                  tabela += `<td>${log.usuario}</td>`;
+                  tabela += `<td>${log.acao}</td>`;
+                  tabela += `<td>${renderDetalhes(log)}</td>`;
+                  tabela += `</tr>`;
+                });
+                tabela += `</tbody></table></div>`;
+                conteudo.innerHTML = tabela;
+              } else {
+                conteudo.innerHTML = '<div class="text-center text-danger">Nenhum registro de auditoria encontrado para este tombo.</div>';
+              }
+            } catch (err) {
+              console.log('[AUDITORIA] Erro ao buscar auditoria:', err);
+              conteudo.innerHTML = '<div class="text-center text-danger">Erro ao buscar auditoria.</div>';
+            }
+          });
+        }
       });
     </script>
+
+    <!-- Modal de Auditoria do Tombo -->
+    <div class="modal fade" id="modalAuditoriaTombo" tabindex="-1" aria-labelledby="modalAuditoriaTomboLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalAuditoriaTomboLabel">Histórico de Auditoria do Tombo <span id="modalTombo"></span></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <div id="modalAuditoriaConteudo">
+              <div class="text-center text-muted">Carregando...</div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
