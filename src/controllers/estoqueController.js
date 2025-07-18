@@ -1337,8 +1337,24 @@ class EstoqueController {
 
          doc.save(pdfPath);
 
+         const modoDocSaida = req.body.modoDocSaida || 'AUTO';
+         // Antes de salvar o PDF e incrementar a sequência, verificar se o termo é automático
+         // O termo automático segue o padrão sequencial do banco, enquanto o manual pode ser qualquer valor
+         // Supondo que o termo automático é sempre igual ao próximo da sequência
+         // Podemos identificar isso comparando doc_saida com o próximo termo esperado
+         // Para garantir, vamos receber do frontend um campo opcional: modoDocSaida ('AUTO' ou 'MANUAL')
+         // Se não vier, considerar 'AUTO' como padrão
+
+         // No início do método registrarSaida:
+         // const modoDocSaida = req.body.modoDocSaida || 'AUTO';
+
+         // Antes de await sequenciaModel.incrementarSequencia(new Date().getFullYear());
+         if (modoDocSaida === 'AUTO') {
+            await sequenciaModel.incrementarSequencia(new Date().getFullYear());
+         }
+
          console.log('Atualizando sequência...');
-         await sequenciaModel.incrementarSequencia(new Date().getFullYear());
+         // await sequenciaModel.incrementarSequencia(new Date().getFullYear());
 
          console.log('Enviando resposta de sucesso...');
          res.status(200).json({
@@ -1370,6 +1386,33 @@ class EstoqueController {
       } catch (error) {
          console.error('Erro ao buscar item pago pelo ID:', error);
          res.status(500).json({ error: 'Erro ao buscar item pago.' });
+      }
+   };
+
+   // Método para verificar se já existe um PDF com o número do termo informado
+   verificarTermoExistente = async (req, res) => {
+      try {
+         const { numero } = req.query;
+         if (!numero) {
+            return res.status(400).json({ existe: false, error: 'Número do termo não informado.' });
+         }
+         // Extrair ano do termo (últimos 4 dígitos)
+         const match = numero.match(/-(\d{4})$/);
+         if (!match) {
+            return res.status(400).json({ existe: false, error: 'Formato do termo inválido.' });
+         }
+         const ano = match[1];
+         // Montar o caminho da pasta do ano
+         const pastaAno = `G:/Meu Drive/SERVIDOR_CEGPA/2. NUCPA/TERMOS RESPONSABILIDADE/${ano} TR SISTEMA NOVO`;
+         // Procurar arquivos que começam com 'Termo_<numero>' e terminam com '.pdf'
+         let existe = false;
+         if (fs.existsSync(pastaAno)) {
+            const arquivos = fs.readdirSync(pastaAno);
+            existe = arquivos.some(nome => nome.startsWith(`Termo_${numero}`) && nome.endsWith('.pdf'));
+         }
+         return res.json({ existe });
+      } catch (error) {
+         return res.status(500).json({ existe: false, error: 'Erro ao verificar termo.' });
       }
    };
 

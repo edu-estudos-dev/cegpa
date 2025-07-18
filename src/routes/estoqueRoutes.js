@@ -88,4 +88,7 @@ router.get('/fetch-info-tombo', estoqueController.fetchInfoTombo);
 // Rota para API de auditoria (JSON)
 router.get('/auditoria/api/tombo/:tombo', estoqueController.historicoAuditoriaTomboAPI);
 
+// Rota para verificar se já existe um PDF com o número do termo informado
+router.get('/verificar-termo-existente', estoqueController.verificarTermoExistente);
+
 export default router;

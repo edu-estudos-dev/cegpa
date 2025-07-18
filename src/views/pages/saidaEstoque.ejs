@@ -175,8 +175,14 @@
                   <div class="col-md-4">
                      <div id="doc_saida-div">
                         <label class="form-label fw-bold">Termo de Responsabilidade</label>
-                        <input style="background-color: var(secondary-color) !important;" name="doc_saida"
-                           id="doc_saida" type="text" class="form-control mb-2" readonly disabled>
+                        <div class="input-group mb-2">
+                           <input style="background-color: var(secondary-color) !important;" name="doc_saida"
+                              id="doc_saida" type="text" class="form-control" readonly disabled>
+                           <select id="modo_doc_saida" class="form-select" style="max-width: 120px;">
+                              <option value="AUTO" selected>Automático</option>
+                              <option value="MANUAL">Manual</option>
+                           </select>
+                        </div>
                      </div>
                   </div>
                   <div class="col-md-4">
@@ -282,6 +288,28 @@
          </div>
       </div>
 
+      <!-- Modal para entrada manual do número do termo -->
+      <div class="modal fade" id="modalDocSaidaManual" tabindex="-1" aria-labelledby="modalDocSaidaManualLabel" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title" id="modalDocSaidaManualLabel">Definir Número do Termo Manualmente</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+               </div>
+               <div class="modal-body">
+                  <label for="inputNumeroDocSaidaManual" class="form-label fw-bold">Número do Termo</label>
+                  <input type="number" class="form-control mb-2" id="inputNumeroDocSaidaManual" placeholder="Ex: 173">
+                  <label for="inputAnoDocSaidaManual" class="form-label fw-bold">Ano</label>
+                  <input type="number" class="form-control" id="inputAnoDocSaidaManual" placeholder="Ex: 2025" min="2000" max="2100">
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <button type="button" class="btn btn-primary" id="confirmarDocSaidaManual">Confirmar</button>
+               </div>
+            </div>
+         </div>
+      </div>
+
       <!-- Scripts necessários para o modal -->
       <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
          integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
@@ -296,9 +324,16 @@
             // Estado da aplicação
             let currentDocSaida = null;
             let startCheckbox = null;
+            let modoDocSaida = 'AUTO';
+            let docSaidaManual = null;
       
             // Elementos DOM
             const docSaidaInput = document.getElementById('doc_saida');
+            const modoDocSaidaSelect = document.getElementById('modo_doc_saida');
+            const modalDocSaidaManual = new bootstrap.Modal(document.getElementById('modalDocSaidaManual'));
+            const inputNumeroDocSaidaManual = document.getElementById('inputNumeroDocSaidaManual');
+            const inputAnoDocSaidaManual = document.getElementById('inputAnoDocSaidaManual');
+            const confirmarDocSaidaManualBtn = document.getElementById('confirmarDocSaidaManual');
             const tombosList = document.getElementById('tombos-list');
             const selectedTombos = document.getElementById('selected-tombos');
       
@@ -462,7 +497,8 @@
                      mf_recebedor: document.getElementById('mf_recebedor').value.trim(),
                      tel_recebedor: document.getElementById('tel_recebedor').value.trim(),
                      nome_do_recebedor: document.getElementById('nome_do_recebedor').value.trim(),
-                     observacao: document.getElementById('observacao').value.trim()
+                     observacao: document.getElementById('observacao').value.trim(),
+                     modoDocSaida: modoDocSaida // <-- incluir aqui
                   };
       
                   const response = await fetch('/saida', {
@@ -600,6 +636,75 @@
             };
                   
             document.getElementById('clearSearch').addEventListener('click', clearSearch);
+
+            // Função para verificar se já existe PDF com o termo informado
+            async function verificarTermoExistente(termoCompleto) {
+               try {
+                  const response = await fetch(`/verificar-termo-existente?numero=${encodeURIComponent(termoCompleto)}`);
+                  const data = await response.json();
+                  return data.existe;
+               } catch (error) {
+                  return false;
+               }
+            }
+      
+            // SweetAlert customizado
+            function sweetAlertTermoExistente(termoCompleto) {
+               Swal.fire({
+                  icon: 'warning',
+                  title: 'Termo já existe!',
+                  html: `Já existe um termo com o número <b>${termoCompleto}</b>.<br>Recomenda-se apagar o arquivo antigo na pasta de PDFs se deseja refazer este termo.`,
+                  showCancelButton: true,
+                  confirmButtonText: 'Ver Termo Antigo',
+                  cancelButtonText: 'Cancelar',
+                  focusCancel: true
+               }).then((result) => {
+                  if (result.isConfirmed) {
+                     window.open(`/pdfs/Termo_${termoCompleto}.pdf`, '_blank');
+                  }
+               });
+            }
+      
+            // Alternar modo do termo
+            modoDocSaidaSelect.addEventListener('change', async function () {
+               modoDocSaida = this.value;
+               if (modoDocSaida === 'MANUAL') {
+                  docSaidaInput.value = '';
+                  currentDocSaida = '';
+                  inputNumeroDocSaidaManual.value = '';
+                  // Preencher ano atual
+                  const anoAtual = new Date().getFullYear();
+                  inputAnoDocSaidaManual.value = anoAtual;
+                  modalDocSaidaManual.show();
+               } else {
+                  docSaidaManual = null;
+                  await gerarTermoResponsabilidade();
+               }
+            });
+      
+            // Confirmar número manual do termo
+            confirmarDocSaidaManualBtn.addEventListener('click', async function () {
+               const numero = inputNumeroDocSaidaManual.value.trim();
+               const ano = inputAnoDocSaidaManual.value.trim();
+               if (!numero || !ano) {
+                  Swal.fire({ icon: 'error', title: 'Preencha o número e o ano do termo!' });
+                  return;
+               }
+               // Montar termo no padrão NNNNN-AAAA
+               const numeroFormatado = numero.padStart(5, '0');
+               const termoCompleto = `${numeroFormatado}-${ano}`;
+               // Verificar existência
+               const existe = await verificarTermoExistente(termoCompleto);
+               if (existe) {
+                  sweetAlertTermoExistente(termoCompleto);
+                  return;
+               }
+               // Se não existe, usar o termo manual
+               docSaidaInput.value = termoCompleto;
+               currentDocSaida = termoCompleto;
+               docSaidaManual = termoCompleto;
+               modalDocSaidaManual.hide();
+            });
          });
       </script>
    </body>
