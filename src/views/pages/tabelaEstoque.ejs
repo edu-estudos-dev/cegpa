@@ -246,7 +246,7 @@
                      <% estoque.forEach(function(item) { %>
                         <tr>
                            <td class="py-1 align-middle text-center"><%= item.id %></td>
-                           <td class="py-1 align-middle text-center"><%= new Date(item.data_de_entrada).toLocaleDateString('pt-BR') %></td>
+                           <td class="py-1 text-center align-middle"><%= item.data_de_entrada_formatada %></td>
                            <td class="py-1 align-middle"><%= item.descricao %></td>
                            <td class="py-1 align-middle text-center"><%= item.tombo %></td>
                            <td class="py-1 align-middle text-center"><%= item.categoria %></td>
@@ -308,6 +308,14 @@
                cell.textContent = formatarMoeda(valor);
             }
          });
+
+         // Função para formatar a data
+         function formatarData(data) {
+            if (!data) return 'N/A';
+            const d = new Date(data);
+            if (isNaN(d.getTime())) return 'N/A';
+            return d.toLocaleDateString('pt-BR');
+         }
 
          // Script para o botão "Detalhes"
          const viewButtons = document.querySelectorAll('.btn-details');

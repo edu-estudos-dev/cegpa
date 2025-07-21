@@ -141,7 +141,23 @@ class EstoqueController {
    showItensNovos = async (req, res) => {
       try {
          const itensNovos = await estoqueModel.getAllItensNovos();
-         const userRole = req.user ? req.user.role : 'user'; // Extrai o role ou usa 'user' como padrão
+         console.log('DEBUG - itensNovos do banco:', itensNovos.map(i => i.data_de_entrada));
+         itensNovos.forEach(item => {
+            if (item.data_de_entrada) {
+               const d = new Date(item.data_de_entrada);
+               // Garante formato 'YYYY-MM-DD' se for válido
+               item.data_de_entrada = isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+            } else {
+               item.data_de_entrada = null;
+            }
+            if (item.data_de_entrada) {
+               const d = new Date(item.data_de_entrada);
+               item.data_de_entrada_formatada = isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString('pt-BR');
+            } else {
+               item.data_de_entrada_formatada = 'N/A';
+            }
+         });
+         const userRole = req.user ? req.user.role : 'user';
          res.render('tabelaItensNovos', { novos: itensNovos, userRole });
       } catch (error) {
          console.error('Erro ao carregar os itens novos:', error);
@@ -153,7 +169,21 @@ class EstoqueController {
    showItensUsados = async (req, res) => {
       try {
          const itensUsados = await estoqueModel.getAllItensUsados();
-         const userRole = req.user ? req.user.role : 'user'; // Extrai o role ou usa 'user' como padrão
+         itensUsados.forEach(item => {
+            if (item.data_de_entrada) {
+               const d = new Date(item.data_de_entrada);
+               item.data_de_entrada = isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+            } else {
+               item.data_de_entrada = null;
+            }
+            if (item.data_de_entrada) {
+               const d = new Date(item.data_de_entrada);
+               item.data_de_entrada_formatada = isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString('pt-BR');
+            } else {
+               item.data_de_entrada_formatada = 'N/A';
+            }
+         });
+         const userRole = req.user ? req.user.role : 'user';
          res.render('tabelaItensUsados', { usados: itensUsados, userRole });
       } catch (error) {
          console.error('Erro ao carregar os itens usados:', error);
@@ -178,7 +208,20 @@ class EstoqueController {
    getAllEstoque = async (req, res) => {
       try {
          const estoque = await estoqueModel.getAllEstoque();
-         console.log('req.session.user:', req.session.user); // Debug
+         estoque.forEach(item => {
+            if (item.data_de_entrada) {
+               const d = new Date(item.data_de_entrada);
+               item.data_de_entrada = isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+            } else {
+               item.data_de_entrada = null;
+            }
+            if (item.data_de_entrada) {
+               const d = new Date(item.data_de_entrada);
+               item.data_de_entrada_formatada = isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString('pt-BR');
+            } else {
+               item.data_de_entrada_formatada = 'N/A';
+            }
+         });
          res.status(200).render('tabelaEstoque', {
             estoque,
             userRole: req.session.user.role,
@@ -390,14 +433,15 @@ class EstoqueController {
          if (!item)
             return res.status(404).json({ error: 'Item não encontrado' });
 
-         // Formatar datas e valores
-         item.data_de_entrada = new Date(
-            item.data_de_entrada
-         ).toLocaleDateString('pt-BR');
-         item.valor = item.valor.toLocaleString('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-         });
+         // Garante que data_de_entrada seja string ISO (ou null)
+         if (item.data_de_entrada) {
+            const d = new Date(item.data_de_entrada);
+            item.data_de_entrada = isNaN(d.getTime()) ? null : d.toISOString();
+         } else {
+            item.data_de_entrada = null;
+         }
+         // Valor formatado pode ser útil, mas mantenha o valor original também
+         item.valor_formatado = item.valor ? Number(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
 
          res.json(item);
       } catch (error) {

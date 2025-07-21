@@ -439,6 +439,7 @@
                                                    <strong>MAT FUNCIONAL:</strong> ${item.mat_funcional} <br/>
                                                    <strong>TELEFONE:</strong> ${item.telefone} <br/>
                                                    <strong>OBSERVAÇÃO:</strong> ${item.observacao.toUpperCase() || 'N/A'} <br/>
+                                                   <strong>DATA DE ENTRADA:</strong> ${item.data_de_entrada ? new Date(item.data_de_entrada).toLocaleDateString('pt-BR') : 'N/A'} <br/>
                                                 </p>
                                              </div>
                                           </div>

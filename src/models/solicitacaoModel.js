@@ -73,21 +73,13 @@ class SolicitacaoModel {
    // método para buscar uma solicitação por ID
    getSolicitacaoById = async (id) => {
       try {
-         console.log(`[DEBUG] Executando consulta SQL para ID ${id}`);
          const [results] = await connection.execute(
             'SELECT * FROM solicitacaoaquisicao WHERE id = ?',
             [id]
          );
-         console.log(
-            `[DEBUG] Resultado da consulta para ID ${id}:`,
-            results[0]
-         );
+
          return results[0] || null;
       } catch (error) {
-         console.error(
-            `[ERROR] Erro ao buscar solicitação por ID ${id}:`,
-            error
-         );
          throw error;
       }
    };
