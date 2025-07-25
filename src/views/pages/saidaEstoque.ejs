@@ -319,14 +319,14 @@
       </script>
 
       <!-- Scripts para buscar e registrar saída -->
-      <script>
+       <script>
          document.addEventListener('DOMContentLoaded', function () {
             // Estado da aplicação
             let currentDocSaida = null;
             let startCheckbox = null;
             let modoDocSaida = 'AUTO';
             let docSaidaManual = null;
-      
+
             // Elementos DOM
             const docSaidaInput = document.getElementById('doc_saida');
             const modoDocSaidaSelect = document.getElementById('modo_doc_saida');
@@ -336,29 +336,29 @@
             const confirmarDocSaidaManualBtn = document.getElementById('confirmarDocSaidaManual');
             const tombosList = document.getElementById('tombos-list');
             const selectedTombos = document.getElementById('selected-tombos');
-      
+
             // Funções auxiliares
             const showAlert = (message) => {
                const errorMessage = document.getElementById('errorMessage');
                errorMessage.innerHTML = `
                   <div class="alert alert-danger alert-dismissible" role="alert">
-                      ${message}
-                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                     ${message}
+                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>`;
                new bootstrap.Modal(document.getElementById('errorModal')).show();
             };
-      
+
             const formatarTelefone = (value) => {
                value = value.replace(/\D/g, '');
                if (value.length > 11) value = value.slice(0, 11);
                return value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
             };
-      
+
             const formatarMatricula = (value) => {
                let cleaned = value.replace(/[^\dX]/gi, '');
                let digits = [];
                let xChars = [];
-      
+
                for (let char of cleaned) {
                   if (char.toUpperCase() === 'X') {
                      xChars.push(char);
@@ -366,13 +366,13 @@
                      digits.push(char);
                   }
                }
-      
+
                let mainDigits = digits.slice(0, 7).join('');
                let lastChar = xChars.length > 0 ? 'X' : digits.slice(7, 8)[0] || '';
                let formatted = (mainDigits + lastChar).slice(0, 8);
                return formatted.replace(/(\d{3})(\d{3})(\d{1})([\dX])/i, '$1.$2-$3-$4').toUpperCase();
             };
-      
+
             const formatarReferencia = (value) => {
                value = value.replace(/\D/g, '');
                value = value.slice(0, 20);
@@ -384,12 +384,12 @@
                ];
                return `NUP ${parts[0]}${parts[1] ? `.${parts[1]}` : ''}${parts[2] ? `/${parts[2]}` : ''}${parts[3] ? `-${parts[3]}` : ''}`;
             };
-      
+
             const gerarTermoResponsabilidade = async () => {
                try {
                   const response = await fetch('/gerar-termo');
                   if (!response.ok) throw new Error('Falha na geração do termo');
-      
+
                   const { doc_saida } = await response.json();
                   currentDocSaida = doc_saida;
                   docSaidaInput.value = doc_saida;
@@ -399,12 +399,12 @@
                   return false;
                }
             };
-      
+
             // Carrega o termo ao iniciar a página
             (async () => {
                await gerarTermoResponsabilidade();
             })();
-      
+
             const validarFormulario = () => {
                const camposObrigatorios = {
                   referencia: 'Referência (NUP)',
@@ -414,26 +414,26 @@
                   tel_recebedor: 'Telefone',
                   nome_do_recebedor: 'Nome do Recebedor'
                };
-      
+
                const erros = [];
-      
+
                if (document.querySelectorAll('#tombos-list input:checked').length === 0) {
                   erros.push('Selecione pelo menos um item do estoque');
                }
-      
+
                for (const [id, nome] of Object.entries(camposObrigatorios)) {
                   if (!document.getElementById(id).value.trim()) {
                      erros.push(`${nome} é obrigatório`);
                   }
                }
-      
+
                return erros;
             };
-      
+
             tombosList.addEventListener('click', (event) => {
                let checkbox;
                const target = event.target;
-      
+
                if (target.tagName === 'LABEL' && target.htmlFor) {
                   checkbox = document.getElementById(target.htmlFor);
                } else if (target.tagName === 'INPUT' && target.type === 'checkbox') {
@@ -441,14 +441,14 @@
                } else {
                   return;
                }
-      
+
                const checkboxes = Array.from(tombosList.querySelectorAll('input[type="checkbox"]'));
-      
+
                if (event.shiftKey && startCheckbox) {
                   const startIndex = checkboxes.indexOf(startCheckbox);
                   const endIndex = checkboxes.indexOf(checkbox);
                   const [start, end] = [Math.min(startIndex, endIndex), Math.max(startIndex, endIndex)];
-      
+
                   const isChecked = startCheckbox.checked;
                   for (let i = start; i <= end; i++) {
                      checkboxes[i].checked = isChecked;
@@ -459,11 +459,11 @@
                   atualizarItemSelecionado(checkbox);
                }
             });
-      
+
             const atualizarItemSelecionado = (checkbox) => {
                const item = checkbox.closest('div').querySelector('label').textContent;
                const listItem = document.getElementById(`selected-${checkbox.value}`);
-      
+
                if (checkbox.checked) {
                   if (!listItem) {
                      const li = document.createElement('li');
@@ -477,17 +477,17 @@
                   listItem.remove();
                }
             };
-      
+
             document.getElementById('submit-btn').addEventListener('click', async (e) => {
                e.preventDefault();
-      
+
                try {
                   const erros = validarFormulario();
                   if (erros.length > 0) {
                      showAlert(erros.join('<br>'));
                      return;
                   }
-      
+
                   const formData = {
                      tombos: Array.from(document.querySelectorAll('#tombos-list input:checked')).map(i => i.value),
                      doc_saida: currentDocSaida,
@@ -498,19 +498,19 @@
                      tel_recebedor: document.getElementById('tel_recebedor').value.trim(),
                      nome_do_recebedor: document.getElementById('nome_do_recebedor').value.trim(),
                      observacao: document.getElementById('observacao').value.trim(),
-                     modoDocSaida: modoDocSaida // <-- incluir aqui
+                     modoDocSaida: modoDocSaida
                   };
-      
+
                   const response = await fetch('/saida', {
                      method: 'POST',
                      headers: { 'Content-Type': 'application/json' },
                      body: JSON.stringify(formData)
                   });
-      
+
                   const result = await response.json();
-      
+
                   if (!response.ok) throw new Error(result.error || 'Erro desconhecido');
-      
+
                   window.open(result.pdfPath, '_blank');
                   location.reload(); // Recarrega para mostrar o próximo número
                } catch (error) {
@@ -518,43 +518,53 @@
                   showAlert(error.message);
                }
             });
-      
+
             document.getElementById('tel_recebedor').addEventListener('input', (e) => {
                e.target.value = formatarTelefone(e.target.value);
             });
-      
+
             document.getElementById('mf_recebedor').addEventListener('input', (e) => {
                e.target.value = formatarMatricula(e.target.value);
             });
-      
+
             document.getElementById('referencia').addEventListener('input', (e) => {
                e.target.value = formatarReferencia(e.target.value);
             });
-      
+
             const searchAndHighlight = () => {
                const searchInput = document.getElementById('searchInput');
                const searchValue = searchInput.value.trim().toLowerCase().replace(/\s+/g, ' ');
                const tombosContainer = document.getElementById('tombos-container');
                const tomboItems = document.querySelectorAll('#tombos-list .form-check');
-      
+
+               // Função para remover acentos
+               const removerAcentos = (str) => {
+                  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+               };
+
+               // Normaliza o termo de busca removendo acentos
+               const normalizedSearchValue = removerAcentos(searchValue);
+
+               // Limpa destaques anteriores
                tomboItems.forEach(item => {
                   item.classList.remove('tombo-highlighted');
                });
-      
-               if (searchValue === '') {
+
+               if (normalizedSearchValue === '') {
                   alert('Por favor, digite um valor para pesquisar.');
                   return;
                }
-      
+
                let foundItem = null;
                tomboItems.forEach(item => {
-                  const label = item.querySelector('label').textContent.toLowerCase().replace(/\s+/g, ' ');
+                  // Normaliza o texto do label removendo acentos
+                  const label = removerAcentos(item.querySelector('label').textContent.toLowerCase().replace(/\s+/g, ' '));
                   const tomboMatch = label.match(/tombo:\s*(\d+)/);
                   if (tomboMatch && tomboMatch[1] === searchValue) {
                      foundItem = item;
                   }
                });
-      
+
                if (foundItem) {
                   foundItem.classList.add('tombo-highlighted');
                   const containerRect = tombosContainer.getBoundingClientRect();
@@ -568,22 +578,23 @@
                   let firstMatch = null;
                   const matchingItems = [];
                   tomboItems.forEach(item => {
-                     const label = item.querySelector('label').textContent.toLowerCase().replace(/\s+/g, ' ');
+                     // Normaliza o texto do label removendo acentos
+                     const label = removerAcentos(item.querySelector('label').textContent.toLowerCase().replace(/\s+/g, ' '));
                      const parts = label.split(' - ');
                      if (parts.length >= 3) {
                         const descricaoPart = parts[1].trim();
-                        if (descricaoPart.includes(searchValue)) {
+                        if (descricaoPart.includes(normalizedSearchValue)) {
                            matchingItems.push(item);
                            if (!firstMatch) firstMatch = item;
                         }
                      }
                   });
-      
+
                   if (matchingItems.length > 0 && firstMatch) {
                      matchingItems.forEach(item => {
                         item.classList.add('tombo-highlighted');
                      });
-      
+
                      const containerRect = tombosContainer.getBoundingClientRect();
                      const itemRect = firstMatch.getBoundingClientRect();
                      const scrollPosition = itemRect.top - containerRect.top + tombosContainer.scrollTop - (containerRect.height / 2) + (itemRect.height / 2);
@@ -596,13 +607,14 @@
                   }
                }
             };
-      
+
             document.getElementById('searchBtn').addEventListener('click', searchAndHighlight);
             document.getElementById('searchInput').addEventListener('keypress', (e) => {
                if (e.key === 'Enter') {
                   searchAndHighlight();
                }
             });
+
             const clearSearch = () => {
                const searchInput = document.getElementById('searchInput');
                searchInput.value = '';
@@ -634,7 +646,7 @@
                document.getElementById('tel_recebedor').value = ''; // Telefone
                document.getElementById('nome_do_recebedor').value = ''; // Nome Completo
             };
-                  
+
             document.getElementById('clearSearch').addEventListener('click', clearSearch);
 
             // Função para verificar se já existe PDF com o termo informado
@@ -647,7 +659,7 @@
                   return false;
                }
             }
-      
+
             // SweetAlert customizado
             function sweetAlertTermoExistente(termoCompleto) {
                Swal.fire({
@@ -664,7 +676,7 @@
                   }
                });
             }
-      
+
             // Alternar modo do termo
             modoDocSaidaSelect.addEventListener('change', async function () {
                modoDocSaida = this.value;
@@ -681,7 +693,7 @@
                   await gerarTermoResponsabilidade();
                }
             });
-      
+
             // Confirmar número manual do termo
             confirmarDocSaidaManualBtn.addEventListener('click', async function () {
                const numero = inputNumeroDocSaidaManual.value.trim();
@@ -707,5 +719,6 @@
             });
          });
       </script>
+    
    </body>
 </html>
