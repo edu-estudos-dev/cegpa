@@ -76,6 +76,8 @@ router.get('/relatorio/itens-pagos', estoqueController.generatePDFItensPagos);
 
 router.get('/relatorio/quantidade-disponivel', estoqueController.generatePDFQuantidadeDisponivel);
 
+router.get('/tabela/tombamento', estoqueController.listarTombamento);
+
 // Rota para reverter um item que já foi pago (apenas admin)
 router.delete('/reverter-saida/:id', isAuthenticated, checkRole(['admin']), estoqueController.reverterSaida);
 
@@ -90,5 +92,13 @@ router.get('/auditoria/api/tombo/:tombo', estoqueController.historicoAuditoriaTo
 
 // Rota para verificar se já existe um PDF com o número do termo informado
 router.get('/verificar-termo-existente', estoqueController.verificarTermoExistente);
+
+router.get('/tabela/tombamento', estoqueController.listarTombamento);
+
+router.get('/tombamento/visualizar/:id', estoqueController.visualizarTombamento);
+router.get('/tombamento/editar/:id', estoqueController.editarTombamento);
+
+router.delete('/tombamento/excluir/:id', estoqueController.excluirTombamento);
+router.get('/relatorio/tombamento', estoqueController.gerarRelatorioTombamento);
 
 export default router;

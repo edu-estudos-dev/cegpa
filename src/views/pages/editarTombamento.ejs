@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+   <%- include('../partials/head', { title: 'Editar Tombamento' }) %>
+   <style>
+      * {
+         margin: 0;
+         padding: 0;
+      }
+
+      body {
+         display: flex;
+         align-items: center;
+         padding-top: 2.5rem;
+      }
+
+      .w-10 {
+         width: 9%;
+      }
+
+      .w-95 {
+         width: 95%;
+      }
+
+      @media (max-width: 1366px) {
+         * {
+            font-size: 0.83rem;
+         }
+
+         .caixa-externa {
+            margin: 0 auto;
+         }
+
+         .w-10 {
+            width: 12%;
+         }
+      }
+   </style>
+</head>
+
+<body>
+   <%- include('../partials/header') %>
+   <div class="caixa w-95 p-4 mx-auto">
+      <div class="border caixa-externa p-4 shadow-sm rounded">
+         <form id="formulario-edicao" action="/tombamento/atualizar/<%= item.id %>" method="post">
+            <input id="id" type="hidden" name="id" value="<%= item.id %>">
+
+            <div class="row align-items-center mb-3 px-3">
+               <h2 style="border-bottom: 4px solid orange;" class="text-white py-2 mt-0 fw-bold bg-success text-center">Editar Tombamento</h2>
+            </div>
+
+            <!-- Linha 1: Campos principais -->
+            <div id="row1" class="row">
+               <div class="col-md-2">
+                  <div id="data_de_entrada-div" class="mb-3">
+                     <label class="form-label fw-bold">Data de Entrada</label>
+                     <input id="data_de_entrada" type="date" class="form-control" name="data_de_entrada" value="<%= item.data_de_entrada ? item.data_de_entrada.split('T')[0] : '' %>">
+                  </div>
+               </div>
+
+               <div class="col-md-1">
+                  <div id="qtd-div" class="mb-3">
+                     <label class="form-label fw-bold">Quantidade</label>
+                     <input id="qtd" type="number" class="form-control" name="quantidade_visible" min="1" value="<%= item.quantidade || 1 %>" readonly>
+                     <input id="quantidade_hidden" type="hidden" name="quantidade" value="<%= item.quantidade || 1 %>">
+                  </div>
+               </div>
+
+               <div class="col-md-2">
+                  <div id="tipo_tombo-div" class="mb-3">
+                     <label class="form-label fw-bold">Tipo de Tombo</label>
+                     <select id="tipo_tombo" class="form-select" name="tipo_tombo" disabled>
+                        <option value="AUTO" <%= item.tipo_tombo === 'AUTO' ? 'selected' : '' %>>Automático</option>
+                        <option value="LOTE_MANUAL" <%= item.tipo_tombo === 'LOTE_MANUAL' ? 'selected' : '' %>>Manual</option>
+                        <option value="LOTE" <%= item.tipo_tombo === 'LOTE' ? 'selected' : '' %>>Lote</option>
+                     </select>
+                  </div>
+               </div>
+
+               <div class="col-md-1">
+                  <div id="tombo_inicial-div" class="mb-3">
+                     <label class="form-label fw-bold">Tombo Inicial</label>
+                     <input id="tombo_inicial" type="text" class="form-control" name="tombo_inicial" value="<%= item.tombo || '' %>" readonly>
+                  </div>
+                  <input id="tombo_lote_manual" type="hidden" name="tombo_lote_manual" value="<%= item.tipo_tombo === 'LOTE_MANUAL' ? JSON.stringify(item.tombo_lote_manual || []) : '' %>">
+                  <input id="tombo_final" type="hidden" name="tombo_final" value="<%= item.tombo_final || '' %>">
+               </div>
+
+               <div class="col-md-3">
+                  <div id="categoria-div" class="mb-3">
+                     <label class="form-label fw-bold">Categoria</label>
+                     <select id="categoria" class="form-select" name="categoria">
+                        <option value="Selecione uma categoria..." <%= !item.categoria ? 'selected' : '' %>>Selecione uma categoria...</option>
+                        <option value="mesa" <%= item.categoria === 'mesa' ? 'selected' : '' %>>MESA</option>
+                        <option value="ar-condicionado" <%= item.categoria === 'ar-condicionado' ? 'selected' : '' %>>AR-CONDICIONADO</option>
+                        <option value="automovel" <%= item.categoria === 'automovel' ? 'selected' : '' %>>AUTOMÓVEL</option>
+                        <option value="bicicleta" <%= item.categoria === 'bicicleta' ? 'selected' : '' %>>BICICLETA</option>
+                        <option value="tv" <%= item.categoria === 'tv' ? 'selected' : '' %>>TV</option>
+                        <option value="cadeira" <%= item.categoria === 'cadeira' ? 'selected' : '' %>>CADEIRA</option>
+                        <option value="gaveteiro" <%= item.categoria === 'gaveteiro' ? 'selected' : '' %>>GAVETEIRO</option>
+                        <option value="armario" <%= item.categoria === 'armario' ? 'selected' : '' %>>ARMÁRIO</option>
+                        <option value="estante" <%= item.categoria === 'estante' ? 'selected' : '' %>>ESTANTE</option>
+                        <option value="desktop" <%= item.categoria === 'desktop' ? 'selected' : '' %>>DESKTOP</option>
+                        <option value="arquivo" <%= item.categoria === 'arquivo' ? 'selected' : '' %>>ARQUIVO</option>
+                        <option value="beliche" <%= item.categoria === 'beliche' ? 'selected' : '' %>>BELICHE</option>
+                        <option value="lousa" <%= item.categoria === 'lousa' ? 'selected' : '' %>>LOUSA</option>
+                        <option value="monitor" <%= item.categoria === 'monitor' ? 'selected' : '' %>>MONITOR</option>
+                        <option value="mobiliário" <%= item.categoria === 'mobiliário' ? 'selected' : '' %>>MOBILIÁRIO EM GERAL</option>
+                        <option value="esportes" <%= item.categoria === 'esportes' ? 'selected' : '' %>>ESPORTES</option>
+                        <option value="multimidia" <%= item.categoria === 'multimidia' ? 'selected' : '' %>>MULTIMIDIA</option>
+                     </select>
+                  </div>
+               </div>
+
+               <div class="col-md-3">
+                  <div id="doc_origem-div" class="mb-3">
+                     <label class="form-label fw-bold">Documento de Origem</label>
+                     <input id="doc_origem" type="text" class="form-control" placeholder="Nota Fiscal, Termo de Doação, etc..." name="doc_origem" value="<%= item.doc_origem || '' %>">
+                  </div>
+               </div>
+            </div>
+
+            <!-- Linha 2: Valor, Descrição e Conservação -->
+            <div id="row2" class="row">
+               <div class="col-md-2">
+                  <div class="mb-3">
+                     <label class="form-label fw-bold">Valor Unitário</label>
+                     <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input id="valor" type="number" class="form-control" name="valor" step="0.01" value="<%= item.valor || '' %>">
+                     </div>
+                  </div>
+               </div>
+
+               <div class="col-md-7">
+                  <div id="observacao-div" class="mb-3">
+                     <label class="form-label fw-bold">Descrição</label>
+                     <input placeholder="Descreva o item em detalhes." id="descricao" name="descricao" type="text" class="form-control" value="<%= item.descricao || '' %>">
+                  </div>
+               </div>
+
+               <div class="col-md-3">
+                  <div id="situacao-div" class="mb-3">
+                     <label class="form-label fw-bold">Estado de Conservação</label>
+                     <select id="situacao" class="form-select" name="situacao">
+                        <option value="Escolha uma opção..." <%= !item.situacao ? 'selected' : '' %>>Escolha uma opção...</option>
+                        <option value="novo" <%= item.situacao === 'novo' ? 'selected' : '' %>>Novo</option>
+                        <option value="otimo" <%= item.situacao === 'otimo' ? 'selected' : '' %>>Ótimo</option>
+                        <option value="bom" <%= item.situacao === 'bom' ? 'selected' : '' %>>Bom</option>
+                        <option value="regular" <%= item.situacao === 'regular' ? 'selected' : '' %>>Regular</option>
+                        <option value="ruim" <%= item.situacao === 'ruim' ? 'selected' : '' %>>Ruim</option>
+                        <option value="inservivel" <%= item.situacao === 'inservivel' ? 'selected' : '' %>>Inservível</option>
+                     </select>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Linha 3: Conta Contábil, Local de Estoque e Destino dos Dados -->
+            <div id="row3" class="row">
+               <div class="col-md-3">
+                  <div id="conta_contabil-div" class="mb-3">
+                     <label class="form-label fw-bold">Conta Contábil</label>
+                     <select id="conta_contabil" class="form-select" name="conta_contabil">
+                        <option value="Escolha uma opção..." <%= !item.conta_contabil ? 'selected' : '' %>>Escolha uma opção...</option>
+                        <option value="medicao" <%= item.conta_contabil === 'medicao' ? 'selected' : '' %>>APARELHOS DE MEDIÇÃO E ORIENTAÇÃO</option>
+                        <option value="aeronaves" <%= item.conta_contabil === 'aeronaves' ? 'selected' : '' %>>AERONAVES</option>
+                        <option value="almoxarifado" <%= item.conta_contabil === 'almoxarifado' ? 'selected' : '' %>>ALMOXARIFADO DE MATERIAIS A SEREM APLICADOS EM BENS EM ANDAMENTO</option>
+                        <option value="comunicacao" <%= item.conta_contabil === 'comunicacao' ? 'selected' : '' %>>APARELHOS E EQUIPAMENTOS DE COMUNICAÇÃO</option>
+                        <option value="esportes" <%= item.conta_contabil === 'esportes' ? 'selected' : '' %>>APARELHOS E EQUIPAMENTOS PARA ESPORTES E DIVERSÕES</option>
+                        <option value="domesticos" <%= item.conta_contabil === 'domesticos' ? 'selected' : '' %>>APARELHOS E UTENSÍLIOS DOMÉSTICOS</option>
+                        <option value="medicos" <%= item.conta_contabil === 'medicos' ? 'selected' : '' %>>APARELHOS, EQUIPAMENTOS E UTENSÍLIOS MÉDICOS, ODONTOLÓGICOS, LABORATORIAIS E HOSPITALARES</option>
+                        <option value="armamentos" <%= item.conta_contabil === 'armamentos' ? 'selected' : '' %>>ARMAMENTOS</option>
+                        <option value="poder_outro" <%= item.conta_contabil === 'poder_outro' ? 'selected' : '' %>>BENS EM PODER DE OUTRA UNIDADE OU TERCEIROS</option>
+                        <option value="alienar" <%= item.conta_contabil === 'alienar' ? 'selected' : '' %>>BENS MÓVEIS A ALIENAR</option>
+                        <option value="classificar" <%= item.conta_contabil === 'classificar' ? 'selected' : '' %>>BENS MÓVEIS A CLASSIFICAR</option>
+                        <option value="reparar" <%= item.conta_contabil === 'reparar' ? 'selected' : '' %>>BENS MÓVEIS A REPARAR</option>
+                        <option value="movel_elaboracao" <%= item.conta_contabil === 'movel_elaboracao' ? 'selected' : '' %>>BENS MÓVEIS EM ELABORAÇÃO</option>
+                        <option value="inserviveis" <%= item.conta_contabil === 'inserviveis' ? 'selected' : '' %>>BENS MÓVEIS INSERVÍVEIS</option>
+                        <option value="combate" <%= item.conta_contabil === 'combate' ? 'selected' : '' %>>CARROS DE COMBATE</option>
+                        <option value="colecoes" <%= item.conta_contabil === 'colecoes' ? 'selected' : '' %>>COLEÇÕES E MATERIAIS BIBLIOGRÁFICOS</option>
+                        <option value="discotecas" <%= item.conta_contabil === 'discotecas' ? 'selected' : '' %>>DISCOTECAS E FILMOTECAS</option>
+                        <option value="embarcacoes" <%= item.conta_contabil === 'embarcacoes' ? 'selected' : '' %>>EMBARCAÇÕES</option>
+                        <option value="protecao" <%= item.conta_contabil === 'protecao' ? 'selected' : '' %>>EQUIPAMENTO DE PROTEÇÃO, SEGURANÇA E SOCORRO</option>
+                        <option value="manobras" <%= item.conta_contabil === 'manobras' ? 'selected' : '' %>>EQUIPAMENTOS DE MANOBRAS E PATRULHAMENTO</option>
+                        <option value="mergulho" <%= item.conta_contabil === 'mergulho' ? 'selected' : '' %>>EQUIPAMENTOS DE MERGULHO E SALVAMENTO</option>
+                        <option value="montaria" <%= item.conta_contabil === 'montaria' ? 'selected' : '' %>>EQUIPAMENTOS DE MONTARIA</option>
+                        <option value="dados" <%= item.conta_contabil === 'dados' ? 'selected' : '' %>>EQUIPAMENTOS DE PROCESSAMENTO DE DADOS</option>
+                        <option value="vigilancia" <%= item.conta_contabil === 'vigilancia' ? 'selected' : '' %>>EQUIPAMENTOS DE PROTEÇÃO E VIGILÂNCIA AMBIENTAL</option>
+                        <option value="tecnologia" <%= item.conta_contabil === 'tecnologia' ? 'selected' : '' %>>EQUIPAMENTOS DE TECNOLOGIA DA INFORMAÇÃO</option>
+                        <option value="sigiloso" <%= item.conta_contabil === 'sigiloso' ? 'selected' : '' %>>EQUIPAMENTOS E MATERIAL SIGILOSO E RESERVADO</option>
+                        <option value="hidraulicos" <%= item.conta_contabil === 'hidraulicos' ? 'selected' : '' %>>EQUIPAMENTOS HIDRÁULICOS E ELÉTRICOS</option>
+                        <option value="audio_video" <%= item.conta_contabil === 'audio_video' ? 'selected' : '' %>>EQUIPAMENTOS PARA ÁUDIO, VÍDEO E FOTO</option>
+                        <option value="aeronauticos" <%= item.conta_contabil === 'aeronauticos' ? 'selected' : '' %>>EQUIPAMENTOS, PEÇAS E ACESSÓRIOS AERONÁUTICOS</option>
+                        <option value="protecao_voo" <%= item.conta_contabil === 'protecao_voo' ? 'selected' : '' %>>EQUIPAMENTOS, PEÇAS E ACESSÓRIOS DE PROTEÇÃO AO VOO</option>
+                        <option value="maritimos" <%= item.conta_contabil === 'maritimos' ? 'selected' : '' %>>EQUIPAMENTOS, PEÇAS E ACESSÓRIOS MARÍTIMOS</option>
+                        <option value="automoveis" <%= item.conta_contabil === 'automoveis' ? 'selected' : '' %>>EQUIPAMENTOS, PEÇAS E ACESSÓRIOS PARA AUTOMÓVEIS</option>
+                        <option value="estoque_interno" <%= item.conta_contabil === 'estoque_interno' ? 'selected' : '' %>>ESTOQUE INTERNO</option>
+                        <option value="importacoes" <%= item.conta_contabil === 'importacoes' ? 'selected' : '' %>>IMPORTAÇÕES EM ANDAMENTO</option>
+                        <option value="instrumentos" <%= item.conta_contabil === 'instrumentos' ? 'selected' : '' %>>INSTRUMENTOS MUSICAIS E ARTÍSTICOS</option>
+                        <option value="energeticos" <%= item.conta_contabil === 'energeticos' ? 'selected' : '' %>>MÁQUINAS E EQUIPAMENTOS ENERGÉTICOS</option>
+                        <option value="graficos" <%= item.conta_contabil === 'graficos' ? 'selected' : '' %>>MÁQUINAS E EQUIPAMENTOS GRÁFICOS</option>
+                        <option value="industriais" <%= item.conta_contabil === 'industriais' ? 'selected' : '' %>>MÁQUINAS E EQUIPAMENTOS INDUSTRIAIS</option>
+                        <option value="escritorio" <%= item.conta_contabil === 'escritorio' ? 'selected' : '' %>>MÁQUINAS E UTENSÍLIOS DE ESCRITÓRIO</option>
+                        <option value="agropecuarios" <%= item.conta_contabil === 'agropecuarios' ? 'selected' : '' %>>MÁQUINAS, EQUIPAMENTOS E UTENSÍLIOS AGROPECUÁRIOS</option>
+                        <option value="rodoviarios" <%= item.conta_contabil === 'rodoviarios' ? 'selected' : '' %>>MÁQUINAS, EQUIPAMENTOS E UTENSÍLIOS RODOVIÁRIOS</option>
+                        <option value="oficina" <%= item.conta_contabil === 'oficina' ? 'selected' : '' %>>MÁQUINAS, FERRAMENTAS E UTENSÍLIOS DE OFICINA</option>
+                        <option value="mobiliario" <%= item.conta_contabil === 'mobiliario' ? 'selected' : '' %>>MOBILIÁRIO EM GERAL</option>
+                        <option value="obras_arte" <%= item.conta_contabil === 'obras_arte' ? 'selected' : '' %>>OBRAS DE ARTE E PEÇAS PARA EXPOSIÇÃO</option>
+                        <option value="outras_maquinas" <%= item.conta_contabil === 'outras_maquinas' ? 'selected' : '' %>>OUTRAS MÁQUINAS, APARELHOS, EQUIPAMENTOS E FERRAMENTAS</option>
+                        <option value="outros_bens" <%= item.conta_contabil === 'outros_bens' ? 'selected' : '' %>>OUTROS BENS MÓVEIS</option>
+                        <option value="outros_culturais" <%= item.conta_contabil === 'outros_culturais' ? 'selected' : '' %>>OUTROS MATERIAIS CULTURAIS, EDUCACIONAIS E DE COMUNICAÇÃO</option>
+                        <option value="pecas_reposicao" <%= item.conta_contabil === 'pecas_reposicao' ? 'selected' : '' %>>PEÇAS E CONJUNTOS DE REPOSIÇÃO</option>
+                        <option value="semoventes" <%= item.conta_contabil === 'semoventes' ? 'selected' : '' %>>SEMOVENTES</option>
+                        <option value="utensilios" <%= item.conta_contabil === 'utensilios' ? 'selected' : '' %>>UTENSÍLIOS EM GERAL</option>
+                        <option value="mecanica" <%= item.conta_contabil === 'mecanica' ? 'selected' : '' %>>VEÍCULOS DE TRAÇÃO MECÂNICA</option>
+                        <option value="veiculos_geral" <%= item.conta_contabil === 'veiculos_geral' ? 'selected' : '' %>>VEÍCULOS EM GERAL</option>
+                        <option value="ferroviarios" <%= item.conta_contabil === 'ferroviarios' ? 'selected' : '' %>>VEÍCULOS FERROVIÁRIOS</option>
+                     </select>
+                  </div>
+               </div>
+
+               <div class="col-md-3">
+                  <div id="estoque-div" class="mb-3">
+                     <label class="form-label fw-bold">Local de Estoque</label>
+                     <select id="estoque" class="form-select" name="estoque">
+                        <option value="Escolha uma opção..." <%= !item.estoque ? 'selected' : '' %>>Escolha uma opção...</option>
+                        <option value="galpao" <%= item.estoque === 'galpao' ? 'selected' : '' %>>ESTOQUE COLOG - GALPÃO</option>
+                        <option value="sala" <%= item.estoque === 'sala' ? 'selected' : '' %>>ESTOQUE COLOG - SALA</option>
+                        <option value="cabemce" <%= item.estoque === 'cabemce' ? 'selected' : '' %>>ESTOQUE COLOG - CABEMCE</option>
+                     </select>
+                  </div>
+               </div>
+
+               <div class="col-md-3">
+                  <div id="destino_dados-div" class="mb-3">
+                     <label class="form-label fw-bold">Destino dos Dados</label>
+                     <select id="destino_dados" class="form-select" name="destino_dados">
+                        <option value="estoqueatual" <%= item.destino_dados === 'estoqueatual' ? 'selected' : '' %>>Entrar no Estoque</option>
+                        <option value="registrodetombamento" <%= item.destino_dados === 'registrodetombamento' ? 'selected' : '' %>>Fazer Tombamento</option>
+                     </select>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Linha 4: Observação -->
+            <div id="row4" class="row">
+               <div class="col-md-12">
+                  <div id="observacao-div" class="mb-3">
+                     <label class="form-label fw-bold">Observação</label>
+                     <textarea id="observacao" type="text" class="form-control" name="observacao"><%= item.observacao || '' %></textarea>
+                  </div>
+               </div>
+            </div>
+
+            <div class="col-md-12 d-flex justify-content-center mt-4">
+               <button id="btnAtualizar" type="submit" class="w-10 btn btn-success mx-1">Atualizar Tombamento</button>
+               <button id="btnLimpar" type="button" class="w-10 btn btn-warning mx-1">Limpar</button>
+               <a href="/tabela/tombamento" class="w-10 btn btn-secondary mx-1">Voltar</a>
+            </div>
+         </form>
+
+         <!-- Modal de Alerta -->
+         <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h5 class="modal-title" id="errorModalLabel">Erro de Validação</h5>
+                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                     <p id="errorMessage"></p>
+                  </div>
+                  <div class="modal-footer">
+                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Scripts necessários para o modal -->
+   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+      integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+   <!-- Incluindo o SweetAlert2 via CDN -->
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+   <script>
+      // Função para limpar o formulário
+      function limparFormulario() {
+         // Resetar o formulário HTML
+         document.getElementById('formulario-edicao').reset();
+
+         // Definir valores iniciais específicos
+         document.getElementById('data_de_entrada').value = '<%= item.data_de_entrada ? item.data_de_entrada.split("T")[0] : "" %>';
+         document.getElementById('qtd').value = '<%= item.quantidade || 1 %>';
+         document.getElementById('quantidade_hidden').value = '<%= item.quantidade || 1 %>';
+         document.getElementById('tipo_tombo').value = '<%= item.tipo_tombo || "AUTO" %>';
+         document.getElementById('tombo_inicial').value = '<%= item.tombo || "" %>';
+         document.getElementById('tombo_lote_manual').value = '<%= item.tipo_tombo === "LOTE_MANUAL" ? JSON.stringify(item.tombo_lote_manual || []) : "" %>';
+         document.getElementById('tombo_final').value = '<%= item.tombo_final || "" %>';
+         document.getElementById('categoria').value = '<%= item.categoria || "Selecione uma categoria..." %>';
+         document.getElementById('doc_origem').value = '<%= item.doc_origem || "" %>';
+         document.getElementById('valor').value = '<%= item.valor || "" %>';
+         document.getElementById('descricao').value = '<%= item.descricao || "" %>';
+         document.getElementById('situacao').value = '<%= item.situacao || "Escolha uma opção..." %>';
+         document.getElementById('conta_contabil').value = '<%= item.conta_contabil || "Escolha uma opção..." %>';
+         document.getElementById('estoque').value = '<%= item.estoque || "Escolha uma opção..." %>';
+         document.getElementById('destino_dados').value = '<%= item.destino_dados || "registrodetombamento" %>';
+         document.getElementById('observacao').value = '<%= item.observacao || "" %>';
+      }
+
+      // Validação do formulário e envio assíncrono
+      document.getElementById('formulario-edicao').addEventListener('submit', async function (event) {
+         event.preventDefault();
+
+         const dataEntrada = document.getElementById('data_de_entrada').value;
+         const quantidade = document.getElementById('qtd').value;
+         const categoria = document.getElementById('categoria').value;
+         const documentoOrigem = document.getElementById('doc_origem').value;
+         const valor = document.getElementById('valor').value;
+         const descricao = document.getElementById('descricao').value;
+         const situacao = document.getElementById('situacao').value;
+         const contaContabil = document.getElementById('conta_contabil').value;
+         const estoque = document.getElementById('estoque').value;
+         const observacao = document.getElementById('observacao').value;
+         const destinoDados = document.getElementById('destino_dados').value;
+
+         if (!dataEntrada) return alert('Por favor, preencha a Data de Entrada.');
+         if (!quantidade || quantidade < 1) return alert('A quantidade deve ser maior ou igual a 1.');
+         if (categoria === 'Selecione uma categoria...') return alert('Por favor, selecione uma Categoria.');
+         if (!documentoOrigem) return alert('Por favor, preencha o Documento de Origem.');
+         if (!valor || valor <= 0) return alert('Por favor, preencha um Valor Unitário válido.');
+         if (!descricao) return alert('Por favor, preencha a Descrição.');
+         if (situacao === 'Escolha uma opção...') return alert('Por favor, selecione o Estado de Conservação.');
+         if (contaContabil === 'Escolha uma opção...') return alert('Por favor, selecione a Conta Contábil.');
+         if (estoque === 'Escolha uma opção...') return alert('Por favor, selecione o Local de Estoque.');
+         if (!destinoDados) return alert('Por favor, selecione o Destino dos Dados.');
+
+         const formDataObj = {
+            id: document.getElementById('id').value,
+            data_de_entrada: dataEntrada,
+            quantidade: quantidade,
+            tipo_tombo: document.getElementById('tipo_tombo').value,
+            tombo_inicial: document.getElementById('tombo_inicial').value,
+            tombo_final: document.getElementById('tombo_final').value,
+            tombo_lote_manual: document.getElementById('tombo_lote_manual').value,
+            categoria: categoria,
+            doc_origem: documentoOrigem,
+            valor: valor,
+            descricao: descricao,
+            situacao: situacao,
+            conta_contabil: contaContabil,
+            estoque: estoque,
+            observacao: observacao,
+            destino_dados: destinoDados
+         };
+
+         const formDataParams = new URLSearchParams();
+         for (const [key, value] of Object.entries(formDataObj)) {
+            if (value !== undefined && value !== null && value !== '') {
+               formDataParams.append(key, value);
+            }
+         }
+
+         console.log('Dados enviados ao backend:', formDataParams.toString());
+
+         try {
+            const response = await fetch(`/tombamento/atualizar/${document.getElementById('id').value}`, {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+               },
+               body: formDataParams
+            });
+
+            if (!response.ok) {
+               const errorData = await response.json();
+               throw new Error('Erro ao atualizar o tombamento: ' + (errorData.error || 'Erro desconhecido'));
+            }
+
+            Swal.fire({
+               icon: 'success',
+               title: 'Sucesso!',
+               text: 'Tombamento atualizado com sucesso!',
+               timer: 2000,
+               timerProgressBar: true,
+               showConfirmButton: false,
+            }).then(() => {
+               window.location.href = '/tabela/tombamento';
+            });
+         } catch (error) {
+            console.error('Erro ao enviar o formulário:', error);
+            Swal.fire({
+               icon: 'error',
+               title: 'Erro!',
+               text: error.message || 'Erro ao atualizar o tombamento.',
+               timer: 3000,
+               timerProgressBar: true,
+               showConfirmButton: false,
+            });
+         }
+      });
+
+      // Adicionar evento ao botão "Limpar"
+      document.getElementById('btnLimpar').addEventListener('click', limparFormulario);
+
+      // Inicializar o formulário ao carregar a página
+      document.addEventListener('DOMContentLoaded', function () {
+         // Verificar permissões do usuário
+         const userRole = '<%= userRole %>';
+         if (userRole !== 'admin') {
+            Swal.fire({
+               icon: 'error',
+               title: 'Acesso Negado!',
+               text: 'Você não tem permissão para editar itens. Apenas administradores podem realizar esta ação.',
+               timer: 3000,
+               timerProgressBar: true,
+               showConfirmButton: false,
+            }).then(() => {
+               window.location.href = '/tabela/tombamento';
+            });
+         }
+      });
+   </script>
+</body>
+</html>

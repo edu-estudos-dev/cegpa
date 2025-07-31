@@ -91,7 +91,6 @@ class EstoqueController {
             .json({ error: 'O valor deve ser maior que zero.' });
       if (!situacao || situacao === 'Escolha uma opção...')
          return res.status(400).json({ error: 'A situação é obrigatória.' });
-      // Removida a validação: if (observacao && observacao.trim() === '')
 
       const safeData = {
          data_de_entrada,
@@ -122,7 +121,7 @@ class EstoqueController {
             tabela_afetada: 'estoqueatual',
             id_registro: id,
             tombo: safeData.tombo,
-            detalhes: { novos_dados: safeData }
+            detalhes: { novos_dados: safeData },
          });
          res.status(200).json({ message: 'Item atualizado com sucesso!' });
       } catch (error) {
@@ -141,19 +140,21 @@ class EstoqueController {
    showItensNovos = async (req, res) => {
       try {
          const itensNovos = await estoqueModel.getAllItensNovos();
-         console.log('DEBUG - itensNovos do banco:', itensNovos.map(i => i.data_de_entrada));
-         itensNovos.forEach(item => {
+         console.log(
+            'DEBUG - itensNovos do banco:',
+            itensNovos.map((i) => i.data_de_entrada)
+         );
+         itensNovos.forEach((item) => {
             if (item.data_de_entrada) {
                const d = new Date(item.data_de_entrada);
-               // Garante formato 'YYYY-MM-DD' se for válido
-               item.data_de_entrada = isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+               item.data_de_entrada = isNaN(d.getTime())
+                  ? null
+                  : d.toISOString().split('T')[0];
+               item.data_de_entrada_formatada = isNaN(d.getTime())
+                  ? 'N/A'
+                  : d.toLocaleDateString('pt-BR');
             } else {
                item.data_de_entrada = null;
-            }
-            if (item.data_de_entrada) {
-               const d = new Date(item.data_de_entrada);
-               item.data_de_entrada_formatada = isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString('pt-BR');
-            } else {
                item.data_de_entrada_formatada = 'N/A';
             }
          });
@@ -169,17 +170,17 @@ class EstoqueController {
    showItensUsados = async (req, res) => {
       try {
          const itensUsados = await estoqueModel.getAllItensUsados();
-         itensUsados.forEach(item => {
+         itensUsados.forEach((item) => {
             if (item.data_de_entrada) {
                const d = new Date(item.data_de_entrada);
-               item.data_de_entrada = isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+               item.data_de_entrada = isNaN(d.getTime())
+                  ? null
+                  : d.toISOString().split('T')[0];
+               item.data_de_entrada_formatada = isNaN(d.getTime())
+                  ? 'N/A'
+                  : d.toLocaleDateString('pt-BR');
             } else {
                item.data_de_entrada = null;
-            }
-            if (item.data_de_entrada) {
-               const d = new Date(item.data_de_entrada);
-               item.data_de_entrada_formatada = isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString('pt-BR');
-            } else {
                item.data_de_entrada_formatada = 'N/A';
             }
          });
@@ -208,23 +209,23 @@ class EstoqueController {
    getAllEstoque = async (req, res) => {
       try {
          const estoque = await estoqueModel.getAllEstoque();
-         estoque.forEach(item => {
+         estoque.forEach((item) => {
             if (item.data_de_entrada) {
                const d = new Date(item.data_de_entrada);
-               item.data_de_entrada = isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+               item.data_de_entrada = isNaN(d.getTime())
+                  ? null
+                  : d.toISOString().split('T')[0];
+               item.data_de_entrada_formatada = isNaN(d.getTime())
+                  ? 'N/A'
+                  : d.toLocaleDateString('pt-BR');
             } else {
                item.data_de_entrada = null;
-            }
-            if (item.data_de_entrada) {
-               const d = new Date(item.data_de_entrada);
-               item.data_de_entrada_formatada = isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString('pt-BR');
-            } else {
                item.data_de_entrada_formatada = 'N/A';
             }
          });
          res.status(200).render('tabelaEstoque', {
             estoque,
-            userRole: req.session.user.role,
+            userRole: req.user ? req.user.role : 'user',
          });
       } catch (error) {
          console.error('Erro ao carregar o estoque:', error);
@@ -237,7 +238,182 @@ class EstoqueController {
       res.render('cadastrarEstoque');
    };
 
-   // Método para criar um novo item no estoque
+   listarTombamento = async (req, res) => {
+      try {
+         const tombamento = await estoqueModel.getAllTombamento();
+         const userRole = req.user?.role || 'user';
+         res.render('tabelaTombamento', { tombamento, userRole });
+      } catch (error) {
+         console.error('Erro ao listar tombamento:', error);
+         res.status(500).send('Erro ao carregar a tabela de tombamento');
+      }
+   };
+
+   visualizarTombamento = async (req, res) => {
+      try {
+         const item = await estoqueModel.getInfoByIdTombamento(req.params.id);
+         res.json(item);
+      } catch (error) {
+         console.error('Erro ao visualizar tombamento:', error);
+         res.status(500).json({ error: 'Erro ao carregar detalhes' });
+      }
+   };
+
+   excluirTombamento = async (req, res) => {
+      try {
+         await estoqueModel.deleteTombamento(req.params.id);
+         res.json({ msg: 'Item tombado excluído com sucesso' });
+      } catch (error) {
+         console.error('Erro ao excluir tombamento:', error);
+         res.status(500).json({ msg: 'Erro ao excluir item' });
+      }
+   };
+
+   // Método corrigido para atualizar tombamento
+   atualizarTombamento = async (req, res) => {
+      try {
+         if (req.user.role !== 'admin') {
+            return res.status(403).json({
+               error: 'Acesso negado. Apenas administradores podem atualizar tombamentos.',
+            });
+         }
+
+         const { id } = req.params;
+         const {
+            data_de_entrada,
+            quantidade,
+            tipo_tombo,
+            tombo_inicial,
+            tombo_final,
+            tombo_lote_manual,
+            categoria,
+            doc_origem,
+            valor,
+            descricao,
+            situacao,
+            conta_contabil,
+            estoque,
+            observacao,
+            destino_dados,
+         } = req.body;
+
+         // Validações básicas no backend
+         if (!data_de_entrada) throw new Error('Data de entrada é obrigatória');
+         if (!quantidade || quantidade < 1)
+            throw new Error('Quantidade deve ser maior ou igual a 1');
+         if (!categoria || categoria === 'Selecione uma categoria...')
+            throw new Error('Categoria é obrigatória');
+         if (!doc_origem) throw new Error('Documento de origem é obrigatório');
+         if (!valor || valor <= 0)
+            throw new Error('Valor unitário deve ser maior que 0');
+         if (!descricao) throw new Error('Descrição é obrigatória');
+         if (!situacao || situacao === 'Escolha uma opção...')
+            throw new Error('Estado de conservação é obrigatório');
+         if (!conta_contabil || conta_contabil === 'Escolha uma opção...')
+            throw new Error('Conta contábil é obrigatória');
+         if (!estoque || estoque === 'Escolha uma opção...')
+            throw new Error('Local de estoque é obrigatório');
+         if (!destino_dados) throw new Error('Destino dos dados é obrigatório');
+
+         const safeData = {
+            data_de_entrada,
+            quantidade: Number(quantidade),
+            tipo_tombo,
+            tombo_inicial,
+            tombo_final,
+            tombo_lote_manual: tombo_lote_manual
+               ? JSON.parse(tombo_lote_manual)
+               : null,
+            categoria: categoria.toUpperCase(),
+            doc_origem: doc_origem.toUpperCase(),
+            valor: Number(valor),
+            descricao: descricao.toUpperCase(),
+            situacao: situacao.toUpperCase(),
+            conta_contabil: conta_contabil.toUpperCase(),
+            estoque: estoque.toUpperCase(),
+            observacao: observacao ? observacao.toUpperCase() : null,
+            destino_dados,
+         };
+
+         const affectedRows = await estoqueModel.updateTombamento(id, safeData);
+         if (affectedRows === 0) {
+            return res.status(404).json({ error: 'Item não encontrado.' });
+         }
+
+         // Registrar log de auditoria
+         await AuditoriaModel.registrarLog({
+            usuario: req.user?.nome_completo || 'desconhecido',
+            acao: 'EDIÇÃO',
+            tabela_afetada: 'registrodetombamento',
+            id_registro: id,
+            tombo: safeData.tombo_inicial,
+            detalhes: { novos_dados: safeData },
+         });
+
+         res.json({ msg: 'Tombamento atualizado com sucesso' });
+      } catch (error) {
+         console.error('Erro ao atualizar tombamento:', error);
+         res.status(500).json({
+            error: error.message || 'Erro ao atualizar tombamento',
+         });
+      }
+   };
+
+   // Método corrigido para renderizar formulário de edição de tombamento
+   editarTombamento = async (req, res) => {
+      try {
+         const item = await estoqueModel.getInfoByIdTombamento(req.params.id);
+         if (!item) {
+            return res.status(404).send('Item não encontrado');
+         }
+         // Ajustar formato da data para o input type="date" (YYYY-MM-DD)
+         item.data_de_entrada = item.data_de_entrada
+            ? new Date(item.data_de_entrada).toISOString().split('T')[0]
+            : null;
+         // Garantir que o valor seja um número puro
+         item.valor = item.valor ? parseFloat(item.valor).toFixed(2) : null;
+         res.render('editarTombamento', {
+            item,
+            userRole: req.user ? req.user.role : 'user',
+         });
+      } catch (error) {
+         console.error('Erro ao carregar item para edição:', error);
+         res.status(500).send('Erro ao carregar o formulário de edição');
+      }
+   };
+
+   // Método para gerar relatório de tombamento (PDF ou Excel)
+   gerarRelatorioTombamento = async (req, res) => {
+      try {
+         const { formato = 'pdf' } = req.query;
+         const tombamento = await estoqueModel.getAllTombamento();
+         await this._generateReport(
+            res,
+            tombamento,
+            'Relatório de Tombamento',
+            formato,
+            [
+               {
+                  header: 'Entrada',
+                  dataKey: 'data_de_entrada_formatada',
+                  width: 18,
+               },
+               { header: 'Descrição', dataKey: 'descricao', width: 120 },
+               { header: 'Tombo', dataKey: 'tombo', width: 20 },
+               { header: 'Categoria', dataKey: 'categoria', width: 30 },
+               { header: 'Local', dataKey: 'estoque', width: 20 },
+               { header: 'Situação', dataKey: 'situacao', width: 20 },
+               { header: 'Valor', dataKey: 'valor', width: 20 },
+               { header: 'Doc Origem', dataKey: 'doc_origem', width: 30 },
+            ]
+         );
+      } catch (error) {
+         console.error('Erro ao gerar relatório de tombamento:', error);
+         res.status(500).json({ error: 'Erro ao gerar relatório' });
+      }
+   };
+
+   // Método para criar um novo item no estoque ou registro de tombamento
    create = async (req, res) => {
       console.log('Dados recebidos no método create (req.body):', req.body);
 
@@ -257,6 +433,7 @@ class EstoqueController {
             conta_contabil,
             estoque,
             observacao,
+            destino_dados,
          } = req.body;
 
          // Validação básica
@@ -296,6 +473,13 @@ class EstoqueController {
                .json({ error: 'A conta contábil é obrigatória.' });
          if (!estoque || estoque === 'Escolha uma opção...')
             return res.status(400).json({ error: 'O estoque é obrigatório.' });
+         if (
+            !destino_dados ||
+            !['estoqueatual', 'registrodetombamento'].includes(destino_dados)
+         )
+            return res
+               .status(400)
+               .json({ error: 'Destino dos dados inválido.' });
 
          const safeData = {
             data_de_entrada,
@@ -316,7 +500,13 @@ class EstoqueController {
             const ultimoTombo = await estoqueModel.getUltimoTombo();
             const tomboInicial = ultimoTombo;
             for (let i = 0; i < safeData.quantidade; i++) {
-               tombos.push(tomboInicial + 1 + i);
+               const novoTombo = tomboInicial + 1 + i;
+               if (novoTombo.toString().length > 6) {
+                  return res.status(400).json({
+                     error: `O tombo gerado (${novoTombo}) excede o limite de 6 dígitos.`,
+                  });
+               }
+               tombos.push(novoTombo);
             }
          } else if (safeData.tipo_tombo === 'LOTE_MANUAL') {
             if (!tombo_lote_manual)
@@ -329,10 +519,18 @@ class EstoqueController {
                   error: 'A quantidade de tombos não corresponde à quantidade informada.',
                });
 
-            // Verificar duplicatas no banco
             for (const tombo of tombos) {
-               const tomboExistente = await estoqueModel.getInfoByTombo(tombo);
-               if (tomboExistente)
+               if (tombo.toString().length !== 6) {
+                  return res.status(400).json({
+                     error: `O tombo ${tombo} deve ter exatamente 6 dígitos.`,
+                  });
+               }
+               const tomboExistenteEstoque = await estoqueModel.getInfoByTombo(
+                  tombo
+               );
+               const tomboExistenteTombamento =
+                  await estoqueModel.getInfoByTomboTombamento(tombo);
+               if (tomboExistenteEstoque || tomboExistenteTombamento)
                   return res
                      .status(400)
                      .json({ error: `O tombo ${tombo} já existe no sistema.` });
@@ -347,6 +545,12 @@ class EstoqueController {
             const inicio = Number(tombo_inicial);
             const fim = Number(tombo_final);
 
+            if (inicio.toString().length !== 6 || fim.toString().length !== 6) {
+               return res.status(400).json({
+                  error: 'Tombo inicial e final devem ter exatamente 6 dígitos.',
+               });
+            }
+
             if (inicio >= fim) {
                return res.status(400).json({
                   error: 'O tombo inicial deve ser menor que o tombo final.',
@@ -359,10 +563,18 @@ class EstoqueController {
                });
             }
 
-            // Verificar duplicatas no banco
             for (let tombo = inicio; tombo <= fim; tombo++) {
-               const tomboExistente = await estoqueModel.getInfoByTombo(tombo);
-               if (tomboExistente) {
+               if (tombo.toString().length !== 6) {
+                  return res.status(400).json({
+                     error: `O tombo ${tombo} deve ter exatamente 6 dígitos.`,
+                  });
+               }
+               const tomboExistenteEstoque = await estoqueModel.getInfoByTombo(
+                  tombo
+               );
+               const tomboExistenteTombamento =
+                  await estoqueModel.getInfoByTomboTombamento(tombo);
+               if (tomboExistenteEstoque || tomboExistenteTombamento) {
                   return res
                      .status(400)
                      .json({ error: `O tombo ${tombo} já existe no sistema.` });
@@ -387,19 +599,35 @@ class EstoqueController {
             tipo_tombo: safeData.tipo_tombo,
          }));
 
-         // Inserir todos os itens de uma vez usando createEstoqueLote
-         await estoqueModel.createEstoqueLote(itens);
-         // Registrar log de auditoria (entrada)
-         for (const item of itens) {
-            await AuditoriaModel.registrarLog({
-               usuario: req.user?.nome_completo || 'desconhecido',
-               acao: 'ENTRADA',
-               tabela_afetada: 'estoqueatual',
-               id_registro: null, // O id só é conhecido após inserção individual, mas o tombo é único
-               tombo: item.tombo,
-               detalhes: { dados: item }
-            });
+         // Inserir na tabela correta com base no destino_dados
+         if (destino_dados === 'estoqueatual') {
+            await estoqueModel.createEstoqueLote(itens);
+            // Registrar log de auditoria (entrada no estoque)
+            for (const item of itens) {
+               await AuditoriaModel.registrarLog({
+                  usuario: req.user?.nome_completo || 'desconhecido',
+                  acao: 'ENTRADA',
+                  tabela_afetada: 'estoqueatual',
+                  id_registro: null,
+                  tombo: item.tombo,
+                  detalhes: { dados: item },
+               });
+            }
+         } else {
+            await estoqueModel.createTombamentoLote(itens);
+            // Registrar log de auditoria (tombamento)
+            for (const item of itens) {
+               await AuditoriaModel.registrarLog({
+                  usuario: req.user?.nome_completo || 'desconhecido',
+                  acao: 'TOMBAMENTO',
+                  tabela_afetada: 'registrodetombamento',
+                  id_registro: null,
+                  tombo: item.tombo,
+                  detalhes: { dados: item },
+               });
+            }
          }
+
          res.status(200).json({ message: 'Entrada registrada com sucesso!' });
       } catch (error) {
          console.error(
@@ -441,7 +669,12 @@ class EstoqueController {
             item.data_de_entrada = null;
          }
          // Valor formatado pode ser útil, mas mantenha o valor original também
-         item.valor_formatado = item.valor ? Number(item.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
+         item.valor_formatado = item.valor
+            ? Number(item.valor).toLocaleString('pt-BR', {
+                 style: 'currency',
+                 currency: 'BRL',
+              })
+            : 'N/A';
 
          res.json(item);
       } catch (error) {
@@ -481,7 +714,7 @@ class EstoqueController {
                tabela_afetada: 'estoqueatual',
                id_registro: id,
                tombo: item?.tombo || null,
-               detalhes: { dados: item }
+               detalhes: { dados: item },
             });
             return res.json({
                msg: 'Item deletado com sucesso!',
@@ -558,7 +791,6 @@ class EstoqueController {
       customColumns = null
    ) => {
       const columns = customColumns || [
-         // { header: 'ID', dataKey: 'id', width: 10 },
          { header: 'Entrada', dataKey: 'data_entrada', width: 18 },
          { header: 'Descrição', dataKey: 'descricao', width: 120 },
          { header: 'Tombo', dataKey: 'tombo', width: 20 },
@@ -598,7 +830,7 @@ class EstoqueController {
 
       if (formato === 'pdf') {
          const doc = new jsPDF({
-            orientation: 'landscape', // Forçado para paisagem
+            orientation: 'landscape',
             unit: 'mm',
             format: 'a4',
          });
@@ -625,7 +857,7 @@ class EstoqueController {
          drawHeader(1);
 
          doc.autoTable({
-            startY: 25, // Mantido em 25mm
+            startY: 25,
             margin: { left: 10, right: 10, top: 30 },
             head: [columns.map((col) => col.header)],
             body: rows.map((row) => columns.map((col) => row[col.dataKey])),
@@ -649,9 +881,9 @@ class EstoqueController {
                return acc;
             }, {}),
             didDrawPage: function (data) {
-               drawHeader(data.pageNumber); // Desenha o cabeçalho em todas as páginas
+               drawHeader(data.pageNumber);
                if (data.pageNumber < doc.internal.getNumberOfPages()) {
-                  doc.autoTable.previous.finalY = 30; // Define o ponto de partida da próxima tabela como 30mm
+                  doc.autoTable.previous.finalY = 30;
                }
             },
          });
@@ -667,11 +899,15 @@ class EstoqueController {
          console.log('[EXCEL] Título da planilha:', title);
          const workbook = new ExcelJS.Workbook();
          const worksheet = workbook.addWorksheet(title);
-         worksheet.mergeCells(`A1:${String.fromCharCode(65 + columns.length - 1)}1`);
+         worksheet.mergeCells(
+            `A1:${String.fromCharCode(65 + columns.length - 1)}1`
+         );
          worksheet.getCell('A1').value = title;
          worksheet.getCell('A1').alignment = { horizontal: 'center' };
          worksheet.getCell('A1').font = { size: 16, bold: true };
-         worksheet.addRow([`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`]);
+         worksheet.addRow([
+            `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
+         ]);
          worksheet.addRow(columns.map((col) => col.header)).eachCell((cell) => {
             cell.fill = {
                type: 'pattern',
@@ -806,11 +1042,11 @@ class EstoqueController {
          doc.setFontSize(15);
          const titleWidth = doc.getTextWidth(title);
          const pageWidth = doc.internal.pageSize.width;
-         doc.text(title, 10, 15); // Título alinhado à esquerda
+         doc.text(title, 10, 15);
          const dateRangeText = `de ${data_inicial} a ${data_final}`;
-         doc.setFontSize(6); // Reduzido para 6, menos destaque
+         doc.setFontSize(6);
          const dateRangeWidth = doc.getTextWidth(dateRangeText);
-         doc.text(dateRangeText, pageWidth - dateRangeWidth - 10, 15); // Intervalo alinhado à direita
+         doc.text(dateRangeText, pageWidth - dateRangeWidth - 10, 15);
 
          doc.setFontSize(8);
 
@@ -830,14 +1066,13 @@ class EstoqueController {
             head: [columns.map((col) => col.header)],
             body: [
                ...rows.map((row) => columns.map((col) => row[col.dataKey])),
-               // Adicionar linha de total com mesclagem de colunas
                [
                   {
                      content: `Total Itens Pagos: ${totalItensPagos}`,
-                     colSpan: 8, // Mescla todas as 8 colunas
+                     colSpan: 8,
                      styles: {
                         halign: 'center',
-                        fontStyle: 'bold', // Negrito para destaque
+                        fontStyle: 'bold',
                      },
                   },
                ],
@@ -865,11 +1100,11 @@ class EstoqueController {
                doc.setFontSize(15);
                const titleWidth = doc.getTextWidth(title);
                const pageWidth = doc.internal.pageSize.width;
-               doc.text(title, 10, 15); // Título alinhado à esquerda
+               doc.text(title, 10, 15);
                const dateRangeText = `de ${data_inicial} a ${data_final}`;
-               doc.setFontSize(6); // Reduzido para 6, menos destaque
+               doc.setFontSize(6);
                const dateRangeWidth = doc.getTextWidth(dateRangeText);
-               doc.text(dateRangeText, pageWidth - dateRangeWidth - 10, 15); // Intervalo alinhado à direita
+               doc.text(dateRangeText, pageWidth - dateRangeWidth - 10, 15);
 
                doc.setFontSize(8);
                const pageStr = `Página ${data.pageNumber}`;
@@ -972,54 +1207,21 @@ class EstoqueController {
    // Método para mostrar todos os itens pagos
    getAllItensPagos = async (req, res) => {
       try {
-         const { data_inicial, data_final } = req.query;
-         console.log('Requisição recebida em /estoque/itenspagos:', {
-            data_inicial,
-            data_final,
-         });
-
-         // Verificar se ambas as datas foram fornecidas
-         if (data_inicial && data_final) {
-            const itensPagos = await estoqueModel.getItensPagos(
-               data_inicial,
-               data_final
-            );
-            console.log('Itens pagos retornados do modelo:', itensPagos.length);
-
-            const userRole = req.user ? req.user.role : 'user';
-            return res.render('tabelaSaidaEstoque', {
-               itensPagos,
-               userRole,
-               data_inicial,
-               data_final,
-            });
-         }
-
-         // Se não houver filtro de datas, retornar todos os itens
-         const itensPagos = await estoqueModel.getItensPagos();
-         const userRole = req.user ? req.user.role : 'user';
+         const itensPagos = await estoqueModel.getAllItensPagos();
+         const userRole = req.user?.role || 'user';
+         console.log('Itens pagos retornados:', itensPagos);
          res.render('tabelaSaidaEstoque', {
             itensPagos,
             userRole,
-            data_inicial: null,
-            data_final: null,
+            data_inicial: '',
+            data_final: '',
          });
       } catch (error) {
-         console.error('Erro ao carregar os itens pagos:', {
-            message: error.message,
-            stack: error.stack,
-            query: req.query,
-         });
-         res.status(500).render('tabelaSaidaEstoque', {
-            itensPagos: [],
-            userRole: req.user ? req.user.role : 'user',
-            data_inicial: null,
-            data_final: null,
-            error: 'Erro ao carregar os itens pagos.',
-         });
+         console.error('Erro no servidor:', error);
+         res.status(500).send('Erro ao listar itens pagos');
       }
    };
-
+   
    // Método para mostrar os itens que foram pagos na tabela
    fetchItensDisponiveis = async (_, res) => {
       try {
@@ -1117,16 +1319,16 @@ class EstoqueController {
          const imageData = fs.readFileSync(imagePath).toString('base64');
          const imgProps = {
             format: 'PNG',
-            width: 70, // Largura da imagem em mm
-            height: 15, // Altura da imagem em mm
+            width: 70,
+            height: 15,
          };
 
          // Adicionar a imagem ao PDF
          doc.addImage(
             imageData,
             imgProps.format,
-            67.5, // Posição X
-            8, // Posição Y
+            67.5,
+            8,
             imgProps.width,
             imgProps.height
          );
@@ -1143,7 +1345,7 @@ class EstoqueController {
 
          const headerYStart = 20 + imgProps.height;
          const obsText = (observacao || 'Nenhuma').toUpperCase();
-         const obsLines = doc.splitTextToSize(`Observações: ${obsText}`, 170); // aumente de 120 para 170
+         const obsLines = doc.splitTextToSize(`Observações: ${obsText}`, 170);
 
          const headerData = [
             `Nº Termo: ${doc_saida}`,
@@ -1152,8 +1354,7 @@ class EstoqueController {
             `Responsável: ${postoGrad} ${nome_do_recebedor.toUpperCase()}`,
             `MF: ${mf_recebedor}`,
             `Contato: ${tel_recebedor}`,
-            `Referência: ${referencia}`
-            // Observações será renderizado separadamente
+            `Referência: ${referencia}`,
          ];
 
          // Renderiza o cabeçalho com destaque para o Nº Termo
@@ -1179,7 +1380,7 @@ class EstoqueController {
          });
 
          // Calcula a posição Y final após o cabeçalho e observação
-         const tableStartY = headerYStart + headerYOffset + 2; // +2 para um pequeno espaçamento
+         const tableStartY = headerYStart + headerYOffset + 2;
 
          let ordem = 1;
          const items = [];
@@ -1195,7 +1396,6 @@ class EstoqueController {
             }
 
             if (itemEstoque.pago) {
-               // Item já foi pago, não pode sair de novo!
                return res.status(400).json({
                   error: `O item com tombo ${tombo} já foi pago e não pode ser retirado novamente.`,
                });
@@ -1243,8 +1443,8 @@ class EstoqueController {
                   tel_recebedor,
                   nome_do_recebedor,
                   observacao,
-                  descricao: itemEstoque.descricao
-               }
+                  descricao: itemEstoque.descricao,
+               },
             });
 
             console.log(`Marcando tombo ${tombo} como pago...`);
@@ -1268,7 +1468,7 @@ class EstoqueController {
                fontSize: 8,
                halign: 'center',
                cellPadding: 1.5,
-               overflow: 'linebreak', // Garante que textos longos sejam quebrados
+               overflow: 'linebreak',
             },
             headStyles: {
                fillColor: [34, 139, 34],
@@ -1281,9 +1481,9 @@ class EstoqueController {
                2: { cellWidth: 130, halign: 'left' },
                3: { cellWidth: 20 },
             },
-            margin: { left: 13, right: 7, bottom: 10 }, // Adiciona margem inferior
+            margin: { left: 13, right: 7, bottom: 10 },
             tableWidth: 'wrap',
-            pageBreak: 'auto', // Garante quebra automática de página
+            pageBreak: 'auto',
             didDrawPage: (data) => {
                console.log('Desenhando página:', data.pageNumber);
                doc.rect(
@@ -1308,7 +1508,7 @@ class EstoqueController {
          doc.setPage(totalPages);
 
          // Define a posição Y das assinaturas fixas na parte inferior da página
-         const signatureY = pageHeight - 20; // 20 mm acima da borda inferior para acomodar texto e linhas
+         const signatureY = pageHeight - 20;
          const lineLength = 50;
          const gapBetweenBlocks = 10;
 
@@ -1382,23 +1582,9 @@ class EstoqueController {
          doc.save(pdfPath);
 
          const modoDocSaida = req.body.modoDocSaida || 'AUTO';
-         // Antes de salvar o PDF e incrementar a sequência, verificar se o termo é automático
-         // O termo automático segue o padrão sequencial do banco, enquanto o manual pode ser qualquer valor
-         // Supondo que o termo automático é sempre igual ao próximo da sequência
-         // Podemos identificar isso comparando doc_saida com o próximo termo esperado
-         // Para garantir, vamos receber do frontend um campo opcional: modoDocSaida ('AUTO' ou 'MANUAL')
-         // Se não vier, considerar 'AUTO' como padrão
-
-         // No início do método registrarSaida:
-         // const modoDocSaida = req.body.modoDocSaida || 'AUTO';
-
-         // Antes de await sequenciaModel.incrementarSequencia(new Date().getFullYear());
          if (modoDocSaida === 'AUTO') {
             await sequenciaModel.incrementarSequencia(new Date().getFullYear());
          }
-
-         console.log('Atualizando sequência...');
-         // await sequenciaModel.incrementarSequencia(new Date().getFullYear());
 
          console.log('Enviando resposta de sucesso...');
          res.status(200).json({
@@ -1415,7 +1601,7 @@ class EstoqueController {
          });
       }
    };
-   
+
    // Método para visualizar um item pago específico
    visualizarItemPago = async (req, res) => {
       const { id } = req.params;
@@ -1438,12 +1624,17 @@ class EstoqueController {
       try {
          const { numero } = req.query;
          if (!numero) {
-            return res.status(400).json({ existe: false, error: 'Número do termo não informado.' });
+            return res.status(400).json({
+               existe: false,
+               error: 'Número do termo não informado.',
+            });
          }
          // Extrair ano do termo (últimos 4 dígitos)
          const match = numero.match(/-(\d{4})$/);
          if (!match) {
-            return res.status(400).json({ existe: false, error: 'Formato do termo inválido.' });
+            return res
+               .status(400)
+               .json({ existe: false, error: 'Formato do termo inválido.' });
          }
          const ano = match[1];
          // Montar o caminho da pasta do ano
@@ -1452,11 +1643,16 @@ class EstoqueController {
          let existe = false;
          if (fs.existsSync(pastaAno)) {
             const arquivos = fs.readdirSync(pastaAno);
-            existe = arquivos.some(nome => nome.startsWith(`Termo_${numero}`) && nome.endsWith('.pdf'));
+            existe = arquivos.some(
+               (nome) =>
+                  nome.startsWith(`Termo_${numero}`) && nome.endsWith('.pdf')
+            );
          }
          return res.json({ existe });
       } catch (error) {
-         return res.status(500).json({ existe: false, error: 'Erro ao verificar termo.' });
+         return res
+            .status(500)
+            .json({ existe: false, error: 'Erro ao verificar termo.' });
       }
    };
 
@@ -1490,9 +1686,7 @@ class EstoqueController {
          `[EstoqueController] Recebida requisição DELETE para reverter saída com ID: ${req.params.id}`
       );
       console.log(
-         `[EstoqueController] Usuário autenticado: ${JSON.stringify(
-            req.session.user
-         )}`
+         `[EstoqueController] Usuário autenticado: ${JSON.stringify(req.user)}`
       );
       const { id } = req.params;
       try {
@@ -1522,12 +1716,15 @@ class EstoqueController {
          await estoqueModel.reverterSaida(id, item.estoqueatual_id);
          // Registrar log de auditoria (reversão)
          await AuditoriaModel.registrarLog({
-            usuario: req.session.user?.nome_completo || 'desconhecido',
+            usuario: req.user?.nome_completo || 'desconhecido',
             acao: 'REVERSÃO',
             tabela_afetada: 'itenspagos',
             id_registro: id,
             tombo: item.tombo,
-            detalhes: { motivo: 'Reversão de saída', id_estoqueatual: item.estoqueatual_id }
+            detalhes: {
+               motivo: 'Reversão de saída',
+               id_estoqueatual: item.estoqueatual_id,
+            },
          });
 
          console.log(
@@ -1554,7 +1751,9 @@ class EstoqueController {
          res.json({ tombo, historico });
       } catch (error) {
          console.error('Erro ao buscar histórico de auditoria (API):', error);
-         res.status(500).json({ error: 'Erro ao buscar histórico de auditoria.' });
+         res.status(500).json({
+            error: 'Erro ao buscar histórico de auditoria.',
+         });
       }
    };
 }

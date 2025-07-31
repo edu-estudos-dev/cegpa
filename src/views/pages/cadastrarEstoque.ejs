@@ -156,9 +156,9 @@
                </div>
             </div>
 
-            <!-- Linha 3: Conta Contábil e Estoque -->
+            <!-- Linha 3: Conta Contábil, Local de Estoque e Destino dos Dados -->
             <div id="row3" class="row">
-               <div class="col-md-9">
+               <div class="col-md-3">
                   <div id="conta_contabil-div" class="mb-3">
                      <label class="form-label fw-bold">Conta Contábil</label>
                      <select id="conta_contabil" class="form-select" name="conta_contabil">
@@ -228,6 +228,16 @@
                         <option value="galpao">ESTOQUE COLOG - GALPÃO</option>
                         <option value="sala">ESTOQUE COLOG - SALA</option>
                         <option value="cabemce">ESTOQUE COLOG - CABEMCE</option>
+                     </select>
+                  </div>
+               </div>
+
+               <div class="col-md-3">
+                  <div id="destino_dados-div" class="mb-3">
+                     <label class="form-label fw-bold">Destino dos Dados</label>
+                     <select id="destino_dados" class="form-select" name="destino_dados">
+                        <option value="estoqueatual" selected>Entrar no Estoque</option>
+                        <option value="registrodetombamento">Fazer Tombamento</option>
                      </select>
                   </div>
                </div>
@@ -523,6 +533,7 @@
          const tomboInicial = document.getElementById('tombo_inicial').value;
          const tomboFinal = document.getElementById('tombo_final').value;
          const observacao = document.getElementById('observacao').value;
+         const destinoDados = document.getElementById('destino_dados').value;
 
          if (!dataEntrada) return alert('Por favor, preencha a Data de Entrada.');
          if (!quantidade || quantidade < 1) return alert('A quantidade deve ser maior ou igual a 1.');
@@ -535,6 +546,7 @@
          if (situacao === 'Escolha uma opção...') return alert('Por favor, selecione o Estado de Conservação.');
          if (contaContabil === 'Escolha uma opção...') return alert('Por favor, selecione a Conta Contábil.');
          if (estoque === 'Escolha uma opção...') return alert('Por favor, selecione o Local de Estoque.');
+         if (!destinoDados) return alert('Por favor, selecione o Destino dos Dados.');
 
          const formDataObj = {
             data_de_entrada: dataEntrada,
@@ -550,7 +562,8 @@
             situacao: situacao,
             conta_contabil: contaContabil,
             estoque: estoque,
-            observacao: observacao
+            observacao: observacao,
+            destino_dados: destinoDados
          };
 
          const formDataParams = new URLSearchParams();
@@ -604,6 +617,7 @@
          document.getElementById('situacao').value = 'Escolha uma opção...';
          document.getElementById('conta_contabil').value = 'Escolha uma opção...';
          document.getElementById('estoque').value = 'Escolha uma opção...';
+         document.getElementById('destino_dados').value = 'estoqueatual';
          document.getElementById('qtd').disabled = false;
 
          // Limpar os modais
