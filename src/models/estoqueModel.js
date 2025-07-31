@@ -384,8 +384,8 @@ class EstoqueModel {
       }
    };
 
-   getAllItensPagos = async () => {
-      const query = `
+   getAllItensPagos = async (data_inicial, data_final) => {
+      let query = `
       SELECT 
          ip.id,
          ip.data_de_saida,
@@ -398,11 +398,19 @@ class EstoqueModel {
          ea.valor
       FROM itenspagos ip
       JOIN estoqueatual ea ON ip.estoqueatual_id = ea.id
-      ORDER BY ip.data_de_saida DESC
    `;
+      const params = [];
+
+      if (data_inicial && data_final) {
+         const dataFinalAjustada = `${data_final} 23:59:59`;
+         query += ` WHERE ip.data_de_saida BETWEEN ? AND ?`;
+         params.push(data_inicial, dataFinalAjustada);
+      }
+
+      query += ` ORDER BY ip.data_de_saida DESC`;
 
       try {
-         const [results] = await connection.execute(query);
+         const [results] = await connection.execute(query, params);
          console.log(
             'Resultados da query getAllItensPagos:',
             results.map((item) => ({
@@ -410,6 +418,7 @@ class EstoqueModel {
                tombo: item.tombo_estoqueatual,
                descricao: item.descricao,
                valor: item.valor,
+               data_de_saida: item.data_de_saida,
             }))
          );
          return results.map((item) => ({

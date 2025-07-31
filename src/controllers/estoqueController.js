@@ -967,7 +967,7 @@ class EstoqueController {
    generatePDFItensPagos = async (req, res) => {
       try {
          const { formato = 'pdf', data_inicial, data_final } = req.query;
-         const itensPagos = await estoqueModel.getItensPagosForPDF(
+         const itensPagos = await estoqueModel.getAllItensPagos(
             data_inicial,
             data_final
          );
@@ -976,8 +976,8 @@ class EstoqueController {
             itensPagos,
             'Relatório de Itens Pagos',
             formato,
-            data_inicial,
-            data_final
+            data_inicial || '',
+            data_final || ''
          );
       } catch (error) {
          console.error('Erro ao gerar relatório:', error);
@@ -1207,21 +1207,36 @@ class EstoqueController {
    // Método para mostrar todos os itens pagos
    getAllItensPagos = async (req, res) => {
       try {
-         const itensPagos = await estoqueModel.getAllItensPagos();
+         const { data_inicial, data_final } = req.query;
+         console.log('Requisição recebida em /estoque/itenspagos:', {
+            data_inicial,
+            data_final,
+         });
+
+         const itensPagos = await estoqueModel.getAllItensPagos(
+            data_inicial,
+            data_final
+         );
          const userRole = req.user?.role || 'user';
          console.log('Itens pagos retornados:', itensPagos);
          res.render('tabelaSaidaEstoque', {
             itensPagos,
             userRole,
-            data_inicial: '',
-            data_final: '',
+            data_inicial: data_inicial || '',
+            data_final: data_final || '',
          });
       } catch (error) {
          console.error('Erro no servidor:', error);
-         res.status(500).send('Erro ao listar itens pagos');
+         res.status(500).render('tabelaSaidaEstoque', {
+            itensPagos: [],
+            userRole: req.user?.role || 'user',
+            data_inicial: '',
+            data_final: '',
+            error: 'Erro ao carregar os itens pagos.',
+         });
       }
    };
-   
+
    // Método para mostrar os itens que foram pagos na tabela
    fetchItensDisponiveis = async (_, res) => {
       try {
