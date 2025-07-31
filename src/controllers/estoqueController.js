@@ -241,6 +241,17 @@ class EstoqueController {
    listarTombamento = async (req, res) => {
       try {
          const tombamento = await estoqueModel.getAllTombamento();
+         // Formatar data_de_entrada para o template
+         tombamento.forEach((item) => {
+            if (item.data_de_entrada) {
+               const d = new Date(item.data_de_entrada);
+               item.data_de_entrada_formatada = isNaN(d.getTime())
+                  ? 'N/A'
+                  : d.toLocaleDateString('pt-BR');
+            } else {
+               item.data_de_entrada_formatada = 'N/A';
+            }
+         });
          const userRole = req.user?.role || 'user';
          res.render('tabelaTombamento', { tombamento, userRole });
       } catch (error) {
@@ -283,6 +294,7 @@ class EstoqueController {
             data_de_entrada,
             quantidade,
             tipo_tombo,
+            tombo,
             tombo_inicial,
             tombo_final,
             tombo_lote_manual,
@@ -315,15 +327,81 @@ class EstoqueController {
             throw new Error('Local de estoque é obrigatório');
          if (!destino_dados) throw new Error('Destino dos dados é obrigatório');
 
+         // Validação específica para tipo_tombo
+         let safeTombo = null;
+         if (tipo_tombo === 'AUTO') {
+            if (!tombo || !Number.isInteger(Number(tombo)) || tombo <= 0) {
+               throw new Error(
+                  'O tombo deve ser um número inteiro positivo para o tipo AUTO.'
+               );
+            }
+            safeTombo = tombo;
+         } else if (tipo_tombo === 'LOTE') {
+            if (!tombo_inicial || !tombo_final) {
+               throw new Error(
+                  'Tombo inicial e final são obrigatórios para o tipo LOTE.'
+               );
+            }
+            if (
+               !Number.isInteger(Number(tombo_inicial)) ||
+               !Number.isInteger(Number(tombo_final)) ||
+               tombo_inicial <= 0 ||
+               tombo_final <= 0
+            ) {
+               throw new Error(
+                  'Tombo inicial e final devem ser números inteiros positivos.'
+               );
+            }
+            if (Number(tombo_inicial) >= Number(tombo_final)) {
+               throw new Error(
+                  'O tombo inicial deve ser menor que o tombo final.'
+               );
+            }
+            if (
+               Number(tombo_final) - Number(tombo_inicial) + 1 !==
+               Number(quantidade)
+            ) {
+               throw new Error(
+                  'A quantidade informada não corresponde ao intervalo de tombos.'
+               );
+            }
+            safeTombo = tombo_inicial;
+         } else if (tipo_tombo === 'LOTE_MANUAL') {
+            if (!tombo_lote_manual) {
+               throw new Error(
+                  'A lista de tombos do lote é obrigatória para LOTE_MANUAL.'
+               );
+            }
+            const parsedTomboLoteManual = JSON.parse(tombo_lote_manual);
+            if (
+               !Array.isArray(parsedTomboLoteManual) ||
+               parsedTomboLoteManual.length !== Number(quantidade)
+            ) {
+               throw new Error(
+                  'A lista de tombos deve corresponder à quantidade informada.'
+               );
+            }
+            for (const t of parsedTomboLoteManual) {
+               if (!Number.isInteger(Number(t)) || t <= 0) {
+                  throw new Error(
+                     `O tombo ${t} deve ser um número inteiro positivo.`
+                  );
+               }
+            }
+            safeTombo = parsedTomboLoteManual[0]; // Usa o primeiro tombo do lote manual
+         }
+
          const safeData = {
             data_de_entrada,
             quantidade: Number(quantidade),
             tipo_tombo,
-            tombo_inicial,
-            tombo_final,
-            tombo_lote_manual: tombo_lote_manual
-               ? JSON.parse(tombo_lote_manual)
-               : null,
+            tombo: safeTombo,
+            tombo_inicial: tipo_tombo === 'LOTE' ? tombo_inicial : null,
+            tombo_final: tipo_tombo === 'LOTE' ? tombo_final : null,
+            tombo_lote_manual:
+               tipo_tombo === 'LOTE_MANUAL'
+                  ? JSON.parse(tombo_lote_manual)
+                  : null,
             categoria: categoria.toUpperCase(),
             doc_origem: doc_origem.toUpperCase(),
             valor: Number(valor),
@@ -346,7 +424,7 @@ class EstoqueController {
             acao: 'EDIÇÃO',
             tabela_afetada: 'registrodetombamento',
             id_registro: id,
-            tombo: safeData.tombo_inicial,
+            tombo: safeData.tombo,
             detalhes: { novos_dados: safeData },
          });
 
@@ -366,12 +444,43 @@ class EstoqueController {
          if (!item) {
             return res.status(404).send('Item não encontrado');
          }
+         // Log para inspecionar os dados retornados
+         console.log('Dados do item para edição:', {
+            id: item.id,
+            data_de_entrada: item.data_de_entrada,
+            descricao: item.descricao,
+            tombo: item.tombo,
+            categoria: item.categoria,
+            conta_contabil: item.conta_contabil,
+            doc_origem: item.doc_origem,
+            estoque: item.estoque,
+            valor: item.valor,
+            situacao: item.situacao,
+            observacao: item.observacao,
+            tipo_tombo: item.tipo_tombo,
+            quantidade: item.quantidade,
+         });
          // Ajustar formato da data para o input type="date" (YYYY-MM-DD)
          item.data_de_entrada = item.data_de_entrada
             ? new Date(item.data_de_entrada).toISOString().split('T')[0]
             : null;
          // Garantir que o valor seja um número puro
          item.valor = item.valor ? parseFloat(item.valor).toFixed(2) : null;
+         // Padronizar valores para corresponder às opções do <select>
+         item.categoria = item.categoria
+            ? item.categoria.toLowerCase()
+            : 'Selecione uma categoria...';
+         item.situacao = item.situacao
+            ? item.situacao.toLowerCase()
+            : 'Escolha uma opção...';
+         item.conta_contabil = item.conta_contabil
+            ? item.conta_contabil.toLowerCase()
+            : 'Escolha uma opção...';
+         item.estoque = item.estoque
+            ? item.estoque.toLowerCase()
+            : 'Escolha uma opção...';
+         // Definir destino_dados como 'registrodetombamento' (já que não existe na tabela)
+         item.destino_dados = 'registrodetombamento';
          res.render('editarTombamento', {
             item,
             userRole: req.user ? req.user.role : 'user',
@@ -414,6 +523,8 @@ class EstoqueController {
    };
 
    // Método para criar um novo item no estoque ou registro de tombamento
+   // In estoqueController.js, replace the create method with the following:
+
    create = async (req, res) => {
       console.log('Dados recebidos no método create (req.body):', req.body);
 
@@ -501,11 +612,6 @@ class EstoqueController {
             const tomboInicial = ultimoTombo;
             for (let i = 0; i < safeData.quantidade; i++) {
                const novoTombo = tomboInicial + 1 + i;
-               if (novoTombo.toString().length > 6) {
-                  return res.status(400).json({
-                     error: `O tombo gerado (${novoTombo}) excede o limite de 6 dígitos.`,
-                  });
-               }
                tombos.push(novoTombo);
             }
          } else if (safeData.tipo_tombo === 'LOTE_MANUAL') {
@@ -520,9 +626,9 @@ class EstoqueController {
                });
 
             for (const tombo of tombos) {
-               if (tombo.toString().length !== 6) {
+               if (!Number.isInteger(Number(tombo)) || tombo <= 0) {
                   return res.status(400).json({
-                     error: `O tombo ${tombo} deve ter exatamente 6 dígitos.`,
+                     error: `O tombo ${tombo} deve ser um número inteiro positivo.`,
                   });
                }
                const tomboExistenteEstoque = await estoqueModel.getInfoByTombo(
@@ -545,9 +651,14 @@ class EstoqueController {
             const inicio = Number(tombo_inicial);
             const fim = Number(tombo_final);
 
-            if (inicio.toString().length !== 6 || fim.toString().length !== 6) {
+            if (
+               !Number.isInteger(inicio) ||
+               !Number.isInteger(fim) ||
+               inicio <= 0 ||
+               fim <= 0
+            ) {
                return res.status(400).json({
-                  error: 'Tombo inicial e final devem ter exatamente 6 dígitos.',
+                  error: 'Tombo inicial e final devem ser números inteiros positivos.',
                });
             }
 
@@ -564,11 +675,6 @@ class EstoqueController {
             }
 
             for (let tombo = inicio; tombo <= fim; tombo++) {
-               if (tombo.toString().length !== 6) {
-                  return res.status(400).json({
-                     error: `O tombo ${tombo} deve ter exatamente 6 dígitos.`,
-                  });
-               }
                const tomboExistenteEstoque = await estoqueModel.getInfoByTombo(
                   tombo
                );

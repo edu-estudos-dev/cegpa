@@ -62,8 +62,7 @@
                <div class="col-md-1">
                   <div id="qtd-div" class="mb-3">
                      <label class="form-label fw-bold">Quantidade</label>
-                     <input id="qtd" type="number" class="form-control" name="quantidade_visible" min="1" value="<%= item.quantidade || 1 %>" readonly>
-                     <input id="quantidade_hidden" type="hidden" name="quantidade" value="<%= item.quantidade || 1 %>">
+                     <input id="qtd" type="number" class="form-control" name="quantidade" min="1" value="<%= item.quantidade || 1 %>" readonly>
                   </div>
                </div>
 
@@ -80,11 +79,15 @@
 
                <div class="col-md-1">
                   <div id="tombo_inicial-div" class="mb-3">
-                     <label class="form-label fw-bold">Tombo Inicial</label>
-                     <input id="tombo_inicial" type="text" class="form-control" name="tombo_inicial" value="<%= item.tombo || '' %>" readonly>
+                     <label class="form-label fw-bold">Tombo</label>
+                     <input id="tombo" type="text" class="form-control" name="tombo" value="<%= item.tombo || '' %>" readonly disabled>
+                     <% if (item.tipo_tombo === 'LOTE') { %>
+                        <input id="tombo_inicial" type="hidden" name="tombo_inicial" value="<%= item.tombo || '' %>">
+                        <input id="tombo_final" type="hidden" name="tombo_final" value="<%= item.tombo_final || '' %>">
+                     <% } else if (item.tipo_tombo === 'LOTE_MANUAL') { %>
+                        <input id="tombo_lote_manual" type="hidden" name="tombo_lote_manual" value="<%= item.tombo_lote_manual ? JSON.stringify(item.tombo_lote_manual) : JSON.stringify([item.tombo || '']) %>">
+                     <% } %>
                   </div>
-                  <input id="tombo_lote_manual" type="hidden" name="tombo_lote_manual" value="<%= item.tipo_tombo === 'LOTE_MANUAL' ? JSON.stringify(item.tombo_lote_manual || []) : '' %>">
-                  <input id="tombo_final" type="hidden" name="tombo_final" value="<%= item.tombo_final || '' %>">
                </div>
 
                <div class="col-md-3">
@@ -254,8 +257,7 @@
             </div>
 
             <div class="col-md-12 d-flex justify-content-center mt-4">
-               <button id="btnAtualizar" type="submit" class="w-10 btn btn-success mx-1">Atualizar Tombamento</button>
-               <button id="btnLimpar" type="button" class="w-10 btn btn-warning mx-1">Limpar</button>
+               <button id="btnAtualizar" type="submit" class="w-10 btn btn-success mx-1">Atualizar</button>
                <a href="/tabela/tombamento" class="w-10 btn btn-secondary mx-1">Voltar</a>
             </div>
          </form>
@@ -289,30 +291,6 @@
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
    <script>
-      // Função para limpar o formulário
-      function limparFormulario() {
-         // Resetar o formulário HTML
-         document.getElementById('formulario-edicao').reset();
-
-         // Definir valores iniciais específicos
-         document.getElementById('data_de_entrada').value = '<%= item.data_de_entrada ? item.data_de_entrada.split("T")[0] : "" %>';
-         document.getElementById('qtd').value = '<%= item.quantidade || 1 %>';
-         document.getElementById('quantidade_hidden').value = '<%= item.quantidade || 1 %>';
-         document.getElementById('tipo_tombo').value = '<%= item.tipo_tombo || "AUTO" %>';
-         document.getElementById('tombo_inicial').value = '<%= item.tombo || "" %>';
-         document.getElementById('tombo_lote_manual').value = '<%= item.tipo_tombo === "LOTE_MANUAL" ? JSON.stringify(item.tombo_lote_manual || []) : "" %>';
-         document.getElementById('tombo_final').value = '<%= item.tombo_final || "" %>';
-         document.getElementById('categoria').value = '<%= item.categoria || "Selecione uma categoria..." %>';
-         document.getElementById('doc_origem').value = '<%= item.doc_origem || "" %>';
-         document.getElementById('valor').value = '<%= item.valor || "" %>';
-         document.getElementById('descricao').value = '<%= item.descricao || "" %>';
-         document.getElementById('situacao').value = '<%= item.situacao || "Escolha uma opção..." %>';
-         document.getElementById('conta_contabil').value = '<%= item.conta_contabil || "Escolha uma opção..." %>';
-         document.getElementById('estoque').value = '<%= item.estoque || "Escolha uma opção..." %>';
-         document.getElementById('destino_dados').value = '<%= item.destino_dados || "registrodetombamento" %>';
-         document.getElementById('observacao').value = '<%= item.observacao || "" %>';
-      }
-
       // Validação do formulário e envio assíncrono
       document.getElementById('formulario-edicao').addEventListener('submit', async function (event) {
          event.preventDefault();
@@ -345,9 +323,10 @@
             data_de_entrada: dataEntrada,
             quantidade: quantidade,
             tipo_tombo: document.getElementById('tipo_tombo').value,
-            tombo_inicial: document.getElementById('tombo_inicial').value,
-            tombo_final: document.getElementById('tombo_final').value,
-            tombo_lote_manual: document.getElementById('tombo_lote_manual').value,
+            tombo: document.getElementById('tombo').value,
+            tombo_inicial: document.getElementById('tombo_inicial')?.value || '',
+            tombo_final: document.getElementById('tombo_final')?.value || '',
+            tombo_lote_manual: document.getElementById('tombo_lote_manual')?.value || JSON.stringify([document.getElementById('tombo').value]),
             categoria: categoria,
             doc_origem: documentoOrigem,
             valor: valor,
@@ -404,9 +383,6 @@
             });
          }
       });
-
-      // Adicionar evento ao botão "Limpar"
-      document.getElementById('btnLimpar').addEventListener('click', limparFormulario);
 
       // Inicializar o formulário ao carregar a página
       document.addEventListener('DOMContentLoaded', function () {

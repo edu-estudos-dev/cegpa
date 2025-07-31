@@ -80,20 +80,25 @@ class EstoqueModel {
          quantidade = ?, 
          tipo_tombo = ?, 
          tombo = ?, 
+         tombo_final = ?, 
+         tombo_lote_manual = ?, 
          categoria = ?, 
          doc_origem = ?, 
          estoque = ?, 
          valor = ?, 
          situacao = ?, 
          observacao = ?, 
-         conta_contabil = ?
+         conta_contabil = ?,
+         descricao = ?
       WHERE id = ?
    `;
       const values = [
          data.data_de_entrada,
          data.quantidade,
          data.tipo_tombo,
-         data.tombo_inicial || null, // Usamos tombo_inicial como tombo
+         data.tombo || null,
+         data.tombo_final || null,
+         data.tombo_lote_manual ? JSON.stringify(data.tombo_lote_manual) : null,
          data.categoria,
          data.doc_origem,
          data.estoque,
@@ -101,16 +106,19 @@ class EstoqueModel {
          data.situacao,
          data.observacao,
          data.conta_contabil,
+         data.descricao,
          id,
       ];
 
       try {
-         if (data.tombo_inicial && data.tombo_inicial.toString().length !== 6) {
-            throw new Error(
-               `O tombo ${data.tombo_inicial} deve ter exatamente 6 dígitos.`
+         console.log('Executando query de atualização com valores:', values);
+         const [result] = await connection.execute(query, values);
+         console.log('Resultado da query:', result);
+         if (result.affectedRows === 0) {
+            console.warn(
+               `Nenhuma linha afetada ao atualizar tombamento com ID ${id}`
             );
          }
-         const [result] = await connection.execute(query, values);
          return result.affectedRows;
       } catch (error) {
          console.error('Erro ao atualizar tombamento:', error);
@@ -145,14 +153,8 @@ class EstoqueModel {
       observacao,
       tipo_tombo = 'AUTO'
    ) => {
-      if (
-         !Number.isInteger(Number(tombo)) ||
-         tombo < 0 ||
-         tombo.toString().length !== 6
-      ) {
-         throw new Error(
-            'O tombo deve ser um número inteiro de exatamente 6 dígitos.'
-         );
+      if (!Number.isInteger(Number(tombo)) || tombo <= 0) {
+         throw new Error('O tombo deve ser um número inteiro positivo.');
       }
       const query = `
       INSERT INTO estoqueatual (
@@ -194,9 +196,9 @@ class EstoqueModel {
    `;
       try {
          for (const item of itens) {
-            if (item.tombo.toString().length !== 6) {
+            if (!Number.isInteger(Number(item.tombo)) || item.tombo <= 0) {
                throw new Error(
-                  `O tombo ${item.tombo} deve ter exatamente 6 dígitos.`
+                  `O tombo ${item.tombo} deve ser um número inteiro positivo.`
                );
             }
             await connection.execute(query, [
@@ -227,14 +229,14 @@ class EstoqueModel {
       INSERT INTO registrodetombamento (
          data_de_entrada, quantidade, tipo_tombo, tombo, categoria, 
          doc_origem, estoque, valor, situacao, observacao, 
-         conta_contabil
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         conta_contabil, descricao
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
    `;
       try {
          for (const item of itens) {
-            if (item.tombo.toString().length !== 6) {
+            if (!Number.isInteger(Number(item.tombo)) || item.tombo <= 0) {
                throw new Error(
-                  `O tombo ${item.tombo} deve ter exatamente 6 dígitos.`
+                  `O tombo ${item.tombo} deve ser um número inteiro positivo.`
                );
             }
             await connection.execute(query, [
@@ -249,6 +251,7 @@ class EstoqueModel {
                item.situacao,
                item.observacao,
                item.conta_contabil,
+               item.descricao,
             ]);
          }
          return itens.length;
@@ -296,10 +299,33 @@ class EstoqueModel {
 
    // Método para obter informações de um item no tombamento pelo ID
    getInfoByIdTombamento = async (id) => {
-      const query = `SELECT * FROM registrodetombamento WHERE id = ?`;
+      const query = `
+      SELECT 
+         id,
+         data_de_entrada,
+         quantidade,
+         tipo_tombo,
+         tombo,
+         tombo_final,
+         tombo_lote_manual,
+         categoria,
+         doc_origem,
+         estoque,
+         valor,
+         situacao,
+         observacao,
+         conta_contabil,
+         descricao
+      FROM registrodetombamento 
+      WHERE id = ?
+   `;
       try {
          const [results] = await connection.execute(query, [id]);
-         return results[0] || null;
+         const item = results[0] || null;
+         if (item && item.tombo_lote_manual) {
+            item.tombo_lote_manual = JSON.parse(item.tombo_lote_manual);
+         }
+         return item;
       } catch (error) {
          console.error('Erro ao buscar item no tombamento por ID:', error);
          throw error;
@@ -347,9 +373,9 @@ class EstoqueModel {
       const query = `
       SELECT tombo 
       FROM (
-         SELECT tombo FROM estoqueatual WHERE LENGTH(tombo) = 6
+         SELECT tombo FROM estoqueatual
          UNION 
-         SELECT tombo FROM registrodetombamento WHERE LENGTH(tombo) = 6
+         SELECT tombo FROM registrodetombamento
       ) AS combined 
       ORDER BY tombo DESC 
       LIMIT 1

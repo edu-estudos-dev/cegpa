@@ -100,5 +100,6 @@ router.get('/tombamento/editar/:id', estoqueController.editarTombamento);
 
 router.delete('/tombamento/excluir/:id', estoqueController.excluirTombamento);
 router.get('/relatorio/tombamento', estoqueController.gerarRelatorioTombamento);
+router.post('/tombamento/atualizar/:id', estoqueController.atualizarTombamento);
 
 export default router;
