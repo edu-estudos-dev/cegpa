@@ -371,18 +371,15 @@ class EstoqueModel {
    // Método para obter o último tombo
    getUltimoTombo = async () => {
       const query = `
-      SELECT tombo 
-      FROM (
-         SELECT tombo FROM estoqueatual
-         UNION 
-         SELECT tombo FROM registrodetombamento
-      ) AS combined 
-      ORDER BY tombo DESC 
-      LIMIT 1
+      SELECT MAX(tombo) AS ultimo_tombo 
+      FROM estoqueatual
    `;
       try {
          const [results] = await connection.execute(query);
-         return results[0]?.tombo ? parseInt(results[0].tombo) : 0;
+         console.log('Resultados da query getUltimoTombo:', results);
+         return results[0]?.ultimo_tombo
+            ? parseInt(results[0].ultimo_tombo)
+            : 0;
       } catch (error) {
          console.error('Erro ao obter último tombo:', error);
          throw error;

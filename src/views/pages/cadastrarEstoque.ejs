@@ -24,15 +24,15 @@
       }
 
       @media (max-width: 1366px) {
-         *{
+         * {
             font-size: 0.83rem;
          }
 
-         .caixa-externa{
+         .caixa-externa {
             margin: 0 auto;
          }
-         
-         .w-10{
+
+         .w-10 {
             width: 12%;
          }
       }
@@ -82,9 +82,9 @@
                   <div id="tombo_inicial-div" class="mb-3">
                      <label class="form-label fw-bold">Próximo Tombo</label>
                      <input id="tombo_inicial" type="text" class="form-control" name="tombo_inicial" readonly>
+                     <input id="tombo_lote_manual" type="hidden" name="tombo_lote_manual">
+                     <input id="tombo_final" type="hidden" name="tombo_final">
                   </div>
-                  <input id="tombo_lote_manual" type="hidden" name="tombo_lote_manual">
-                  <input id="tombo_final" type="hidden" name="tombo_final">
                </div>
 
                <div class="col-md-2">
@@ -101,7 +101,7 @@
                         <option value="gaveteiro">GAVETEIRO</option>
                         <option value="armario">ARMÁRIO</option>
                         <option value="estante">ESTANTE</option>
-                        <option value="desktop">DESKTOP</option>
+                        <option value="t.i.">T.I.</option>
                         <option value="arquivo">ARQUIVO</option>
                         <option value="beliche">BELICHE</option>
                         <option value="lousa">LOUSA</option>
@@ -120,7 +120,6 @@
                   </div>
                </div>
 
-               
                <div class="col-md-2">
                   <div id="destino_dados-div" class="mb-3">
                      <label class="form-label fw-bold">Destino dos Dados</label>
@@ -152,7 +151,7 @@
                </div>
             </div>
 
-            <!-- Linha 3: Conta Contábil, Local de Estoque e Destino dos Dados -->
+            <!-- Linha 3: Conta Contábil, Local de Estoque e Conservação -->
             <div id="row3" class="row">
                <div class="col-md-4">
                   <div id="conta_contabil-div" class="mb-3">
@@ -219,12 +218,14 @@
                <div class="col-md-4">
                   <div id="estoque-div" class="mb-3">
                      <label class="form-label fw-bold">Local de Estoque</label>
-                     <select id="estoque" class="form-select" name="estoque">
-                        <option selected>Escolha uma opção...</option>
-                        <option value="galpao">ESTOQUE COLOG - GALPÃO</option>
-                        <option value="sala">ESTOQUE COLOG - SALA</option>
-                        <option value="cabemce">ESTOQUE COLOG - CABEMCE</option>
-                     </select>
+                     <div id="estoque-container">
+                        <select id="estoque" class="form-select" name="estoque">
+                           <option selected>Escolha uma opção...</option>
+                           <option value="galpao">ESTOQUE COLOG - GALPÃO</option>
+                           <option value="sala">ESTOQUE COLOG - SALA</option>
+                           <option value="cabemce">ESTOQUE COLOG - CABEMCE</option>
+                        </select>
+                     </div>
                   </div>
                </div>
 
@@ -242,7 +243,6 @@
                      </select>
                   </div>
                </div>
-
             </div>
 
             <!-- Linha 4: Observação -->
@@ -402,6 +402,31 @@
          }
       }
 
+      // Função para alternar o campo de estoque entre select e input
+      function toggleEstoqueInput() {
+         const destinoDados = document.getElementById('destino_dados').value;
+         const estoqueContainer = document.getElementById('estoque-container');
+         const currentEstoqueValue = document.getElementById('estoque')?.value || '';
+         const isValidEstoqueValue = ['galpao', 'sala', 'cabemce'].includes(currentEstoqueValue);
+
+         if (destinoDados === 'registrodetombamento') {
+            // Substituir por input de texto sem o placeholder "Escolha uma opção..."
+            estoqueContainer.innerHTML = `
+               <input id="estoque" type="text" class="form-control" name="estoque" placeholder="Digite o local de estoque" value="${isValidEstoqueValue ? currentEstoqueValue : ''}">
+            `;
+         } else {
+            // Restaurar o select
+            estoqueContainer.innerHTML = `
+               <select id="estoque" class="form-select" name="estoque">
+                  <option value="Escolha uma opção..." ${!isValidEstoqueValue ? 'selected' : ''}>Escolha uma opção...</option>
+                  <option value="galpao" ${currentEstoqueValue === 'galpao' ? 'selected' : ''}>ESTOQUE COLOG - GALPÃO</option>
+                  <option value="sala" ${currentEstoqueValue === 'sala' ? 'selected' : ''}>ESTOQUE COLOG - SALA</option>
+                  <option value="cabemce" ${currentEstoqueValue === 'cabemce' ? 'selected' : ''}>ESTOQUE COLOG - CABEMCE</option>
+               </select>
+            `;
+         }
+      }
+     
       // Função para gerar inputs dinâmicos de tombos no modal Manual
       function gerarInputsTombo(quantidade) {
          const container = document.getElementById('tombo_inputs_container');
@@ -424,7 +449,6 @@
       });
 
       // Evento para o botão "Confirmar" do modal Manual
-      // Validar inputs de tombo no modal Manual
       document.getElementById('confirmarLoteBtn').addEventListener('click', function () {
          const inputs = document.querySelectorAll('.tombo_lote_input');
          const tombos = Array.from(inputs).map(input => parseInt(input.value)).filter(valor => !isNaN(valor));
@@ -457,7 +481,7 @@
          manualModal.hide();
       });
 
-      // Validar inputs de tombo no modal LOTE
+      // Evento para o botão "Confirmar" do modal LOTE
       document.getElementById('confirmarLoteIntervaloBtn').addEventListener('click', function () {
          const tomboInicial = parseInt(document.getElementById('tombo_inicial_lote').value);
          const tomboFinal = parseInt(document.getElementById('tombo_final_lote').value);
@@ -498,43 +522,6 @@
          }
       });
 
-      // Função para atualizar quantidade calculada no modal LOTE
-      function atualizarQuantidadeCalculada() {
-         const inicio = parseInt(document.getElementById('tombo_inicial_lote').value) || 0;
-         const fim = parseInt(document.getElementById('tombo_final_lote').value) || 0;
-         const quantidade = fim >= inicio ? fim - inicio + 1 : 0;
-         document.getElementById('quantidade_calculada').value = quantidade;
-      }
-
-      // Adicionar listeners para atualizar quantidade calculada no modal LOTE
-      document.getElementById('tombo_inicial_lote').addEventListener('input', atualizarQuantidadeCalculada);
-      document.getElementById('tombo_final_lote').addEventListener('input', atualizarQuantidadeCalculada);
-
-      // Evento para o botão "Confirmar" do modal LOTE
-      document.getElementById('confirmarLoteIntervaloBtn').addEventListener('click', function () {
-         const tomboInicial = parseInt(document.getElementById('tombo_inicial_lote').value);
-         const tomboFinal = parseInt(document.getElementById('tombo_final_lote').value);
-
-         if (isNaN(tomboInicial) || isNaN(tomboFinal)) {
-            alert('Por favor, insira valores válidos para tombo inicial e final.');
-            return;
-         }
-
-         if (tomboInicial >= tomboFinal) {
-            alert('O tombo inicial deve ser menor que o tombo final.');
-            return;
-         }
-
-         const quantidade = tomboFinal - tomboInicial + 1;
-         document.getElementById('qtd').value = quantidade;
-         document.getElementById('quantidade_hidden').value = quantidade;
-         document.getElementById('tombo_inicial').value = tomboInicial;
-         document.getElementById('tombo_final').value = tomboFinal;
-
-         const loteModal = bootstrap.Modal.getInstance(document.getElementById('LoteModal'));
-         loteModal.hide();
-      });
-
       // Limpar modal LOTE ao fechar sem confirmar
       document.getElementById('LoteModal').addEventListener('hidden.bs.modal', function () {
          document.getElementById('tombo_inicial_lote').value = '';
@@ -547,12 +534,27 @@
          }
       });
 
+      // Função para atualizar quantidade calculada no modal LOTE
+      function atualizarQuantidadeCalculada() {
+         const inicio = parseInt(document.getElementById('tombo_inicial_lote').value) || 0;
+         const fim = parseInt(document.getElementById('tombo_final_lote').value) || 0;
+         const quantidade = fim >= inicio ? fim - inicio + 1 : 0;
+         document.getElementById('quantidade_calculada').value = quantidade;
+      }
+
+      // Adicionar listeners para atualizar quantidade calculada no modal LOTE
+      document.getElementById('tombo_inicial_lote').addEventListener('input', atualizarQuantidadeCalculada);
+      document.getElementById('tombo_final_lote').addEventListener('input', atualizarQuantidadeCalculada);
+
       // Sincronizar o campo visível "quantidade_visible" com o campo oculto "quantidade"
       document.getElementById('qtd').addEventListener('input', function () {
          const quantidade = this.value;
          document.getElementById('quantidade_hidden').value = quantidade;
          atualizarTomboInicial();
       });
+
+      // Evento para alternar o campo de estoque com base no destino_dados
+      document.getElementById('destino_dados').addEventListener('change', toggleEstoqueInput);
 
       // Validação do formulário e envio assíncrono
       document.getElementById('formulario-entrada').addEventListener('submit', async function (event) {
@@ -584,7 +586,7 @@
          if (!descricao) return alert('Por favor, preencha a Descrição.');
          if (situacao === 'Escolha uma opção...') return alert('Por favor, selecione o Estado de Conservação.');
          if (contaContabil === 'Escolha uma opção...') return alert('Por favor, selecione a Conta Contábil.');
-         if (estoque === 'Escolha uma opção...') return alert('Por favor, selecione o Local de Estoque.');
+         if (!estoque || estoque === 'Escolha uma opção...') return alert('Por favor, preencha o Local de Estoque.');
          if (!destinoDados) return alert('Por favor, selecione o Destino dos Dados.');
 
          const formDataObj = {
@@ -659,6 +661,9 @@
          document.getElementById('destino_dados').value = 'estoqueatual';
          document.getElementById('qtd').disabled = false;
 
+         // Restaurar o campo de estoque para select
+         toggleEstoqueInput();
+
          // Limpar os modais
          document.getElementById('qtd_itens_lote').value = '1';
          document.getElementById('tombo_inputs_container').innerHTML = '';
@@ -680,6 +685,7 @@
       document.addEventListener('DOMContentLoaded', function () {
          setDataAtual();
          atualizarTomboInicial();
+         toggleEstoqueInput(); // Inicializar o campo de estoque com base no destino_dados inicial
       });
    </script>
 </body>
