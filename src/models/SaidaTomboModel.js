@@ -1,4 +1,5 @@
 import connection from '../../db_config/connection.js';
+import sequenciaModel from '../models/sequenciaModel.js';
 
 export default {
    // Busca tombos disponíveis
@@ -22,15 +23,12 @@ export default {
    // Gera um número único para o termo de recebimento
    async gerarTermoRecebimento() {
       try {
-         const [rows] = await connection.query(`
-            SELECT MAX(CAST(SUBSTRING_INDEX(doc_saida, "-", 1) AS UNSIGNED)) as ultimo_numero 
-            FROM saida_tombo 
-            WHERE doc_saida LIKE "%-____"
-         `);
-         const ultimoNumero = rows[0].ultimo_numero || 0;
          const anoAtual = new Date().getFullYear();
-         const novoNumero = String(ultimoNumero + 1).padStart(5, '0');
-         return `${novoNumero}-${anoAtual}`;
+         const sequenciaAtual = await sequenciaModel.getSequenciaAtual(
+            anoAtual
+         );
+         const novoNumero = String(sequenciaAtual).padStart(5, '0'); // Formato com 5 dígitos
+         return `${novoNumero}/${anoAtual}`; // Formato NNNNN/AAAA (ex.: 00318/2025)
       } catch (error) {
          console.error('Erro ao gerar termo:', error);
          throw error;
@@ -45,10 +43,15 @@ export default {
             `SELECT tombo FROM registrodetombamento WHERE tombo IN (?) AND situacao != 'inservivel'`,
             [tombos]
          );
-         const tombosExistentesArray = tombosExistentes.map(t => t.tombo);
-         const tombosInvalidos = tombos.filter(t => !tombosExistentesArray.includes(t));
+         const tombosExistentesArray = tombosExistentes.map((t) => t.tombo);
+         const tombosInvalidos = tombos.filter(
+            (t) => !tombosExistentesArray.includes(t)
+         );
          if (tombosInvalidos.length > 0) {
-            return { valido: false, erro: `Tombos inválidos: ${tombosInvalidos.join(', ')}` };
+            return {
+               valido: false,
+               erro: `Tombos inválidos: ${tombosInvalidos.join(', ')}`,
+            };
          }
 
          // Verifica se os tombos já estão em saída sem devolução
@@ -57,7 +60,12 @@ export default {
             [tombos]
          );
          if (tombosEmSaida.length > 0) {
-            return { valido: false, erro: `Tombos já em saída: ${tombosEmSaida.map(t => t.tombo).join(', ')}` };
+            return {
+               valido: false,
+               erro: `Tombos já em saída: ${tombosEmSaida
+                  .map((t) => t.tombo)
+                  .join(', ')}`,
+            };
          }
 
          return { valido: true };
@@ -82,18 +90,40 @@ export default {
    },
 
    // Insere registros de saída na tabela saida_tombo
-   async registrarSaida(tombos, doc_saida, referencia, destino, postoGrad, mf_recebedor, tel_recebedor, nome_do_recebedor, observacao, dataSaida) {
+   async registrarSaida(
+      tombos,
+      doc_saida,
+      referencia,
+      destino,
+      postoGrad,
+      mf_recebedor,
+      tel_recebedor,
+      nome_do_recebedor,
+      observacao,
+      dataSaida
+   ) {
       try {
          for (const tombo of tombos) {
             await connection.query(
                `INSERT INTO saida_tombo (tombo, doc_saida, referencia, destino, posto_grad, mf_recebedor, tel_recebedor, nome_recebedor, observacao, data_saida)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-               [tombo, doc_saida, referencia, destino, postoGrad, mf_recebedor, tel_recebedor, nome_do_recebedor, observacao, dataSaida]
+               [
+                  tombo,
+                  doc_saida,
+                  referencia,
+                  destino,
+                  postoGrad,
+                  mf_recebedor,
+                  tel_recebedor,
+                  nome_do_recebedor,
+                  observacao,
+                  dataSaida,
+               ]
             );
          }
       } catch (error) {
          console.error('Erro ao registrar saída:', error);
          throw error;
       }
-   }
+   },
 };

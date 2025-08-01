@@ -4,7 +4,9 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import SaidaTomboModel from '../models/SaidaTomboModel.js';
-import sequenciaModel from '../models/sequenciaModel.js'; // Importar o modelo de sequência
+import sequenciaModel from '../models/sequenciaModel.js';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale'; // Corrigido para importar de 'date-fns/locale'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,11 +38,14 @@ export default {
    async verificarTermoExistente(req, res) {
       const { numero } = req.query;
       try {
+         if (!/^\d{5}\/\d{4}$/.test(numero)) {
+            return res.status(400).json({ error: 'Formato de termo inválido: esperado NNNNN/AAAA' });
+         }
          const pdfPath = path.join(
             __dirname,
             '../../pdfs',
-            `Tombo_Termo_${numero}.pdf`
-         ); // Ajustado para pdfs
+            `Termo_${numero.replace(/\//g, '-')}.pdf`
+         );
          const existe = fs.existsSync(pdfPath);
          res.json({ existe });
       } catch (error) {
@@ -61,6 +66,7 @@ export default {
          nome_do_recebedor,
          observacao,
          modoDocSaida,
+         doc_saida // Adicionado para suportar o número do termo enviado pelo frontend
       } = req.body;
 
       const usuarioLogado = req.user;
@@ -71,9 +77,7 @@ export default {
       try {
          // Validações
          if (!tombos || tombos.length === 0) {
-            return res
-               .status(400)
-               .json({ error: 'Selecione pelo menos um tombo' });
+            return res.status(400).json({ error: 'Selecione pelo menos um tombo' });
          }
          if (
             !referencia ||
@@ -81,11 +85,25 @@ export default {
             !postoGrad ||
             !mf_recebedor ||
             !tel_recebedor ||
-            !nome_do_recebedor
+            !nome_do_recebedor ||
+            !doc_saida
          ) {
-            return res
-               .status(400)
-               .json({ error: 'Todos os campos são obrigatórios' });
+            return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+         }
+
+         // Validação do formato do termo
+         if (!/^\d{5}\/\d{4}$/.test(doc_saida)) {
+            return res.status(400).json({ error: 'Formato de termo inválido: esperado NNNNN/AAAA' });
+         }
+
+         // Validação para modo AUTO
+         const anoAtual = new Date().getFullYear();
+         if (modoDocSaida === 'AUTO') {
+            const sequenciaAtual = await sequenciaModel.getSequenciaAtual(anoAtual);
+            const expectedDocSaida = `${sequenciaAtual.toString().padStart(5, '0')}/${anoAtual}`;
+            if (doc_saida !== expectedDocSaida) {
+               return res.status(400).json({ error: 'Número do termo inválido para o modo AUTO' });
+            }
          }
 
          // Verifica se os tombos são válidos e estão disponíveis
@@ -94,14 +112,15 @@ export default {
             return res.status(400).json({ error: validacao.erro });
          }
 
-         // Obtém o termo atual sem incrementar
-         const anoAtual = new Date().getFullYear();
-         const sequenciaAtual = await sequenciaModel.getSequenciaAtual(
-            anoAtual
+         // Verifica se o PDF já existe
+         const pdfPath = path.join(
+            __dirname,
+            '../../pdfs',
+            `Termo_${doc_saida.replace(/\//g, '-')}.pdf`
          );
-         const doc_saida = `${sequenciaAtual
-            .toString()
-            .padStart(3, '0')}/${anoAtual}`; // Ajustado para 3 dígitos (ex.: 302/2025)
+         if (fs.existsSync(pdfPath)) {
+            return res.status(400).json({ error: 'Já existe um PDF com esse número de termo' });
+         }
 
          // Gera o PDF com jsPDF
          const doc = new jsPDF({
@@ -142,7 +161,7 @@ export default {
          const headerYStart = 35;
          const headerData = [
             `Nº Termo: ${doc_saida}`,
-            `Data: ${new Date().toLocaleDateString('pt-BR')}`,
+            `Data: ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`,
             `Destino: ${destino.toUpperCase()}`,
             `Responsável: ${postoGrad.toUpperCase()} ${nome_do_recebedor.toUpperCase()}`,
             `MF: ${mf_recebedor}`,
@@ -179,9 +198,7 @@ export default {
          console.log('Dados retornados por getTombosInfo:', tombosInfo); // Log para depuração
          for (const tombo of tombosInfo) {
             const descricao = tombo.descricao
-               ? tombo.descricao
-                    .toUpperCase()
-                    .replace('RETAINGLIAR', 'RETANGULAR')
+               ? tombo.descricao.toUpperCase().replace('RETAINGLIAR', 'RETANGULAR')
                : 'N/A';
             items.push([ordem++, tombo.tombo || 'N/A', descricao]);
          }
@@ -291,11 +308,6 @@ export default {
          });
 
          // Salva o PDF
-         const pdfPath = path.join(
-            __dirname,
-            '../../pdfs',
-            `Tombo_Termo_${doc_saida.replace(/\//g, '-')}.pdf`
-         );
          const pdfDir = path.dirname(pdfPath);
          if (!fs.existsSync(pdfDir)) {
             fs.mkdirSync(pdfDir, { recursive: true });
@@ -303,10 +315,7 @@ export default {
          doc.save(pdfPath);
 
          // Registra a saída
-         const dataSaida = new Date()
-            .toISOString()
-            .slice(0, 19)
-            .replace('T', ' ');
+         const dataSaida = new Date().toISOString().slice(0, 19).replace('T', ' ');
          await SaidaTomboModel.registrarSaida(
             tombos,
             doc_saida,
@@ -327,7 +336,7 @@ export default {
 
          res.status(200).json({
             success: true,
-            pdfPath: `/pdfs/Tombo_Termo_${doc_saida.replace(/\//g, '-')}.pdf`,
+            pdfPath: `/pdfs/Termo_${doc_saida.replace(/\//g, '-')}.pdf`,
             message: 'Saída registrada com sucesso!',
          });
       } catch (error) {
