@@ -368,24 +368,24 @@ class EstoqueModel {
       }
    };
 
-   // Método para obter o último tombo
-   getUltimoTombo = async () => {
-      const query = `
-      SELECT MAX(tombo) AS ultimo_tombo 
-      FROM estoqueatual
-   `;
+   // Obtém o último tombo considerando estoqueatual e registrodetombamento
+   static async getUltimoTombo() {
       try {
+         const query = `
+         SELECT MAX(CAST(tombo AS UNSIGNED)) as ultimo_tombo 
+         FROM (
+            SELECT tombo FROM estoqueatual
+            UNION
+            SELECT tombo FROM registrodetombamento
+         ) AS combined_tombos
+      `;
          const [results] = await connection.execute(query);
-         console.log('Resultados da query getUltimoTombo:', results);
-         return results[0]?.ultimo_tombo
-            ? parseInt(results[0].ultimo_tombo)
-            : 0;
+         return results[0].ultimo_tombo || 0;
       } catch (error) {
          console.error('Erro ao obter último tombo:', error);
          throw error;
       }
-   };
-
+   }  
    // Método para obter quantidade única de itens no estoque
    getQtdeUnicaEstoque = async () => {
       const query = `

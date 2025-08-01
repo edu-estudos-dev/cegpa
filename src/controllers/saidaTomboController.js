@@ -1,8 +1,10 @@
-import PDFDocument from 'pdfkit';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import SaidaTomboModel from '../models/SaidaTomboModel.js';
+import sequenciaModel from '../models/sequenciaModel.js'; // Importar o modelo de sequência
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,7 +36,11 @@ export default {
    async verificarTermoExistente(req, res) {
       const { numero } = req.query;
       try {
-         const pdfPath = path.join(__dirname, '../../pdfs', `Tombo_Termo_${numero}.pdf`); // Ajustado para pdfs
+         const pdfPath = path.join(
+            __dirname,
+            '../../pdfs',
+            `Tombo_Termo_${numero}.pdf`
+         ); // Ajustado para pdfs
          const existe = fs.existsSync(pdfPath);
          res.json({ existe });
       } catch (error) {
@@ -46,17 +52,40 @@ export default {
    // Registra a saída de tombos e gera o PDF
    async registrarSaida(req, res) {
       const {
-         tombos, doc_saida, referencia, destino, postoGrad, mf_recebedor,
-         tel_recebedor, nome_do_recebedor, observacao, modoDocSaida
+         tombos,
+         referencia,
+         destino,
+         postoGrad,
+         mf_recebedor,
+         tel_recebedor,
+         nome_do_recebedor,
+         observacao,
+         modoDocSaida,
       } = req.body;
+
+      const usuarioLogado = req.user;
+      const nomeResponsavel = usuarioLogado?.nome_completo || 'Desconhecido';
+      const mfResponsavel = usuarioLogado?.matricula || 'N/A';
+      const postoGradResponsavel = usuarioLogado?.posto_grad || 'N/A';
 
       try {
          // Validações
          if (!tombos || tombos.length === 0) {
-            return res.status(400).json({ error: 'Selecione pelo menos um tombo' });
+            return res
+               .status(400)
+               .json({ error: 'Selecione pelo menos um tombo' });
          }
-         if (!doc_saida || !referencia || !destino || !postoGrad || !mf_recebedor || !tel_recebedor || !nome_do_recebedor) {
-            return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+         if (
+            !referencia ||
+            !destino ||
+            !postoGrad ||
+            !mf_recebedor ||
+            !tel_recebedor ||
+            !nome_do_recebedor
+         ) {
+            return res
+               .status(400)
+               .json({ error: 'Todos os campos são obrigatórios' });
          }
 
          // Verifica se os tombos são válidos e estão disponíveis
@@ -65,64 +94,249 @@ export default {
             return res.status(400).json({ error: validacao.erro });
          }
 
-         // Gera o PDF
-         const pdfPath = path.join(__dirname, '../../pdfs', `Tombo_Termo_${doc_saida}.pdf`); // Ajustado para pdfs
+         // Obtém o termo atual sem incrementar
+         const anoAtual = new Date().getFullYear();
+         const sequenciaAtual = await sequenciaModel.getSequenciaAtual(
+            anoAtual
+         );
+         const doc_saida = `${sequenciaAtual
+            .toString()
+            .padStart(3, '0')}/${anoAtual}`; // Ajustado para 3 dígitos (ex.: 302/2025)
+
+         // Gera o PDF com jsPDF
+         const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+         });
+
+         // Caminho da imagem
+         const imagePath = path.join(
+            __dirname,
+            '../../public/images/cabeçalho pmce.png'
+         );
+         const imageData = fs.readFileSync(imagePath).toString('base64');
+
+         // Desenha a borda
+         doc.setDrawColor(0);
+         doc.setLineWidth(0.5);
+         doc.rect(
+            5,
+            5,
+            doc.internal.pageSize.width - 10,
+            doc.internal.pageSize.height - 10
+         );
+
+         // Adiciona a imagem
+         doc.addImage(imageData, 'PNG', 67.5, 8, 70, 15);
+
+         // Título e cabeçalho
+         doc.setFontSize(10);
+         doc.text(
+            'TERMO DE RECEBIMENTO E RESPONSABILIDADE - CEGPA/COLOG',
+            105,
+            28,
+            { align: 'center' }
+         );
+
+         const headerYStart = 35;
+         const headerData = [
+            `Nº Termo: ${doc_saida}`,
+            `Data: ${new Date().toLocaleDateString('pt-BR')}`,
+            `Destino: ${destino.toUpperCase()}`,
+            `Responsável: ${postoGrad.toUpperCase()} ${nome_do_recebedor.toUpperCase()}`,
+            `MF: ${mf_recebedor}`,
+            `Contato: ${tel_recebedor}`,
+            `Referência: ${referencia.toUpperCase()}`,
+         ];
+         let headerYOffset = 0;
+         headerData.forEach((line, index) => {
+            if (line.startsWith('Nº Termo')) {
+               doc.setFont('helvetica', 'bold');
+               doc.setFontSize(12);
+               doc.text(line, 14, headerYStart + headerYOffset);
+               doc.setFont('helvetica', 'normal');
+               doc.setFontSize(10);
+            } else {
+               doc.text(line, 14, headerYStart + headerYOffset);
+            }
+            headerYOffset += 5;
+         });
+
+         // Observações
+         const obsText = (observacao || 'Nenhuma').toUpperCase();
+         const obsLines = doc.splitTextToSize(`Observações: ${obsText}`, 170);
+         obsLines.forEach((obsLine) => {
+            doc.text(obsLine, 14, headerYStart + headerYOffset);
+            headerYOffset += 5;
+         });
+
+         // Tabela de tombos (sem a coluna "Situação")
+         const tableStartY = headerYStart + headerYOffset + 2;
+         const items = [];
+         let ordem = 1;
+         const tombosInfo = await SaidaTomboModel.getTombosInfo(tombos);
+         console.log('Dados retornados por getTombosInfo:', tombosInfo); // Log para depuração
+         for (const tombo of tombosInfo) {
+            const descricao = tombo.descricao
+               ? tombo.descricao
+                    .toUpperCase()
+                    .replace('RETAINGLIAR', 'RETANGULAR')
+               : 'N/A';
+            items.push([ordem++, tombo.tombo || 'N/A', descricao]);
+         }
+
+         doc.autoTable({
+            startY: tableStartY,
+            head: [['ORD.', 'TOMBO', 'DESCRIÇÃO']],
+            body: items,
+            styles: {
+               fontSize: 8,
+               halign: 'center',
+               cellPadding: 1.5,
+               overflow: 'linebreak',
+            },
+            headStyles: {
+               fillColor: [34, 139, 34],
+               textColor: 255,
+               fontStyle: 'bold',
+            },
+            columnStyles: {
+               0: { cellWidth: 15 },
+               1: { cellWidth: 35 },
+               2: { cellWidth: 130, halign: 'left' },
+            },
+            margin: { left: 13, right: 7, bottom: 10 },
+            tableWidth: 'wrap',
+            pageBreak: 'auto',
+            didDrawPage: (data) => {
+               doc.rect(
+                  5,
+                  5,
+                  doc.internal.pageSize.width - 10,
+                  doc.internal.pageSize.height - 10
+               );
+            },
+         });
+
+         // Cláusula de recebimento
+         const tombosList = tombos.map((t) => t.tombo || t).join(', ');
+         const clausula = `Eu, ${nome_do_recebedor.toUpperCase()} estou recebendo as etiquetas dos tombos e me comprometo em afixá-las nos referidos itens.`;
+         const clausulaLines = doc.splitTextToSize(clausula, 180);
+         const clausulaY = tableStartY + items.length * 10 + 10; // Ajuste dinâmico após a tabela
+         clausulaLines.forEach((line, index) => {
+            doc.setFontSize(8);
+            doc.text(line, 14, clausulaY + index * 5);
+         });
+
+         // Assinaturas na parte inferior
+         const pageHeight = doc.internal.pageSize.height;
+         const totalPages = doc.internal.getNumberOfPages();
+         doc.setPage(totalPages);
+
+         const signatureY = pageHeight - 20;
+         const lineLength = 50;
+         const gapBetweenBlocks = 10;
+         const totalBlockWidth = lineLength * 3 + gapBetweenBlocks * 2;
+         const startX = 5 + (200 - totalBlockWidth) / 2;
+
+         const leftPos = startX + lineLength / 2;
+         const centerPos = leftPos + lineLength + gapBetweenBlocks;
+         const rightPos = centerPos + lineLength + gapBetweenBlocks;
+
+         doc.setLineWidth(0.3);
+         doc.line(startX, signatureY, startX + lineLength, signatureY);
+         doc.line(
+            centerPos - lineLength / 2,
+            signatureY,
+            centerPos + lineLength / 2,
+            signatureY
+         );
+         doc.line(
+            rightPos - lineLength / 2,
+            signatureY,
+            rightPos + lineLength / 2,
+            signatureY
+         );
+
+         doc.setFontSize(6);
+         doc.text(
+            `${postoGrad.toUpperCase()} ${nome_do_recebedor.toUpperCase()}\nMF: ${mf_recebedor}`,
+            leftPos,
+            signatureY + 4,
+            { align: 'center' }
+         );
+         doc.text('(Recebedor)', leftPos, signatureY + 8.5, {
+            align: 'center',
+         });
+
+         doc.text(
+            'TEN. CEL. ALLAN KARDEK\nMF: 135.907-1-0',
+            centerPos,
+            signatureY + 4,
+            { align: 'center' }
+         );
+         doc.text('Comandante CEGPA', centerPos, signatureY + 8.5, {
+            align: 'center',
+         });
+
+         doc.text(
+            `${postoGradResponsavel.toUpperCase()} ${nomeResponsavel.toUpperCase()}\nMF: ${mfResponsavel}`,
+            rightPos,
+            signatureY + 4,
+            { align: 'center' }
+         );
+         doc.text('(Responsável pela entrega)', rightPos, signatureY + 8.5, {
+            align: 'center',
+         });
+
+         // Salva o PDF
+         const pdfPath = path.join(
+            __dirname,
+            '../../pdfs',
+            `Tombo_Termo_${doc_saida.replace(/\//g, '-')}.pdf`
+         );
          const pdfDir = path.dirname(pdfPath);
          if (!fs.existsSync(pdfDir)) {
-            fs.mkdirSync(pdfDir, { recursive: true }); // Garante que a pasta pdfs exista
+            fs.mkdirSync(pdfDir, { recursive: true });
          }
-         const doc = new PDFDocument();
-         const stream = fs.createWriteStream(pdfPath);
+         doc.save(pdfPath);
 
-         // Tratamento de erro no stream
-         stream.on('error', (err) => {
-            console.error('Erro ao escrever o PDF:', err);
-            res.status(500).json({ error: 'Erro ao gerar o PDF' });
-         });
+         // Registra a saída
+         const dataSaida = new Date()
+            .toISOString()
+            .slice(0, 19)
+            .replace('T', ' ');
+         await SaidaTomboModel.registrarSaida(
+            tombos,
+            doc_saida,
+            referencia,
+            destino,
+            postoGrad,
+            mf_recebedor,
+            tel_recebedor,
+            nome_do_recebedor,
+            observacao,
+            dataSaida
+         );
 
-         doc.pipe(stream);
-
-         doc.fontSize(12).text('Termo de Recebimento de Tombos', { align: 'center' });
-         doc.moveDown();
-         doc.text(`Número do Termo: ${doc_saida}`);
-         doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`);
-         doc.text(`Referência (NUP): ${referencia}`);
-         doc.text(`Destino: ${destino}`);
-         doc.text(`Posto/Graduação: ${postoGrad}`);
-         doc.text(`Matrícula Funcional: ${mf_recebedor}`);
-         doc.text(`Telefone: ${tel_recebedor}`);
-         doc.text(`Nome do Recebedor: ${nome_do_recebedor}`);
-         doc.moveDown();
-         doc.text('Tombos:', { underline: true });
-         const tombosInfo = await SaidaTomboModel.getTombosInfo(tombos);
-         tombosInfo.forEach(tombo => {
-            doc.text(`- Tombo: ${tombo.tombo} - ${tombo.descricao}`);
-         });
-         if (observacao) {
-            doc.moveDown();
-            doc.text('Observação:', { underline: true });
-            doc.text(observacao);
+         // Incrementa a sequência após o registro
+         if (modoDocSaida === 'AUTO') {
+            await sequenciaModel.incrementarSequencia(anoAtual);
          }
-         doc.end();
 
-         // Aguarda a finalização do stream antes de prosseguir
-         stream.on('finish', async () => {
-            try {
-               // Insere os registros na tabela saida_tombo
-               const dataSaida = new Date().toISOString().slice(0, 19).replace('T', ' ');
-               await SaidaTomboModel.registrarSaida(
-                  tombos, doc_saida, referencia, destino, postoGrad,
-                  mf_recebedor, tel_recebedor, nome_do_recebedor, observacao, dataSaida
-               );
-               res.json({ pdfPath: `/pdfs/Tombo_Termo_${doc_saida}.pdf` }); // Ajustado para /pdfs
-            } catch (error) {
-               console.error('Erro ao registrar saída:', error);
-               res.status(500).json({ error: 'Erro ao registrar saída' });
-            }
+         res.status(200).json({
+            success: true,
+            pdfPath: `/pdfs/Tombo_Termo_${doc_saida.replace(/\//g, '-')}.pdf`,
+            message: 'Saída registrada com sucesso!',
          });
       } catch (error) {
          console.error('Erro ao registrar saída:', error);
-         res.status(500).json({ error: 'Erro ao registrar saída' });
+         res.status(500).json({
+            success: false,
+            error: 'Erro interno no servidor',
+            details: error.message,
+         });
       }
-   }
+   },
 };

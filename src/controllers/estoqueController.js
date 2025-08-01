@@ -608,7 +608,7 @@ class EstoqueController {
 
          let tombos = [];
          if (safeData.tipo_tombo === 'AUTO') {
-            const ultimoTombo = await estoqueModel.getUltimoTombo();
+            const ultimoTombo = await estoqueModel.constructor.getUltimoTombo();
             const tomboInicial = ultimoTombo;
             for (let i = 0; i < safeData.quantidade; i++) {
                const novoTombo = tomboInicial + 1 + i;
@@ -750,7 +750,7 @@ class EstoqueController {
    // Método para obter o último tombo (endpoint para o frontend)
    fetchUltimoTombo = async (req, res) => {
       try {
-         const ultimoTombo = await estoqueModel.getUltimoTombo();
+         const ultimoTombo = await estoqueModel.constructor.getUltimoTombo();
          res.json({ ultimoTombo });
       } catch (error) {
          console.error('Erro ao obter o último tombo:', error);
