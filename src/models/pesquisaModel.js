@@ -175,20 +175,12 @@ class PesquisaModel {
                 queryEntraram,
                 paramsEntraram
             );
-            console.log(
-                'Quantidade de itens que entraram - queryEntraram:',
-                quantidadeEntraram
-            );
-
+   
             const [quantidadeSaidos] = await connection.execute(
                 querySaidos,
                 paramsSaidos
             );
-            console.log(
-                'Quantidade de itens que saíram - querySaidos:',
-                quantidadeSaidos
-            );
-
+     
             return {
                 quantidadeEntraram:
                     quantidadeEntraram[0].quantidadeEntraram || 0,

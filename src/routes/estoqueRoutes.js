@@ -56,6 +56,17 @@ router.get('/visualizar/itempago/:id', estoqueController.visualizarItemPago);
 /* ********************************************************************************
                   Rotas para SAÍDA de Tombos
 *********************************************************************************/
+// Nome: Mostrar Tabela de Tombos Usados
+router.get('/tombos-usados', isAuthenticated, saidaTomboController.getAllTombosUsados);
+
+// Nome: Visualizar Tombo Usado Específico
+router.get('/visualizar/tombo-usado/:id', isAuthenticated, saidaTomboController.visualizarTomboUsado);
+
+// Nome: Reverter Saída de Tombo (Apenas Admin)
+router.delete('/reverter-saida-tombo/:id', isAuthenticated, checkRole(['admin']), saidaTomboController.reverterSaida);
+
+// Nome: Gerar Relatório de Tombos Usados (PDF/Excel)
+router.get('/relatorio/tombos-usados', isAuthenticated, saidaTomboController.generatePDFTombosUsados);
 
 // Nome: Renderizar Formulário de Saída de Tombos
 router.get('/saida-tombo', isAuthenticated, saidaTomboController.renderizarFormulario);

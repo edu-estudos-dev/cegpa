@@ -357,16 +357,17 @@ class EstoqueModel {
    };
 
    // Método para obter todos os itens do tombamento
-   getAllTombamento = async () => {
-      const query = `SELECT * FROM registrodetombamento ORDER BY descricao ASC`;
+   async getAllTombamento() {
       try {
-         const [results] = await connection.execute(query);
-         return results;
+         const [rows] = await connection.query(
+            'SELECT * FROM registrodetombamento WHERE usado = 0'
+         );
+         return rows;
       } catch (error) {
-         console.error('Erro ao buscar tombamento:', error);
+         console.error('Erro ao buscar tombamentos:', error);
          throw error;
       }
-   };
+   }
 
    // Obtém o último tombo considerando estoqueatual e registrodetombamento
    static async getUltimoTombo() {
@@ -385,7 +386,7 @@ class EstoqueModel {
          console.error('Erro ao obter último tombo:', error);
          throw error;
       }
-   }  
+   }
    // Método para obter quantidade única de itens no estoque
    getQtdeUnicaEstoque = async () => {
       const query = `

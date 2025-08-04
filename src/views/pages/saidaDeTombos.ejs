@@ -477,27 +477,27 @@
             try {
                const erros = validarFormulario();
                if (erros.length > 0) {
-                  showAlert(erros.join('<br>'));
-                  return;
+                     showAlert(erros.join('<br>'));
+                     return;
                }
 
                const formData = {
-                  tombos: Array.from(document.querySelectorAll('#tombos-list input:checked')).map(i => i.value),
-                  doc_saida: currentDocSaida,
-                  referencia: document.getElementById('referencia').value.trim(),
-                  destino: document.getElementById('destino').value.trim(),
-                  postoGrad: document.getElementById('postoGrad').value.trim(),
-                  mf_recebedor: document.getElementById('mf_recebedor').value.trim(),
-                  tel_recebedor: document.getElementById('tel_recebedor').value.trim(),
-                  nome_do_recebedor: document.getElementById('nome_do_recebedor').value.trim(),
-                  observacao: document.getElementById('observacao').value.trim(),
-                  modoDocSaida: modoDocSaida
+                     tombos: Array.from(document.querySelectorAll('#tombos-list input:checked')).map(i => i.value),
+                     doc_saida: currentDocSaida.replace('-', '/'), // Converte NNNNN-AAAA para NNNNN/AAAA
+                     referencia: document.getElementById('referencia').value.trim(),
+                     destino: document.getElementById('destino').value.trim(),
+                     postoGrad: document.getElementById('postoGrad').value.trim(),
+                     mf_recebedor: document.getElementById('mf_recebedor').value.trim(),
+                     tel_recebedor: document.getElementById('tel_recebedor').value.trim(),
+                     nome_do_recebedor: document.getElementById('nome_do_recebedor').value.trim(),
+                     observacao: document.getElementById('observacao').value.trim(),
+                     modoDocSaida: modoDocSaida
                };
 
                const response = await fetch('/saida-tombo', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(formData)
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify(formData)
                });
 
                const result = await response.json();
@@ -511,6 +511,8 @@
                showAlert(error.message);
             }
          });
+
+    
 
          document.getElementById('tel_recebedor').addEventListener('input', (e) => {
             e.target.value = formatarTelefone(e.target.value);
@@ -633,10 +635,13 @@
 
          async function verificarTermoExistente(termoCompleto) {
             try {
-               const response = await fetch(`/verificar-termo-tombo-existente?numero=${encodeURIComponent(termoCompleto)}`);
+               // Converte o formato NNNNN-AAAA para NNNNN/AAAA para o backend
+               const termoFormatado = termoCompleto.replace('-', '/');
+               const response = await fetch(`/verificar-termo-tombo-existente?numero=${encodeURIComponent(termoFormatado)}`);
                const data = await response.json();
                return data.existe;
             } catch (error) {
+               console.error('Erro ao verificar termo:', error);
                return false;
             }
          }
@@ -675,12 +680,12 @@
          confirmarDocSaidaManualBtn.addEventListener('click', async function () {
             const numero = inputNumeroDocSaidaManual.value.trim();
             const ano = inputAnoDocSaidaManual.value.trim();
-            if (!numero || !ano) {
-               Swal.fire({ icon: 'error', title: 'Preencha o número e o ano do termo!' });
+            if (!numero || !ano || isNaN(ano) || ano < 2000 || ano > 2100) {
+               Swal.fire({ icon: 'error', title: 'Preencha o número e um ano válido (2000–2100)!' });
                return;
             }
             const numeroFormatado = numero.padStart(5, '0');
-            const termoCompleto = `${numeroFormatado}-${ano}`;
+            const termoCompleto = `${numeroFormatado}-${ano}`; // Usa hífen
             const existe = await verificarTermoExistente(termoCompleto);
             if (existe) {
                sweetAlertTermoExistente(termoCompleto);

@@ -138,12 +138,6 @@ class PesquisaController {
         try {
             const quantidadeEntraram =
                 await PesquisaModel.getItensEntradaPorAno(qtd_itens_entraram);
-            console.log(
-                'Quantidade de itens que entraram no ano',
-                qtd_itens_entraram,
-                ':',
-                quantidadeEntraram
-            );
             res.json({ quantidadeEntraram }); // Retorna a quantidade de itens que entraram como JSON
         } catch (error) {
             console.error('Erro ao buscar itens entraram por ano:', error);
@@ -239,10 +233,6 @@ class PesquisaController {
         try {
             const { quantidadeEntraram, quantidadeSaidos } =
                 await PesquisaModel.pesquisaAvancada(ano);
-            console.log(
-                'Quantidade de itens que entraram:',
-                quantidadeEntraram
-            );
             console.log('Quantidade de itens que saíram:', quantidadeSaidos);
 
             res.json({ quantidadeEntraram, quantidadeSaidos });

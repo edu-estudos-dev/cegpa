@@ -361,7 +361,6 @@
          try {
             const response = await fetch('/ultimo-tombo');
             const data = await response.json();
-            console.log('Valor retornado do endpoint /ultimo-tombo:', data);
             const ultimoTombo = data.ultimoTombo || 108702;
             const quantidade = parseInt(document.getElementById('qtd').value) || 1;
             document.getElementById('tombo_inicial').value = ultimoTombo + 1;
