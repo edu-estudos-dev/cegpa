@@ -84,6 +84,7 @@ export default {
       postoGrad,
       mf_recebedor,
       tel_recebedor,
+      nome_recebedor,
       observacao,
       dataSaida
    ) {
@@ -91,10 +92,59 @@ export default {
          const connectionPool = await connection.getConnection();
          await connectionPool.beginTransaction();
 
+         // Log para verificar os parâmetros recebidos
+         console.log(
+            '========================================================='
+         );
+         console.log('[SaidaTomboModel.registrarSaida] Parâmetros recebidos:');
+         console.log('tombos:', tombos);
+         console.log('doc_saida:', doc_saida);
+         console.log('referencia:', referencia);
+         console.log('destino:', destino);
+         console.log('postoGrad:', postoGrad);
+         console.log('mf_recebedor:', mf_recebedor);
+         console.log('tel_recebedor:', tel_recebedor);
+         console.log('nome_recebedor:', nome_recebedor);
+         console.log('observacao:', observacao);
+         console.log('dataSaida:', dataSaida);
+         console.log(
+            '========================================================='
+         );
+
+         // Validar e formatar dataSaida
+         let formattedDataSaida = dataSaida;
+         console.log(
+            '[SaidaTomboModel.registrarSaida] Valor recebido de dataSaida:',
+            dataSaida
+         );
+         if (!dataSaida || isNaN(new Date(dataSaida).getTime())) {
+            formattedDataSaida = new Date()
+               .toISOString()
+               .slice(0, 19)
+               .replace('T', ' ');
+            console.log(
+               '[SaidaTomboModel.registrarSaida] dataSaida inválido, usando data atual:',
+               formattedDataSaida
+            );
+         } else {
+            formattedDataSaida = new Date(dataSaida)
+               .toISOString()
+               .slice(0, 19)
+               .replace('T', ' ');
+            console.log(
+               '[SaidaTomboModel.registrarSaida] dataSaida válido, formatado:',
+               formattedDataSaida
+            );
+         }
+
          try {
             for (const tombo of tombos) {
+               console.log(
+                  '[SaidaTomboModel.registrarSaida] Inserindo tombo:',
+                  tombo
+               );
                await connectionPool.query(
-                  'INSERT INTO saida_tombo (tombo, doc_saida, referencia, destino, posto_grad, mf_recebedor, tel_recebedor, observacao, data_saida) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                  'INSERT INTO saida_tombo (tombo, doc_saida, referencia, destino, posto_grad, mf_recebedor, tel_recebedor, nome_recebedor, observacao, data_saida) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                   [
                      tombo.tombo || tombo,
                      doc_saida,
@@ -103,13 +153,22 @@ export default {
                      postoGrad,
                      mf_recebedor,
                      tel_recebedor,
+                     nome_recebedor,
                      observacao,
-                     dataSaida,
+                     formattedDataSaida,
                   ]
+               );
+               console.log(
+                  '[SaidaTomboModel.registrarSaida] Atualizando estoqueatual para tombo:',
+                  tombo
                );
                await connectionPool.query(
                   'UPDATE estoqueatual SET situacao = "SAIDA" WHERE tombo = ?',
                   [tombo.tombo || tombo]
+               );
+               console.log(
+                  '[SaidaTomboModel.registrarSaida] Atualizando registrodetombamento para tombo:',
+                  tombo
                );
                await connectionPool.query(
                   'UPDATE registrodetombamento SET usado = 1 WHERE tombo = ?',
@@ -117,15 +176,26 @@ export default {
                );
             }
             await connectionPool.commit();
+            console.log(
+               '[SaidaTomboModel.registrarSaida] Saída registrada com sucesso, data_saida:',
+               formattedDataSaida
+            );
             return { success: true };
          } catch (error) {
             await connectionPool.rollback();
+            console.error(
+               '[SaidaTomboModel.registrarSaida] Erro na transação de registro:',
+               error
+            );
             throw error;
          } finally {
             connectionPool.release();
          }
       } catch (error) {
-         console.error('Erro ao registrar saída:', error);
+         console.error(
+            '[SaidaTomboModel.registrarSaida] Erro ao registrar saída:',
+            error
+         );
          throw error;
       }
    },
@@ -140,7 +210,8 @@ export default {
             st.tombo,
             st.destino,
             st.referencia,
-            st.doc_saida
+            st.doc_saida,
+            rt.valor
          FROM saida_tombo st
          JOIN registrodetombamento rt ON st.tombo = rt.tombo
          WHERE rt.usado = 1
@@ -166,20 +237,29 @@ export default {
    },
 
    // Método para obter detalhes de um tombo usado por ID
-   async getTomboUsadoDetalhes(id) {
-      const query = `
-         SELECT 
-            st.*,
-            rt.descricao
-         FROM saida_tombo st
-         JOIN registrodetombamento rt ON st.tombo = rt.tombo
-         WHERE st.id = ?
-      `;
+   async getTomboUsadoDetalhes(tombo) {
       try {
-         const [results] = await connection.query(query, [id]);
-         return results[0] || null;
+         const connectionPool = await connection.getConnection();
+         try {
+            const [rows] = await connectionPool.query(
+               'SELECT tombo, doc_saida, referencia, destino, posto_grad, mf_recebedor, tel_recebedor, nome_recebedor, observacao, data_saida FROM saida_tombo WHERE tombo = ?',
+               [tombo]
+            );
+            console.log(
+               '[SaidaTomboModel.getTomboUsadoDetalhes] Dados retornados para tombo',
+               tombo,
+               ':',
+               rows[0]
+            );
+            return rows[0] || null;
+         } finally {
+            connectionPool.release();
+         }
       } catch (error) {
-         console.error('Erro ao buscar detalhes do tombo usado:', error);
+         console.error(
+            '[SaidaTomboModel.getTomboUsadoDetalhes] Erro ao buscar detalhes:',
+            error
+         );
          throw error;
       }
    },

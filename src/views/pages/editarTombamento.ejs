@@ -159,9 +159,9 @@
                </div>
             </div>
 
-            <!-- Linha 3: Conta Contábil, Local de Estoque e Destino dos Dados -->
+            <!-- Linha 3: Conta Contábil e Local de Estoque -->
             <div id="row3" class="row">
-               <div class="col-md-3">
+               <div class="col-md-6">
                   <div id="conta_contabil-div" class="mb-3">
                      <label class="form-label fw-bold">Conta Contábil</label>
                      <select id="conta_contabil" class="form-select" name="conta_contabil">
@@ -223,25 +223,21 @@
                   </div>
                </div>
 
-               <div class="col-md-3">
+               <div class="col-md-6">
                   <div id="estoque-div" class="mb-3">
                      <label class="form-label fw-bold">Local de Estoque</label>
-                     <select id="estoque" class="form-select" name="estoque">
-                        <option value="Escolha uma opção..." <%= !item.estoque ? 'selected' : '' %>>Escolha uma opção...</option>
-                        <option value="galpao" <%= item.estoque === 'galpao' ? 'selected' : '' %>>ESTOQUE COLOG - GALPÃO</option>
-                        <option value="sala" <%= item.estoque === 'sala' ? 'selected' : '' %>>ESTOQUE COLOG - SALA</option>
-                        <option value="cabemce" <%= item.estoque === 'cabemce' ? 'selected' : '' %>>ESTOQUE COLOG - CABEMCE</option>
-                     </select>
-                  </div>
-               </div>
-
-               <div class="col-md-3">
-                  <div id="destino_dados-div" class="mb-3">
-                     <label class="form-label fw-bold">Destino dos Dados</label>
-                     <select id="destino_dados" class="form-select" name="destino_dados">
-                        <option value="estoqueatual" <%= item.destino_dados === 'estoqueatual' ? 'selected' : '' %>>Entrar no Estoque</option>
-                        <option value="registrodetombamento" <%= item.destino_dados === 'registrodetombamento' ? 'selected' : '' %>>Fazer Tombamento</option>
-                     </select>
+                     <div id="estoque-container">
+                        <% if (['galpao', 'sala', 'cabemce'].includes(item.estoque)) { %>
+                           <select id="estoque" class="form-select" name="estoque">
+                              <option value="Escolha uma opção..." <%= !item.estoque ? 'selected' : '' %>>Escolha uma opção...</option>
+                              <option value="galpao" <%= item.estoque === 'galpao' ? 'selected' : '' %>>ESTOQUE COLOG - GALPÃO</option>
+                              <option value="sala" <%= item.estoque === 'sala' ? 'selected' : '' %>>ESTOQUE COLOG - SALA</option>
+                              <option value="cabemce" <%=矩item.estoque === 'cabemce' ? 'selected' : '' %>>ESTOQUE COLOG - CABEMCE</option>
+                           </select>
+                        <% } else { %>
+                           <input id="estoque" type="text" class="form-control" name="estoque" placeholder="Digite o local de estoque" value="<%= item.estoque || '' %>">
+                        <% } %>
+                     </div>
                   </div>
                </div>
             </div>
@@ -282,12 +278,11 @@
       </div>
    </div>
 
-   <!-- Scripts necessários para o modal -->
+   <!-- Scripts necessários -->
    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
       integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-   <!-- Incluindo o SweetAlert2 via CDN -->
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
    <script>
@@ -305,18 +300,16 @@
          const contaContabil = document.getElementById('conta_contabil').value;
          const estoque = document.getElementById('estoque').value;
          const observacao = document.getElementById('observacao').value;
-         const destinoDados = document.getElementById('destino_dados').value;
 
-         if (!dataEntrada) return alert('Por favor, preencha a Data de Entrada.');
-         if (!quantidade || quantidade < 1) return alert('A quantidade deve ser maior ou igual a 1.');
-         if (categoria === 'Selecione uma categoria...') return alert('Por favor, selecione uma Categoria.');
-         if (!documentoOrigem) return alert('Por favor, preencha o Documento de Origem.');
-         if (!valor || valor <= 0) return alert('Por favor, preencha um Valor Unitário válido.');
-         if (!descricao) return alert('Por favor, preencha a Descrição.');
-         if (situacao === 'Escolha uma opção...') return alert('Por favor, selecione o Estado de Conservação.');
-         if (contaContabil === 'Escolha uma opção...') return alert('Por favor, selecione a Conta Contábil.');
-         if (estoque === 'Escolha uma opção...') return alert('Por favor, selecione o Local de Estoque.');
-         if (!destinoDados) return alert('Por favor, selecione o Destino dos Dados.');
+         if (!dataEntrada) return Swal.fire({ icon: 'error', title: 'Erro', text: 'Por favor, preencha a Data de Entrada.' });
+         if (!quantidade || quantidade < 1) return Swal.fire({ icon: 'error', title: 'Erro', text: 'A quantidade deve ser maior ou igual a 1.' });
+         if (categoria === 'Selecione uma categoria...') return Swal.fire({ icon: 'error', title: 'Erro', text: 'Por favor, selecione uma Categoria.' });
+         if (!documentoOrigem) return Swal.fire({ icon: 'error', title: 'Erro', text: 'Por favor, preencha o Documento de Origem.' });
+         if (!valor || valor <= 0) return Swal.fire({ icon: 'error', title: 'Erro', text: 'Por favor, preencha um Valor Unitário válido.' });
+         if (!descricao) return Swal.fire({ icon: 'error', title: 'Erro', text: 'Por favor, preencha a Descrição.' });
+         if (situacao === 'Escolha uma opção...') return Swal.fire({ icon: 'error', title: 'Erro', text: 'Por favor, selecione o Estado de Conservação.' });
+         if (contaContabil === 'Escolha uma opção...') return Swal.fire({ icon: 'error', title: 'Erro', text: 'Por favor, selecione a Conta Contábil.' });
+         if (!estoque || estoque === 'Escolha uma opção...') return Swal.fire({ icon: 'error', title: 'Erro', text: 'Por favor, preencha o Local de Estoque.' });
 
          const formDataObj = {
             id: document.getElementById('id').value,
@@ -334,8 +327,7 @@
             situacao: situacao,
             conta_contabil: contaContabil,
             estoque: estoque,
-            observacao: observacao,
-            destino_dados: destinoDados
+            observacao: observacao
          };
 
          const formDataParams = new URLSearchParams();

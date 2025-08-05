@@ -260,15 +260,60 @@ class EstoqueController {
       }
    };
 
-   visualizarTombamento = async (req, res) => {
+   // visualizarTombamento = async (req, res) => {
+   //    try {
+   //       const item = await estoqueModel.getInfoByIdTombamento(req.params.id);
+   //       res.json(item);
+   //    } catch (error) {
+   //       console.error('Erro ao visualizar tombamento:', error);
+   //       res.status(500).json({ error: 'Erro ao carregar detalhes' });
+   //    }
+   // };
+
+   async visualizarTombamento(req, res) {
       try {
-         const item = await estoqueModel.getInfoByIdTombamento(req.params.id);
-         res.json(item);
+         const { id } = req.params;
+
+         // Busca dados da tabela registrodetombamento
+         const item = await estoqueModel.getInfoByIdTombamento(id);
+         if (!item) {
+            return res.status(404).json({ error: 'Item não encontrado' });
+         }
+
+         // Busca dados da tabela saida_tombo relacionados ao tombo
+         const tomboUsado = await SaidaTomboModel.getTomboUsadoDetalhes(
+            item.tombo
+         );
+
+         // Combina os dados
+         const response = {
+            ...item,
+            nome_recebedor: tomboUsado?.nome_recebedor || 'N/A',
+            observacao_saida: tomboUsado?.observacao || 'N/A',
+            doc_saida: tomboUsado?.doc_saida || 'N/A',
+            destino: tomboUsado?.destino || 'N/A',
+            posto_grad: tomboUsado?.posto_grad || 'N/A',
+            mf_recebedor: tomboUsado?.mf_recebedor || 'N/A',
+            tel_recebedor: tomboUsado?.tel_recebedor || 'N/A',
+            referencia: tomboUsado?.referencia || 'N/A',
+            data_saida: tomboUsado?.data_saida
+               ? new Date(tomboUsado.data_saida).toLocaleDateString('pt-BR')
+               : 'N/A',
+         };
+
+         console.log(
+            '[estoqueController.visualizarTombamento] Dados retornados:',
+            response
+         );
+         res.json(response);
       } catch (error) {
-         console.error('Erro ao visualizar tombamento:', error);
+         console.error(
+            '[estoqueController.visualizarTombamento] Erro ao visualizar tombamento:',
+            error
+         );
          res.status(500).json({ error: 'Erro ao carregar detalhes' });
       }
-   };
+   }
 
    excluirTombamento = async (req, res) => {
       try {
@@ -281,16 +326,10 @@ class EstoqueController {
    };
 
    // Método corrigido para atualizar tombamento
-   atualizarTombamento = async (req, res) => {
+   async atualizarTombamento(req, res) {
       try {
-         if (req.user.role !== 'admin') {
-            return res.status(403).json({
-               error: 'Acesso negado. Apenas administradores podem atualizar tombamentos.',
-            });
-         }
-
-         const { id } = req.params;
          const {
+            id,
             data_de_entrada,
             quantidade,
             tipo_tombo,
@@ -306,136 +345,90 @@ class EstoqueController {
             conta_contabil,
             estoque,
             observacao,
-            destino_dados,
          } = req.body;
 
-         // Validações básicas no backend
-         if (!data_de_entrada) throw new Error('Data de entrada é obrigatória');
-         if (!quantidade || quantidade < 1)
-            throw new Error('Quantidade deve ser maior ou igual a 1');
-         if (!categoria || categoria === 'Selecione uma categoria...')
-            throw new Error('Categoria é obrigatória');
-         if (!doc_origem) throw new Error('Documento de origem é obrigatório');
-         if (!valor || valor <= 0)
-            throw new Error('Valor unitário deve ser maior que 0');
-         if (!descricao) throw new Error('Descrição é obrigatória');
-         if (!situacao || situacao === 'Escolha uma opção...')
-            throw new Error('Estado de conservação é obrigatório');
-         if (!conta_contabil || conta_contabil === 'Escolha uma opção...')
-            throw new Error('Conta contábil é obrigatória');
-         if (!estoque || estoque === 'Escolha uma opção...')
-            throw new Error('Local de estoque é obrigatório');
-         if (!destino_dados) throw new Error('Destino dos dados é obrigatório');
-
-         // Validação específica para tipo_tombo
-         let safeTombo = null;
-         if (tipo_tombo === 'AUTO') {
-            if (!tombo || !Number.isInteger(Number(tombo)) || tombo <= 0) {
-               throw new Error(
-                  'O tombo deve ser um número inteiro positivo para o tipo AUTO.'
-               );
-            }
-            safeTombo = tombo;
-         } else if (tipo_tombo === 'LOTE') {
-            if (!tombo_inicial || !tombo_final) {
-               throw new Error(
-                  'Tombo inicial e final são obrigatórios para o tipo LOTE.'
-               );
-            }
-            if (
-               !Number.isInteger(Number(tombo_inicial)) ||
-               !Number.isInteger(Number(tombo_final)) ||
-               tombo_inicial <= 0 ||
-               tombo_final <= 0
-            ) {
-               throw new Error(
-                  'Tombo inicial e final devem ser números inteiros positivos.'
-               );
-            }
-            if (Number(tombo_inicial) >= Number(tombo_final)) {
-               throw new Error(
-                  'O tombo inicial deve ser menor que o tombo final.'
-               );
-            }
-            if (
-               Number(tombo_final) - Number(tombo_inicial) + 1 !==
-               Number(quantidade)
-            ) {
-               throw new Error(
-                  'A quantidade informada não corresponde ao intervalo de tombos.'
-               );
-            }
-            safeTombo = tombo_inicial;
-         } else if (tipo_tombo === 'LOTE_MANUAL') {
-            if (!tombo_lote_manual) {
-               throw new Error(
-                  'A lista de tombos do lote é obrigatória para LOTE_MANUAL.'
-               );
-            }
-            const parsedTomboLoteManual = JSON.parse(tombo_lote_manual);
-            if (
-               !Array.isArray(parsedTomboLoteManual) ||
-               parsedTomboLoteManual.length !== Number(quantidade)
-            ) {
-               throw new Error(
-                  'A lista de tombos deve corresponder à quantidade informada.'
-               );
-            }
-            for (const t of parsedTomboLoteManual) {
-               if (!Number.isInteger(Number(t)) || t <= 0) {
-                  throw new Error(
-                     `O tombo ${t} deve ser um número inteiro positivo.`
-                  );
-               }
-            }
-            safeTombo = parsedTomboLoteManual[0]; // Usa o primeiro tombo do lote manual
+         // Validações dos campos obrigatórios
+         if (!data_de_entrada) {
+            return res
+               .status(400)
+               .json({ error: 'Data de entrada é obrigatória' });
+         }
+         if (!quantidade || quantidade < 1) {
+            return res
+               .status(400)
+               .json({ error: 'Quantidade deve ser maior ou igual a 1' });
+         }
+         if (!categoria || categoria === 'Selecione uma categoria...') {
+            return res.status(400).json({ error: 'Categoria é obrigatória' });
+         }
+         if (!doc_origem) {
+            return res
+               .status(400)
+               .json({ error: 'Documento de origem é obrigatório' });
+         }
+         if (!valor || valor <= 0) {
+            return res
+               .status(400)
+               .json({ error: 'Valor unitário deve ser maior que 0' });
+         }
+         if (!descricao) {
+            return res.status(400).json({ error: 'Descrição é obrigatória' });
+         }
+         if (!situacao || situacao === 'Escolha uma opção...') {
+            return res
+               .status(400)
+               .json({ error: 'Estado de conservação é obrigatório' });
+         }
+         if (!conta_contabil || conta_contabil === 'Escolha uma opção...') {
+            return res
+               .status(400)
+               .json({ error: 'Conta contábil é obrigatória' });
+         }
+         if (!estoque || estoque === 'Escolha uma opção...') {
+            return res
+               .status(400)
+               .json({ error: 'Local de estoque é obrigatório' });
          }
 
-         const safeData = {
+         // Preparar dados para atualização
+         const updateData = {
             data_de_entrada,
-            quantidade: Number(quantidade),
+            quantidade: parseInt(quantidade),
             tipo_tombo,
-            tombo: safeTombo,
+            tombo,
             tombo_inicial: tipo_tombo === 'LOTE' ? tombo_inicial : null,
             tombo_final: tipo_tombo === 'LOTE' ? tombo_final : null,
             tombo_lote_manual:
                tipo_tombo === 'LOTE_MANUAL'
                   ? JSON.parse(tombo_lote_manual)
                   : null,
-            categoria: categoria.toUpperCase(),
-            doc_origem: doc_origem.toUpperCase(),
-            valor: Number(valor),
-            descricao: descricao.toUpperCase(),
-            situacao: situacao.toUpperCase(),
-            conta_contabil: conta_contabil.toUpperCase(),
-            estoque: estoque.toUpperCase(),
-            observacao: observacao ? observacao.toUpperCase() : null,
-            destino_dados,
+            categoria,
+            doc_origem,
+            valor: parseFloat(valor),
+            descricao,
+            situacao,
+            conta_contabil,
+            estoque,
+            observacao: observacao || null,
          };
 
-         const affectedRows = await estoqueModel.updateTombamento(id, safeData);
-         if (affectedRows === 0) {
-            return res.status(404).json({ error: 'Item não encontrado.' });
+         console.log('Dados para atualização no banco:', updateData);
+
+         // Atualizar o registro no banco
+         const result = await estoqueModel.updateTombamento(id, updateData);
+
+         if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Item não encontrado' });
          }
 
-         // Registrar log de auditoria
-         await AuditoriaModel.registrarLog({
-            usuario: req.user?.nome_completo || 'desconhecido',
-            acao: 'EDIÇÃO',
-            tabela_afetada: 'registrodetombamento',
-            id_registro: id,
-            tombo: safeData.tombo,
-            detalhes: { novos_dados: safeData },
-         });
-
-         res.json({ msg: 'Tombamento atualizado com sucesso' });
+         res.status(200).json({ message: 'Tombamento atualizado com sucesso' });
       } catch (error) {
          console.error('Erro ao atualizar tombamento:', error);
          res.status(500).json({
-            error: error.message || 'Erro ao atualizar tombamento',
+            error: 'Erro ao atualizar o tombamento: ' + error.message,
          });
       }
-   };
+   }
 
    // Método corrigido para renderizar formulário de edição de tombamento
    editarTombamento = async (req, res) => {
@@ -523,8 +516,6 @@ class EstoqueController {
    };
 
    // Método para criar um novo item no estoque ou registro de tombamento
-   // In estoqueController.js, replace the create method with the following:
-
    create = async (req, res) => {
       console.log('Dados recebidos no método create (req.body):', req.body);
 
@@ -1358,11 +1349,9 @@ class EstoqueController {
    };
 
    // Método para registrar a saída de itens e gerar o PDF
-   registrarSaida = async (req, res) => {
-      console.log('Requisição recebida em registrarSaida:', req.body);
+   async registrarSaida(req, res) {
       const {
          tombos,
-         doc_saida,
          referencia,
          destino,
          postoGrad,
@@ -1370,61 +1359,98 @@ class EstoqueController {
          tel_recebedor,
          nome_do_recebedor,
          observacao,
+         modoDocSaida,
+         doc_saida,
       } = req.body;
 
-      console.log('req.user no registrarSaida:', req.user);
-
       const usuarioLogado = req.user;
-      const nomeResponsavel = usuarioLogado?.nome_completo;
-      const mfResponsavel = usuarioLogado?.matricula;
-      const postoGradResponsavel = usuarioLogado?.posto_grad;
+      const nomeResponsavel = usuarioLogado?.nome_completo || 'Desconhecido';
+      const mfResponsavel = usuarioLogado?.matricula || 'N/A';
+      const postoGradResponsavel = usuarioLogado?.posto_grad || 'N/A';
 
       try {
-         // Validação dos campos obrigatórios
+         // Validações
+         if (!tombos || tombos.length === 0) {
+            return res
+               .status(400)
+               .json({ error: 'Selecione pelo menos um tombo.' });
+         }
          if (
-            !tombos?.length ||
-            !doc_saida ||
             !referencia ||
             !destino ||
             !postoGrad ||
             !mf_recebedor ||
             !tel_recebedor ||
-            !nome_do_recebedor
+            !nome_do_recebedor ||
+            !doc_saida
          ) {
-            console.log('Campos obrigatórios faltando:', {
-               tombos,
-               doc_saida,
-               referencia,
-               destino,
-               postoGrad,
-               mf_recebedor,
-               tel_recebedor,
-               nome_do_recebedor,
-            });
             return res
                .status(400)
-               .json({ error: 'Preencha todos os campos obrigatórios' });
+               .json({ error: 'Todos os campos são obrigatórios.' });
          }
 
-         if (!nomeResponsavel || !mfResponsavel || !postoGradResponsavel) {
-            console.log('Dados do usuário logado incompletos:', {
-               nomeResponsavel,
-               mfResponsavel,
-               postoGradResponsavel,
-            });
-            return res.status(401).json({
-               error: 'Usuário autenticado não possui informações completas',
+         // Validação do formato do termo
+         if (!/^\d{1,5}\/\d{4}$/.test(doc_saida)) {
+            return res.status(400).json({
+               error: 'Formato de termo inválido. Use o formato N/AAAA ou NN/AAAA ou NNN/AAAA ou NNNN/AAAA ou NNNNN/AAAA (ex.: 5/2025 ou 00001/2025).',
             });
          }
 
-         const dataDeSaida = new Date();
-         const doc = new jsPDF();
+         // Padronizar o número do termo com 5 dígitos para consistência
+         const [num, ano] = doc_saida.split('/');
+         const docSaidaFormatado = `${num.padStart(5, '0')}/${ano}`;
 
-         console.log('Iniciando geração do PDF...');
+         // Validação para modo AUTO
+         const anoAtual = new Date().getFullYear();
+         if (modoDocSaida === 'AUTO') {
+            const sequenciaAtual = await sequenciaModel.getSequenciaAtual(
+               anoAtual
+            );
+            const expectedDocSaida = `${sequenciaAtual
+               .toString()
+               .padStart(5, '0')}/${anoAtual}`;
+            if (docSaidaFormatado !== expectedDocSaida) {
+               return res.status(400).json({
+                  error: `Número do termo inválido para o modo AUTO. Esperado: ${expectedDocSaida}.`,
+               });
+            }
+         }
+
+         // Verifica se os tombos são válidos e estão disponíveis
+         const validacao = await SaidaTomboModel.validarTombos(tombos);
+         if (!validacao.valido) {
+            return res.status(400).json({ error: validacao.erro });
+         }
+
+         // Verifica se o PDF já existe
+         const pdfPath = path.join(
+            __dirname,
+            '../../pdfs',
+            `Termo_${docSaidaFormatado.replace(/\//g, '-')}.pdf`
+         );
+         if (fs.existsSync(pdfPath)) {
+            return res.status(400).json({
+               error: `O número do termo ${doc_saida} já foi utilizado. Escolha outro número.`,
+            });
+         }
+
+         // Gera o PDF com jsPDF
+         const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+         });
+
+         // Caminho da imagem
+         const imagePath = path.join(
+            __dirname,
+            '../../public/images/cabeçalho pmce.png'
+         );
+         const imageData = fs.readFileSync(imagePath).toString('base64');
+
+         // Desenha a borda
          doc.setDrawColor(0);
          doc.setLineWidth(0.5);
-
-         // Desenha a borda na primeira página
          doc.rect(
             5,
             5,
@@ -1432,53 +1458,28 @@ class EstoqueController {
             doc.internal.pageSize.height - 10
          );
 
-         // Carregar a imagem
-         const imagePath = path.join(
-            __dirname,
-            '../../public/images/cabeçalho pmce.png'
-         );
-         const imageData = fs.readFileSync(imagePath).toString('base64');
-         const imgProps = {
-            format: 'PNG',
-            width: 70,
-            height: 15,
-         };
+         // Adiciona a imagem
+         doc.addImage(imageData, 'PNG', 67.5, 8, 70, 15);
 
-         // Adicionar a imagem ao PDF
-         doc.addImage(
-            imageData,
-            imgProps.format,
-            67.5,
-            8,
-            imgProps.width,
-            imgProps.height
-         );
-
-         // Título do documento (ajustado para não sobrepor a imagem)
+         // Título e cabeçalho
          doc.setFontSize(10);
          doc.text(
             'TERMO DE RECEBIMENTO E RESPONSABILIDADE - CEGPA/COLOG',
             105,
-            12 + imgProps.height,
+            28,
             { align: 'center' }
          );
-         doc.setFontSize(10);
 
-         const headerYStart = 20 + imgProps.height;
-         const obsText = (observacao || 'Nenhuma').toUpperCase();
-         const obsLines = doc.splitTextToSize(`Observações: ${obsText}`, 170);
-
+         const headerYStart = 35;
          const headerData = [
-            `Nº Termo: ${doc_saida}`,
-            `Data: ${dataDeSaida.toLocaleDateString('pt-BR')}`,
+            `Nº Termo: ${docSaidaFormatado}`,
+            `Data: ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`,
             `Destino: ${destino.toUpperCase()}`,
-            `Responsável: ${postoGrad} ${nome_do_recebedor.toUpperCase()}`,
+            `Responsável: ${postoGrad.toUpperCase()} ${nome_do_recebedor.toUpperCase()}`,
             `MF: ${mf_recebedor}`,
             `Contato: ${tel_recebedor}`,
-            `Referência: ${referencia}`,
+            `Referência: ${referencia.toUpperCase()}`,
          ];
-
-         // Renderiza o cabeçalho com destaque para o Nº Termo
          let headerYOffset = 0;
          headerData.forEach((line, index) => {
             if (line.startsWith('Nº Termo')) {
@@ -1488,102 +1489,36 @@ class EstoqueController {
                doc.setFont('helvetica', 'normal');
                doc.setFontSize(10);
             } else {
-               doc.setFontSize(10);
                doc.text(line, 14, headerYStart + headerYOffset);
             }
             headerYOffset += 5;
          });
-         // Renderiza as linhas de observação com quebra automática
+
+         // Observações
+         const obsText = (observacao || 'Nenhuma').toUpperCase();
+         const obsLines = doc.splitTextToSize(`Observações: ${obsText}`, 170);
          obsLines.forEach((obsLine) => {
-            doc.setFontSize(10);
             doc.text(obsLine, 14, headerYStart + headerYOffset);
             headerYOffset += 5;
          });
 
-         // Calcula a posição Y final após o cabeçalho e observação
+         // Tabela de tombos
          const tableStartY = headerYStart + headerYOffset + 2;
-
-         let ordem = 1;
          const items = [];
-
-         console.log('Processando tombos:', tombos);
-         for (const tombo of tombos) {
-            console.log(`Buscando item com tombo ${tombo}...`);
-            const itemEstoque = await estoqueModel.getInfoByTombo(tombo);
-
-            if (!itemEstoque) {
-               console.warn(`Tombo ${tombo} não encontrado`);
-               continue;
-            }
-
-            if (itemEstoque.pago) {
-               return res.status(400).json({
-                  error: `O item com tombo ${tombo} já foi pago e não pode ser retirado novamente.`,
-               });
-            }
-
-            console.log(`Item encontrado para tombo ${tombo}:`, itemEstoque);
-            items.push([
-               ordem++,
-               itemEstoque.tombo,
-               itemEstoque.descricao
-                  .toUpperCase()
-                  .replace('RETAINGLIAR', 'RETANGULAR'),
-               itemEstoque.situacao.toUpperCase(),
-            ]);
-
-            console.log(`Registrando saída para tombo ${tombo}...`);
-            await estoqueModel.createSaida(
-               itemEstoque.id,
-               itemEstoque.tombo,
-               doc_saida,
-               dataDeSaida,
-               1,
-               referencia,
-               destino,
-               postoGrad,
-               mf_recebedor,
-               tel_recebedor,
-               nome_do_recebedor,
-               observacao,
-               itemEstoque.descricao
-            );
-            // Registrar log de auditoria (saída)
-            await AuditoriaModel.registrarLog({
-               usuario: req.user?.nome_completo || 'desconhecido',
-               acao: 'SAÍDA',
-               tabela_afetada: 'itenspagos',
-               id_registro: itemEstoque.id,
-               tombo: itemEstoque.tombo,
-               detalhes: {
-                  doc_saida,
-                  referencia,
-                  destino,
-                  postoGrad,
-                  mf_recebedor,
-                  tel_recebedor,
-                  nome_do_recebedor,
-                  observacao,
-                  descricao: itemEstoque.descricao,
-               },
-            });
-
-            console.log(`Marcando tombo ${tombo} como pago...`);
-            await estoqueModel.markAsPaid(itemEstoque.id);
+         let ordem = 1;
+         const tombosInfo = await SaidaTomboModel.getTombosInfo(tombos);
+         for (const tombo of tombosInfo) {
+            const descricao = tombo.descricao
+               ? tombo.descricao
+                    .toUpperCase()
+                    .replace('RETAINGLIAR', 'RETANGULAR')
+               : 'N/A';
+            items.push([ordem++, tombo.tombo || 'N/A', descricao]);
          }
 
-         if (items.length === 0) {
-            console.log('Nenhum item válido encontrado para gerar o termo.');
-            return res.status(400).json({
-               error: 'Nenhum item válido encontrado para gerar o termo.',
-            });
-         }
-
-         // Renderiza a tabela
-         console.log('Total de itens na tabela:', items.length);
          doc.autoTable({
             startY: tableStartY,
-            head: [['ORD.', 'TOMBO', 'DESCRIÇÃO', 'SITUAÇÃO']],
+            head: [['ORD.', 'TOMBO', 'DESCRIÇÃO']],
             body: items,
             styles: {
                fontSize: 8,
@@ -1597,16 +1532,14 @@ class EstoqueController {
                fontStyle: 'bold',
             },
             columnStyles: {
-               0: { cellWidth: 10 },
-               1: { cellWidth: 25 },
+               0: { cellWidth: 15 },
+               1: { cellWidth: 35 },
                2: { cellWidth: 130, halign: 'left' },
-               3: { cellWidth: 20 },
             },
             margin: { left: 13, right: 7, bottom: 10 },
             tableWidth: 'wrap',
             pageBreak: 'auto',
             didDrawPage: (data) => {
-               console.log('Desenhando página:', data.pageNumber);
                doc.rect(
                   5,
                   5,
@@ -1616,23 +1549,24 @@ class EstoqueController {
             },
          });
 
-         console.log(
-            'Total de páginas geradas:',
-            doc.internal.getNumberOfPages()
-         );
+         // Cláusula de recebimento
+         const tombosList = tombos.map((t) => t.tombo || t).join(', ');
+         const clausula = `Eu, ${nome_do_recebedor.toUpperCase()} Declaro estar ciente de que, ao assinar o presente Termo de Recebimento, assumo a responsabilidade pelo correto recebimento e pela fixação das etiquetas de tombamento em todos os bens móveis nele relacionados, comprometendo-me a cumprir essa obrigação conforme as orientações da Célula de Gestão Patrimonial CEGPA/COLOG`;
+         const clausulaLines = doc.splitTextToSize(clausula, 235);
+         const clausulaY = tableStartY + items.length * 10 + 10;
+         clausulaLines.forEach((line, index) => {
+            doc.setFontSize(8);
+            doc.text(line, 14, clausulaY + index * 5);
+         });
 
-         // Após a tabela ser renderizada
+         // Assinaturas na parte inferior
          const pageHeight = doc.internal.pageSize.height;
-
-         // Garante que estamos na última página
          const totalPages = doc.internal.getNumberOfPages();
          doc.setPage(totalPages);
 
-         // Define a posição Y das assinaturas fixas na parte inferior da página
          const signatureY = pageHeight - 20;
          const lineLength = 50;
          const gapBetweenBlocks = 10;
-
          const totalBlockWidth = lineLength * 3 + gapBetweenBlocks * 2;
          const startX = 5 + (200 - totalBlockWidth) / 2;
 
@@ -1641,7 +1575,6 @@ class EstoqueController {
          const rightPos = centerPos + lineLength + gapBetweenBlocks;
 
          doc.setLineWidth(0.3);
-
          doc.line(startX, signatureY, startX + lineLength, signatureY);
          doc.line(
             centerPos - lineLength / 2,
@@ -1663,65 +1596,74 @@ class EstoqueController {
             signatureY + 4,
             { align: 'center' }
          );
-         doc.setFontSize(6);
          doc.text('(Recebedor)', leftPos, signatureY + 8.5, {
             align: 'center',
          });
 
-         doc.setFontSize(6);
          doc.text(
             'TEN. CEL. ALLAN KARDEK\nMF: 135.907-1-0',
             centerPos,
             signatureY + 4,
             { align: 'center' }
          );
-         doc.setFontSize(6);
          doc.text('Comandante CEGPA', centerPos, signatureY + 8.5, {
             align: 'center',
          });
 
-         doc.setFontSize(6);
          doc.text(
             `${postoGradResponsavel.toUpperCase()} ${nomeResponsavel.toUpperCase()}\nMF: ${mfResponsavel}`,
             rightPos,
             signatureY + 4,
             { align: 'center' }
          );
-         doc.setFontSize(6);
          doc.text('(Responsável pela entrega)', rightPos, signatureY + 8.5, {
             align: 'center',
          });
 
-         console.log('Salvando PDF...');
-         const fileName = `Termo_${doc_saida.replace(/\//g, '-')}.pdf`;
-         const pdfPath = path.join(__dirname, '../../pdfs', fileName);
-
-         if (!fs.existsSync(path.dirname(pdfPath))) {
-            fs.mkdirSync(path.dirname(pdfPath), { recursive: true });
+         // Salva o PDF
+         const pdfDir = path.dirname(pdfPath);
+         if (!fs.existsSync(pdfDir)) {
+            fs.mkdirSync(pdfDir, { recursive: true });
          }
-
          doc.save(pdfPath);
 
-         const modoDocSaida = req.body.modoDocSaida || 'AUTO';
+         // Registra a saída
+         const dataSaida = new Date()
+            .toISOString()
+            .slice(0, 19)
+            .replace('T', ' ');
+         await SaidaTomboModel.registrarSaida(
+            tombos,
+            docSaidaFormatado,
+            referencia,
+            destino,
+            postoGrad,
+            mf_recebedor,
+            tel_recebedor,
+            nome_do_recebedor, // Corrigido: Passando nome_do_recebedor
+            observacao,
+            dataSaida
+         );
+
+         // Incrementa a sequência após o registro
          if (modoDocSaida === 'AUTO') {
-            await sequenciaModel.incrementarSequencia(new Date().getFullYear());
+            await sequenciaModel.incrementarSequencia(anoAtual);
          }
 
-         console.log('Enviando resposta de sucesso...');
          res.status(200).json({
             success: true,
-            pdfPath: `/pdfs/${fileName}`,
+            pdfPath: `/pdfs/Termo_${docSaidaFormatado.replace(/\//g, '-')}.pdf`,
             message: 'Saída registrada com sucesso!',
          });
       } catch (error) {
-         console.error('Erro no registrarSaida:', error);
+         console.error('Erro ao registrar saída:', error);
          res.status(500).json({
             success: false,
-            error: 'Erro interno no servidor',
+            error: 'Erro interno no servidor.',
             details: error.message,
          });
       }
-   };
+   }
 
    // Método para visualizar um item pago específico
    visualizarItemPago = async (req, res) => {

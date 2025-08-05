@@ -8,7 +8,7 @@ import sequenciaModel from '../models/sequenciaModel.js';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ExcelJS from 'exceljs';
-import AuditoriaModel from '../models/AuditoriaModel.js';
+// import AuditoriaModel from '../models/AuditoriaModel.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -71,6 +71,20 @@ export default {
 
    // Registra a saída de tombos e gera o PDF
    async registrarSaida(req, res) {
+      console.log('=========================================================');
+      console.log(
+         '[saidaTomboController.registrarSaida] INÍCIO DA REQUISIÇÃO POST /saida-tombo'
+      );
+      console.log(
+         '[saidaTomboController.registrarSaida] Corpo da requisição:',
+         JSON.stringify(req.body, null, 2)
+      );
+      console.log(
+         '[saidaTomboController.registrarSaida] Usuário autenticado:',
+         JSON.stringify(req.user, null, 2)
+      );
+      console.log('=========================================================');
+
       const {
          tombos,
          referencia,
@@ -92,6 +106,9 @@ export default {
       try {
          // Validações
          if (!tombos || tombos.length === 0) {
+            console.log(
+               '[saidaTomboController.registrarSaida] Erro: Nenhum tombo selecionado'
+            );
             return res
                .status(400)
                .json({ error: 'Selecione pelo menos um tombo.' });
@@ -105,6 +122,9 @@ export default {
             !nome_do_recebedor ||
             !doc_saida
          ) {
+            console.log(
+               '[saidaTomboController.registrarSaida] Erro: Campos obrigatórios faltando'
+            );
             return res
                .status(400)
                .json({ error: 'Todos os campos são obrigatórios.' });
@@ -112,6 +132,10 @@ export default {
 
          // Validação do formato do termo
          if (!/^\d{1,5}\/\d{4}$/.test(doc_saida)) {
+            console.log(
+               '[saidaTomboController.registrarSaida] Erro: Formato de termo inválido:',
+               doc_saida
+            );
             return res.status(400).json({
                error: 'Formato de termo inválido. Use o formato N/AAAA ou NN/AAAA ou NNN/AAAA ou NNNN/AAAA ou NNNNN/AAAA (ex.: 5/2025 ou 00001/2025).',
             });
@@ -120,6 +144,10 @@ export default {
          // Padronizar o número do termo com 5 dígitos para consistência
          const [num, ano] = doc_saida.split('/');
          const docSaidaFormatado = `${num.padStart(5, '0')}/${ano}`;
+         console.log(
+            '[saidaTomboController.registrarSaida] Termo formatado:',
+            docSaidaFormatado
+         );
 
          // Validação para modo AUTO
          const anoAtual = new Date().getFullYear();
@@ -131,6 +159,10 @@ export default {
                .toString()
                .padStart(5, '0')}/${anoAtual}`;
             if (docSaidaFormatado !== expectedDocSaida) {
+               console.log(
+                  '[saidaTomboController.registrarSaida] Erro: Número do termo inválido para modo AUTO. Esperado:',
+                  expectedDocSaida
+               );
                return res.status(400).json({
                   error: `Número do termo inválido para o modo AUTO. Esperado: ${expectedDocSaida}.`,
                });
@@ -140,6 +172,10 @@ export default {
          // Verifica se os tombos são válidos e estão disponíveis
          const validacao = await SaidaTomboModel.validarTombos(tombos);
          if (!validacao.valido) {
+            console.log(
+               '[saidaTomboController.registrarSaida] Erro: Tombos inválidos:',
+               validacao.erro
+            );
             return res.status(400).json({ error: validacao.erro });
          }
 
@@ -150,6 +186,10 @@ export default {
             `Termo_${docSaidaFormatado.replace(/\//g, '-')}.pdf`
          );
          if (fs.existsSync(pdfPath)) {
+            console.log(
+               '[saidaTomboController.registrarSaida] Erro: Termo já existe:',
+               docSaidaFormatado
+            );
             return res.status(400).json({
                error: `O número do termo ${doc_saida} já foi utilizado. Escolha outro número.`,
             });
@@ -272,12 +312,12 @@ export default {
 
          // Cláusula de recebimento
          const tombosList = tombos.map((t) => t.tombo || t).join(', ');
-         const clausula = `Eu, ${nome_do_recebedor.toUpperCase()} Declaro estar ciente de que, ao assinar o presente Termo de Recebimento, assumo a responsabilidade pelo correto recebimento e pela fixação das etiquetas de tombamento em todos os bens móveis nele relacionados, comprometendo-me a cumprir essa obrigação conforme as orientações da Célula de Gestão Patrimonial CEGPA/COLOG`;
-         const clausulaLines = doc.splitTextToSize(clausula, 235);
+         const clausula = `Eu, ${nome_do_recebedor.toUpperCase()} Declaro estar ciente de que, ao assinar o presente Termo de Recebimento, assumo a responsabilidade pelo correto recebimento e pela fixação das etiquetas de tombamento em todos os bens móveis nele relacionados, comprometendo-me a cumprir essa obrigação conforme as orientações da Célula de Gestão Patrimonial CEGPA/COLOG`;
+         const clausulaLines = doc.splitTextToSize(clausula, 230);
          const clausulaY = tableStartY + items.length * 10 + 10;
          clausulaLines.forEach((line, index) => {
             doc.setFontSize(8);
-            doc.text(line, 14, clausulaY + index * 5);   
+            doc.text(line, 14, clausulaY + index * 5);
          });
 
          // Assinaturas na parte inferior
@@ -353,6 +393,21 @@ export default {
             .toISOString()
             .slice(0, 19)
             .replace('T', ' ');
+         console.log(
+            '[saidaTomboController.registrarSaida] Chamando SaidaTomboModel.registrarSaida com:',
+            {
+               tombos,
+               docSaidaFormatado,
+               referencia,
+               destino,
+               postoGrad,
+               mf_recebedor,
+               tel_recebedor,
+               nome_do_recebedor,
+               observacao,
+               dataSaida,
+            }
+         );
          await SaidaTomboModel.registrarSaida(
             tombos,
             docSaidaFormatado,
@@ -368,16 +423,26 @@ export default {
 
          // Incrementa a sequência após o registro
          if (modoDocSaida === 'AUTO') {
+            console.log(
+               '[saidaTomboController.registrarSaida] Incrementando sequência para o ano:',
+               anoAtual
+            );
             await sequenciaModel.incrementarSequencia(anoAtual);
          }
 
+         console.log(
+            '[saidaTomboController.registrarSaida] Saída registrada com sucesso, retornando resposta'
+         );
          res.status(200).json({
             success: true,
             pdfPath: `/pdfs/Termo_${docSaidaFormatado.replace(/\//g, '-')}.pdf`,
             message: 'Saída registrada com sucesso!',
          });
       } catch (error) {
-         console.error('Erro ao registrar saída:', error);
+         console.error(
+            '[saidaTomboController.registrarSaida] Erro ao registrar saída:',
+            error
+         );
          res.status(500).json({
             success: false,
             error: 'Erro interno no servidor.',
@@ -385,6 +450,7 @@ export default {
          });
       }
    },
+
    // Método para mostrar todos os tombos usados
    async getAllTombosUsados(req, res) {
       try {
