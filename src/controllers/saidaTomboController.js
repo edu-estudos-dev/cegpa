@@ -8,7 +8,7 @@ import sequenciaModel from '../models/sequenciaModel.js';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ExcelJS from 'exceljs';
-// import AuditoriaModel from '../models/AuditoriaModel.js';
+import AuditoriaModel from '../models/AuditoriaModel.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -488,16 +488,31 @@ export default {
    async visualizarTomboUsado(req, res) {
       const { id } = req.params;
       try {
+         console.log(
+            `[saidaTomboController.visualizarTomboUsado] Buscando tombo com ID: ${id}`
+         );
          const tombo = await SaidaTomboModel.getTomboUsadoDetalhes(id);
-         console.log('Tombo usado retornado:', tombo);
+         console.log(
+            '[saidaTomboController.visualizarTomboUsado] Dados do tombo:',
+            tombo
+         );
          if (tombo) {
             res.json(tombo);
          } else {
+            console.log(
+               `[saidaTomboController.visualizarTomboUsado] Tombo não encontrado para ID: ${id}`
+            );
             res.status(404).json({ error: 'Tombo usado não encontrado' });
          }
       } catch (error) {
-         console.error('Erro ao buscar tombo usado pelo ID:', error);
-         res.status(500).json({ error: 'Erro ao buscar tombo usado.' });
+         console.error(
+            '[saidaTomboController.visualizarTomboUsado] Erro:',
+            error
+         );
+         res.status(500).json({
+            error: 'Erro ao buscar tombo usado.',
+            details: error.message,
+         });
       }
    },
 

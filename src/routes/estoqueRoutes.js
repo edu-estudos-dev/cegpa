@@ -64,6 +64,7 @@ router.get('/visualizar/tombo-usado/:id', isAuthenticated, saidaTomboController.
 
 // Nome: Reverter Saída de Tombo (Apenas Admin)
 router.delete('/reverter-saida-tombo/:id', isAuthenticated, checkRole(['admin']), saidaTomboController.reverterSaida);
+router.delete('/tombos-usados/reverter/:id', isAuthenticated, checkRole(['admin']), saidaTomboController.reverterSaida);
 
 // Nome: Gerar Relatório de Tombos Usados (PDF/Excel)
 router.get('/relatorio/tombos-usados', isAuthenticated, saidaTomboController.generatePDFTombosUsados);

@@ -419,7 +419,7 @@
                                                 <strong>REFERÊNCIA:</strong> ${tombo.referencia ? tombo.referencia.toUpperCase() : 'N/A'} <br/>
                                                 <strong>DOC. SAÍDA:</strong> ${tombo.doc_saida ? tombo.doc_saida.toUpperCase() : 'N/A'} <br/>
                                                 <strong>VALOR:</strong> ${tombo.valor && !isNaN(parseFloat(tombo.valor)) ? parseFloat(tombo.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'} <br/>
-                                                <strong>NOME DO RECEBEDOR:</strong> ${tombo.nome_do_recebedor ? tombo.nome_do_recebedor.toUpperCase() : 'N/A'} <br/>
+                                                <strong>NOME DO RECEBEDOR:</strong> ${tombo.nome_recebedor ? tombo.nome_recebedor.toUpperCase() : 'N/A'} <br/>
                                                 <strong>POSTO/GRADUAÇÃO:</strong> ${tombo.posto_grad ? tombo.posto_grad.toUpperCase() : 'N/A'} <br/>
                                                 <strong>MAT. FUNCIONAL:</strong> ${tombo.mf_recebedor ? tombo.mf_recebedor : 'N/A'} <br/>
                                                 <strong>TELEFONE:</strong> ${tombo.tel_recebedor ? tombo.tel_recebedor : 'N/A'} <br/>

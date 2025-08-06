@@ -237,17 +237,32 @@ export default {
    },
 
    // Método para obter detalhes de um tombo usado por ID
-   async getTomboUsadoDetalhes(tombo) {
+   async getTomboUsadoDetalhes(id) {
       try {
          const connectionPool = await connection.getConnection();
          try {
             const [rows] = await connectionPool.query(
-               'SELECT tombo, doc_saida, referencia, destino, posto_grad, mf_recebedor, tel_recebedor, nome_recebedor, observacao, data_saida FROM saida_tombo WHERE tombo = ?',
-               [tombo]
+               `SELECT 
+               st.tombo, 
+               st.doc_saida, 
+               st.referencia, 
+               st.destino, 
+               st.posto_grad, 
+               st.mf_recebedor, 
+               st.tel_recebedor, 
+               st.nome_recebedor, 
+               st.observacao, 
+               st.data_saida,
+               rt.descricao,
+               rt.valor
+             FROM saida_tombo st
+             JOIN registrodetombamento rt ON st.tombo = rt.tombo
+             WHERE st.id = ?`,
+               [id]
             );
             console.log(
-               '[SaidaTomboModel.getTomboUsadoDetalhes] Dados retornados para tombo',
-               tombo,
+               '[SaidaTomboModel.getTomboUsadoDetalhes] Dados retornados para id',
+               id,
                ':',
                rows[0]
             );
@@ -263,7 +278,6 @@ export default {
          throw error;
       }
    },
-
    // Método para reverter a saída de um tombo
    async reverterSaida(id, tombo) {
       const deleteQuery = `DELETE FROM saida_tombo WHERE id = ?`;

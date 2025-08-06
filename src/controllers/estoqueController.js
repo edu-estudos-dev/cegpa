@@ -260,15 +260,15 @@ class EstoqueController {
       }
    };
 
-   // visualizarTombamento = async (req, res) => {
-   //    try {
-   //       const item = await estoqueModel.getInfoByIdTombamento(req.params.id);
-   //       res.json(item);
-   //    } catch (error) {
-   //       console.error('Erro ao visualizar tombamento:', error);
-   //       res.status(500).json({ error: 'Erro ao carregar detalhes' });
-   //    }
-   // };
+   visualizarTombamento = async (req, res) => {
+      try {
+         const item = await estoqueModel.getInfoByIdTombamento(req.params.id);
+         res.json(item);
+      } catch (error) {
+         console.error('Erro ao visualizar tombamento:', error);
+         res.status(500).json({ error: 'Erro ao carregar detalhes' });
+      }
+   };
 
    async visualizarTombamento(req, res) {
       try {
@@ -390,26 +390,38 @@ class EstoqueController {
                .json({ error: 'Local de estoque é obrigatório' });
          }
 
-         // Preparar dados para atualização
+         // Preparar dados para atualização com conversão para caixa alta
          const updateData = {
             data_de_entrada,
             quantidade: parseInt(quantidade),
-            tipo_tombo,
-            tombo,
-            tombo_inicial: tipo_tombo === 'LOTE' ? tombo_inicial : null,
-            tombo_final: tipo_tombo === 'LOTE' ? tombo_final : null,
+            tipo_tombo: tipo_tombo ? tipo_tombo.toUpperCase() : null,
+            tombo: tombo ? tombo.toUpperCase() : null,
+            tombo_inicial:
+               tipo_tombo === 'LOTE'
+                  ? tombo_inicial
+                     ? tombo_inicial.toUpperCase()
+                     : null
+                  : null,
+            tombo_final:
+               tipo_tombo === 'LOTE'
+                  ? tombo_final
+                     ? tombo_final.toUpperCase()
+                     : null
+                  : null,
             tombo_lote_manual:
                tipo_tombo === 'LOTE_MANUAL'
                   ? JSON.parse(tombo_lote_manual)
                   : null,
-            categoria,
-            doc_origem,
+            categoria: categoria ? categoria.toUpperCase() : null,
+            doc_origem: doc_origem ? doc_origem.toUpperCase() : null,
             valor: parseFloat(valor),
-            descricao,
-            situacao,
-            conta_contabil,
-            estoque,
-            observacao: observacao || null,
+            descricao: descricao ? descricao.toUpperCase() : null,
+            situacao: situacao ? situacao.toUpperCase() : null,
+            conta_contabil: conta_contabil
+               ? conta_contabil.toUpperCase()
+               : null,
+            estoque: estoque ? estoque.toUpperCase() : null,
+            observacao: observacao ? observacao.toUpperCase() : null,
          };
 
          console.log('Dados para atualização no banco:', updateData);
@@ -429,7 +441,7 @@ class EstoqueController {
          });
       }
    }
-
+   
    // Método corrigido para renderizar formulário de edição de tombamento
    editarTombamento = async (req, res) => {
       try {
