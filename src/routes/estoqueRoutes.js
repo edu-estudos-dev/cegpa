@@ -1,153 +1,166 @@
 import express from 'express';
 import estoqueController from '../controllers/estoqueController.js';
-import saidaTomboController from '../controllers/saidaTomboController.js'; // Novo controlador para saída de tombos
-import isAuthenticated from '../middleware/auth.js'; // Middleware de autenticação
-import checkRole from '../middleware/checkRole.js'; // Middleware de permissão
+import saidaTomboController from '../controllers/saidaTomboController.js';
+import isAuthenticated from '../middleware/auth.js';
+import checkRole from '../middleware/checkRole.js';
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { v4 as uuidv4 } from 'uuid';
+
+// Configurar __dirname para ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Configuração do Multer para salvar PDFs
+const storage = multer.diskStorage({
+   destination: (req, file, cb) => {
+      cb(null, 'Uploads/');
+   },
+   filename: (req, file, cb) => {
+      const uniqueSuffix = `${Date.now()}-${uuidv4()}`;
+      cb(null, `temp-${uniqueSuffix}.pdf`); // Nome temporário
+   },
+});
+
+const upload = multer({
+   storage,
+   fileFilter: (req, file, cb) => {
+      if (file.mimetype === 'application/pdf') {
+         cb(null, true);
+      } else {
+         cb(new Error('Apenas arquivos PDF são permitidos'), false);
+      }
+   },
+}).single('pdfFile');
+
 
 const router = express.Router();
 
-/* ********************************************************************************
-                  Rotas para a ENTRADA de Itens no Estoque
-*********************************************************************************/
+// Rota para renderizar o formulário de entrada de itens no estoque
+router.get('/entrada', isAuthenticated, estoqueController.renderEntradaForm);
 
-// Nome: Renderizar Formulário de Entrada
-router.get('/entrada', estoqueController.renderEntradaForm);
+// Rota para criar um novo item no estoque, com upload de PDF
+router.post('/entrada', isAuthenticated, upload, estoqueController.create);
 
-// Nome: Inserir Dados no Estoque
-router.post('/entrada', estoqueController.create);
+// Rota para obter o último número de tombo registrado
+router.get('/ultimo-tombo', isAuthenticated, estoqueController.fetchUltimoTombo);
 
-// Nome: Obter Último Tombo
-router.get('/ultimo-tombo', estoqueController.fetchUltimoTombo);
+// Rota para visualizar detalhes de um item no estoque por ID
+router.get('/visualizar/:id', isAuthenticated, estoqueController.visualizarItem);
 
-// Nome: Visualizar Item Específico (Entrada)
-router.get('/visualizar/:id', estoqueController.visualizarItem);
-
-// Nome: Editar Item (Apenas Admin)
+// Rota para renderizar o formulário de edição de um item no estoque (acesso restrito a admins)
 router.get('/editar/:id', isAuthenticated, checkRole(['admin']), estoqueController.renderEditForm);
 
-// Nome: Atualizar Item (Apenas Admin)
+// Rota para atualizar um item no estoque (acesso restrito a admins)
 router.put('/editar/:id', isAuthenticated, checkRole(['admin']), estoqueController.update);
 
-// Nome: Excluir Item do Estoque (Apenas Admin)
+// Rota para excluir um item do estoque (acesso restrito a admins)
 router.delete('/excluir/:id', isAuthenticated, checkRole(['admin']), estoqueController.destroy);
 
-/* ********************************************************************************
-                  Rotas para a SAÍDA de Itens no Estoque
-*********************************************************************************/
+// Rota para renderizar o formulário de saída de itens do estoque
+router.get('/saida', isAuthenticated, estoqueController.renderSaidaForm);
 
-// Nome: Renderizar Formulário de Saída
-router.get('/saida', estoqueController.renderSaidaForm);
+// Rota para registrar a saída de itens do estoque
+router.post('/saida', isAuthenticated, estoqueController.registrarSaida);
 
-// Nome: Registrar Saída de Itens
-router.post('/saida', estoqueController.registrarSaida);
+// Rota para obter a lista de itens disponíveis no estoque
+router.get('/api/itens-disponiveis', isAuthenticated, estoqueController.fetchItensDisponiveis);
 
-// Nome: Buscar Itens Disponíveis
-router.get('/api/itens-disponiveis', estoqueController.fetchItensDisponiveis);
+// Rota para verificar se um termo de recebimento já existe
+router.get('/verificar-termo-existente', isAuthenticated, estoqueController.verificarTermoExistente);
 
-// Nome: Verificar Termo de Responsabilidade Existente
-router.get('/verificar-termo-existente', estoqueController.verificarTermoExistente);
-
-// Nome: Reverter Saída de Item (Apenas Admin)
+// Rota para reverter a saída de um item do estoque (acesso restrito a admins)
 router.delete('/reverter-saida/:id', isAuthenticated, checkRole(['admin']), estoqueController.reverterSaida);
 
-// Nome: Visualizar Item Pago Específico
-router.get('/visualizar/itempago/:id', estoqueController.visualizarItemPago);
+// Rota para visualizar detalhes de um item pago por ID
+router.get('/visualizar/itempago/:id', isAuthenticated, estoqueController.visualizarItemPago);
 
-/* ********************************************************************************
-                  Rotas para SAÍDA de Tombos
-*********************************************************************************/
-// Nome: Mostrar Tabela de Tombos Usados
+// Rota para obter a lista de tombos usados
 router.get('/tombos-usados', isAuthenticated, saidaTomboController.getAllTombosUsados);
 
-// Nome: Visualizar Tombo Usado Específico
+// Rota para visualizar detalhes de um tombo usado por ID
 router.get('/visualizar/tombo-usado/:id', isAuthenticated, saidaTomboController.visualizarTomboUsado);
 
-// Nome: Reverter Saída de Tombo (Apenas Admin)
+// Rota para reverter a saída de um tombo (acesso restrito a admins)
 router.delete('/reverter-saida-tombo/:id', isAuthenticated, checkRole(['admin']), saidaTomboController.reverterSaida);
-router.delete('/tombos-usados/reverter/:id', isAuthenticated, checkRole(['admin']), saidaTomboController.reverterSaida);
 
-// Nome: Gerar Relatório de Tombos Usados (PDF/Excel)
+// Rota alternativa para reverter a saída de um tombo (acesso restrito a admins)
+router.delete('/tombos-usados/reverter/:id', isAuthenticated, saidaTomboController.reverterSaida);
+
+// Rota para gerar um relatório em PDF de tombos usados
 router.get('/relatorio/tombos-usados', isAuthenticated, saidaTomboController.generatePDFTombosUsados);
 
-// Nome: Renderizar Formulário de Saída de Tombos
+// Rota para renderizar o formulário de saída de tombos
 router.get('/saida-tombo', isAuthenticated, saidaTomboController.renderizarFormulario);
 
-// Nome: Gerar Termo de Recebimento
+// Rota para gerar um novo número de termo de recebimento para saída de tombos
 router.get('/gerar-termo-tombo', isAuthenticated, saidaTomboController.gerarTermoRecebimento);
 
-// Nome: Verificar Termo de Recebimento Existente
+// Rota para verificar se um termo de recebimento de tombo já existe
 router.get('/verificar-termo-tombo-existente', isAuthenticated, saidaTomboController.verificarTermoExistente);
 
-// Nome: Registrar Saída de Tombos
+// Rota para registrar a saída de tombos
 router.post('/saida-tombo', isAuthenticated, saidaTomboController.registrarSaida);
 
-/* ********************************************************************************
-                  Rotas para TOMBAMENTO
-*********************************************************************************/
+// Rota para listar todos os registros de tombamento
+router.get('/tabela/tombamento', isAuthenticated, estoqueController.listarTombamento);
 
-// Nome: Listar Tombamentos
-router.get('/tabela/tombamento', estoqueController.listarTombamento);
+// Rota para visualizar detalhes de um registro de tombamento por ID
+router.get('/tombamento/visualizar/:id', isAuthenticated, estoqueController.visualizarTombamento);
 
-// Nome: Visualizar Tombamento Específico
-router.get('/tombamento/visualizar/:id', estoqueController.visualizarTombamento);
+// Rota para renderizar o formulário de edição de um registro de tombamento (acesso restrito a admins)
+router.get('/tombamento/editar/:id', isAuthenticated, checkRole(['admin']), estoqueController.editarTombamento);
 
-// Nome: Editar Tombamento
-router.get('/tombamento/editar/:id', estoqueController.editarTombamento);
+// Rota para atualizar um registro de tombamento (acesso restrito a admins)
+router.post('/tombamento/atualizar/:id', isAuthenticated, checkRole(['admin']), estoqueController.atualizarTombamento);
 
-// Nome: Atualizar Tombamento
-router.post('/tombamento/atualizar/:id', estoqueController.atualizarTombamento);
+// Rota para excluir um registro de tombamento (acesso restrito a admins)
+router.delete('/tombamento/excluir/:id', isAuthenticated, checkRole(['admin']), estoqueController.excluirTombamento);
 
-// Nome: Excluir Tombamento
-router.delete('/tombamento/excluir/:id', estoqueController.excluirTombamento);
+// Rota para baixar/visualizar um arquivo PDF associado a um tombo
+router.get('/download-pdf/:tombo', isAuthenticated, estoqueController.viewPDF);
 
-/* ********************************************************************************
-                  Rotas para RELATÓRIOS
-*********************************************************************************/
-
-// Nome: Mostrar Tabela de Estoque Atual
+// Rota para listar todos os itens no estoque atual
 router.get('/tabela/estoqueatual', isAuthenticated, estoqueController.getAllEstoque);
 
-// Nome: Mostrar Tabela de Itens Novos
-router.get('/tabela/itens-novos', estoqueController.showItensNovos);
+// Rota para listar todos os itens novos no estoque
+router.get('/tabela/itens-novos', isAuthenticated, estoqueController.showItensNovos);
 
-// Nome: Listar Itens Usados
-router.get('/itens-usados', estoqueController.getItensUsados);
+// Rota para obter a lista de itens usados no estoque
+router.get('/itens-usados', isAuthenticated, estoqueController.getItensUsados);
 
-// Nome: Mostrar Tabela de Itens Usados
-router.get('/tabela/itens-usados', estoqueController.showItensUsados);
+// Rota para listar todos os itens usados no estoque
+router.get('/tabela/itens-usados', isAuthenticated, estoqueController.showItensUsados);
 
-// Nome: Mostrar Tabela de Itens Pagos
-router.get('/estoque/itenspagos', estoqueController.getAllItensPagos);
+// Rota para listar todos os itens pagos (saídas registradas)
+router.get('/estoque/itenspagos', isAuthenticated, estoqueController.getAllItensPagos);
 
-// Nome: Obter Quantidade Única de Itens no Estoque
-router.get('/qtde-unica', estoqueController.getQtdeUnicaEstoque);
+// Rota para obter a quantidade única de itens no estoque, agrupada por descrição e categoria
+router.get('/qtde-unica', isAuthenticated, estoqueController.getQtdeUnicaEstoque);
 
-// Nome: Gerar Relatório Geral (PDF/Excel)
-router.get('/relatorio/geral', estoqueController.generatePDF);
+// Rota para gerar um relatório em PDF do estoque geral
+router.get('/relatorio/geral', isAuthenticated, estoqueController.generatePDF);
 
-// Nome: Gerar Relatório de Itens Novos (PDF/Excel)
-router.get('/relatorio/novos', estoqueController.generatePDFNovos);
+// Rota para gerar um relatório em PDF de itens novos
+router.get('/relatorio/novos', isAuthenticated, estoqueController.generatePDFNovos);
 
-// Nome: Gerar Relatório de Itens Usados (PDF/Excel)
-router.get('/relatorio/usados', estoqueController.generatePDFUsados);
+// Rota para gerar um relatório em PDF de itens usados
+router.get('/relatorio/usados', isAuthenticated, estoqueController.generatePDFUsados);
 
-// Nome: Gerar Relatório de Itens Pagos (PDF/Excel)
-router.get('/relatorio/itens-pagos', estoqueController.generatePDFItensPagos);
+// Rota para gerar um relatório em PDF de itens pagos
+router.get('/relatorio/itens-pagos', isAuthenticated, estoqueController.generatePDFItensPagos);
 
-// Nome: Gerar Relatório de Quantidade Disponível
-router.get('/relatorio/quantidade-disponivel', estoqueController.generatePDFQuantidadeDisponivel);
+// Rota para gerar um relatório em PDF da quantidade disponível no estoque
+router.get('/relatorio/quantidade-disponivel', isAuthenticated, estoqueController.generatePDFQuantidadeDisponivel);
 
-// Nome: Gerar Relatório de Tombamento
-router.get('/relatorio/tombamento', estoqueController.gerarRelatorioTombamento);
+// Rota para gerar um relatório em PDF de registros de tombamento
+router.get('/relatorio/tombamento', isAuthenticated, estoqueController.gerarRelatorioTombamento);
 
-/* ********************************************************************************
-                  Rotas para AUDITORIA
-*********************************************************************************/
+// Rota para buscar informações de um tombo específico
+router.get('/fetch-info-tombo', isAuthenticated, estoqueController.fetchInfoTombo);
 
-// Nome: Buscar Informações de um Tombo
-router.get('/fetch-info-tombo', estoqueController.fetchInfoTombo);
-
-// Nome: Histórico de Auditoria de Tombo (API)
-router.get('/auditoria/api/tombo/:tombo', estoqueController.historicoAuditoriaTomboAPI);
+// Rota para obter o histórico de auditoria de um tombo específico por API
+router.get('/auditoria/api/tombo/:tombo', isAuthenticated, estoqueController.historicoAuditoriaTomboAPI);
 
 export default router;

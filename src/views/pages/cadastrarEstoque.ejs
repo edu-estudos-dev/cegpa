@@ -260,8 +260,17 @@
                <button id="btnRegistrar" type="submit" class="w-10 btn btn-success mx-1">Registrar Entrada</button>
                <button id="btnLimpar" type="button" class="w-10 btn btn-warning mx-1">Limpar</button>
             </div>
+
+            <div class="row mt-3">
+            <div class="col-md-12">
+               <div class="form-group">
+                  <label for="pdfFile" class="form-label fw-bold">Anexar PDF (opcional):</label>
+                  <input type="file" class="form-control" id="pdfFile" name="pdfFile" accept="application/pdf">
+               </div>
+            </div>
          </form>
 
+      
          <!-- Modal para Lote Manual -->
          <div class="modal fade" id="ManualModal" tabindex="-1" aria-labelledby="loteManualModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -587,174 +596,34 @@
    document.getElementById('formulario-entrada').addEventListener('submit', async function (event) {
       event.preventDefault();
 
-      const tipoTombo = document.getElementById('tipo_tombo').value;
-      const dataEntrada = document.getElementById('data_de_entrada').value;
-      const quantidade = document.getElementById('qtd').value;
-      const categoria = document.getElementById('categoria').value;
-      const documentoOrigem = document.getElementById('doc_origem').value;
-      const valor = document.getElementById('valor').value;
-      const descricao = document.getElementById('descricao').value;
-      const situacao = document.getElementById('situacao').value;
-      const contaContabil = document.getElementById('conta_contabil').value;
-      const estoque = document.getElementById('estoque').value;
-      const tomboLoteManual = document.getElementById('tombo_lote_manual').value;
-      const tomboInicial = document.getElementById('tombo_inicial').value;
-      const tomboFinal = document.getElementById('tombo_final').value;
-      const observacao = document.getElementById('observacao').value;
-      const destinoDados = document.getElementById('destino_dados').value;
+      const form = this;
+      const formData = new FormData(form);
 
-      if (!dataEntrada) {
-         Swal.fire({
-            icon: 'error',
-            title: 'Erro de Validação',
-            text: 'Por favor, preencha a Data de Entrada.',
-         });
-         return;
+      // Log para verificar os dados enviados
+      const formDataEntries = {};
+      for (const [key, value] of formData.entries()) {
+         formDataEntries[key] = value instanceof File ? value.name : value;
       }
-      if (!quantidade || quantidade < 1) {
-         Swal.fire({
-            icon: 'error',
-            title: 'Erro de Validação',
-            text: 'A quantidade deve ser maior ou igual a 1.',
-         });
-         return;
-      }
-      if (tipoTombo === 'LOTE_MANUAL' && !tomboLoteManual) {
-         Swal.fire({
-            icon: 'error',
-            title: 'Erro de Validação',
-            text: 'Por favor, defina os tombos no modo Lote Manual.',
-         });
-         return;
-      }
-      if (tipoTombo === 'LOTE' && (!tomboInicial || !tomboFinal)) {
-         Swal.fire({
-            icon: 'error',
-            title: 'Erro de Validação',
-            text: 'Por favor, defina o intervalo de tombos no modo Lote.',
-         });
-         return;
-      }
-      if (categoria === 'Selecione uma categoria...') {
-         Swal.fire({
-            icon: 'error',
-            title: 'Erro de Validação',
-            text: 'Por favor, selecione uma Categoria.',
-         });
-         return;
-      }
-      if (!documentoOrigem) {
-         Swal.fire({
-            icon: 'error',
-            title: 'Erro de Validação',
-            text: 'Por favor, preencha o Documento de Origem.',
-         });
-         return;
-      }
-      if (!valor || valor <= 0) {
-         Swal.fire({
-            icon: 'error',
-            title: 'Erro de Validação',
-            text: 'Por favor, preencha um Valor Unitário válido.',
-         });
-         return;
-      }
-      if (!descricao) {
-         Swal.fire({
-            icon: 'error',
-            title: 'Erro de Validação',
-            text: 'Por favor, preencha a Descrição.',
-         });
-         return;
-      }
-      if (situacao === 'Escolha uma opção...') {
-         Swal.fire({
-            icon: 'error',
-            title: 'Erro de Validação',
-            text: 'Por favor, selecione o Estado de Conservação.',
-         });
-         return;
-      }
-      if (contaContabil === 'Escolha uma opção...') {
-         Swal.fire({
-            icon: 'error',
-            title: 'Erro de Validação',
-            text: 'Por favor, selecione a Conta Contábil.',
-         });
-         return;
-      }
-      if (!estoque || estoque === 'Escolha uma opção...') {
-         Swal.fire({
-            icon: 'error',
-            title: 'Erro de Validação',
-            text: 'Por favor, preencha o Local de Estoque.',
-         });
-         return;
-      }
-      if (!destinoDados) {
-         Swal.fire({
-            icon: 'error',
-            title: 'Erro de Validação',
-            text: 'Por favor, selecione o Destino dos Dados.',
-         });
-         return;
-      }
-
-      const formDataObj = {
-         data_de_entrada: dataEntrada,
-         quantidade: quantidade,
-         tipo_tombo: tipoTombo,
-         tombo_inicial: tomboInicial,
-         tombo_final: tomboFinal,
-         tombo_lote_manual: tomboLoteManual,
-         categoria: categoria,
-         doc_origem: documentoOrigem,
-         valor: valor,
-         descricao: descricao,
-         situacao: situacao,
-         conta_contabil: contaContabil,
-         estoque: estoque,
-         observacao: observacao,
-         destino_dados: destinoDados
-      };
-
-      const formDataParams = new URLSearchParams();
-      for (const [key, value] of Object.entries(formDataObj)) {
-         if (value !== undefined && value !== null && value !== '') {
-            formDataParams.append(key, value);
-         }
-      }
-
-      console.log('Dados enviados ao backend:', formDataParams.toString());
+      console.log('Dados enviados ao backend (FormData):', formDataEntries);
 
       try {
          const response = await fetch('/entrada', {
             method: 'POST',
-            headers: {
-               'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: formDataParams
+            body: formData
          });
 
          if (!response.ok) {
             const errorData = await response.json();
-            if (errorData.error && errorData.error.includes('já existe no sistema')) {
-               Swal.fire({
-                  icon: 'error',
-                  title: 'Erro',
-                  text: errorData.error,
-               });
-               return;
-            }
             throw new Error('Erro ao registrar a entrada: ' + (errorData.error || 'Erro desconhecido'));
          }
 
+         const result = await response.json();
          const destinoDados = document.getElementById('destino_dados').value;
          const redirectUrl = destinoDados === 'registrodetombamento' ? '/tabela/tombamento' : '/tabela/estoqueatual';
          Swal.fire({
             icon: 'success',
             title: 'Sucesso',
-            text: 'Entrada registrada com sucesso!',
+            text: result.message || 'Entrada registrada com sucesso!',
             timer: 1500,
             showConfirmButton: false
          }).then(() => {
@@ -769,7 +638,7 @@
          });
       }
    });
-
+  
    // Função para limpar o formulário
    function limparFormulario() {
       // Resetar o formulário HTML

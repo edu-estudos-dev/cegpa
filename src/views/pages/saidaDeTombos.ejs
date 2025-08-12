@@ -477,27 +477,28 @@
             try {
                const erros = validarFormulario();
                if (erros.length > 0) {
-                     showAlert(erros.join('<br>'));
-                     return;
+                  showAlert(erros.join('<br>'));
+                  return;
                }
 
                const formData = {
-                     tombos: Array.from(document.querySelectorAll('#tombos-list input:checked')).map(i => i.value),
-                     doc_saida: currentDocSaida.replace('-', '/'), // Converte NNNNN-AAAA para NNNNN/AAAA
-                     referencia: document.getElementById('referencia').value.trim(),
-                     destino: document.getElementById('destino').value.trim(),
-                     postoGrad: document.getElementById('postoGrad').value.trim(),
-                     mf_recebedor: document.getElementById('mf_recebedor').value.trim(),
-                     tel_recebedor: document.getElementById('tel_recebedor').value.trim(),
-                     nome_do_recebedor: document.getElementById('nome_do_recebedor').value.trim(),
-                     observacao: document.getElementById('observacao').value.trim(),
-                     modoDocSaida: modoDocSaida
+                  tombos: Array.from(document.querySelectorAll('#tombos-list input:checked')).map(i => i.value),
+                  doc_saida: currentDocSaida, // Envia no formato NNNNN-AAAA
+                  referencia: document.getElementById('referencia').value.trim(),
+                  destino: document.getElementById('destino').value.trim(),
+                  postoGrad: document.getElementById('postoGrad').value.trim(),
+                  mf_recebedor: document.getElementById('mf_recebedor').value.trim(),
+                  tel_recebedor: document.getElementById('tel_recebedor').value.trim(),
+                  nome_do_recebedor: document.getElementById('nome_do_recebedor').value.trim(),
+                  observacao: document.getElementById('observacao').value.trim(),
+                  modoDocSaida: modoDocSaida,
+                  dataSaida: new Date().toISOString().split('T')[0] // Adiciona dataSaida
                };
 
                const response = await fetch('/saida-tombo', {
-                     method: 'POST',
-                     headers: { 'Content-Type': 'application/json' },
-                     body: JSON.stringify(formData)
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(formData)
                });
 
                const result = await response.json();
@@ -512,7 +513,7 @@
             }
          });
 
-    
+      
 
          document.getElementById('tel_recebedor').addEventListener('input', (e) => {
             e.target.value = formatarTelefone(e.target.value);

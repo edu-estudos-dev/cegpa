@@ -111,9 +111,7 @@ class EstoqueModel {
       ];
 
       try {
-         console.log('Executando query de atualização com valores:', values);
          const [result] = await connection.execute(query, values);
-         console.log('Resultado da query:', result);
          if (result.affectedRows === 0) {
             console.warn(
                `Nenhuma linha afetada ao atualizar tombamento com ID ${id}`
@@ -195,13 +193,14 @@ class EstoqueModel {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
    `;
       try {
+         let firstInsertId = null;
          for (const item of itens) {
             if (!Number.isInteger(Number(item.tombo)) || item.tombo <= 0) {
                throw new Error(
                   `O tombo ${item.tombo} deve ser um número inteiro positivo.`
                );
             }
-            await connection.execute(query, [
+            const [result] = await connection.execute(query, [
                item.data_de_entrada,
                item.descricao,
                item.tombo,
@@ -215,8 +214,11 @@ class EstoqueModel {
                item.observacao,
                item.tipo_tombo,
             ]);
+            if (!firstInsertId) {
+               firstInsertId = result.insertId;
+            }
          }
-         return itens.length;
+         return { insertId: firstInsertId, affectedRows: itens.length };
       } catch (error) {
          console.error('Erro ao criar itens em lote no estoque:', error);
          throw error;
@@ -233,13 +235,14 @@ class EstoqueModel {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
    `;
       try {
+         let firstInsertId = null;
          for (const item of itens) {
             if (!Number.isInteger(Number(item.tombo)) || item.tombo <= 0) {
                throw new Error(
                   `O tombo ${item.tombo} deve ser um número inteiro positivo.`
                );
             }
-            await connection.execute(query, [
+            const [result] = await connection.execute(query, [
                item.data_de_entrada,
                item.quantidade,
                item.tipo_tombo,
@@ -253,8 +256,11 @@ class EstoqueModel {
                item.conta_contabil,
                item.descricao,
             ]);
+            if (!firstInsertId) {
+               firstInsertId = result.insertId;
+            }
          }
-         return itens.length;
+         return { insertId: firstInsertId, affectedRows: itens.length };
       } catch (error) {
          console.error('Erro ao criar itens em lote no tombamento:', error);
          throw error;
@@ -373,13 +379,13 @@ class EstoqueModel {
    static async getUltimoTombo() {
       try {
          const query = `
-         SELECT MAX(CAST(tombo AS UNSIGNED)) as ultimo_tombo 
-         FROM (
-            SELECT tombo FROM estoqueatual
-            UNION
-            SELECT tombo FROM registrodetombamento
-         ) AS combined_tombos
-      `;
+            SELECT MAX(CAST(tombo AS UNSIGNED)) as ultimo_tombo 
+            FROM (
+               SELECT tombo FROM estoqueatual
+               UNION
+               SELECT tombo FROM registrodetombamento
+            ) AS combined_tombos
+         `;
          const [results] = await connection.execute(query);
          return results[0].ultimo_tombo || 0;
       } catch (error) {
@@ -387,6 +393,7 @@ class EstoqueModel {
          throw error;
       }
    }
+
    // Método para obter quantidade única de itens no estoque
    getQtdeUnicaEstoque = async () => {
       const query = `
@@ -410,19 +417,20 @@ class EstoqueModel {
 
    getAllItensPagos = async (data_inicial, data_final) => {
       let query = `
-      SELECT 
-         ip.id,
-         ip.data_de_saida,
-         ip.descricao,
-         ea.tombo AS tombo_estoqueatual,
-         ip.destino,
-         ip.referencia,
-         ip.doc_saida,
-         ea.doc_origem,
-         ea.valor
-      FROM itenspagos ip
-      JOIN estoqueatual ea ON ip.estoqueatual_id = ea.id
-   `;
+         SELECT 
+            ip.id,
+            ip.data_de_saida,
+            ip.descricao,
+            ea.tombo AS tombo_estoqueatual,
+            ip.destino,
+            ip.referencia,
+            ip.doc_saida,
+            ea.doc_origem,
+            ea.valor,
+            ea.situacao
+         FROM itenspagos ip
+         JOIN estoqueatual ea ON ip.estoqueatual_id = ea.id
+      `;
       const params = [];
 
       if (data_inicial && data_final) {
@@ -700,6 +708,64 @@ class EstoqueModel {
          throw error;
       }
    };
+
+   async savePDFData(pdfData) {
+      try {
+         const connectionPool = await connection.getConnection();
+         try {
+            const [result] = await connectionPool.query(
+               'INSERT INTO pdfs (filename, file_path, uploaded_by, upload_date, id_registro, tombo) VALUES (?, ?, ?, ?, ?, ?)',
+               [
+                  pdfData.filename,
+                  pdfData.file_path,
+                  pdfData.uploaded_by,
+                  pdfData.upload_date,
+                  pdfData.id_registro || null,
+                  pdfData.tombo || null,
+               ]
+            );
+            return result;
+         } finally {
+            connectionPool.release();
+         }
+      } catch (error) {
+         console.error('[EstoqueModel.savePDFData] Erro ao salvar PDF:', error);
+         throw error;
+      }
+   }
+
+   async getPDFByTombo(tombo) {
+      try {
+         const [rows] = await connection.execute(
+            'SELECT * FROM pdfs WHERE tombo = ? LIMIT 1',
+            [tombo]
+         );
+         return rows.length > 0 ? rows[0] : null;
+      } catch (error) {
+         console.error('Erro ao buscar PDF por tombo:', error);
+         throw error;
+      }
+   }
+
+   async getAllRegistroTombamento() {
+      try {
+         console.log('Executando consulta em registrodetombamento...');
+         const [rows] = await connection.execute(
+            'SELECT * FROM registrodetombamento WHERE usado = 0 ORDER BY id'
+         );
+         console.log(
+            'Consulta SQL: SELECT * FROM registrodetombamento WHERE usado = 0 ORDER BY id'
+         );
+         console.log('Registros encontrados:', rows.length);
+         console.log('Primeiros 5 registros:', rows.slice(0, 5));
+         return rows;
+      } catch (error) {
+         console.error('Erro ao buscar registros de tombamento:', error);
+         throw error;
+      }
+   }
 }
 
-export default new EstoqueModel();
+const estoqueModelInstance = new EstoqueModel();
+export default estoqueModelInstance;
+export { EstoqueModel }; // Exporta a classe explicitamente

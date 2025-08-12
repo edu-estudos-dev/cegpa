@@ -67,6 +67,11 @@
          width: 70px;
       }
 
+      .btn-view-upload {
+         width: 120px;
+         margin-left: 5px;
+      }
+
       .modal.fade .modal-dialog {
          transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
          transform: translateY(-10%);
@@ -350,14 +355,26 @@
                            <a
                               href="/tombamento/editar/<%= item.id %>"
                               class="btn btn-warning btn-sm btn-edit"
-                              >Editar</a
                            >
+                              Editar
+                           </a>
                            <a
                               href="/tombamento/excluir/<%= item.id %>"
                               class="btn btn-danger btn-sm btn-delete"
                               data-id="<%= item.id %>"
-                              >Excluir</a
                            >
+                              Excluir
+                           </a>
+                           <% if (item.has_pdf) { %>
+                           <a
+                              href="/download-pdf/<%= item.tombo %>"
+                              class="btn btn-info btn-sm"
+                              title="Visualizar Upload"
+                              target="_blank"
+                           >
+                              Visualizar pdf
+                           </a>
+                           <% } %>
                         </td>
                      </tr>
                      <% }); %> <% } else { %>

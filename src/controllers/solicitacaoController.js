@@ -303,16 +303,6 @@ class SolicitacaoController {
             observacao,
          } = req.body;
 
-         console.log('[DEBUG] Valores recebidos em req.body:', {
-            data_da_solicitacao,
-            solicitante,
-            qtd,
-            descricao,
-            nup,
-            observacao,
-            _method: req.body._method, // Log do campo _method, se presente
-         });
-
          // Validação dos campos obrigatórios
          if (!data_da_solicitacao || !solicitante || !qtd || !descricao) {
             console.log('Campos obrigatórios ausentes:', {

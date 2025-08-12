@@ -71,19 +71,25 @@ export default {
 
    // Registra a saída de tombos e gera o PDF
    async registrarSaida(req, res) {
-      console.log('=========================================================');
-      console.log(
-         '[saidaTomboController.registrarSaida] INÍCIO DA REQUISIÇÃO POST /saida-tombo'
-      );
-      console.log(
-         '[saidaTomboController.registrarSaida] Corpo da requisição:',
-         JSON.stringify(req.body, null, 2)
-      );
-      console.log(
-         '[saidaTomboController.registrarSaida] Usuário autenticado:',
-         JSON.stringify(req.user, null, 2)
-      );
-      console.log('=========================================================');
+      // Validação inicial para req.body e req.user
+      if (!req.body) {
+         console.log(
+            '[saidaTomboController.registrarSaida] Erro: req.body está indefinido'
+         );
+         return res.status(400).json({
+            success: false,
+            error: 'Corpo da requisição não fornecido.',
+         });
+      }
+      if (!req.user) {
+         console.log(
+            '[saidaTomboController.registrarSaida] Erro: Usuário não autenticado'
+         );
+         return res.status(401).json({
+            success: false,
+            error: 'Usuário não autenticado.',
+         });
+      }
 
       const {
          tombos,
@@ -179,13 +185,46 @@ export default {
             return res.status(400).json({ error: validacao.erro });
          }
 
-         // Verifica se o PDF já existe
-         const pdfPath = path.join(
-            __dirname,
-            '../../pdfs',
-            `Termo_${docSaidaFormatado.replace(/\//g, '-')}.pdf`
+         // Define o caminho da pasta de PDFs
+         const pdfDir = path.join(__dirname, '../../pdfs');
+         console.log(
+            '[saidaTomboController.registrarSaida] Diretório de PDFs:',
+            pdfDir
          );
-         if (fs.existsSync(pdfPath)) {
+
+         // Lista todos os arquivos na pasta de PDFs para depuração
+         try {
+            const filesInDir = fs.readdirSync(pdfDir);
+         } catch (error) {}
+
+         // Cria a pasta se não existir
+         if (!fs.existsSync(pdfDir)) {
+            console.log(
+               '[saidaTomboController.registrarSaida] Criando diretório de PDFs:',
+               pdfDir
+            );
+            fs.mkdirSync(pdfDir, { recursive: true });
+         }
+
+         // Define o caminho completo do PDF
+         const pdfFileName = `Termo_${docSaidaFormatado.replace(
+            /\//g,
+            '-'
+         )}.pdf`;
+         const pdfPath = path.join(pdfDir, pdfFileName);
+         console.log(
+            '[saidaTomboController.registrarSaida] Caminho completo do PDF:',
+            pdfPath
+         );
+
+         // Verifica se o PDF já existe
+         const pdfExists = fs.existsSync(pdfPath);
+         console.log(
+            '[saidaTomboController.registrarSaida] O PDF já existe?',
+            pdfExists
+         );
+
+         if (pdfExists) {
             console.log(
                '[saidaTomboController.registrarSaida] Erro: Termo já existe:',
                docSaidaFormatado
@@ -195,7 +234,40 @@ export default {
             });
          }
 
-         // Gera o PDF com jsPDF
+         // Registra a saída no banco de dados antes de gerar o PDF
+         const dataSaida = new Date()
+            .toISOString()
+            .slice(0, 19)
+            .replace('T', ' ');
+         console.log(
+            '[saidaTomboController.registrarSaida] Chamando SaidaTomboModel.registrarSaida com:',
+            {
+               tombos,
+               docSaidaFormatado,
+               referencia,
+               destino,
+               postoGrad,
+               mf_recebedor,
+               tel_recebedor,
+               nome_do_recebedor,
+               observacao,
+               dataSaida,
+            }
+         );
+         await SaidaTomboModel.registrarSaida(
+            req.body.tombos,
+            req.body.referencia,
+            req.body.destino,
+            req.body.postoGrad,
+            req.body.mf_recebedor,
+            req.body.tel_recebedor,
+            req.body.nome_do_recebedor,
+            req.body.observacao,
+            dataSaida,
+            docSaidaFormatado
+         );
+
+         // Gera o PDF com jsPDF após o registro no banco
          const doc = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
@@ -207,6 +279,23 @@ export default {
             __dirname,
             '../../public/images/cabeçalho pmce.png'
          );
+         console.log(
+            '[saidaTomboController.registrarSaida] Caminho da imagem:',
+            imagePath
+         );
+
+         // Verifica se a imagem existe antes de tentar lê-la
+         if (!fs.existsSync(imagePath)) {
+            console.error(
+               '[saidaTomboController.registrarSaida] Erro: Imagem não encontrada em:',
+               imagePath
+            );
+            return res.status(500).json({
+               success: false,
+               error: 'Erro interno no servidor: Imagem do cabeçalho não encontrada.',
+            });
+         }
+
          const imageData = fs.readFileSync(imagePath).toString('base64');
 
          // Desenha a borda
@@ -224,12 +313,14 @@ export default {
 
          // Título e cabeçalho
          doc.setFontSize(10);
+         doc.setFont('helvetica', 'bold');
          doc.text(
             'TERMO DE RECEBIMENTO E RESPONSABILIDADE - CEGPA/COLOG',
             105,
             28,
             { align: 'center' }
          );
+         doc.setFont('helvetica', 'normal');
 
          const headerYStart = 35;
          const headerData = [
@@ -242,16 +333,8 @@ export default {
             `Referência: ${referencia.toUpperCase()}`,
          ];
          let headerYOffset = 0;
-         headerData.forEach((line, index) => {
-            if (line.startsWith('Nº Termo')) {
-               doc.setFont('helvetica', 'bold');
-               doc.setFontSize(12);
-               doc.text(line, 14, headerYStart + headerYOffset);
-               doc.setFont('helvetica', 'normal');
-               doc.setFontSize(10);
-            } else {
-               doc.text(line, 14, headerYStart + headerYOffset);
-            }
+         headerData.forEach((line) => {
+            doc.text(line, 14, headerYStart + headerYOffset);
             headerYOffset += 5;
          });
 
@@ -313,7 +396,7 @@ export default {
          // Cláusula de recebimento
          const tombosList = tombos.map((t) => t.tombo || t).join(', ');
          const clausula = `Eu, ${nome_do_recebedor.toUpperCase()} Declaro estar ciente de que, ao assinar o presente Termo de Recebimento, assumo a responsabilidade pelo correto recebimento e pela fixação das etiquetas de tombamento em todos os bens móveis nele relacionados, comprometendo-me a cumprir essa obrigação conforme as orientações da Célula de Gestão Patrimonial CEGPA/COLOG`;
-         const clausulaLines = doc.splitTextToSize(clausula, 230);
+         const clausulaLines = doc.splitTextToSize(clausula, 220);
          const clausulaY = tableStartY + items.length * 10 + 10;
          clausulaLines.forEach((line, index) => {
             doc.setFontSize(8);
@@ -382,43 +465,14 @@ export default {
          });
 
          // Salva o PDF
-         const pdfDir = path.dirname(pdfPath);
-         if (!fs.existsSync(pdfDir)) {
-            fs.mkdirSync(pdfDir, { recursive: true });
-         }
-         doc.save(pdfPath);
-
-         // Registra a saída
-         const dataSaida = new Date()
-            .toISOString()
-            .slice(0, 19)
-            .replace('T', ' ');
          console.log(
-            '[saidaTomboController.registrarSaida] Chamando SaidaTomboModel.registrarSaida com:',
-            {
-               tombos,
-               docSaidaFormatado,
-               referencia,
-               destino,
-               postoGrad,
-               mf_recebedor,
-               tel_recebedor,
-               nome_do_recebedor,
-               observacao,
-               dataSaida,
-            }
+            '[saidaTomboController.registrarSaida] Salvando PDF em:',
+            pdfPath
          );
-         await SaidaTomboModel.registrarSaida(
-            tombos,
-            docSaidaFormatado,
-            referencia,
-            destino,
-            postoGrad,
-            mf_recebedor,
-            tel_recebedor,
-            nome_do_recebedor,
-            observacao,
-            dataSaida
+         doc.save(pdfPath);
+         console.log(
+            '[saidaTomboController.registrarSaida] PDF salvo com sucesso em:',
+            pdfPath
          );
 
          // Incrementa a sequência após o registro
