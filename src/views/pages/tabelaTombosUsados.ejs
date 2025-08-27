@@ -75,12 +75,12 @@
       /* Ajuste das colunas */
       .table-container th:nth-child(1), /* ID */
       .table-container td:nth-child(1) {
-         width: 3%;
+         width: 1%;
       }
 
       .table-container th:nth-child(2), /* Saída */
       .table-container td:nth-child(2) {
-         width: 5%;
+         width: 3%;
       }
 
       .table-container th:nth-child(3), /* Descrição */
@@ -90,7 +90,7 @@
 
       .table-container th:nth-child(4), /* Tombo */
       .table-container td:nth-child(4) {
-         width: 5%;
+         width: 3%;
       }
 
       .table-container th:nth-child(5), /* Destino */
@@ -105,12 +105,17 @@
 
       .table-container th:nth-child(7), /* Doc. Saída */
       .table-container td:nth-child(7) {
-         width: 8%;
+         width: 3%;
+      }
+
+      .table-container th:nth-child(8), /* Valor */
+      .table-container td:nth-child(8) {
+         width: 3%;
       }
 
       .table-container th:last-child, /* Ações */
       .table-container td:last-child {
-         width: 5%;
+         width: 3%;
       }
 
       @media (max-width: 1920px) {
@@ -431,164 +436,143 @@
             '<%= typeof userRole !== "undefined" ? userRole : "user" %>';
 
          document.addEventListener('DOMContentLoaded', () => {
-            const attachDetailsEvents = () => {
-               const viewButtons = document.querySelectorAll('.btn-details');
-               viewButtons.forEach((button) => {
-                  button.addEventListener('click', async (event) => {
-                     const itemId = event.target.getAttribute('data-id');
-                     const url = `/visualizar/tombo-usado/${itemId}`;
-                     try {
-                        console.log('Fetching data for tombo ID:', itemId);
-                        const response = await fetch(url);
-                        if (!response.ok) {
-                           if (response.status === 404) {
-                              throw new Error('Tombo não encontrado');
-                           }
-                           throw new Error(
-                              `ERRO: ${response.statusText.toUpperCase()}`
-                           );
+           const attachDetailsEvents = () => {
+            const viewButtons = document.querySelectorAll('.btn-details');
+            viewButtons.forEach((button) => {
+               button.addEventListener('click', async (event) => {
+                  const itemId = event.target.getAttribute('data-id');
+                  console.log('Botão Detalhes clicado - Item ID:', itemId);
+                  const url = `/visualizar/tombo-usado/${itemId}`;
+                  console.log('URL da requisição:', url);
+
+                  // Remover qualquer modal existente com o mesmo ID
+                  const existingModal = document.getElementById('infoTomboModal');
+                  if (existingModal) {
+                     console.log('Modal existente encontrado, removendo:', existingModal);
+                     existingModal.remove();
+                  }
+
+                  try {
+                     const response = await fetch(url);
+                     console.log('Status da resposta:', response.status);
+                     if (!response.ok) {
+                        if (response.status === 404) {
+                           throw new Error('Tombo não encontrado');
                         }
-                        const tombo = await response.json();
-                        console.log('Data fetched:', tombo);
-                        if (tombo) {
-                           const modalHtml = `
-                           <div class="modal fade" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
-                              <div class="modal-dialog modal-dialog-centered">
-                                 <div class="modal-content">
-                                    <div class="modal-header bg-success text-white d-flex justify-content-between">
-                                       <h3 class="modal-title ms-3" id="infoTomboModalLabel">Informações do Tombo Usado</h3>
-                                       <button type="button" class="btn text-white" data-bs-dismiss="modal" aria-label="Close">
-                                          <i class="fa fa-times fa-lg"></i>
-                                       </button>
-                                    </div>
-                                    <div class="modal-body">
-                                       <div class="card">
-                                          <div class="card-body pb-0">
-                                             <h5 class="card-title">${
-                                                tombo.descricao
-                                                   ? tombo.descricao.toUpperCase()
+                        throw new Error(`ERRO: ${response.statusText.toUpperCase()}`);
+                     }
+                     const tombo = await response.json();
+                     console.log('Dados recebidos do backend:', tombo);
+
+                     // Gerar um ID único para o modal usando timestamp
+                     const modalId = `infoTomboModal_${Date.now()}`;
+                     
+                     const modalHtml = `
+                        <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
+                           <div class="modal-dialog modal-dialog-centered modal-lg">
+                              <div class="modal-content">
+                                 <div class="modal-header bg-success text-white d-flex justify-content-between">
+                                    <h3 class="modal-title ms-3" id="infoTomboModalLabel">Informações do Tombo Usado</h3>
+                                    <button type="button" class="btn text-white" data-bs-dismiss="modal" aria-label="Close">
+                                       <i class="fa fa-times fa-lg"></i>
+                                    </button>
+                                 </div>
+                                 <div class="modal-body">
+                                    <div class="card">
+                                       <div class="card-body pb-0">
+                                          <h5 class="card-title">${tombo.descricao ? tombo.descricao.toUpperCase() : 'N/A'}</h5>
+                                          <p class="card-text">
+                                             <h5 class="bg-primary text-white p-2">Dados do Tombamento</h5>
+                                             <strong>ID:</strong> ${tombo.id || 'N/A'} <br/>
+                                             <strong>Tombo:</strong> ${tombo.tombo || 'N/A'} <br/>
+                                             <strong>Data de Entrada:</strong> ${
+                                                tombo.data_de_entrada
+                                                   ? new Date(tombo.data_de_entrada).toLocaleDateString('pt-BR')
                                                    : 'N/A'
-                                             }</h5>
-                                             <p class="card-text">
-                                                <h5 class="bg-danger text-white p-2">DADOS DA SAÍDA</h5>
-                                                <strong>TOMBO:</strong> ${
-                                                   tombo.tombo
-                                                } <br/>
-                                                <strong>DATA DA SAÍDA:</strong> ${
-                                                   tombo.data_saida &&
-                                                   !isNaN(
-                                                      new Date(
-                                                         tombo.data_saida
-                                                      ).getTime()
-                                                   )
-                                                      ? new Date(
-                                                           tombo.data_saida
-                                                        ).toLocaleDateString(
-                                                           'pt-BR'
-                                                        )
-                                                      : 'N/A'
-                                                } <br/>
-                                                <strong>DESTINO:</strong> ${
-                                                   tombo.destino
-                                                      ? tombo.destino.toUpperCase()
-                                                      : 'N/A'
-                                                } <br/>
-                                                <strong>REFERÊNCIA:</strong> ${
-                                                   tombo.referencia
-                                                      ? tombo.referencia.toUpperCase()
-                                                      : 'N/A'
-                                                } <br/>
-                                                <strong>DOC. SAÍDA:</strong> ${
-                                                   tombo.doc_saida
-                                                      ? tombo.doc_saida.toUpperCase()
-                                                      : 'N/A'
-                                                } <br/>
-                                                <strong>VALOR:</strong> ${
-                                                   tombo.valor &&
-                                                   !isNaN(
-                                                      parseFloat(tombo.valor)
-                                                   )
-                                                      ? parseFloat(
-                                                           tombo.valor
-                                                        ).toLocaleString(
-                                                           'pt-BR',
-                                                           {
-                                                              style: 'currency',
-                                                              currency: 'BRL',
-                                                           }
-                                                        )
-                                                      : 'R$ 0,00'
-                                                } <br/>
-                                                <strong>NOME DO RECEBEDOR:</strong> ${
-                                                   tombo.nome_recebedor
-                                                      ? tombo.nome_recebedor.toUpperCase()
-                                                      : 'N/A'
-                                                } <br/>
-                                                <strong>POSTO/GRADUAÇÃO:</strong> ${
-                                                   tombo.posto_grad
-                                                      ? tombo.posto_grad.toUpperCase()
-                                                      : 'N/A'
-                                                } <br/>
-                                                <strong>MAT. FUNCIONAL:</strong> ${
-                                                   tombo.mf_recebedor
-                                                      ? tombo.mf_recebedor
-                                                      : 'N/A'
-                                                } <br/>
-                                                <strong>TELEFONE:</strong> ${
-                                                   tombo.tel_recebedor
-                                                      ? tombo.tel_recebedor
-                                                      : 'N/A'
-                                                } <br/>
-                                                <strong>OBSERVAÇÃO:</strong> ${
-                                                   tombo.observacao
-                                                      ? tombo.observacao.toUpperCase()
-                                                      : 'N/A'
-                                                } <br/>
-                                             </p>
-                                          </div>
+                                             } <br/>
+                                             <strong>Categoria:</strong> ${tombo.categoria || 'N/A'} <br/>
+                                             <strong>Doc Origem:</strong> ${tombo.doc_origem || 'N/A'} <br/>
+                                             <strong>Estoque:</strong> ${tombo.estoque || 'N/A'} <br/>
+                                             <strong>Valor:</strong> ${
+                                                tombo.valor && !isNaN(parseFloat(tombo.valor))
+                                                   ? parseFloat(tombo.valor).toLocaleString('pt-BR', {
+                                                      style: 'currency',
+                                                      currency: 'BRL',
+                                                   })
+                                                   : 'R$ 0,00'
+                                             } <br/>
+                                             <strong>Situação:</strong> ${tombo.situacao || 'N/A'} <br/>
+                                             <strong>Observação:</strong> ${tombo.observacao || 'N/A'} <br/>
+                                             <hr style="border: 1px solid #ccc; margin: 1rem 0;">
+                                             <h5 class="bg-danger text-white p-2">Dados da Saída</h5>
+                                             <strong>Data de Saída:</strong> ${
+                                                tombo.data_saida && !isNaN(new Date(tombo.data_saida).getTime())
+                                                   ? new Date(tombo.data_saida).toLocaleDateString('pt-BR')
+                                                   : 'N/A'
+                                             } <br/>
+                                             <strong>Destino:</strong> ${tombo.destino ? tombo.destino.toUpperCase() : 'N/A'} <br/>
+                                             <strong>Referência (NUP):</strong> ${
+                                                tombo.referencia ? tombo.referencia.toUpperCase() : 'N/A'
+                                             } <br/>
+                                             <strong>Documento de Saída:</strong> ${
+                                                tombo.doc_saida ? tombo.doc_saida.toUpperCase() : 'N/A'
+                                             } <br/>
+                                             <strong>Recebedor:</strong> ${
+                                                tombo.posto_grad ? tombo.posto_grad.toUpperCase() : 'N/A'
+                                             } ${tombo.nome_recebedor ? tombo.nome_recebedor.toUpperCase() : 'N/A'} <br/>
+                                             <strong>MF do Recebedor:</strong> ${tombo.mf_recebedor || 'N/A'} <br/>
+                                             <strong>Telefone do Recebedor:</strong> ${tombo.tel_recebedor || 'N/A'} <br/>
+                                             <strong>Observação da Saída:</strong> ${
+                                                tombo.observacao ? tombo.observacao.toUpperCase() : 'N/A'
+                                             } <br/>
+                                          </p>
                                        </div>
                                     </div>
                                  </div>
                               </div>
-                           </div>`;
-                           const modalDiv = document.createElement('div');
-                           modalDiv.innerHTML = modalHtml;
-                           document.body.appendChild(modalDiv);
-                           const infoTomboModal = new bootstrap.Modal(
-                              document.getElementById('infoTomboModal'),
-                              {
-                                 backdrop: true,
-                                 focus: true,
-                              }
-                           );
-                           infoTomboModal.show();
-                           infoTomboModal._element.addEventListener(
-                              'hidden.bs.modal',
-                              () => {
-                                 modalDiv.remove();
-                              }
-                           );
+                           </div>
+                        </div>`;
+                                             
+                     const modalDiv = document.createElement('div');
+                     modalDiv.innerHTML = modalHtml;
+                     document.body.appendChild(modalDiv);
+                     console.log('Modal adicionado ao DOM com ID:', modalId);
+
+                     const infoTomboModal = new bootstrap.Modal(
+                        document.getElementById(modalId),
+                        {
+                           backdrop: true,
+                           focus: true,
                         }
-                     } catch (error) {
-                        console.error(
-                           'ERRO AO BUSCAR INFORMAÇÕES DO TOMBO:',
-                           error.message.toUpperCase()
-                        );
-                        Swal.fire({
-                           icon: 'error',
-                           title: 'Erro!',
-                           text:
-                              error.message === 'Tombo não encontrado'
-                                 ? 'O tombo solicitado não foi encontrado.'
-                                 : 'Erro ao carregar os detalhes. Verifique o console para mais informações.',
-                           timer: 3000,
-                           timerProgressBar: true,
-                           showConfirmButton: false,
-                        });
-                     }
-                  });
+                     );
+                     infoTomboModal.show();
+                     console.log('Modal exibido com ID:', modalId);
+
+                     // Logar o conteúdo do modal após exibição
+                     const modalContent = document.getElementById(modalId).outerHTML;
+                     console.log('Conteúdo do modal após exibição:', modalContent);
+
+                     infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
+                        modalDiv.remove();
+                        console.log('Modal removido do DOM');
+                     });
+                  } catch (error) {
+                     console.error('ERRO AO BUSCAR INFORMAÇÕES DO TOMBO:', error.message.toUpperCase());
+                     Swal.fire({
+                        icon: 'error',
+                        title: 'Erro!',
+                        text:
+                           error.message === 'Tombo não encontrado'
+                              ? 'O tombo solicitado não foi encontrado.'
+                              : 'Erro ao carregar os detalhes. Verifique o console para mais informações.',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                     });
+                  }
                });
-            };
+            });
+         };
             // Inicializar eventos dos botões "Detalhes"
             attachDetailsEvents();
 

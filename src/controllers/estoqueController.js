@@ -6,11 +6,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
-import estoqueModelInstance from '../models/estoqueModel.js'; // Instância
-import { EstoqueModel } from '../models/estoqueModel.js'; // Classe
+import estoqueModelInstance from '../models/estoqueModel.js';
+import { EstoqueModel } from '../models/estoqueModel.js';
 import sequenciaModel from '../models/sequenciaModel.js';
-import AuditoriaModel from '../models/AuditoriaModel.js';
-import SaidaTomboModel from '../models/SaidaTomboModel.js';
+import AuditoriaModel from '../models/auditoriaModel.js';
 
 // Configurar __dirname para ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -110,10 +109,6 @@ class EstoqueController {
       };
 
       try {
-         console.log(
-            'Dados recebidos no controlador para atualização:',
-            safeData
-         ); // Log para depuração
          const affectedRows = await estoqueModelInstance.updateEstoque(
             id,
             safeData
@@ -140,75 +135,6 @@ class EstoqueController {
          res.status(500).json({
             error: `Erro ao atualizar o item no estoque: ${error.message}`,
          });
-      }
-   };
-
-   // Método para renderizar a tabela com os itens novos
-   showItensNovos = async (req, res) => {
-      try {
-         const itensNovos = await estoqueModelInstance.getAllItensNovos();
-         console.log(
-            'DEBUG - itensNovos do banco:',
-            itensNovos.map((i) => i.data_de_entrada)
-         );
-         itensNovos.forEach((item) => {
-            if (item.data_de_entrada) {
-               const d = new Date(item.data_de_entrada);
-               item.data_de_entrada = isNaN(d.getTime())
-                  ? null
-                  : d.toISOString().split('T')[0];
-               item.data_de_entrada_formatada = isNaN(d.getTime())
-                  ? 'N/A'
-                  : d.toLocaleDateString('pt-BR');
-            } else {
-               item.data_de_entrada = null;
-               item.data_de_entrada_formatada = 'N/A';
-            }
-         });
-         const userRole = req.user ? req.user.role : 'user';
-         res.render('tabelaItensNovos', { novos: itensNovos, userRole });
-      } catch (error) {
-         console.error('Erro ao carregar os itens novos:', error);
-         res.status(500).json({ error: 'Erro ao carregar os itens novos.' });
-      }
-   };
-
-   // Método para renderizar a tabela com os itens Usados
-   showItensUsados = async (req, res) => {
-      try {
-         const itensUsados = await estoqueModelInstance.getAllItensUsados();
-         itensUsados.forEach((item) => {
-            if (item.data_de_entrada) {
-               const d = new Date(item.data_de_entrada);
-               item.data_de_entrada = isNaN(d.getTime())
-                  ? null
-                  : d.toISOString().split('T')[0];
-               item.data_de_entrada_formatada = isNaN(d.getTime())
-                  ? 'N/A'
-                  : d.toLocaleDateString('pt-BR');
-            } else {
-               item.data_de_entrada = null;
-               item.data_de_entrada_formatada = 'N/A';
-            }
-         });
-         const userRole = req.user ? req.user.role : 'user';
-         res.render('tabelaItensUsados', { usados: itensUsados, userRole });
-      } catch (error) {
-         console.error('Erro ao carregar os itens usados:', error);
-         res.status(500).json({ error: 'Erro ao carregar os itens usados.' });
-      }
-   };
-
-   // Método para listar todos os itens Usados no estoque
-   getItensUsados = async (req, res) => {
-      try {
-         const itensUsados = await estoqueModelInstance.getAllItensUsados();
-         res.status(200).render('tabelaItensUsados', {
-            usados: itensUsados,
-         });
-      } catch (error) {
-         console.error('Erro ao carregar o estoque:', error);
-         res.status(500).json({ error: 'Erro ao carregar o estoque.' });
       }
    };
 
@@ -245,288 +171,8 @@ class EstoqueController {
       res.render('cadastrarEstoque');
    };
 
-   listarTombamento = async (req, res) => {
-      try {
-         console.log('Iniciando listagem de tombamentos...');
-         const tombamento = await estoqueModelInstance.getAllTombamento(); // Alterado para getAllTombamento
-         console.log('Itens encontrados:', tombamento.length);
-
-         for (let item of tombamento) {
-            const pdfData = await estoqueModelInstance.getPDFByTombo(
-               item.tombo
-            );
-            item.has_pdf = !!pdfData;
-
-            if (item.data_de_entrada) {
-               const d = new Date(item.data_de_entrada);
-               item.data_de_entrada_formatada = isNaN(d.getTime())
-                  ? 'N/A'
-                  : d.toLocaleDateString('pt-BR');
-            } else {
-               item.data_de_entrada_formatada = 'N/A';
-            }
-         }
-         const userRole = req.user?.role || 'user';
-         res.render('tabelaTombamento', { tombamento, userRole });
-      } catch (error) {
-         console.error('Erro ao listar tombamento:', error);
-         res.status(500).send('Erro ao carregar a tabela de tombamento');
-      }
-   };
-   visualizarTombamento = async (req, res) => {
-      try {
-         const { id } = req.params;
-
-         // Busca dados da tabela registrodetombamento
-         const item = await estoqueModelInstance.getInfoByIdTombamento(id);
-         if (!item) {
-            return res.status(404).json({ error: 'Item não encontrado' });
-         }
-
-         // Busca dados da tabela saida_tombo relacionados ao tombo
-         const tomboUsado = await SaidaTomboModel.getTomboUsadoDetalhes(
-            item.tombo
-         );
-
-         // Combina os dados
-         const response = {
-            ...item,
-            nome_recebedor: tomboUsado?.nome_recebedor || 'N/A',
-            observacao_saida: tomboUsado?.observacao || 'N/A',
-            doc_saida: tomboUsado?.doc_saida || 'N/A',
-            destino: tomboUsado?.destino || 'N/A',
-            posto_grad: tomboUsado?.posto_grad || 'N/A',
-            mf_recebedor: tomboUsado?.mf_recebedor || 'N/A',
-            tel_recebedor: tomboUsado?.tel_recebedor || 'N/A',
-            referencia: tomboUsado?.referencia || 'N/A',
-            data_saida: tomboUsado?.data_saida
-               ? new Date(tomboUsado.data_saida).toLocaleDateString('pt-BR')
-               : 'N/A',
-         };
-
-         console.log(
-            '[estoqueController.visualizarTombamento] Dados retornados:',
-            response
-         );
-         res.json(response);
-      } catch (error) {
-         console.error(
-            '[estoqueController.visualizarTombamento] Erro ao visualizar tombamento:',
-            error
-         );
-         res.status(500).json({ error: 'Erro ao carregar detalhes' });
-      }
-   };
-
-   excluirTombamento = async (req, res) => {
-      try {
-         await estoqueModelInstance.deleteTombamento(req.params.id);
-         res.json({ msg: 'Item tombado excluído com sucesso' });
-      } catch (error) {
-         console.error('Erro ao excluir tombamento:', error);
-         res.status(500).json({ msg: 'Erro ao excluir item' });
-      }
-   };
-
-   // Método corrigido para atualizar tombamento
-   async atualizarTombamento(req, res) {
-      try {
-         const {
-            id,
-            data_de_entrada,
-            quantidade,
-            tipo_tombo,
-            tombo,
-            tombo_inicial,
-            tombo_final,
-            tombo_lote_manual,
-            categoria,
-            doc_origem,
-            valor,
-            descricao,
-            situacao,
-            conta_contabil,
-            estoque,
-            observacao,
-         } = req.body;
-
-         // Validações dos campos obrigatórios
-         if (!data_de_entrada) {
-            return res
-               .status(400)
-               .json({ error: 'Data de entrada é obrigatória' });
-         }
-         if (!quantidade || quantidade < 1) {
-            return res
-               .status(400)
-               .json({ error: 'Quantidade deve ser maior ou igual a 1' });
-         }
-         if (!categoria || categoria === 'Selecione uma categoria...') {
-            return res.status(400).json({ error: 'Categoria é obrigatória' });
-         }
-         if (!doc_origem) {
-            return res
-               .status(400)
-               .json({ error: 'Documento de origem é obrigatório' });
-         }
-         if (!valor || valor <= 0) {
-            return res
-               .status(400)
-               .json({ error: 'Valor unitário deve ser maior que 0' });
-         }
-         if (!descricao) {
-            return res.status(400).json({ error: 'Descrição é obrigatória' });
-         }
-         if (!situacao || situacao === 'Escolha uma opção...') {
-            return res
-               .status(400)
-               .json({ error: 'Estado de conservação é obrigatório' });
-         }
-         if (!conta_contabil || conta_contabil === 'Escolha uma opção...') {
-            return res
-               .status(400)
-               .json({ error: 'Conta contábil é obrigatória' });
-         }
-         if (!estoque || estoque === 'Escolha uma opção...') {
-            return res
-               .status(400)
-               .json({ error: 'Local de estoque é obrigatório' });
-         }
-
-         // Preparar dados para atualização com conversão para caixa alta
-         const updateData = {
-            data_de_entrada,
-            quantidade: parseInt(quantidade),
-            tipo_tombo: tipo_tombo ? tipo_tombo.toUpperCase() : null,
-            tombo: tombo ? tombo.toUpperCase() : null,
-            tombo_inicial:
-               tipo_tombo === 'LOTE'
-                  ? tombo_inicial
-                     ? tombo_inicial.toUpperCase()
-                     : null
-                  : null,
-            tombo_final:
-               tipo_tombo === 'LOTE'
-                  ? tombo_final
-                     ? tombo_final.toUpperCase()
-                     : null
-                  : null,
-            tombo_lote_manual:
-               tipo_tombo === 'LOTE_MANUAL'
-                  ? JSON.parse(tombo_lote_manual)
-                  : null,
-            categoria: categoria ? categoria.toUpperCase() : null,
-            doc_origem: doc_origem ? doc_origem.toUpperCase() : null,
-            valor: parseFloat(valor),
-            descricao: descricao ? descricao.toUpperCase() : null,
-            situacao: situacao ? situacao.toUpperCase() : null,
-            conta_contabil: conta_contabil
-               ? conta_contabil.toUpperCase()
-               : null,
-            estoque: estoque ? estoque.toUpperCase() : null,
-            observacao: observacao ? observacao.toUpperCase() : null,
-         };
-
-         // Atualizar o registro no banco
-         const result = await estoqueModelInstance.updateTombamento(
-            id,
-            updateData
-         );
-
-         if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Item não encontrado' });
-         }
-
-         res.status(200).json({ message: 'Tombamento atualizado com sucesso' });
-      } catch (error) {
-         console.error('Erro ao atualizar tombamento:', error);
-         res.status(500).json({
-            error: 'Erro ao atualizar o tombamento: ' + error.message,
-         });
-      }
-   }
-
-   // Método corrigido para renderizar formulário de edição de tombamento
-   editarTombamento = async (req, res) => {
-      try {
-         const item = await estoqueModelInstance.getInfoByIdTombamento(
-            req.params.id
-         );
-         if (!item) {
-            return res.status(404).send('Item não encontrado');
-         }
-
-         // Ajustar formato da data para o input type="date" (YYYY-MM-DD)
-         item.data_de_entrada = item.data_de_entrada
-            ? new Date(item.data_de_entrada).toISOString().split('T')[0]
-            : null;
-         // Garantir que o valor seja um número puro
-         item.valor = item.valor ? parseFloat(item.valor).toFixed(2) : null;
-         // Padronizar valores para corresponder às opções do <select>
-         item.categoria = item.categoria
-            ? item.categoria.toLowerCase()
-            : 'Selecione uma categoria...';
-         item.situacao = item.situacao
-            ? item.situacao.toLowerCase()
-            : 'Escolha uma opção...';
-         item.conta_contabil = item.conta_contabil
-            ? item.conta_contabil.toLowerCase()
-            : 'Escolha uma opção...';
-         item.estoque = item.estoque
-            ? item.estoque.toLowerCase()
-            : 'Escolha uma opção...';
-         // Definir destino_dados como 'registrodetombamento' (já que não existe na tabela)
-         item.destino_dados = 'registrodetombamento';
-         res.render('editarTombamento', {
-            item,
-            userRole: req.user ? req.user.role : 'user',
-         });
-      } catch (error) {
-         console.error('Erro ao carregar item para edição:', error);
-         res.status(500).send('Erro ao carregar o formulário de edição');
-      }
-   };
-
-   // Método para gerar relatório de tombamento (PDF ou Excel)
-   gerarRelatorioTombamento = async (req, res) => {
-      try {
-         const { formato = 'pdf' } = req.query;
-         const tombamento = await estoqueModelInstance.getAllTombamento();
-         await this._generateReport(
-            res,
-            tombamento,
-            'Relatório de Tombamento',
-            formato,
-            [
-               {
-                  header: 'Entrada',
-                  dataKey: 'data_de_entrada_formatada',
-                  width: 18,
-               },
-               { header: 'Descrição', dataKey: 'descricao', width: 120 },
-               { header: 'Tombo', dataKey: 'tombo', width: 20 },
-               { header: 'Categoria', dataKey: 'categoria', width: 30 },
-               { header: 'Local', dataKey: 'estoque', width: 20 },
-               { header: 'Situação', dataKey: 'situacao', width: 20 },
-               { header: 'Valor', dataKey: 'valor', width: 20 },
-               { header: 'Doc Origem', dataKey: 'doc_origem', width: 30 },
-            ]
-         );
-      } catch (error) {
-         console.error('Erro ao gerar relatório de tombamento:', error);
-         res.status(500).json({ error: 'Erro ao gerar relatório' });
-      }
-   };
-
    // Método para criar um novo item no estoque ou registro de tombamento
    create = async (req, res) => {
-      console.log('Dados recebidos no método create (req.body):', req.body);
-      console.log(
-         'Arquivo recebido:',
-         req.file
-            ? { filename: req.file.filename, filePath: req.file.path }
-            : 'Nenhum arquivo'
-      );
 
       try {
          const {
@@ -564,7 +210,10 @@ class EstoqueController {
                .status(400)
                .json({ error: 'O tipo de tombo é obrigatório.' });
          }
-         if (!categoria || categoria === 'Selecione uma categoria...') {
+         if (
+            !categoria ||
+            categoria.toUpperCase() === 'SELECIONE UMA CATEGORIA...'
+         ) {
             return res
                .status(400)
                .json({ error: 'A categoria é obrigatória.' });
@@ -584,15 +233,18 @@ class EstoqueController {
                .status(400)
                .json({ error: 'A descrição é obrigatória.' });
          }
-         if (!situacao || situacao === 'Escolha uma opção...') {
+         if (!situacao || situacao.toUpperCase() === 'ESCOLHA UMA OPÇÃO...') {
             return res.status(400).json({ error: 'A situação é obrigatória.' });
          }
-         if (!conta_contabil || conta_contabil === 'Escolha uma opção...') {
+         if (
+            !conta_contabil ||
+            conta_contabil.toUpperCase() === 'ESCOLHA UMA OPÇÃO...'
+         ) {
             return res
                .status(400)
                .json({ error: 'A conta contábil é obrigatória.' });
          }
-         if (!estoque || estoque === 'Escolha uma opção...') {
+         if (!estoque || estoque.toUpperCase() === 'ESCOLHA UMA OPÇÃO...') {
             return res.status(400).json({ error: 'O estoque é obrigatório.' });
          }
          if (
@@ -626,6 +278,17 @@ class EstoqueController {
             const tomboInicial = ultimoTombo;
             for (let i = 0; i < safeData.quantidade; i++) {
                const novoTombo = tomboInicial + 1 + i;
+               const tomboExistenteEstoque =
+                  await estoqueModelInstance.getInfoByTombo(novoTombo);
+               const tomboExistenteTombamento =
+                  await estoqueModelInstance.getInfoByTomboTombamento(
+                     novoTombo
+                  );
+               if (tomboExistenteEstoque || tomboExistenteTombamento) {
+                  return res.status(400).json({
+                     error: `O tombo ${novoTombo} já existe no sistema.`,
+                  });
+               }
                tombos.push(novoTombo);
             }
          } else if (safeData.tipo_tombo === 'LOTE_MANUAL') {
@@ -634,27 +297,36 @@ class EstoqueController {
                   .status(400)
                   .json({ error: 'A lista de tombos do lote é obrigatória.' });
             }
-            tombos = JSON.parse(tombo_lote_manual);
-            if (tombos.length !== safeData.quantidade) {
-               return res.status(400).json({
-                  error: 'A quantidade de tombos não corresponde à quantidade informada.',
-               });
-            }
-            for (const tombo of tombos) {
-               if (!Number.isInteger(Number(tombo)) || tombo <= 0) {
+            try {
+               tombos = JSON.parse(tombo_lote_manual);
+               if (
+                  !Array.isArray(tombos) ||
+                  tombos.length !== safeData.quantidade
+               ) {
                   return res.status(400).json({
-                     error: `O tombo ${tombo} deve ser um número inteiro positivo.`,
+                     error: 'A quantidade de tombos não corresponde à quantidade informada ou a lista é inválida.',
                   });
                }
-               const tomboExistenteEstoque =
-                  await estoqueModelInstance.getInfoByTombo(tombo);
-               const tomboExistenteTombamento =
-                  await estoqueModelInstance.getInfoByTomboTombamento(tombo);
-               if (tomboExistenteEstoque || tomboExistenteTombamento) {
-                  return res
-                     .status(400)
-                     .json({ error: `O tombo ${tombo} já existe no sistema.` });
+               for (const tombo of tombos) {
+                  if (!Number.isInteger(Number(tombo)) || Number(tombo) <= 0) {
+                     return res.status(400).json({
+                        error: `O tombo ${tombo} deve ser um número inteiro positivo.`,
+                     });
+                  }
+                  const tomboExistenteEstoque =
+                     await estoqueModelInstance.getInfoByTombo(tombo);
+                  const tomboExistenteTombamento =
+                     await estoqueModelInstance.getInfoByTomboTombamento(tombo);
+                  if (tomboExistenteEstoque || tomboExistenteTombamento) {
+                     return res.status(400).json({
+                        error: `O tombo ${tombo} já existe no sistema.`,
+                     });
+                  }
                }
+            } catch (error) {
+               return res.status(400).json({
+                  error: 'Erro ao processar a lista de tombos manuais.',
+               });
             }
          } else if (safeData.tipo_tombo === 'LOTE') {
             if (!tombo_inicial || !tombo_final) {
@@ -733,7 +405,6 @@ class EstoqueController {
                   detalhes: { dados: item },
                });
                if (req.file) {
-                  console.log(`Salvando PDF para tombo: ${item.tombo}`);
                   const pdfData = {
                      filename: req.file.filename,
                      file_path: req.file.path,
@@ -746,9 +417,6 @@ class EstoqueController {
                      tombo: item.tombo,
                   };
                   await estoqueModelInstance.savePDFData(pdfData);
-                  console.log(
-                     `PDF salvo para tombo: ${item.tombo}, file_path: ${req.file.path}`
-                  );
                }
             }
          } else {
@@ -769,7 +437,6 @@ class EstoqueController {
                   detalhes: { dados: item },
                });
                if (req.file) {
-                  console.log(`Salvando PDF para tombo: ${item.tombo}`);
                   const pdfData = {
                      filename: req.file.filename,
                      file_path: req.file.path,
@@ -782,9 +449,6 @@ class EstoqueController {
                      tombo: item.tombo,
                   };
                   await estoqueModelInstance.savePDFData(pdfData);
-                  console.log(
-                     `PDF salvo para tombo: ${item.tombo}, file_path: ${req.file.path}`
-                  );
                }
             }
          }
@@ -822,8 +486,19 @@ class EstoqueController {
       }
    };
 
+   // Método para obter o último número de tombo registrado
+   getUltimoTombo = async (req, res) => {
+      try {
+         const ultimoTombo = await EstoqueModel.getUltimoTombo();
+         res.json({ ultimoTombo });
+      } catch (error) {
+         console.error('Erro ao obter último tombo:', error);
+         res.status(500).json({ error: 'Erro ao obter último tombo.' });
+      }
+   };
+
    // Método para obter o último tombo (endpoint para o frontend)
-   fetchUltimoTombo = async (req, res) => {
+   async fetchUltimoTombo(req, res) {
       try {
          const ultimoTombo = await EstoqueModel.getUltimoTombo();
          res.json({ ultimoTombo });
@@ -831,7 +506,7 @@ class EstoqueController {
          console.error('Erro ao obter o último tombo:', error);
          res.status(500).json({ error: 'Erro ao obter o último tombo' });
       }
-   };
+   }
 
    // Método para visualizar um item
    visualizarItem = async (req, res) => {
@@ -938,23 +613,6 @@ class EstoqueController {
             res,
             novos,
             'Relatório de Itens Novos',
-            formato
-         );
-      } catch (error) {
-         console.error('Erro ao gerar relatório:', error);
-         res.status(500).json({ error: 'Erro ao gerar relatório' });
-      }
-   };
-
-   // Método para Gerar Relatório de Itens Usados (PDF ou Excel)
-   generatePDFUsados = async (req, res) => {
-      try {
-         const { formato = 'pdf' } = req.query;
-         const usados = await estoqueModelInstance.getAllItensUsados();
-         await this._generateReport(
-            res,
-            usados,
-            'Relatório de Itens Usados',
             formato
          );
       } catch (error) {
@@ -1077,7 +735,6 @@ class EstoqueController {
          );
          res.send(pdfBuffer);
       } else if (formato === 'excel') {
-         console.log('[EXCEL] Título da planilha:', title);
          const workbook = new ExcelJS.Workbook();
          const worksheet = workbook.addWorksheet(title);
          worksheet.mergeCells(
@@ -1140,28 +797,6 @@ class EstoqueController {
             'Erro ao gerar relatório de quantidade disponível:',
             error
          );
-         res.status(500).json({ error: 'Erro ao gerar relatório' });
-      }
-   };
-
-   // Método para Gerar Relatório de Itens Pagos (PDF ou Excel)
-   generatePDFItensPagos = async (req, res) => {
-      try {
-         const { formato = 'pdf', data_inicial, data_final } = req.query;
-         const itensPagos = await estoqueModelInstance.getAllItensPagos(
-            data_inicial,
-            data_final
-         );
-         await this._generatePDFItensPagos(
-            res,
-            itensPagos,
-            'Relatório de Itens Pagos',
-            formato,
-            data_inicial || '',
-            data_final || ''
-         );
-      } catch (error) {
-         console.error('Erro ao gerar relatório:', error);
          res.status(500).json({ error: 'Erro ao gerar relatório' });
       }
    };
@@ -1252,7 +887,7 @@ class EstoqueController {
                [
                   {
                      content: `Total Itens Pagos: ${totalItensPagos}`,
-                     colSpan: 9, // Ajustado para 9 colunas devido à adição de "Estado de Conservação"
+                     colSpan: 9,
                      styles: {
                         halign: 'center',
                         fontStyle: 'bold',
@@ -1408,7 +1043,6 @@ class EstoqueController {
             item.has_pdf = !!pdfData; // Adiciona a propriedade has_pdf (true/false)
          }
          const userRole = req.user?.role || 'user';
-         console.log('Itens pagos retornados:', itensPagos);
          res.render('tabelaSaidaEstoque', {
             itensPagos: itensPagos,
             userRole,
@@ -1510,9 +1144,17 @@ class EstoqueController {
          }
 
          // Verifica se os tombos são válidos e estão disponíveis
-         const validacao = await SaidaTomboModel.validarTombos(tombos);
-         if (!validacao.valido) {
-            return res.status(400).json({ error: validacao.erro });
+         const tombosIndisponiveis = [];
+         for (const tombo of tombos) {
+            const item = await estoqueModelInstance.getInfoByTombo(tombo);
+            if (!item || item.pago) {
+               tombosIndisponiveis.push(tombo);
+            }
+         }
+         if (tombosIndisponiveis.length > 0) {
+            return res.status(400).json({
+               error: `Tombos já em saída: ${tombosIndisponiveis.join(', ')}`,
+            });
          }
 
          // Verifica se o PDF já existe
@@ -1599,19 +1241,24 @@ class EstoqueController {
          const tableStartY = headerYStart + headerYOffset + 2;
          const items = [];
          let ordem = 1;
-         const tombosInfo = await SaidaTomboModel.getTombosInfo(tombos);
+         const tombosInfo = await estoqueModelInstance.getTombosInfo(tombos);
          for (const tombo of tombosInfo) {
             const descricao = tombo.descricao
                ? tombo.descricao
                     .toUpperCase()
                     .replace('RETAINGLIAR', 'RETANGULAR')
                : 'N/A';
-            items.push([ordem++, tombo.tombo || 'N/A', descricao]);
+            items.push([
+               ordem++,
+               tombo.tombo || 'N/A',
+               descricao,
+               tombo.situacao || 'N/A', // Inclui a coluna Situação
+            ]);
          }
 
          doc.autoTable({
             startY: tableStartY,
-            head: [['ORD.', 'TOMBO', 'DESCRIÇÃO']],
+            head: [['ORD.', 'TOMBO', 'DESCRIÇÃO', 'SITUAÇÃO']], // Inclui SITUAÇÃO no cabeçalho
             body: items,
             styles: {
                fontSize: 8,
@@ -1627,7 +1274,8 @@ class EstoqueController {
             columnStyles: {
                0: { cellWidth: 15 },
                1: { cellWidth: 35 },
-               2: { cellWidth: 130, halign: 'left' },
+               2: { cellWidth: 100, halign: 'left' }, // Ajusta largura para DESCRIÇÃO
+               3: { cellWidth: 30 }, // Largura para SITUAÇÃO
             },
             margin: { left: 13, right: 7, bottom: 10 },
             tableWidth: 'wrap',
@@ -1640,16 +1288,6 @@ class EstoqueController {
                   doc.internal.pageSize.height - 10
                );
             },
-         });
-
-         // Cláusula de recebimento
-         const tombosList = tombos.map((t) => t.tombo || t).join(', ');
-         const clausula = `Eu, ${nome_do_recebedor.toUpperCase()} Declaro estar ciente de que, ao assinar o presente Termo de Recebimento, assumo a responsabilidade pelo correto recebimento e pela fixação das etiquetas de tombamento em todos os bens móveis nele relacionados, comprometendo-me a cumprir essa obrigação conforme as orientações da Célula de Gestão Patrimonial CEGPA/COLOG`;
-         const clausulaLines = doc.splitTextToSize(clausula, 220);
-         const clausulaY = tableStartY + items.length * 10 + 10;
-         clausulaLines.forEach((line, index) => {
-            doc.setFontSize(8);
-            doc.text(line, 14, clausulaY + index * 5);
          });
 
          // Assinaturas na parte inferior
@@ -1725,7 +1363,7 @@ class EstoqueController {
             .toISOString()
             .slice(0, 19)
             .replace('T', ' ');
-         await SaidaTomboModel.registrarSaida(
+         await estoqueModelInstance.registrarSaida(
             tombos,
             docSaidaFormatado,
             referencia,
@@ -1733,7 +1371,7 @@ class EstoqueController {
             postoGrad,
             mf_recebedor,
             tel_recebedor,
-            nome_do_recebedor, // Corrigido: Passando nome_do_recebedor
+            nome_do_recebedor,
             observacao,
             dataSaida
          );
@@ -1763,7 +1401,6 @@ class EstoqueController {
       const { id } = req.params;
       try {
          const item = await estoqueModelInstance.getItemPagoDetalhes(id);
-         console.log('Item retornado:', item);
          if (item) {
             res.json(item);
          } else {
@@ -1816,7 +1453,6 @@ class EstoqueController {
    fetchInfoTombo = async (req, res) => {
       const { tombo } = req.query;
       try {
-         console.log(`Buscando informações para o tombo: ${tombo}`);
          const infoTombo = await estoqueModelInstance.getInfoByTombo(tombo);
          if (infoTombo) {
             console.log(`Tombo ${tombo} encontrado:`, infoTombo);
@@ -1847,7 +1483,6 @@ class EstoqueController {
       );
       const { id } = req.params;
       try {
-         console.log(`[EstoqueController] Buscando item pago com ID: ${id}`);
          const item = await estoqueModelInstance.getItemPagoByID(id);
          if (!item) {
             console.log(
@@ -1901,28 +1536,42 @@ class EstoqueController {
    };
 
    // API: Retorna histórico de auditoria de um tombo em JSON
-   historicoAuditoriaTomboAPI = async (req, res) => {
-      const { tombo } = req.params;
+   async historicoAuditoriaTomboAPI(req, res) {
+      console.log(
+         '[estoqueController.historicoAuditoriaTomboAPI] Iniciando busca de auditoria para tombo:',
+         req.params.tombo
+      );
       try {
-         console.log(`Buscando histórico de auditoria para o tombo: ${tombo}`);
-         const historico = await AuditoriaModel.getHistoricoPorTombo(tombo);
-         if (historico.length === 0) {
-            return res.status(404).json({
-               message: `Nenhum registro de auditoria encontrado para o tombo ${tombo}.`,
-            });
-         }
-         res.status(200).json(historico);
+         const tombo = req.params.tombo;
+         const historico = await AuditoriaModel.buscarPorTombo(tombo);
+         console.log(
+            '[estoqueController.historicoAuditoriaTomboAPI] Histórico retornado:',
+            {
+               tombo,
+               historicoCount: historico.length,
+               historico: historico.map((log) => ({
+                  id: log.id,
+                  usuario: log.usuario,
+                  acao: log.acao,
+                  data_hora: log.data_hora,
+               })),
+            }
+         );
+         res.status(200).json({ historico });
       } catch (error) {
          console.error(
-            `Erro ao buscar histórico de auditoria para o tombo ${tombo}:`,
-            error
+            '[estoqueController.historicoAuditoriaTomboAPI] Erro ao buscar histórico:',
+            {
+               tombo: req.params.tombo,
+               error: error.message,
+            }
          );
          res.status(500).json({
-            error: 'Erro ao buscar histórico de auditoria.',
-            details: error.message,
+            message: 'Erro ao buscar histórico de auditoria',
+            error: error.message,
          });
       }
-   };
+   }
 
    // Método para renderizar a página de histórico de auditoria
    renderHistoricoAuditoria = async (req, res) => {
@@ -1930,84 +1579,229 @@ class EstoqueController {
          const { tombo } = req.query;
          let historico = [];
          if (tombo) {
-            historico = await AuditoriaModel.getHistoricoPorTombo(tombo);
+            historico = await AuditoriaModel.getHistoricoByTombo(tombo);
          }
          res.render('historicoAuditoria', {
             historico,
-            tombo: tombo || '',
+            tomboPesquisado: tombo || '',
             userRole: req.user?.role || 'user',
          });
       } catch (error) {
-         console.error('Erro ao carregar página de histórico:', error);
-         res.status(500).render('historicoAuditoria', {
-            historico: [],
-            tombo: '',
-            userRole: req.user?.role || 'user',
+         console.error('Erro ao renderizar histórico de auditoria:', error);
+         res.status(500).json({
             error: 'Erro ao carregar histórico de auditoria.',
          });
       }
    };
 
-   // Método para download de PDF associado a um tombo
-   viewPDF = async (req, res) => {
+   // Método para baixar o PDF associado a um tombo
+   downloadPDF = async (req, res) => {
       const { tombo } = req.params;
       try {
          const pdfData = await estoqueModelInstance.getPDFByTombo(tombo);
-         if (!pdfData) {
+         if (!pdfData || !pdfData.file_path) {
             return res.status(404).json({ error: 'PDF não encontrado.' });
          }
-         const filePath = path.join(__dirname, '../../', pdfData.file_path);
-         if (!fs.existsSync(filePath)) {
+
+         const pdfPath = path.resolve(pdfData.file_path);
+         if (!fs.existsSync(pdfPath)) {
             return res
                .status(404)
                .json({ error: 'Arquivo PDF não encontrado no servidor.' });
          }
-         res.setHeader('Content-Type', 'application/pdf');
-         res.setHeader(
-            'Content-Disposition',
-            'inline; filename="' + pdfData.filename + '"'
+
+         res.download(pdfPath, pdfData.filename, (err) => {
+            if (err) {
+               console.error('Erro ao baixar o PDF:', err);
+               res.status(500).json({ error: 'Erro ao baixar o PDF.' });
+            }
+         });
+      } catch (error) {
+         console.error('Erro ao buscar PDF:', error);
+         res.status(500).json({ error: 'Erro ao buscar PDF.' });
+      }
+   };
+
+   // Método para baixar o PDF de saída associado a um tombo
+   downloadPDFSaida = async (req, res) => {
+      const { doc_saida } = req.params;
+      try {
+         const formattedDocSaida = doc_saida.replace('-', '/');
+         const pdfPath = path.join(
+            __dirname,
+            '../../pdfs',
+            `Termo_${doc_saida}.pdf`
          );
-         res.sendFile(filePath);
-      } catch (error) {
-         console.error('Erro ao visualizar PDF:', error);
-         res.status(500).json({ error: 'Erro ao visualizar PDF.' });
-      }
-   };
 
-   // Método para verificar se um tombo já existe
-   verificarTomboExistente = async (req, res) => {
-      const { tombo } = req.query;
-      try {
-         const tomboExistenteEstoque =
-            await estoqueModelInstance.getInfoByTombo(tombo);
-         const tomboExistenteTombamento =
-            await estoqueModelInstance.getInfoByTomboTombamento(tombo);
-         const existe = !!tomboExistenteEstoque || !!tomboExistenteTombamento;
-         res.json({ existe });
-      } catch (error) {
-         console.error('Erro ao verificar tombo:', error);
-         res.status(500).json({ error: 'Erro ao verificar tombo.' });
-      }
-   };
-
-   // Método para buscar tombos por descrição
-   buscarTombosPorDescricao = async (req, res) => {
-      const { descricao } = req.query;
-      try {
-         if (!descricao || descricao.length < 3) {
-            return res.status(400).json({
-               error: 'A descrição deve ter pelo menos 3 caracteres.',
-            });
+         if (!fs.existsSync(pdfPath)) {
+            return res
+               .status(404)
+               .json({ error: 'Arquivo PDF de saída não encontrado.' });
          }
-         const tombos = await estoqueModelInstance.buscarTombosPorDescricao(
-            descricao.toUpperCase()
-         );
-         res.json(tombos);
+
+         res.download(pdfPath, `Termo_${doc_saida}.pdf`, (err) => {
+            if (err) {
+               console.error('Erro ao baixar o PDF de saída:', err);
+               res.status(500).json({ error: 'Erro ao baixar o PDF.' });
+            }
+         });
       } catch (error) {
-         console.error('Erro ao buscar tombos por descrição:', error);
-         res.status(500).json({ error: 'Erro ao buscar tombos.' });
+         console.error('Erro ao buscar PDF de saída:', error);
+         res.status(500).json({ error: 'Erro ao buscar PDF de saída.' });
       }
    };
+
+   // Método para obter o próximo número de sequência para o ano atual
+   getProximoNumeroSequencia = async (req, res) => {
+      try {
+         const anoAtual = new Date().getFullYear();
+         const sequencia = await sequenciaModel.getSequenciaAtual(anoAtual);
+         const proximoNumero = sequencia.toString().padStart(5, '0');
+         res.json({ proximoNumero: `${proximoNumero}/${anoAtual}` });
+      } catch (error) {
+         console.error('Erro ao obter próximo número de sequência:', error);
+         res.status(500).json({
+            error: 'Erro ao obter próximo número de sequência.',
+         });
+      }
+   };
+
+   // Método para obter o último número de tombo registrado
+   getUltimoTombo = async (req, res) => {
+      try {
+         const ultimoTombo = await EstoqueModel.getUltimoTombo();
+         res.json({ ultimoTombo });
+      } catch (error) {
+         console.error('Erro ao obter último tombo:', error);
+         res.status(500).json({ error: 'Erro ao obter último tombo.' });
+      }
+   };
+
+   // Método para registrar uma reserva de item
+   async registrarReserva(req, res) {
+      const { itemId, destino } = req.body;
+      const usuarioLogado = req.user;
+      const nomeResponsavel = usuarioLogado?.nome_completo || 'Desconhecido';
+
+      try {
+         // Validação dos campos
+         if (!itemId || !destino) {
+            console.log(
+               '[registrarReserva] Validação falhou: itemId ou destino ausentes'
+            );
+            return res
+               .status(400)
+               .json({ error: 'ID do item e destino são obrigatórios.' });
+         }
+
+         // Registrar a reserva usando o modelo
+         const result = await estoqueModelInstance.createReserva(
+            itemId,
+            destino,
+            nomeResponsavel
+         );
+
+         if (!result) {
+            console.log(
+               '[registrarReserva] Resultado inválido retornado por createReserva'
+            );
+            return res
+               .status(400)
+               .json({ error: 'Não foi possível realizar a reserva.' });
+         }
+
+         // Registrar log de auditoria
+         const item = await estoqueModelInstance.getInfoByID(itemId);
+         if (!item) {
+            console.log(
+               '[registrarReserva] Item não encontrado para ID:',
+               itemId
+            );
+            return res.status(404).json({ error: 'Item não encontrado.' });
+         }
+         console.log('[registrarReserva] Item encontrado:', {
+            id: item.id,
+            tombo: item.tombo,
+         });
+
+         await AuditoriaModel.registrarLog({
+            usuario: nomeResponsavel,
+            acao: 'RESERVA',
+            tabela_afetada: 'reservas',
+            id_registro: result.insertId,
+            tombo: item.tombo,
+            detalhes: { itemId, destino },
+         });
+
+         console.log(
+            '[registrarReserva] Reserva registrada com sucesso, ID:',
+            result.insertId
+         );
+         return res
+            .status(200)
+            .json({ message: 'Reserva realizada com sucesso!' });
+      } catch (error) {
+         console.error(
+            '[registrarReserva] Erro ao registrar reserva:',
+            error.message,
+            error.stack
+         );
+         return res.status(500).json({
+            error: 'Erro interno ao realizar a reserva.',
+            details: error.message,
+         });
+      }
+   }
+
+   async showReservas(req, res) {
+      try {
+         const reservas = await estoqueModelInstance.getAllReservas();
+         res.render('tabelaItensReservados', {
+            reservas,
+            userRole: req.user ? req.user.role : 'user',
+         });
+      } catch (error) {
+         console.error('Erro ao carregar reservas:', error);
+         res.status(500).json({
+            error: 'Erro ao carregar a lista de reservas',
+         });
+      }
+   }
+
+   async cancelarReserva(req, res) {
+      const { id } = req.params;
+      try {
+         const { affectedRows, tombo } =
+            await estoqueModelInstance.desativarReserva(id);
+         if (affectedRows === 0) {
+            return res
+               .status(404)
+               .json({ error: 'Reserva não encontrada ou já cancelada.' });
+         }
+
+         // Registrar log de auditoria
+         await AuditoriaModel.registrarLog({
+            usuario: req.user?.nome_completo || 'desconhecido',
+            acao: 'CANCELAMENTO_RESERVA',
+            tabela_afetada: 'reservas',
+            id_registro: id,
+            tombo,
+            detalhes: { motivo: 'Cancelamento de reserva' },
+         });
+
+         res.status(200).json({
+            message:
+               'Reserva cancelada com sucesso! O item retornou ao estoque atual.',
+         });
+      } catch (error) {
+         console.error('Erro ao cancelar reserva:', error);
+         res.status(500).json({
+            error: 'Erro ao cancelar reserva.',
+            details: error.message,
+         });
+      }
+   }
 }
 
+// Exporta a instância da classe EstoqueController
 export default new EstoqueController();

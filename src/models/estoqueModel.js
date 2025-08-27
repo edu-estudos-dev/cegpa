@@ -126,7 +126,13 @@ class EstoqueModel {
 
    // Método para obter todo o estoque
    getAllEstoque = async () => {
-      const query = `SELECT * FROM estoqueatual WHERE pago = FALSE ORDER BY descricao ASC`;
+      const query = `
+      SELECT ea.* 
+      FROM estoqueatual ea
+      LEFT JOIN reservas r ON ea.id = r.item_id AND r.ativo = TRUE
+      WHERE ea.pago = FALSE AND r.id IS NULL
+      ORDER BY ea.descricao ASC
+   `;
       try {
          const [results] = await connection.execute(query);
          return results;
@@ -151,9 +157,51 @@ class EstoqueModel {
       observacao,
       tipo_tombo = 'AUTO'
    ) => {
-      if (!Number.isInteger(Number(tombo)) || tombo <= 0) {
+      // Validação de campos obrigatórios
+      const requiredFields = [
+         { field: data_de_entrada, name: 'data_de_entrada' },
+         { field: descricao, name: 'descricao' },
+         { field: tombo, name: 'tombo' },
+         { field: quantidade, name: 'quantidade' },
+         {
+            field: categoria,
+            name: 'categoria',
+            invalid: 'SELECIONE UMA CATEGORIA...',
+         },
+         {
+            field: conta_contabil,
+            name: 'conta_contabil',
+            invalid: 'ESCOLHA UMA OPÇÃO...',
+         },
+         { field: doc_origem, name: 'doc_origem' },
+         { field: estoque, name: 'estoque', invalid: 'ESCOLHA UMA OPÇÃO...' },
+         { field: valor, name: 'valor' },
+         { field: situacao, name: 'situacao', invalid: 'ESCOLHA UMA OPÇÃO...' },
+      ];
+
+      for (const { field, name, invalid } of requiredFields) {
+         if (
+            field === undefined ||
+            field === null ||
+            field === '' ||
+            (invalid && field.toUpperCase() === invalid)
+         ) {
+            throw new Error(
+               `Campo obrigatório '${name}' está ausente ou inválido.`
+            );
+         }
+      }
+
+      if (!Number.isInteger(Number(tombo)) || Number(tombo) <= 0) {
          throw new Error('O tombo deve ser um número inteiro positivo.');
       }
+      if (!Number.isInteger(Number(quantidade)) || Number(quantidade) <= 0) {
+         throw new Error('A quantidade deve ser um número inteiro positivo.');
+      }
+      if (Number(valor) <= 0) {
+         throw new Error('O valor deve ser um número positivo.');
+      }
+
       const query = `
       INSERT INTO estoqueatual (
          data_de_entrada, descricao, tombo, quantidade, categoria, 
@@ -164,16 +212,16 @@ class EstoqueModel {
       try {
          const [result] = await connection.execute(query, [
             data_de_entrada,
-            descricao,
+            descricao.toUpperCase(),
             tombo,
             quantidade,
-            categoria,
-            conta_contabil,
-            doc_origem,
-            estoque,
+            categoria.toUpperCase(),
+            conta_contabil.toUpperCase(),
+            doc_origem.toUpperCase(),
+            estoque.toUpperCase(),
             valor,
-            situacao,
-            observacao,
+            situacao.toUpperCase(),
+            observacao ? observacao.toUpperCase() : null,
             tipo_tombo,
          ]);
          return result.affectedRows;
@@ -192,36 +240,43 @@ class EstoqueModel {
          observacao, tipo_tombo
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
    `;
+      const conn = await connection.getConnection();
       try {
+         await conn.beginTransaction();
          let firstInsertId = null;
          for (const item of itens) {
-            if (!Number.isInteger(Number(item.tombo)) || item.tombo <= 0) {
-               throw new Error(
-                  `O tombo ${item.tombo} deve ser um número inteiro positivo.`
-               );
-            }
-            const [result] = await connection.execute(query, [
+            // Validação de campos obrigatórios (como acima)
+            const requiredFields = [
+               { field: item.data_de_entrada, name: 'data_de_entrada' },
+               // ... outros campos ...
+            ];
+            // ... validação ...
+            const [result] = await conn.execute(query, [
                item.data_de_entrada,
-               item.descricao,
+               item.descricao.toUpperCase(),
                item.tombo,
                item.quantidade,
-               item.categoria,
-               item.conta_contabil,
-               item.doc_origem,
-               item.estoque,
+               item.categoria.toUpperCase(),
+               item.conta_contabil.toUpperCase(),
+               item.doc_origem.toUpperCase(),
+               item.estoque.toUpperCase(),
                item.valor,
-               item.situacao,
-               item.observacao,
+               item.situacao.toUpperCase(),
+               item.observacao ? item.observacao.toUpperCase() : null,
                item.tipo_tombo,
             ]);
             if (!firstInsertId) {
                firstInsertId = result.insertId;
             }
          }
+         await conn.commit();
          return { insertId: firstInsertId, affectedRows: itens.length };
       } catch (error) {
+         await conn.rollback();
          console.error('Erro ao criar itens em lote no estoque:', error);
          throw error;
+      } finally {
+         conn.release();
       }
    };
 
@@ -237,24 +292,84 @@ class EstoqueModel {
       try {
          let firstInsertId = null;
          for (const item of itens) {
-            if (!Number.isInteger(Number(item.tombo)) || item.tombo <= 0) {
+            // Validação de campos obrigatórios para cada item
+            const requiredFields = [
+               { field: item.data_de_entrada, name: 'data_de_entrada' },
+               { field: item.quantidade, name: 'quantidade' },
+               { field: item.tombo, name: 'tombo' },
+               {
+                  field: item.categoria,
+                  name: 'categoria',
+                  invalid: 'SELECIONE UMA CATEGORIA...',
+               },
+               { field: item.doc_origem, name: 'doc_origem' },
+               {
+                  field: item.estoque,
+                  name: 'estoque',
+                  invalid: 'ESCOLHA UMA OPÇÃO...',
+               },
+               { field: item.valor, name: 'valor' },
+               {
+                  field: item.situacao,
+                  name: 'situacao',
+                  invalid: 'ESCOLHA UMA OPÇÃO...',
+               },
+               {
+                  field: item.conta_contabil,
+                  name: 'conta_contabil',
+                  invalid: 'ESCOLHA UMA OPÇÃO...',
+               },
+               { field: item.descricao, name: 'descricao' },
+            ];
+
+            for (const { field, name, invalid } of requiredFields) {
+               if (
+                  field === undefined ||
+                  field === null ||
+                  field === '' ||
+                  (invalid && field.toUpperCase() === invalid)
+               ) {
+                  throw new Error(
+                     `Campo obrigatório '${name}' está ausente ou inválido no item com tombo ${item.tombo}.`
+                  );
+               }
+            }
+
+            if (
+               !Number.isInteger(Number(item.tombo)) ||
+               Number(item.tombo) <= 0
+            ) {
                throw new Error(
                   `O tombo ${item.tombo} deve ser um número inteiro positivo.`
                );
             }
+            if (
+               !Number.isInteger(Number(item.quantidade)) ||
+               Number(item.quantidade) <= 0
+            ) {
+               throw new Error(
+                  `A quantidade do item com tombo ${item.tombo} deve ser um número inteiro positivo.`
+               );
+            }
+            if (Number(item.valor) <= 0) {
+               throw new Error(
+                  `O valor do item com tombo ${item.tombo} deve ser um número positivo.`
+               );
+            }
+
             const [result] = await connection.execute(query, [
                item.data_de_entrada,
                item.quantidade,
                item.tipo_tombo,
                item.tombo,
-               item.categoria,
-               item.doc_origem,
-               item.estoque,
+               item.categoria.toUpperCase(),
+               item.doc_origem.toUpperCase(),
+               item.estoque.toUpperCase(),
                item.valor,
-               item.situacao,
-               item.observacao,
-               item.conta_contabil,
-               item.descricao,
+               item.situacao.toUpperCase(),
+               item.observacao ? item.observacao.toUpperCase() : null,
+               item.conta_contabil.toUpperCase(),
+               item.descricao.toUpperCase(),
             ]);
             if (!firstInsertId) {
                firstInsertId = result.insertId;
@@ -334,30 +449,6 @@ class EstoqueModel {
          return item;
       } catch (error) {
          console.error('Erro ao buscar item no tombamento por ID:', error);
-         throw error;
-      }
-   };
-
-   // Método para obter todos os itens novos
-   getAllItensNovos = async () => {
-      const query = `SELECT * FROM estoqueatual WHERE situacao = 'NOVO' AND pago = FALSE ORDER BY descricao ASC`;
-      try {
-         const [results] = await connection.execute(query);
-         return results;
-      } catch (error) {
-         console.error('Erro ao buscar itens novos:', error);
-         throw error;
-      }
-   };
-
-   // Método para obter todos os itens usados
-   getAllItensUsados = async () => {
-      const query = `SELECT * FROM estoqueatual WHERE situacao = 'USADO' AND pago = FALSE ORDER BY descricao ASC`;
-      try {
-         const [results] = await connection.execute(query);
-         return results;
-      } catch (error) {
-         console.error('Erro ao buscar itens usados:', error);
          throw error;
       }
    };
@@ -764,8 +855,235 @@ class EstoqueModel {
          throw error;
       }
    }
+   async getTombosInfo(tombos) {
+      const placeholders = tombos.map(() => '?').join(',');
+      const query = `
+      SELECT id, tombo, descricao, situacao, estoque 
+      FROM estoqueatual 
+      WHERE tombo IN (${placeholders}) AND pago = FALSE
+      ORDER BY tombo ASC
+   `;
+      try {
+         const [results] = await connection.execute(query, tombos);
+         return results;
+      } catch (error) {
+         console.error('Erro ao buscar informações dos tombos:', error);
+         throw error;
+      }
+   }
+
+   async registrarSaida(
+      tombos,
+      doc_saida,
+      referencia,
+      destino,
+      posto_graduacao,
+      mat_funcional,
+      telefone,
+      nome_completo,
+      observacao,
+      data_de_saida
+   ) {
+      const conn = await connection.getConnection();
+      try {
+         await conn.beginTransaction();
+
+         for (const tombo of tombos) {
+            const item = await this.getInfoByTombo(tombo);
+            if (!item) {
+               throw new Error(`Tombo ${tombo} não encontrado.`);
+            }
+
+            const query = `
+            INSERT INTO itenspagos (
+               estoqueatual_id, tombo, doc_saida, data_de_saida, quantidade,
+               referencia, destino, posto_graduacao, mat_funcional, telefone,
+               nome_completo, observacao, descricao
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         `;
+            await conn.execute(query, [
+               item.id,
+               tombo,
+               doc_saida,
+               data_de_saida,
+               1,
+               referencia,
+               destino,
+               posto_graduacao,
+               mat_funcional,
+               telefone,
+               nome_completo,
+               observacao,
+               item.descricao,
+            ]);
+
+            const updateQuery = `UPDATE estoqueatual SET pago = TRUE WHERE tombo = ?`;
+            await conn.execute(updateQuery, [tombo]);
+         }
+
+         await conn.commit();
+         return true;
+      } catch (error) {
+         await conn.rollback();
+         console.error('Erro ao registrar saída:', error);
+         throw error;
+      } finally {
+         conn.release();
+      }
+   }
+
+   // Método para criar uma reserva de item
+   async createReserva(itemId, destino, usuario) {
+      const conn = await connection.getConnection();
+      console.log('[createReserva] Iniciando criação de reserva:', {
+         itemId,
+         destino,
+         usuario,
+      });
+
+      try {
+         await conn.beginTransaction();
+
+         // Verificar se o item existe e não está pago
+         console.log(
+            '[createReserva] Verificando item no estoqueatual para ID:',
+            itemId
+         );
+         const [item] = await conn.execute(
+            `SELECT id, pago FROM estoqueatual WHERE id = ? AND pago = FALSE`,
+            [itemId]
+         );
+
+         if (!item || item.length === 0) {
+            console.log(
+               '[createReserva] Item não encontrado ou já pago:',
+               itemId
+            );
+            throw new Error('Item não encontrado ou já foi pago.');
+         }
+         console.log('[createReserva] Item válido encontrado:', item[0]);
+
+         // Verificar se o item já está reservado
+         console.log(
+            '[createReserva] Verificando se item já está reservado:',
+            itemId
+         );
+         const [reservaExistente] = await conn.execute(
+            `SELECT id FROM reservas WHERE item_id = ? AND ativo = TRUE`,
+            [itemId]
+         );
+
+         if (reservaExistente.length > 0) {
+            console.log('[createReserva] Item já reservado:', itemId);
+            throw new Error('Item já está reservado.');
+         }
+
+         // Inserir a reserva na tabela reservas
+         const dataReserva = new Date()
+            .toISOString()
+            .slice(0, 19)
+            .replace('T', ' ');
+         console.log('[createReserva] Inserindo reserva na tabela reservas:', {
+            itemId,
+            destino,
+            dataReserva,
+            usuario,
+         });
+         const [result] = await conn.execute(
+            `INSERT INTO reservas (item_id, destino, data_reserva, usuario, ativo) VALUES (?, ?, ?, ?, TRUE)`,
+            [itemId, destino.toUpperCase(), dataReserva, usuario]
+         );
+
+         console.log(
+            '[createReserva] Reserva inserida com sucesso, ID:',
+            result.insertId
+         );
+         await conn.commit();
+         return { insertId: result.insertId };
+      } catch (error) {
+         console.error(
+            '[createReserva] Erro ao criar reserva:',
+            error.message,
+            error.stack
+         );
+         await conn.rollback();
+         throw error;
+      } finally {
+         conn.release();
+         console.log('[createReserva] Conexão com o banco liberada');
+      }
+   }
+
+   async getAllReservas() {
+      const query = `
+   SELECT 
+      r.id AS reserva_id,
+      r.item_id,
+      r.destino,
+      r.data_reserva,
+      r.usuario,
+      e.descricao,
+      e.tombo,
+      e.categoria,
+      e.estoque,
+      e.situacao,
+      e.doc_origem
+   FROM reservas r
+   INNER JOIN estoqueatual e ON r.item_id = e.id
+   WHERE r.ativo = 1
+   ORDER BY r.data_reserva DESC;
+`;
+      try {
+         const [rows] = await connection.execute(query);
+         return rows;
+      } catch (error) {
+         console.error('Erro ao buscar reservas:', error);
+         throw new Error('Erro ao buscar reservas no banco de dados');
+      }
+   }
+
+   async desativarReserva(reservaId) {
+      const conn = await connection.getConnection();
+      try {
+         await conn.beginTransaction();
+
+         // Verificar se a reserva existe
+         const [reserva] = await conn.execute(
+            `SELECT r.id, r.item_id, e.tombo, r.destino 
+          FROM reservas r 
+          INNER JOIN estoqueatual e ON r.item_id = e.id 
+          WHERE r.id = ? AND r.ativo = TRUE`,
+            [reservaId]
+         );
+
+         if (!reserva || reserva.length === 0) {
+            throw new Error('Reserva não encontrada ou já cancelada.');
+         }
+
+         const tombo = reserva[0].tombo;
+
+         // Deletar a reserva
+         const [result] = await conn.execute(
+            `DELETE FROM reservas WHERE id = ?`,
+            [reservaId]
+         );
+
+         if (result.affectedRows === 0) {
+            throw new Error('Nenhuma reserva foi deletada.');
+         }
+
+         await conn.commit();
+         return { affectedRows: result.affectedRows, tombo };
+      } catch (error) {
+         await conn.rollback();
+         console.error('Erro ao deletar reserva:', error);
+         throw error;
+      } finally {
+         conn.release();
+      }
+   }
 }
 
 const estoqueModelInstance = new EstoqueModel();
 export default estoqueModelInstance;
-export { EstoqueModel }; // Exporta a classe explicitamente
+export { EstoqueModel };

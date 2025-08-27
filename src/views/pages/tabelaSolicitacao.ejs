@@ -378,9 +378,10 @@
                   const response = await fetch(`/solicitacao/${solicitacaoId}`);
                   if (!response.ok) throw new Error('Erro ao buscar detalhes da solicitação');
                   const item = await response.json();
+
                   const modalHtml = `
                      <div class="modal fade" id="infoSolicitacaoModal" tabindex="-1" aria-labelledby="infoSolicitacaoModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
                            <div class="modal-content">
                               <div class="modal-header bg-success text-white d-flex justify-content-between">
                                  <h3 class="modal-title ms-3" id="infoSolicitacaoModalLabel">Informações da Solicitação</h3>
@@ -408,6 +409,8 @@
                            </div>
                         </div>
                      </div>`;
+                           
+
                   const modalDiv = document.createElement('div');
                   modalDiv.innerHTML = modalHtml;
                   document.body.appendChild(modalDiv);

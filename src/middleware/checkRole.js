@@ -7,7 +7,7 @@ const checkRole = (allowedRoles) => {
   
       const userRole = req.session.user.role;
       if (allowedRoles.includes(userRole)) {
-        console.log(`Acesso permitido para ${userRole} na rota ${req.path}`);
+        
         return next();
       } else {
         console.log(`Acesso negado para ${userRole} na rota ${req.path}`);

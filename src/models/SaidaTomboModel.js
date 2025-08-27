@@ -1,4 +1,5 @@
 import connection from '../../db_config/connection.js';
+
 import sequenciaModel from '../models/sequenciaModel.js';
 
 export default {
@@ -208,10 +209,7 @@ export default {
           WHERE rt.id = ? AND rt.usado = 1`,
             [id]
          );
-         console.log(
-            `[SaidaTomboModel.getTomboUsadoDetalhes] Dados retornados para id ${id} :`,
-            rows[0]
-         );
+
          return rows[0] || null;
       } catch (error) {
          console.error(

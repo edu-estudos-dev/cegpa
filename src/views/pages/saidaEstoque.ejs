@@ -504,7 +504,7 @@
                modoDocSaida: modoDocSaida
             };
 
-            const response = await fetch('/saida-tombo', {
+            const response = await fetch('/saida', {
                method: 'POST',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify(formData)

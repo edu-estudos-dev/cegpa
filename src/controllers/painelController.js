@@ -8,8 +8,6 @@ class PainelController {
 
         // Capturar a mensagem de sucesso da query string
         const successMessage = req.query.success || null;
-
-        console.log('Renderizando painel com mensagem de sucesso:', successMessage);
         res.render('painel', {
             title: 'Painel de Controle',
             usuario: req.session.user,

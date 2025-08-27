@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+   <%- include('../partials/head', { title: 'Itens Reservados' }) %>
+   <style>
+      /* [O mesmo CSS do tabelaEstoque.ejs, conforme fornecido anteriormente] */
+      * {
+         margin: 0;
+         padding: 0;
+      }
+      body {
+         padding-top: 2.5rem;
+      }
+      .botoes {
+         margin-bottom: 1.9rem;
+      }
+      .table-container {
+         max-height: 75vh;
+         overflow-y: auto;
+         overflow-x: hidden;
+         min-height: 75vh;
+         padding-top: 0;
+      }
+      /* ... (demais estilos do tabelaEstoque.ejs, mantidos idênticos) ... */
+      .thead-success {
+         background-color: #f28c38;
+         color: white;
+      }
+   </style>
+   <body>
+      <%- include('../partials/header') %>
+      <div class="caixa p-4 mx-auto">
+         <div class="border caixa-externa p-4 shadow-sm rounded">
+            <div class="row align-items-center mb-3 px-3">
+               <div
+                  class="col d-flex justify-content-between align-items-center bg-success py-2 rounded"
+                  style="border-bottom: 4px solid orange"
+               >
+                  <h2 class="text-white mt-0 fw-bold flex-grow-1 text-center">
+                     Itens Reservados
+                  </h2>
+                  <div class="d-flex align-items-center">
+                     <label for="formato" class="text-white me-2">Formato:</label>
+                     <select id="formato" class="form-select form-select-md me-2" style="width: auto">
+                        <option value="pdf">PDF</option>
+                        <option value="excel">Excel</option>
+                     </select>
+                     <a href="#" id="exportarBtn" class="btn btn-outline-light btn-header fw-bold">Gerar Relatório</a>
+                  </div>
+               </div>
+            </div>
+            <div class="table-container">
+               <div class="search-bar sticky-top">
+                  <div style="background-color: transparent" class="d-flex justify-content-end align-items-center mb-2">
+                     <label for="searchTombo" class="me-2 fw-bold">Pesquisar:</label>
+                     <input
+                        type="text"
+                        id="searchTombo"
+                        placeholder="Digite o número do tombo, categoria, descrição, destino ou usuário"
+                        style="width: 520px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; margin-right: 10px;"
+                     />
+                     <button id="clearSearch" class="btn btn-secondary btn-md me-2 w-5">Limpar</button>
+                  </div>
+               </div>
+               <table id="reservasTable" class="table table-striped table-hover mb-0">
+                  <thead class="thead-success">
+                     <tr class="table-borderless">
+                        <th class="text-center table-borderless px-0 sortable" data-col="0">ID Reserva</th>
+                        <th class="text-center table-borderless px-0 sortable" data-col="1">Data Reserva</th>
+                        <th class="ps-4 table-borderless px-0 sortable" data-col="2">Descrição</th>
+                        <th class="text-center table-borderless px-0 sortable" data-col="3">Tombo</th>
+                        <th class="text-center table-borderless px-0">Categoria</th>
+                        <th class="text-center table-borderless px-0">Estoque</th>
+                        <th class="text-center table-borderless px-0">Conservação</th>
+                        <th class="text-center table-borderless px-0">Doc de Origem</th>
+                        <th class="text-center table-borderless px-0 sortable" data-col="8">Destino</th>
+                        <th class="text-center table-borderless px-0 sortable" data-col="9">Usuário</th>
+                        <th class="text-center table-borderless px-0">Ações</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <% if (reservas.length > 0) { %>
+                     <% reservas.forEach(function(item) { %>
+                     <tr>
+                        <td class="py-1 align-middle text-center"><%= item.reserva_id %></td>
+                        <td class="py-1 text-center align-middle">
+                           <%= item.data_reserva ? new Date(item.data_reserva).toLocaleDateString('pt-BR') : 'N/A' %>
+                        </td>
+                        <td class="py-1 align-middle"><%= item.descricao ? item.descricao.toUpperCase() : 'N/A' %></td>
+                        <td class="py-1 align-middle text-center"><%= item.tombo ? item.tombo : 'N/A' %></td>
+                        <td class="py-1 align-middle text-center"><%= item.categoria ? item.categoria.toUpperCase() : 'N/A' %></td>
+                        <td class="py-1 align-middle text-center"><%= item.estoque ? item.estoque.toUpperCase() : 'N/A' %></td>
+                        <td class="py-1 align-middle text-center"><%= item.situacao ? item.situacao.toUpperCase() : 'N/A' %></td>
+                        <td class="py-1 align-middle text-center"><%= item.doc_origem ? item.doc_origem.toUpperCase() : 'N/A' %></td>
+                        <td class="py-1 align-middle text-center"><%= item.destino ? item.destino.toUpperCase() : 'N/A' %></td>
+                        <td class="py-1 align-middle text-center"><%= item.usuario ? item.usuario.toUpperCase() : 'N/A' %></td>
+                        <td class="py-1 align-middle text-center">
+                           <button type="button" class="btn btn-secondary btn-sm btn-details" data-tombo="<%= item.tombo %>">
+                              Detalhes
+                           </button>
+                           <% if (userRole === 'admin') { %>
+                           <button type="button" class="btn btn-danger btn-sm btn-cancelar-reserva" data-id="<%= item.reserva_id %>">
+                              Cancelar Reserva
+                           </button>
+                           <% } %>
+                        </td>
+                     </tr>
+                     <% }); %>
+                     <% } else { %>
+                     <tr>
+                        <td colspan="11" class="text-center align-middle">Ainda não há itens reservados</td>
+                     </tr>
+                     <% } %>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      </div>
+
+      <!-- Incluindo o SweetAlert2 via CDN -->
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <!-- Scripts para Bootstrap -->
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+      <script>
+         const userRole = '<%= userRole %>';
+         document.addEventListener('DOMContentLoaded', () => {
+            // Função para formatar a data
+            function formatarData(data) {
+               if (!data) return 'N/A';
+               const d = new Date(data);
+               if (isNaN(d.getTime())) return 'N/A';
+               return d.toLocaleDateString('pt-BR');
+            }
+
+            // Script para o botão "Detalhes"
+            const viewButtons = document.querySelectorAll('.btn-details');
+            viewButtons.forEach((button) => {
+               button.addEventListener('click', async (event) => {
+                  const tombo = event.target.getAttribute('data-tombo');
+                  if (!tombo) {
+                     Swal.fire({
+                        icon: 'error',
+                        title: 'Erro!',
+                        text: 'Número do tombo não encontrado.',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                     });
+                     return;
+                  }
+                  try {
+                     const response = await fetch(`/fetch-info-tombo?tombo=${tombo}`);
+                     if (!response.ok) {
+                        throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
+                     }
+                     const data = await response.json();
+                     const modalBody = document.getElementById('infoTomboModalBody');
+                     if (!modalBody) {
+                        throw new Error('Elemento do modal não encontrado');
+                     }
+                     if (data.infoTombo) {
+                        const entrada = data.infoTombo;
+                        const saida = data.infoSaida;
+                        const dataEntradaFormatada = entrada.data_de_entrada ? new Date(entrada.data_de_entrada).toLocaleDateString('pt-BR') : 'N/A';
+                        const dataSaidaFormatada = saida && saida.data_de_saida ? new Date(saida.data_de_saida).toLocaleDateString('pt-BR') : '';
+                        modalBody.innerHTML = `
+                           <div class="card">
+                              <div class="card-body pb-0">
+                                 <h5 class="card-title">${entrada.descricao || 'N/A'}</h5>
+                                 <p class="card-text">
+                                    <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
+                                    <strong>Tombo:</strong> ${entrada.tombo || 'N/A'} <br/>
+                                    <strong>Data de Entrada:</strong> ${dataEntradaFormatada} <br/>
+                                    <strong>Categoria:</strong> ${entrada.categoria || 'N/A'} <br/>
+                                    <strong>Doc Origem:</strong> ${entrada.doc_origem || 'N/A'} <br/>
+                                    <strong>Estoque:</strong> ${entrada.estoque || 'N/A'} <br/>
+                                    <strong>Valor:</strong> ${parseFloat(entrada.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} <br/>
+                                    <strong>Situação:</strong> ${entrada.situacao || 'N/A'} <br/>
+                                    <strong>Observação:</strong> ${entrada.observacao || 'N/A'} <br/>
+                                    <hr>
+                                    ${entrada.pago === 1 ? (saida ? `
+                                       <h5 class="bg-danger text-white p-2">Dados da Saída</h5>
+                                       <strong>Data de Saída:</strong> ${dataSaidaFormatada} <br/>
+                                       <strong>Doc Saída:</strong> ${saida.doc_saida || 'N/A'} <br/>
+                                       <strong>Referência:</strong> ${saida.referencia || 'N/A'} <br/>
+                                       <strong>Destino:</strong> ${saida.destino ? saida.destino.toUpperCase() : 'N/A'} <br/>
+                                       <strong>Posto/Graduação:</strong> ${saida.posto_graduacao ? saida.posto_graduacao.toUpperCase() : 'N/A'} <br/>
+                                       <strong>Matrícula Funcional:</strong> ${saida.mat_funcional || 'N/A'} <br/>
+                                       <strong>Telefone:</strong> ${saida.telefone || 'N/A'} <br/>
+                                       <strong>Nome Completo:</strong> ${saida.nome_completo ? saida.nome_completo.toUpperCase() : 'N/A'} <br/>
+                                       <strong>Observação de Saída:</strong> ${saida.observacao ? saida.observacao.toUpperCase() : 'N/A'} <br/>
+                                    ` : `
+                                       <h5 class="bg-secondary text-white p-2">Item foi dado como pago, mas não há detalhes de saída.</h5>
+                                    `) : `
+                                       <h5 class="bg-secondary text-white p-2">Item consta no estoque, ainda não foi pago.</h5>
+                                    `}
+                                 </p>
+                              </div>
+                           </div>
+                        `;
+                        const infoTomboModalElement = document.getElementById('infoTomboModal');
+                        if (!infoTomboModalElement) {
+                           throw new Error('Modal infoTomboModal não encontrado');
+                        }
+                        const infoTomboModal = new bootstrap.Modal(infoTomboModalElement, {
+                           backdrop: true,
+                           focus: true
+                        });
+                        infoTomboModal.show();
+                        infoTomboModalElement.addEventListener('hidden.bs.modal', () => {
+                           modalBody.innerHTML = '<div class="text-center text-muted">Carregando...</div>';
+                        });
+                     } else {
+                        Swal.fire({
+                           icon: 'error',
+                           title: 'Erro!',
+                           text: 'Desculpe, mas esse tombo é inválido ou ainda não foi cadastrado, tente novamente.',
+                           timer: 3000,
+                           timerProgressBar: true,
+                           showConfirmButton: false
+                        });
+                     }
+                  } catch (error) {
+                     Swal.fire({
+                        icon: 'error',
+                        title: 'Erro!',
+                        text: `Erro ao carregar os detalhes do item: ${error.message}`,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                     });
+                  }
+               });
+            });
+
+            // Script para o botão "Exportar Relatório"
+            const exportarBtn = document.getElementById('exportarBtn');
+            exportarBtn.addEventListener('click', (event) => {
+               event.preventDefault();
+               const formato = document.getElementById('formato').value;
+               window.location.href = `/relatorio/reservas?formato=${formato}`;
+            });
+
+            // Script para o botão "Cancelar Reserva"
+            const cancelarButtons = document.querySelectorAll('.btn-cancelar-reserva');
+            cancelarButtons.forEach((button) => {
+               button.addEventListener('click', async (event) => {
+                  const reservaId = button.getAttribute('data-id');
+                  const result = await Swal.fire({
+                     title: 'Confirmar cancelamento',
+                     text: 'Você tem certeza que deseja cancelar esta reserva? O item voltará ao estoque atual.',
+                     icon: 'warning',
+                     showCancelButton: true,
+                     confirmButtonText: 'Sim, cancelar!',
+                     cancelButtonText: 'Não',
+                     confirmButtonColor: '#28a745',
+                     cancelButtonColor: '#dc3545',
+                  });
+                  if (!result.isConfirmed) {
+                     return;
+                  }
+                  try {
+                     const response = await fetch(`/reservas/cancelar/${reservaId}`, {
+                        method: 'DELETE',
+                        headers: {
+                           'Content-Type': 'application/json'
+                        }
+                     });
+                     if (!response.ok) {
+                        const result = await response.json();
+                        throw new Error(result.error || 'Erro ao cancelar a reserva');
+                     }
+                     Swal.fire({
+                        icon: 'success',
+                        title: 'Sucesso!',
+                        text: 'Reserva cancelada com sucesso! O item retornou ao estoque atual.',
+                        timer: 2000,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                     }).then(() => {
+                        location.reload();
+                     });
+                  } catch (error) {
+                     console.error('Erro ao cancelar reserva:', error);
+                     Swal.fire({
+                        icon: 'error',
+                        title: 'Erro!',
+                        text: error.message || 'Não foi possível cancelar a reserva. Tente novamente.',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                     });
+                  }
+               });
+            });
+
+            // Script para pesquisa
+            document.getElementById('searchTombo').addEventListener('input', function () {
+               const searchTerm = this.value.toLowerCase().trim();
+               filterRows(searchTerm);
+            });
+            document.getElementById('clearSearch').addEventListener('click', () => {
+               document.getElementById('searchTombo').value = '';
+               filterRows('');
+            });
+            function filterRows(searchTerm) {
+               const table = document.getElementById('reservasTable');
+               const rows = table.getElementsByTagName('tr');
+               const removerAcentos = (str) => {
+                  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+               };
+               const normalizedSearchTerm = removerAcentos(searchTerm.toLowerCase().trim());
+               for (let i = 1; i < rows.length; i++) {
+                  const cells = rows[i].getElementsByTagName('td');
+                  if (cells.length < 10) {
+                     rows[i].classList.add('hidden');
+                     continue;
+                  }
+                  const descricaoCell = removerAcentos(cells[2].textContent.toLowerCase().trim());
+                  const tomboCell = removerAcentos(cells[3].textContent.toLowerCase().trim());
+                  const categoriaCell = removerAcentos(cells[4].textContent.toLowerCase().trim());
+                  const estoqueCell = removerAcentos(cells[5].textContent.toLowerCase().trim());
+                  const conservacaoCell = removerAcentos(cells[6].textContent.toLowerCase().trim());
+                  const docOrigemCell = removerAcentos(cells[7].textContent.toLowerCase().trim());
+                  const destinoCell = removerAcentos(cells[8].textContent.toLowerCase().trim());
+                  const usuarioCell = removerAcentos(cells[9].textContent.toLowerCase().trim());
+                  const matches =
+                     descricaoCell.includes(normalizedSearchTerm) ||
+                     tomboCell.includes(normalizedSearchTerm) ||
+                     categoriaCell.includes(normalizedSearchTerm) ||
+                     estoqueCell.includes(normalizedSearchTerm) ||
+                     conservacaoCell.includes(normalizedSearchTerm) ||
+                     docOrigemCell.includes(normalizedSearchTerm) ||
+                     destinoCell.includes(normalizedSearchTerm) ||
+                     usuarioCell.includes(normalizedSearchTerm);
+                  if (searchTerm === '' || matches) {
+                     rows[i].classList.remove('hidden');
+                  } else {
+                     rows[i].classList.add('hidden');
+                  }
+               }
+            }
+
+            // Script para ordenação
+            const sortStates = {};
+            function sortTable(columnIndex, isNumeric = false) {
+               const table = document.getElementById('reservasTable');
+               const tbody = table.querySelector('tbody');
+               const rows = Array.from(tbody.getElementsByTagName('tr')).filter(
+                  (row) => !row.classList.contains('hidden')
+               );
+               const th = document.querySelector(`th[data-col="${columnIndex}"]`);
+               const currentState = sortStates[columnIndex] || 'none';
+               const newState = currentState === 'asc' ? 'desc' : 'asc';
+               sortStates[columnIndex] = newState;
+               document.querySelectorAll('.sortable').forEach((header) => {
+                  header.classList.remove('sort-asc', 'sort-desc');
+               });
+               th.classList.add(newState === 'asc' ? 'sort-asc' : 'sort-desc');
+               rows.sort((a, b) => {
+                  let aValue = a.cells[columnIndex].textContent.trim();
+                  let bValue = b.cells[columnIndex].textContent.trim();
+                  if (columnIndex === 0 || columnIndex === 3) {
+                     aValue = parseInt(aValue) || 0;
+                     bValue = parseInt(bValue) || 0;
+                     return newState === 'asc' ? aValue - bValue : bValue - aValue;
+                  } else if (columnIndex === 1) {
+                     const parseDate = (dateStr) => {
+                        const [day, month, year] = dateStr.split('/').map(Number);
+                        return new Date(year, month - 1, day);
+                     };
+                     const aDate = parseDate(aValue);
+                     const bDate = parseDate(bValue);
+                     return newState === 'asc' ? aDate - bDate : bDate - aDate;
+                  } else {
+                     return newState === 'asc'
+                        ? aValue.localeCompare(bValue, 'pt-BR')
+                        : bValue.localeCompare(bValue, 'pt-BR');
+                  }
+               });
+               rows.forEach((row) => tbody.appendChild(row));
+            }
+            document.querySelectorAll('.sortable').forEach((th) => {
+               th.addEventListener('click', () => {
+                  const columnIndex = parseInt(th.getAttribute('data-col'));
+                  sortTable(columnIndex);
+               });
+            });
+         });
+      </script>
+   </body>
+</html>

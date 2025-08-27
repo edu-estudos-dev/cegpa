@@ -42,7 +42,7 @@
       <%- include('../partials/header') %>
       <div class="caixa w-95 p-4 mx-auto">
          <div class="border caixa-externa p-4 shadow-sm rounded">
-            <form id="editSolicitacaoForm" novalidate>
+            <form id="editSolicitacaoForm" method="PUT" action="/solicitacao/editar/<%= item.id %>" novalidate>
                <div class="row align-items-center mb-3 px-3">
                   <h2
                      style="border-bottom: 4px solid orange"
@@ -179,12 +179,13 @@
                         id="btnRegistrar"
                         type="submit"
                         class="w-10 btn btn-success mx-1"
+                        onclick="console.log('Botão Atualizar clicado')"
                      >
                         Atualizar
                      </button>
                   </div>
                </div>
-            </form>
+            </form> <!-- Fechamento da tag form movido para cá -->
 
             <!-- Modal de Erro -->
             <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
@@ -224,12 +225,20 @@
       <!-- Validação do formulário e envio -->
       <script>
          document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM carregado, associando listener ao formulário');
             const editForm = document.getElementById('editSolicitacaoForm');
             const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
             const errorMessage = document.getElementById('errorMessage');
 
+            if (!editForm) {
+               console.error('Formulário com ID editSolicitacaoForm não encontrado');
+               return;
+            }
+
             editForm.addEventListener('submit', async (e) => {
+               console.log('Evento de submit disparado');
                e.preventDefault();
+               e.stopPropagation();
 
                // Coleta os dados do formulário
                const formData = new FormData(editForm);
@@ -267,28 +276,33 @@
                   return;
                }
 
-               // Log dos dados para depuração
                console.log('Dados do formulário antes do envio:', data);
 
                try {
                   const solicitacaoId = '<%= item.id %>';
+                  console.log('Enviando requisição PUT para:', `/solicitacao/editar/${solicitacaoId}`);
                   const response = await fetch(`/solicitacao/editar/${solicitacaoId}`, {
                      method: 'PUT',
                      headers: { 'Content-Type': 'application/json' },
                      body: JSON.stringify(data),
                   });
 
+                  console.log('Resposta do servidor:', response);
+
                   if (response.ok) {
+                     console.log('Requisição PUT bem-sucedida, exibindo SweetAlert');
                      Swal.fire({
                         title: 'Sucesso!',
                         text: 'Solicitação atualizada com sucesso!',
                         icon: 'success',
                         confirmButtonText: 'OK'
                      }).then(() => {
+                        console.log('Redirecionando para /solicitacao/tabela/solicitacao');
                         window.location.href = '/solicitacao/tabela/solicitacao';
                      });
                   } else {
                      const result = await response.json();
+                     console.log('Erro na resposta do servidor:', result);
                      errorMessage.innerText = result.error || 'Erro ao atualizar a solicitação.';
                      errorModal.show();
                   }
@@ -311,10 +325,12 @@
                document.getElementById('observacao').value = '<%= item.observacao || "" %>';
             }
 
-            // Adicionar evento ao botão "Limpar"
             const btnReset = document.getElementById('btnLimpar');
             if (btnReset) {
-               btnReset.addEventListener('click', resetForm);
+               btnReset.addEventListener('click', () => {
+                  console.log('Botão Limpar clicado');
+                  resetForm();
+               });
             }
          });
       </script>

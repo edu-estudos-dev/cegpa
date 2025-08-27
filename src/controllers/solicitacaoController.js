@@ -221,45 +221,54 @@ class SolicitacaoController {
    };
 
    // método para atualizar a situação de uma solicitação
-   async atualizarSituacao(req, res) {
+   atualizarSituacao = async (req, res) => {
+      console.log(
+         'Recebendo requisição PUT para atualizar situação:',
+         req.params.id,
+         req.body
+      );
       try {
-         const id = req.params.id;
+         const { id } = req.params;
          const { situacao } = req.body;
 
+         if (!situacao) {
+            console.log('Erro: Situação não fornecida');
+            return res.status(400).json({ error: 'Situação é obrigatória.' });
+         }
+
          if (!['PENDENTE', 'ADQUIRIDO'].includes(situacao)) {
+            console.log('Erro: Situação inválida:', situacao);
             return res.status(400).json({ error: 'Situação inválida.' });
          }
 
-         const result = await solicitacaoModel.atualizarSituacao(id, situacao);
-         if (result.affectedRows === 0) {
+         const updated = await solicitacaoModel.updateSituacao(id, situacao);
+         console.log('Resultado da atualização:', updated);
+         if (!updated || updated.affectedRows === 0) {
+            console.log('Solicitação não encontrada para ID:', id);
             return res
                .status(404)
                .json({ error: 'Solicitação não encontrada.' });
          }
 
-         res.status(200).json({ message: 'Situação atualizada com sucesso.' });
+         console.log('Situação atualizada com sucesso para:', situacao);
+         return res.status(200).json({ success: true });
       } catch (error) {
          console.error('Erro ao atualizar situação:', error);
-         res.status(500).json({ error: 'Erro ao atualizar situação.' });
+         return res
+            .status(500)
+            .json({ error: 'Erro interno ao atualizar situação.' });
       }
-   }
-
+   };
    // método para renderizar o formulário de edição
    renderEditForm = async (req, res) => {
-      console.log(`[DEBUG] Acessando renderEditForm para ID: ${req.params.id}`);
-      console.log(`[DEBUG] Usuário na sessão:`, req.session.user);
       try {
          const { id } = req.params;
-         console.log(`[DEBUG] Buscando solicitação com ID ${id}`);
          const solicitacao = await solicitacaoModel.getSolicitacaoById(id);
          if (!solicitacao) {
-            console.log(`[DEBUG] Solicitação com ID ${id} não encontrada`);
             return res
                .status(404)
                .json({ error: 'Solicitação não encontrada.' });
          }
-         console.log(`[DEBUG] Solicitação encontrada:`, solicitacao);
-         console.log(`[DEBUG] Valor do campo NUP:`, solicitacao.NUP);
          const item = {
             id: solicitacao.id,
             data_da_solicitacao: solicitacao.data_da_solicitacao,
@@ -270,7 +279,6 @@ class SolicitacaoController {
             observacao: solicitacao.observacao || '',
             situacao: solicitacao.situacao || 'PENDENTE',
          };
-         console.log(`[DEBUG] Objeto item enviado ao template:`, item);
          return res.render('formEditSolicitacao', {
             title: 'Editar Solicitação',
             item,
@@ -301,15 +309,23 @@ class SolicitacaoController {
             descricao,
             nup,
             observacao,
+            situacao,
          } = req.body;
 
          // Validação dos campos obrigatórios
-         if (!data_da_solicitacao || !solicitante || !qtd || !descricao) {
+         if (
+            !data_da_solicitacao ||
+            !solicitante ||
+            !qtd ||
+            !descricao ||
+            !situacao
+         ) {
             console.log('Campos obrigatórios ausentes:', {
                data_da_solicitacao,
                solicitante,
                qtd,
                descricao,
+               situacao,
             });
             return res
                .status(400)
@@ -333,16 +349,14 @@ class SolicitacaoController {
             descricao,
             nup: nup || null,
             observacao: observacao || null,
-            situacao: req.body.situacao || 'PENDENTE', // Adiciona situacao, caso esteja no formulário
+            situacao: situacao || 'PENDENTE',
          };
-
-         console.log('[DEBUG] Dados a serem atualizados:', solicitacao);
 
          const updated = await solicitacaoModel.updateSolicitacao(
             id,
             solicitacao
          );
-         if (!updated) {
+         if (!updated || updated.affectedRows === 0) {
             console.log(`Solicitação com ID ${id} não encontrada`);
             return res
                .status(404)
@@ -396,41 +410,59 @@ class SolicitacaoController {
             ];
             console.log('[EXCEL] Título da planilha:', title);
             const worksheet = workbook.addWorksheet(title);
-            worksheet.mergeCells(`A1:${String.fromCharCode(65 + columns.length - 1)}1`);
+            worksheet.mergeCells(
+               `A1:${String.fromCharCode(65 + columns.length - 1)}1`
+            );
             worksheet.getCell('A1').value = title;
             worksheet.getCell('A1').alignment = { horizontal: 'center' };
             worksheet.getCell('A1').font = { size: 16, bold: true };
-            worksheet.addRow([`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`]);
-            worksheet.addRow(columns.map((col) => col.header)).eachCell((cell) => {
-               cell.fill = {
-                  type: 'pattern',
-                  pattern: 'solid',
-                  fgColor: { argb: 'FF228B22' },
-               };
-               cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
-               cell.alignment = { horizontal: 'center' };
-            });
-            solicitacoes.forEach(item => {
+            worksheet.addRow([
+               `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
+            ]);
+            worksheet
+               .addRow(columns.map((col) => col.header))
+               .eachCell((cell) => {
+                  cell.fill = {
+                     type: 'pattern',
+                     pattern: 'solid',
+                     fgColor: { argb: 'FF228B22' },
+                  };
+                  cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+                  cell.alignment = { horizontal: 'center' };
+               });
+            solicitacoes.forEach((item) => {
                worksheet.addRow([
                   item.id,
-                  new Date(item.data_da_solicitacao).toLocaleDateString('pt-BR'),
+                  new Date(item.data_da_solicitacao).toLocaleDateString(
+                     'pt-BR'
+                  ),
                   item.descricao,
                   item.quantidade,
                   item.solicitante,
                   item.situacao,
-                  item.nup
+                  item.nup,
                ]);
             });
             worksheet.columns = columns.map((col) => ({ width: col.width }));
             const excelBuffer = await workbook.xlsx.writeBuffer();
-            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            res.setHeader('Content-Disposition', 'attachment; filename=relatorio_solicitacoes.xlsx');
+            res.setHeader(
+               'Content-Type',
+               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            );
+            res.setHeader(
+               'Content-Disposition',
+               'attachment; filename=relatorio_solicitacoes.xlsx'
+            );
             res.send(excelBuffer);
          } else {
             // PDF com jsPDF + autotable (importação dinâmica)
             const { jsPDF } = await import('jspdf');
             await import('jspdf-autotable');
-            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            const doc = new jsPDF({
+               orientation: 'landscape',
+               unit: 'mm',
+               format: 'a4',
+            });
             const title = 'Relatório de Solicitações';
             const columns = [
                { header: 'ID', dataKey: 'id' },
@@ -441,9 +473,11 @@ class SolicitacaoController {
                { header: 'Situação', dataKey: 'situacao' },
                { header: 'NUP', dataKey: 'nup' },
             ];
-            const rows = solicitacoes.map(item => ({
+            const rows = solicitacoes.map((item) => ({
                id: item.id,
-               data_da_solicitacao: new Date(item.data_da_solicitacao).toLocaleDateString('pt-BR'),
+               data_da_solicitacao: new Date(
+                  item.data_da_solicitacao
+               ).toLocaleDateString('pt-BR'),
                descricao: item.descricao,
                quantidade: item.quantidade,
                solicitante: item.solicitante,
@@ -454,16 +488,20 @@ class SolicitacaoController {
             doc.setFontSize(15);
             doc.text(title, 10, 15); // Título alinhado à esquerda
             doc.setFontSize(6);
-            const generatedText = `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`;
+            const generatedText = `Gerado em: ${new Date().toLocaleDateString(
+               'pt-BR'
+            )}`;
             doc.text(generatedText, 10, 22);
             const pageNumberText = `Página 1`;
-            doc.text(pageNumberText, doc.internal.pageSize.width - 10, 22, { align: 'right' });
+            doc.text(pageNumberText, doc.internal.pageSize.width - 10, 22, {
+               align: 'right',
+            });
 
             doc.autoTable({
                startY: 25,
                margin: { left: 8, right: 8, top: 25 },
-               head: [columns.map(col => col.header)],
-               body: rows.map(row => columns.map(col => row[col.dataKey])),
+               head: [columns.map((col) => col.header)],
+               body: rows.map((row) => columns.map((col) => row[col.dataKey])),
                styles: {
                   fontSize: 8,
                   cellPadding: 2,
@@ -491,12 +529,17 @@ class SolicitacaoController {
                   doc.setFontSize(6);
                   doc.text(generatedText, 10, 22);
                   const pageStr = `Página ${data.pageNumber}`;
-                  doc.text(pageStr, doc.internal.pageSize.width - 10, 22, { align: 'right' });
+                  doc.text(pageStr, doc.internal.pageSize.width - 10, 22, {
+                     align: 'right',
+                  });
                },
             });
             const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
             res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename=relatorio_solicitacoes.pdf`);
+            res.setHeader(
+               'Content-Disposition',
+               `attachment; filename=relatorio_solicitacoes.pdf`
+            );
             res.send(pdfBuffer);
          }
       } catch (error) {

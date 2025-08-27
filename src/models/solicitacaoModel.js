@@ -36,7 +36,7 @@ class SolicitacaoModel {
             nup,
             observacao,
          ]);
-         console.log(result);
+         console.log('Resultado da inserção:', result);
          return result;
       } catch (error) {
          console.error(
@@ -58,45 +58,45 @@ class SolicitacaoModel {
          quantidade,
          situacao,
          observacao,
-         NUP AS nup
+         nup AS nup
       FROM solicitacaoaquisicao
    `;
       try {
          const [results] = await connection.execute(query);
          return results;
       } catch (error) {
-         console.error('Erro ao buscar estoque atual:', error);
+         console.error('Erro ao buscar solicitações:', error);
          throw error;
       }
    };
 
-   // método para buscar uma solicitação por ID
+   // Método para buscar uma solicitação por ID
    getSolicitacaoById = async (id) => {
       try {
          const [results] = await connection.execute(
             'SELECT * FROM solicitacaoaquisicao WHERE id = ?',
             [id]
          );
-
          return results[0] || null;
       } catch (error) {
+         console.error('Erro ao buscar solicitação por ID:', error);
          throw error;
       }
    };
 
-   // método para atualizar a situação de uma solicitação
-   async atualizarSituacao(id, situacao) {
+   // Método para atualizar a situação de uma solicitação
+   async updateSituacao(id, situacao) {
       const query = `UPDATE solicitacaoaquisicao SET situacao = ? WHERE id = ?`;
       try {
          const [result] = await connection.execute(query, [situacao, id]);
-         return result;
+         return result.affectedRows;
       } catch (error) {
          console.error('Erro ao atualizar situação:', error);
          throw error;
       }
    }
 
-   // método para atualizar uma solicitação
+   // Método para atualizar uma solicitação
    async updateSolicitacao(id, data) {
       const query = `
          UPDATE solicitacaoaquisicao 
@@ -127,7 +127,7 @@ class SolicitacaoModel {
       }
    }
 
-   // método para excluir uma solicitação
+   // Método para excluir uma solicitação
    async deleteSolicitacao(id) {
       const query = `DELETE FROM solicitacaoaquisicao WHERE id = ?`;
       try {

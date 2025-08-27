@@ -256,18 +256,22 @@
                </div>
             </div>
 
-            <div class="col-md-12 d-flex justify-content-center mt-4">
-               <button id="btnRegistrar" type="submit" class="w-10 btn btn-success mx-1">Registrar Entrada</button>
-               <button id="btnLimpar" type="button" class="w-10 btn btn-warning mx-1">Limpar</button>
-            </div>
-
-            <div class="row mt-3">
+            <div class="row mt-3"></div>
+            <div class="row mt-3"></div>
+            <div class="row mt-3"></div>
             <div class="col-md-12">
                <div class="form-group">
                   <label for="pdfFile" class="form-label fw-bold">Anexar PDF (opcional):</label>
                   <input type="file" class="form-control" id="pdfFile" name="pdfFile" accept="application/pdf">
                </div>
             </div>
+
+            <div class="row mt-3"></div>
+            <div class="col-md-12 d-flex justify-content-center mt-4">
+               <button id="btnRegistrar" type="submit" class="w-10 btn btn-success mx-1">Registrar Entrada</button>
+               <button id="btnLimpar" type="button" class="w-10 btn btn-warning mx-1">Limpar</button>
+            </div>
+            <div class="row mt-3"></div>
          </form>
 
       
@@ -597,14 +601,96 @@
       event.preventDefault();
 
       const form = this;
-      const formData = new FormData(form);
+      const data_de_entrada = document.getElementById('data_de_entrada').value;
+      const quantidade = document.getElementById('qtd').value;
+      const tipo_tombo = document.getElementById('tipo_tombo').value;
+      const tombo_inicial = document.getElementById('tombo_inicial').value;
+      const tombo_final = document.getElementById('tombo_final').value;
+      const tombo_lote_manual = document.getElementById('tombo_lote_manual').value;
+      const categoria = document.getElementById('categoria').value;
+      const doc_origem = document.getElementById('doc_origem').value;
+      const valor = document.getElementById('valor').value;
+      const descricao = document.getElementById('descricao').value;
+      const situacao = document.getElementById('situacao').value;
+      const conta_contabil = document.getElementById('conta_contabil').value;
+      const estoque = document.getElementById('estoque').value;
 
-      // Log para verificar os dados enviados
-      const formDataEntries = {};
-      for (const [key, value] of formData.entries()) {
-         formDataEntries[key] = value instanceof File ? value.name : value;
+      // Validação de campos obrigatórios
+      if (!data_de_entrada) {
+         Swal.fire({ icon: 'error', title: 'Erro', text: 'O campo Data de Entrada é obrigatório.' });
+         return;
       }
-      console.log('Dados enviados ao backend (FormData):', formDataEntries);
+      if (!quantidade || !Number.isInteger(Number(quantidade)) || Number(quantidade) <= 0) {
+         Swal.fire({ icon: 'error', title: 'Erro', text: 'Quantidade deve ser um número inteiro positivo.' });
+         return;
+      }
+      if (!tipo_tombo) {
+         Swal.fire({ icon: 'error', title: 'Erro', text: 'O tipo de tombo é obrigatório.' });
+         return;
+      }
+      if (tipo_tombo === 'AUTO' && (!tombo_inicial || !Number.isInteger(Number(tombo_inicial)) || Number(tombo_inicial) <= 0)) {
+         Swal.fire({ icon: 'error', title: 'Erro', text: 'Tombo inicial inválido para modo AUTO.' });
+         return;
+      }
+      if (tipo_tombo === 'LOTE') {
+         if (!tombo_inicial || !tombo_final || !Number.isInteger(Number(tombo_inicial)) || !Number.isInteger(Number(tombo_final)) || Number(tombo_inicial) <= 0 || Number(tombo_final) <= 0 || Number(tombo_inicial) >= Number(tombo_final)) {
+            Swal.fire({ icon: 'error', title: 'Erro', text: 'Tombo inicial e final devem ser números inteiros positivos, com inicial menor que final.' });
+            return;
+         }
+         if (Number(tombo_final) - Number(tombo_inicial) + 1 !== Number(quantidade)) {
+            Swal.fire({ icon: 'error', title: 'Erro', text: 'A quantidade informada não corresponde ao intervalo de tombos.' });
+            return;
+         }
+      }
+      if (tipo_tombo === 'LOTE_MANUAL') {
+         try {
+            const tombos = JSON.parse(tombo_lote_manual);
+            if (!Array.isArray(tombos) || tombos.length !== Number(quantidade)) {
+               Swal.fire({ icon: 'error', title: 'Erro', text: 'Lista de tombos manuais inválida ou não corresponde à quantidade.' });
+               return;
+            }
+            for (const tombo of tombos) {
+               if (!Number.isInteger(Number(tombo)) || Number(tombo) <= 0) {
+                  Swal.fire({ icon: 'error', title: 'Erro', text: `Tombo ${tombo} deve ser um número inteiro positivo.` });
+                  return;
+               }
+            }
+         } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Erro', text: 'Erro ao processar a lista de tombos manuais.' });
+            return;
+         }
+      }
+      if (categoria === 'Selecione uma categoria...') {
+         Swal.fire({ icon: 'error', title: 'Erro', text: 'Selecione uma categoria válida.' });
+         return;
+      }
+      if (!doc_origem) {
+         Swal.fire({ icon: 'error', title: 'Erro', text: 'O campo Documento de Origem é obrigatório.' });
+         return;
+      }
+      if (!valor || Number(valor) <= 0) {
+         Swal.fire({ icon: 'error', title: 'Erro', text: 'O campo Valor Unitário deve ser um número positivo.' });
+         return;
+      }
+      if (!descricao) {
+         Swal.fire({ icon: 'error', title: 'Erro', text: 'O campo Descrição é obrigatório.' });
+         return;
+      }
+      if (situacao === 'Escolha uma opção...') {
+         Swal.fire({ icon: 'error', title: 'Erro', text: 'Selecione um estado de conservação válido.' });
+         return;
+      }
+      if (conta_contabil === 'Escolha uma opção...') {
+         Swal.fire({ icon: 'error', title: 'Erro', text: 'Selecione uma conta contábil válida.' });
+         return;
+      }
+      if (estoque === 'Escolha uma opção...') {
+         Swal.fire({ icon: 'error', title: 'Erro', text: 'Selecione um local de estoque válido.' });
+         return;
+      }
+
+      const formData = new FormData(form);
+      console.log('Dados enviados ao backend:', Object.fromEntries(formData.entries()));
 
       try {
          const response = await fetch('/entrada', {
@@ -614,7 +700,7 @@
 
          if (!response.ok) {
             const errorData = await response.json();
-            throw new Error('Erro ao registrar a entrada: ' + (errorData.error || 'Erro desconhecido'));
+            throw new Error(errorData.error || 'Erro ao registrar a entrada.');
          }
 
          const result = await response.json();

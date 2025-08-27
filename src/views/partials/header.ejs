@@ -129,6 +129,48 @@
          font-size: 1.2rem;
          padding: 0.5rem 1.5rem;
       }
+
+      .search-container {
+         display: flex;
+         align-items: center;
+         gap: 0; /* Garante que não haja espaço entre os elementos */
+         margin: 0;
+         padding: 0;
+      }
+
+      .search-container input {
+         padding: 0.5rem;
+         border: 1px solid #dadada;
+         border-radius: 4px ; /* Mantém o canto arredondado à esquerda */
+         outline: none;
+         font-size: 1rem;
+         margin: 0; /* Sobrescreve margin-right: 10px do CSS externo */
+         /* margin-left: 15px; */
+         flex-grow: 1; /* Garante que o input ocupe o espaço disponível */
+      }
+
+      .search-container button {
+         padding: 0.6rem 1rem;
+         border: 1px solid #fff;
+         border-radius: 4px; /* Mantém o canto arredondado à direita */
+         /* background-color: #E7A109;  */
+         color: #fff; /* Texto branco para contraste */
+         font-weight: bold;
+         cursor: pointer;
+         transition: filter 0.3s;
+         margin-inline: 3px; 
+
+      }
+
+      .search-container button:hover {
+         filter: brightness(0.9); /* Escurece levemente no hover */
+      }
+
+      /* Estilo para o modal de auditoria */
+      #modalAuditoriaTombo .modal-dialog {
+         max-width: 60% !important;
+         width: 60% !important;
+      }
    </style>
 </head>
 <body>
@@ -140,14 +182,13 @@
             <li class="navbar-item dropdown">
                <a href="/tabela/estoqueatual" class="dropdown-toggle">Tabelas</a>
                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="/tabela/estoqueatual">Estoque Geral</a></li>
+                  <li><a class="dropdown-item" href="/tabela/estoqueatual">Estoque Atual</a></li>
                   <li><a class="dropdown-item" href="/estoque/itenspagos">Itens Pagos</a></li>
-                  <li><a class="dropdown-item" href="/tabela/itens-novos">Itens Novos</a></li>
-                  <li><a class="dropdown-item" href="/tabela/itens-usados">Itens Usados</a></li>
                   <li><a class="dropdown-item" href="/solicitacao/tabela/solicitacao">Itens Solicitados</a></li>
                   <li><a class="dropdown-item" href="/qtde-unica">Quantidade Disponível</a></li>
                   <li><a class="dropdown-item" href="/tabela/tombamento">Tombamento</a></li>
                   <li><a class="dropdown-item" href="/tombos-usados">Tombos Usados</a></li>
+                  <li><a class="dropdown-item" href="/tabela/itens-reservados">Itens Reservados</a></li>
                </ul>
             </li>
 
@@ -158,12 +199,12 @@
                   <li><a class="dropdown-item" href="/entrada">Entrada de Itens</a></li>
                   <li><a class="dropdown-item" href="/saida">Saída de Itens</a></li>
                   <li><a class="dropdown-item" href="/solicitacao/form-solicitacao">Solicitação de Material</a></li>
-                  <li><a class="dropdown-item" href="/saida-tombo">Saída de Tombos</a></li> <!-- Novo item adicionado -->
+                  <li><a class="dropdown-item" href="/saida-tombo">Saída de Tombos</a></li>
                </ul>
             </li>
 
             <!-- Dropdown para Relatórios -->
-            <li class="navbar-item dropdown">
+            <li class="navbar-item dropdown me-5">
                <a href="/relatorios" class="dropdown-toggle">Relatórios</a>
                <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="/relatorios">Entradas e Saídas</a></li>
@@ -171,23 +212,63 @@
                </ul>
             </li>
 
-            <!-- Botão Pesquisa -->
-            <li class="navbar-item">
-               <a href="/pesquisa-avancada-page" class="navbar-link">Pesquisa</a>
-            </li>
+            <!-- Campo de Pesquisa e Botão Auditar -->
+        <li class="navbar-item search-container navbar-search-container">
+            <input type="text" id="tomboInput" placeholder="Pesquisar tombo..." />
+            <button style="background-color: #E7A109;" id="btnAuditar">Auditar</button>
+         </li>
          </ul>
          <a class="logout-link" href="/logout">Sair</a>
       </div>
    </nav>
 
+   <!-- Modal para Informações do Tombo -->
+   <div class="modal fade" id="infoTomboModal" tabindex="-1" aria-labelledby="infoTomboModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+         <div class="modal-content">
+            <div class="modal-header bg-success text-white d-flex justify-content-between">
+               <h3 class="modal-title ms-3" id="infoTomboModalLabel">Informações do Tombo</h3>
+               <button type="button" class="btn text-white" data-bs-dismiss="modal" aria-label="Close">
+                  <i class="fa fa-times fa-lg"></i>
+               </button>
+            </div>
+            <div class="modal-body" id="infoTomboModalBody">
+               <div class="text-center text-muted">Carregando...</div>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal para Auditoria do Tombo -->
+   <div class="modal fade" id="modalAuditoriaTombo" tabindex="-1" aria-labelledby="modalAuditoriaTomboLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="modalAuditoriaTomboLabel">Histórico de Auditoria do Tombo <span id="modalTombo"></span></h5>
+               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+               <div id="modalAuditoriaConteudo">
+                  <div class="text-center text-muted">Carregando...</div>
+               </div>
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
    <script>
       document.addEventListener('DOMContentLoaded', () => {
          const currentPath = window.location.pathname;
-         const navLinks = document.querySelectorAll('.navbar a:not(.navbar-brand)');
+         const navLinks = document.querySelectorAll('.navbar a:not(.navbar-brand):not(.logout-link)');
+         const tomboInput = document.getElementById('tomboInput');
+         const btnAuditar = document.getElementById('btnAuditar');
 
+         // Ativar link atual
          navLinks.forEach(link => {
             const linkPath = new URL(link.href).pathname;
-
             if (linkPath === currentPath) {
                link.classList.add('active');
                if (link.classList.contains('dropdown-item')) {
@@ -198,7 +279,164 @@
                }
             }
          });
+
+         // Função para formatar observação
+         const getObservacao = (data) => data && data.observacao ? data.observacao : "N/A";
+         const valorReal = (valor) => parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+         // Função para renderizar detalhes da auditoria
+         function renderDetalhes(log) {
+            if (log.acao === 'EDIÇÃO' && log.detalhes && log.detalhes.antes && log.detalhes.depois) {
+               let html = `<table class='table table-bordered table-sm'><thead><tr><th>Campo</th><th>Antes</th><th>Depois</th></tr></thead><tbody>`;
+               const todosCampos = new Set([...Object.keys(log.detalhes.antes), ...Object.keys(log.detalhes.depois)]);
+               todosCampos.forEach(campo => {
+                  html += `<tr><td>${campo}</td><td>${log.detalhes.antes[campo] ?? ''}</td><td>${log.detalhes.depois[campo] ?? ''}</td></tr>`;
+               });
+               html += `</tbody></table>`;
+               return html;
+            }
+            if (log.detalhes && typeof log.detalhes === 'object') {
+               let obj = log.detalhes.dados || log.detalhes.novos_dados || log.detalhes || {};
+               if (log.acao === 'REVERSÃO' && log.detalhes.motivo) {
+                  return `<ul><li><b>Motivo:</b> ${log.detalhes.motivo}</li><li><b>ID Estoque Atual:</b> ${log.detalhes.id_estoqueatual ?? ''}</li></ul>`;
+               }
+               let html = '<ul>';
+               for (const [k, v] of Object.entries(obj)) {
+                  html += `<li><b>${k.replace(/_/g, ' ').toUpperCase()}:</b> ${v}</li>`;
+               }
+               html += '</ul>';
+               return html;
+            }
+            return `<pre style='white-space:pre-wrap;word-break:break-all;font-size:0.9em;background:#f8f9fa;border:none;'>${JSON.stringify(log.detalhes, null, 2)}</pre>`;
+         }
+
+         // Evento para pesquisa de tombo ao pressionar Enter
+         tomboInput.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+               e.preventDefault();
+               const tombo = tomboInput.value.trim();
+               if (!tombo) {
+                  alert('Digite o número do tombo.');
+                  return;
+               }
+
+               try {
+                  const response = await fetch(`/fetch-info-tombo?tombo=${tombo}`);
+                  const data = await response.json();
+                  console.log('Dados do tombo recebidos do backend:', data);
+
+                  const modalBody = document.getElementById('infoTomboModalBody');
+                  if (data.infoTombo) {
+                     const entrada = data.infoTombo;
+                     const saida = data.infoSaida;
+                     const dataEntradaFormatada = new Date(entrada.data_de_entrada).toLocaleDateString('pt-BR');
+                     const dataSaidaFormatada = saida ? new Date(saida.data_de_saida).toLocaleDateString('pt-BR') : '';
+
+                     modalBody.innerHTML = `
+                        <div class="card">
+                           <div class="card-body pb-0">
+                              <h5 class="card-title">${entrada.descricao}</h5>
+                              <p class="card-text">
+                                 <h5 class="bg-primary text-white p-2">Dados da Entrada</h5>
+                                 <strong>Tombo:</strong> ${entrada.tombo} <br/>
+                                 <strong>Data de Entrada:</strong> ${dataEntradaFormatada} <br/>
+                                 <strong>Categoria:</strong> ${entrada.categoria} <br/>
+                                 <strong>Doc Origem:</strong> ${entrada.doc_origem} <br/>
+                                 <strong>Estoque:</strong> ${entrada.estoque} <br/>
+                                 <strong>Valor:</strong> ${valorReal(entrada.valor)} <br/>
+                                 <strong>Situação:</strong> ${entrada.situacao} <br/>
+                                 <strong>Observação:</strong> ${getObservacao(entrada)} <br/>
+                                 <hr>
+                                 ${entrada.pago === 1 ? (saida ? `
+                                    <h5 class="bg-danger text-white p-2">Dados da Saída</h5>
+                                    <strong>Data de Saída:</strong> ${dataSaidaFormatada} <br/>
+                                    <strong>Doc Saída:</strong> ${saida.doc_saida} <br/>
+                                    <strong>Referência:</strong> ${saida.referencia} <br/>
+                                    <strong>Destino:</strong> ${saida.destino.toUpperCase()} <br/>
+                                    <strong>Posto/Graduação:</strong> ${saida.posto_graduacao.toUpperCase()} <br/>
+                                    <strong>Matrícula Funcional:</strong> ${saida.mat_funcional} <br/>
+                                    <strong>Telefone:</strong> ${saida.telefone} <br/>
+                                    <strong>Nome Completo:</strong> ${saida.nome_completo.toUpperCase()} <br/>
+                                    <strong>Observação de Saída:</strong> ${getObservacao(saida).toUpperCase()} <br/>
+                                 ` : `
+                                    <h5 class="bg-secondary text-white p-2">Item foi dado como pago, mas não há detalhes de saída.</h5>
+                                 `) : `
+                                    <h5 class="bg-secondary text-white p-2">Item consta no estoque, ainda não foi pago.</h5>
+                                 `}
+                              </p>
+                           </div>
+                        </div>
+                     `;
+
+                     const infoTomboModal = new bootstrap.Modal(document.getElementById('infoTomboModal'), {
+                        backdrop: true,
+                        focus: true
+                     });
+                     infoTomboModal.show();
+                     infoTomboModal._element.addEventListener('hidden.bs.modal', () => {
+                        tomboInput.value = '';
+                        modalBody.innerHTML = '<div class="text-center text-muted">Carregando...</div>';
+                     });
+                  } else {
+                     alert('Desculpe, mas esse tombo é inválido ou ainda não foi cadastrado, tente novamente.');
+                     tomboInput.value = '';
+                  }
+               } catch (error) {
+                  console.error('Erro ao buscar informações do tombo:', error);
+                  alert('Erro ao buscar informações do tombo.');
+                  tomboInput.value = '';
+               }
+            }
+         });
+
+         // Evento para auditoria ao clicar no botão Auditar
+         btnAuditar.addEventListener('click', async () => {
+            const tombo = tomboInput.value.trim();
+            if (!tombo) {
+               alert('Digite o número do tombo para consultar a auditoria.');
+               return;
+            }
+
+            try {
+               const modal = new bootstrap.Modal(document.getElementById('modalAuditoriaTombo'));
+               document.getElementById('modalTombo').textContent = tombo;
+               const conteudo = document.getElementById('modalAuditoriaConteudo');
+               conteudo.innerHTML = '<div class="text-center text-muted">Carregando...</div>';
+               modal.show();
+
+               // Adicionar evento para limpar o campo de input ao fechar o modal
+               modal._element.addEventListener('hidden.bs.modal', () => {
+                  tomboInput.value = '';
+                  conteudo.innerHTML = '<div class="text-center text-muted">Carregando...</div>';
+               });
+
+               const response = await fetch(`/historico-auditoria/${tombo}`);
+               const data = await response.json();
+               console.log('[AUDITORIA] Resposta recebida:', data);
+
+               if (data.historico && data.historico.length > 0) {
+                  let tabela = `<div class='table-responsive'><table class='table table-striped table-bordered'>`;
+                  tabela += `<thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Detalhes</th></tr></thead><tbody>`;
+                  data.historico.forEach(log => {
+                     tabela += `<tr>`;
+                     tabela += `<td>${new Date(log.data_hora).toLocaleString('pt-BR')}</td>`;
+                     tabela += `<td>${log.usuario}</td>`;
+                     tabela += `<td>${log.acao}</td>`;
+                     tabela += `<td>${renderDetalhes(log)}</td>`;
+                     tabela += `</tr>`;
+                  });
+                  tabela += `</tbody></table></div>`;
+                  conteudo.innerHTML = tabela;
+               } else {
+                  conteudo.innerHTML = '<div class="text-center text-danger">Nenhum registro de auditoria encontrado para este tombo.</div>';
+               }
+            } catch (error) {
+               console.error('[AUDITORIA] Erro ao buscar auditoria:', error);
+               document.getElementById('modalAuditoriaConteudo').innerHTML = '<div class="text-center text-danger">Erro ao buscar auditoria.</div>';
+            }
+         });
       });
    </script>
+
 </body>
 </html>

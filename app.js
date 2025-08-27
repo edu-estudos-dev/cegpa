@@ -7,6 +7,7 @@ import estoqueRoutes from './src/routes/estoqueRoutes.js';
 import pesquisaRoutes from './src/routes/pesquisaRoutes.js';
 import loginLogoutRoutes from './src/routes/loginLogoutRoutes.js';
 import painelRoutes from './src/routes/painelRoutes.js';
+import saidaTombosRoutes from './src/routes/SaidaTomboRoutes.js';
 import sequenciaRoutes from './src/routes/sequenciaRoutes.js';
 import solicitacaoRoutes from './src/routes/solicitacaoRoutes.js';
 import isAuthenticated from './src/middleware/auth.js';
@@ -49,13 +50,6 @@ app.use(
 
 // Middleware de log
 app.use((req, res, next) => {
-   console.log(
-      `[${new Date().toISOString()}] ${req.method} ${req.url} - Session ID: ${
-         req.sessionID
-      } - User: ${
-         req.session.user ? JSON.stringify(req.session.user) : 'Nenhum usuário'
-      }`
-   );
    next();
 });
 
@@ -65,6 +59,7 @@ app.use('/', loginLogoutRoutes);
 // Rotas protegidas
 app.use('/painel', isAuthenticated, painelRoutes);
 app.use('/', isAuthenticated, estoqueRoutes);
+app.use('/', isAuthenticated, saidaTombosRoutes);
 app.use('/', isAuthenticated, pesquisaRoutes);
 app.use('/', isAuthenticated, sequenciaRoutes);
 app.use('/solicitacao', isAuthenticated, solicitacaoRoutes);
@@ -83,10 +78,5 @@ app.use((err, req, res, next) => {
    console.error('Erro no servidor:', err);
    res.status(500).json({ error: 'Algo deu errado!' });
 });
-
-// const PORT = process.env.PORT || 8081;
-// app.listen(PORT, () => {
-//    console.log(`Running at address http://localhost:${PORT}/login`);
-// });
 
 export default app;

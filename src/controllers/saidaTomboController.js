@@ -8,7 +8,8 @@ import sequenciaModel from '../models/sequenciaModel.js';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ExcelJS from 'exceljs';
-import AuditoriaModel from '../models/AuditoriaModel.js';
+import AuditoriaModel from '../models/auditoriaModel.js';
+import estoqueModel from '../models/estoqueModel.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -239,21 +240,6 @@ export default {
             .toISOString()
             .slice(0, 19)
             .replace('T', ' ');
-         console.log(
-            '[saidaTomboController.registrarSaida] Chamando SaidaTomboModel.registrarSaida com:',
-            {
-               tombos,
-               docSaidaFormatado,
-               referencia,
-               destino,
-               postoGrad,
-               mf_recebedor,
-               tel_recebedor,
-               nome_do_recebedor,
-               observacao,
-               dataSaida,
-            }
-         );
          await SaidaTomboModel.registrarSaida(
             req.body.tombos,
             req.body.referencia,
@@ -278,10 +264,6 @@ export default {
          const imagePath = path.join(
             __dirname,
             '../../public/images/cabeçalho pmce.png'
-         );
-         console.log(
-            '[saidaTomboController.registrarSaida] Caminho da imagem:',
-            imagePath
          );
 
          // Verifica se a imagem existe antes de tentar lê-la
@@ -803,6 +785,469 @@ export default {
 
          worksheet.columns = columns.map((col) => ({ width: col.width / 6 }));
 
+         const excelBuffer = await workbook.xlsx.writeBuffer();
+         res.setHeader(
+            'Content-Type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+         );
+         res.setHeader(
+            'Content-Disposition',
+            `attachment; filename=${title.replace(/ /g, '_')}.xlsx`
+         );
+         res.send(excelBuffer);
+      } else {
+         res.status(400).json({
+            error: 'Formato inválido. Use "pdf" ou "excel".',
+         });
+      }
+   },
+
+   // Método para visualizar o PDF associado a um tombo em uma nova aba
+   async viewPDF(req, res) {
+      const { tombo } = req.params;
+
+      try {
+         // Validação do parâmetro tombo
+         if (!Number.isInteger(Number(tombo)) || Number(tombo) <= 0) {
+            return res.status(400).json({ error: 'Tombo inválido.' });
+         }
+
+         // Buscar o PDF usando o método do estoqueModel
+         const pdfData = await estoqueModel.getPDFByTombo(tombo);
+
+         if (!pdfData) {
+            console.error(
+               `[saidaTomboController.viewPDF] Nenhum PDF encontrado para o tombo: ${tombo}`
+            );
+            return res
+               .status(404)
+               .json({ error: 'Nenhum PDF associado a este tombo.' });
+         }
+
+         const pdfPath = path.join(__dirname, '../../', pdfData.file_path);
+         if (fs.existsSync(pdfPath)) {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader(
+               'Content-Disposition',
+               `inline; filename="${pdfData.filename}"`
+            );
+            return fs.createReadStream(pdfPath).pipe(res);
+         } else {
+            console.error(
+               `[saidaTomboController.viewPDF] PDF não encontrado em: ${pdfPath}`
+            );
+            return res
+               .status(404)
+               .json({ error: 'Arquivo PDF não encontrado no servidor.' });
+         }
+      } catch (error) {
+         console.error(
+            '[saidaTomboController.viewPDF] Erro ao buscar PDF:',
+            error
+         );
+         return res.status(500).json({
+            error: 'Erro interno ao buscar o PDF.',
+            details: error.message,
+         });
+      }
+   },
+
+   // Método para listar todos os tombamentos
+   async listarTombamento(req, res) {
+      try {
+         const tombamento = await estoqueModel.getAllTombamento();
+         for (let item of tombamento) {
+            const pdfData = await estoqueModel.getPDFByTombo(item.tombo);
+            item.has_pdf = !!pdfData;
+
+            if (item.data_de_entrada) {
+               const d = new Date(item.data_de_entrada);
+               item.data_de_entrada_formatada = isNaN(d.getTime())
+                  ? 'N/A'
+                  : d.toLocaleDateString('pt-BR');
+            } else {
+               item.data_de_entrada_formatada = 'N/A';
+            }
+         }
+         const userRole = req.user?.role || 'user';
+         res.render('tabelaTombamento', { tombamento, userRole });
+      } catch (error) {
+         console.error('Erro ao listar tombamento:', error);
+         res.status(500).send('Erro ao carregar a tabela de tombamento');
+      }
+   },
+
+   // Método para visualizar detalhes de um tombamento
+   async visualizarTombamento(req, res) {
+      try {
+         const { id } = req.params;
+
+         // Busca dados da tabela registrodetombamento
+         const item = await estoqueModel.getInfoByIdTombamento(id);
+         if (!item) {
+            return res.status(404).json({ error: 'Item não encontrado' });
+         }
+
+         // Busca dados da tabela saida_tombo relacionados ao tombo
+         const tomboUsado = await SaidaTomboModel.getTomboUsadoDetalhes(
+            item.tombo
+         );
+
+         // Combina os dados
+         const response = {
+            ...item,
+            nome_recebedor: tomboUsado?.nome_recebedor || 'N/A',
+            observacao_saida: tomboUsado?.observacao || 'N/A',
+            doc_saida: tomboUsado?.doc_saida || 'N/A',
+            destino: tomboUsado?.destino || 'N/A',
+            posto_grad: tomboUsado?.posto_grad || 'N/A',
+            mf_recebedor: tomboUsado?.mf_recebedor || 'N/A',
+            tel_recebedor: tomboUsado?.tel_recebedor || 'N/A',
+            referencia: tomboUsado?.referencia || 'N/A',
+            data_saida: tomboUsado?.data_saida
+               ? new Date(tomboUsado.data_saida).toLocaleDateString('pt-BR')
+               : 'N/A',
+         };
+
+         res.json(response);
+      } catch (error) {
+         console.error(
+            '[saidaTomboController.visualizarTombamento] Erro ao visualizar tombamento:',
+            error
+         );
+         res.status(500).json({ error: 'Erro ao carregar detalhes' });
+      }
+   },
+
+   // Método para excluir um tombamento
+   async excluirTombamento(req, res) {
+      try {
+         await estoqueModel.deleteTombamento(req.params.id);
+         res.json({ msg: 'Item tombado excluído com sucesso' });
+      } catch (error) {
+         console.error('Erro ao excluir tombamento:', error);
+         res.status(500).json({ msg: 'Erro ao excluir item' });
+      }
+   },
+
+   // Método para atualizar um tombamento
+   async atualizarTombamento(req, res) {
+      try {
+         const {
+            id,
+            data_de_entrada,
+            quantidade,
+            tipo_tombo,
+            tombo,
+            tombo_inicial,
+            tombo_final,
+            tombo_lote_manual,
+            categoria,
+            doc_origem,
+            valor,
+            descricao,
+            situacao,
+            conta_contabil,
+            estoque,
+            observacao,
+         } = req.body;
+
+         // Validações dos campos obrigatórios
+         if (!data_de_entrada) {
+            return res
+               .status(400)
+               .json({ error: 'Data de entrada é obrigatória' });
+         }
+         if (!quantidade || quantidade < 1) {
+            return res
+               .status(400)
+               .json({ error: 'Quantidade deve ser maior ou igual a 1' });
+         }
+         if (!categoria || categoria === 'Selecione uma categoria...') {
+            return res.status(400).json({ error: 'Categoria é obrigatória' });
+         }
+         if (!doc_origem) {
+            return res
+               .status(400)
+               .json({ error: 'Documento de origem é obrigatório' });
+         }
+         if (!valor || valor <= 0) {
+            return res
+               .status(400)
+               .json({ error: 'Valor unitário deve ser maior que 0' });
+         }
+         if (!descricao) {
+            return res.status(400).json({ error: 'Descrição é obrigatória' });
+         }
+         if (!situacao || situacao === 'Escolha uma opção...') {
+            return res
+               .status(400)
+               .json({ error: 'Estado de conservação é obrigatório' });
+         }
+         if (!conta_contabil || conta_contabil === 'Escolha uma opção...') {
+            return res
+               .status(400)
+               .json({ error: 'Conta contábil é obrigatória' });
+         }
+         if (!estoque || estoque === 'Escolha uma opção...') {
+            return res
+               .status(400)
+               .json({ error: 'Local de estoque é obrigatório' });
+         }
+
+         // Preparar dados para atualização com conversão para caixa alta
+         const updateData = {
+            data_de_entrada,
+            quantidade: parseInt(quantidade),
+            tipo_tombo: tipo_tombo ? tipo_tombo.toUpperCase() : null,
+            tombo: tombo ? tombo.toUpperCase() : null,
+            tombo_inicial:
+               tipo_tombo === 'LOTE'
+                  ? tombo_inicial
+                     ? tombo_inicial.toUpperCase()
+                     : null
+                  : null,
+            tombo_final:
+               tipo_tombo === 'LOTE'
+                  ? tombo_final
+                     ? tombo_final.toUpperCase()
+                     : null
+                  : null,
+            tombo_lote_manual:
+               tipo_tombo === 'LOTE_MANUAL'
+                  ? JSON.parse(tombo_lote_manual)
+                  : null,
+            categoria: categoria ? categoria.toUpperCase() : null,
+            doc_origem: doc_origem ? doc_origem.toUpperCase() : null,
+            valor: parseFloat(valor),
+            descricao: descricao ? descricao.toUpperCase() : null,
+            situacao: situacao ? situacao.toUpperCase() : null,
+            conta_contabil: conta_contabil
+               ? conta_contabil.toUpperCase()
+               : null,
+            estoque: estoque ? estoque.toUpperCase() : null,
+            observacao: observacao ? observacao.toUpperCase() : null,
+         };
+
+         // Atualizar o registro no banco
+         const result = await estoqueModel.updateTombamento(id, updateData);
+
+         if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Item não encontrado' });
+         }
+
+         res.status(200).json({ message: 'Tombamento atualizado com sucesso' });
+      } catch (error) {
+         console.error('Erro ao atualizar tombamento:', error);
+         res.status(500).json({
+            error: 'Erro ao atualizar o tombamento: ' + error.message,
+         });
+      }
+   },
+
+   // Método para renderizar formulário de edição de tombamento
+   async editarTombamento(req, res) {
+      try {
+         const item = await estoqueModel.getInfoByIdTombamento(req.params.id);
+         if (!item) {
+            return res.status(404).send('Item não encontrado');
+         }
+
+         // Ajustar formato da data para o input type="date" (YYYY-MM-DD)
+         item.data_de_entrada = item.data_de_entrada
+            ? new Date(item.data_de_entrada).toISOString().split('T')[0]
+            : null;
+         // Garantir que o valor seja um número puro
+         item.valor = item.valor ? parseFloat(item.valor).toFixed(2) : null;
+         // Padronizar valores para corresponder às opções do <select>
+         item.categoria = item.categoria
+            ? item.categoria.toLowerCase()
+            : 'Selecione uma categoria...';
+         item.situacao = item.situacao
+            ? item.situacao.toLowerCase()
+            : 'Escolha uma opção...';
+         item.conta_contabil = item.conta_contabil
+            ? item.conta_contabil.toLowerCase()
+            : 'Escolha uma opção...';
+         item.estoque = item.estoque
+            ? item.estoque.toLowerCase()
+            : 'Escolha uma opção...';
+         // Definir destino_dados como 'registrodetombamento'
+         item.destino_dados = 'registrodetombamento';
+         res.render('editarTombamento', {
+            item,
+            userRole: req.user ? req.user.role : 'user',
+         });
+      } catch (error) {
+         console.error('Erro ao carregar item para edição:', error);
+         res.status(500).send('Erro ao carregar o formulário de edição');
+      }
+   },
+
+   // Método para gerar relatório de tombamento (PDF ou Excel)
+   async gerarRelatorioTombamento(req, res) {
+      try {
+         const { formato = 'pdf' } = req.query;
+         const tombamento = await estoqueModel.getAllTombamento();
+         await this._generateReport(
+            res,
+            tombamento,
+            'Relatório de Tombamento',
+            formato,
+            [
+               {
+                  header: 'Entrada',
+                  dataKey: 'data_de_entrada_formatada',
+                  width: 18,
+               },
+               { header: 'Descrição', dataKey: 'descricao', width: 120 },
+               { header: 'Tombo', dataKey: 'tombo', width: 20 },
+               { header: 'Categoria', dataKey: 'categoria', width: 30 },
+               { header: 'Local', dataKey: 'estoque', width: 20 },
+               { header: 'Situação', dataKey: 'situacao', width: 20 },
+               { header: 'Valor', dataKey: 'valor', width: 20 },
+               { header: 'Doc Origem', dataKey: 'doc_origem', width: 30 },
+            ]
+         );
+      } catch (error) {
+         console.error('Erro ao gerar relatório de tombamento:', error);
+         res.status(500).json({ error: 'Erro ao gerar relatório' });
+      }
+   },
+
+   // Método privado para geração de relatórios gerais (PDF ou Excel)
+   async _generateReport(res, data, title, formato, customColumns = null) {
+      const columns = customColumns || [
+         { header: 'Entrada', dataKey: 'data_entrada', width: 18 },
+         { header: 'Descrição', dataKey: 'descricao', width: 120 },
+         { header: 'Tombo', dataKey: 'tombo', width: 20 },
+         { header: 'Categoria', dataKey: 'categoria', width: 30 },
+         { header: 'Local', dataKey: 'estoque', width: 20 },
+         { header: 'Situação', dataKey: 'situacao', width: 20 },
+         { header: 'Valor', dataKey: 'valor', width: 20 },
+         { header: 'Doc Origem', dataKey: 'doc_origem', width: 30 },
+      ];
+
+      const rows = data.map((item) => {
+         const row = {};
+         columns.forEach((col) => {
+            if (col.dataKey === 'data_entrada') {
+               row[col.dataKey] = item.data_de_entrada
+                  ? new Date(item.data_de_entrada).toLocaleDateString('pt-BR')
+                  : 'N/A';
+            } else if (col.dataKey === 'valor') {
+               row[col.dataKey] = item.valor
+                  ? parseFloat(item.valor).toLocaleString('pt-BR', {
+                       style: 'currency',
+                       currency: 'BRL',
+                    })
+                  : 'N/A';
+            } else if (col.dataKey === 'doc_origem') {
+               row[col.dataKey] = item.doc_origem
+                  ? item.doc_origem.toUpperCase()
+                  : 'N/A';
+            } else {
+               row[col.dataKey] = item[col.dataKey]
+                  ? item[col.dataKey].toString().toUpperCase()
+                  : 'N/A';
+            }
+         });
+         return row;
+      });
+
+      if (formato === 'pdf') {
+         const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4',
+         });
+
+         const generatedText = `Gerado em: ${new Date().toLocaleDateString(
+            'pt-BR'
+         )}`;
+
+         // Função para desenhar o cabeçalho
+         const drawHeader = (pageNumber) => {
+            doc.setFontSize(14);
+            doc.text(title, doc.internal.pageSize.width / 2, 15, {
+               align: 'center',
+            });
+            doc.setFontSize(6);
+            const pageStr = `Página ${pageNumber}`;
+            doc.text(generatedText, 10, 22);
+            doc.text(pageStr, doc.internal.pageSize.width - 10, 22, {
+               align: 'right',
+            });
+         };
+
+         // Desenha o cabeçalho na primeira página
+         drawHeader(1);
+
+         doc.autoTable({
+            startY: 25,
+            margin: { left: 10, right: 10, top: 30 },
+            head: [columns.map((col) => col.header)],
+            body: rows.map((row) => columns.map((col) => row[col.dataKey])),
+            styles: {
+               fontSize: 6,
+               cellPadding: 2,
+               halign: 'center',
+               overflow: 'linebreak',
+            },
+            headStyles: {
+               fontSize: 7,
+               fillColor: [34, 139, 34],
+               textColor: 255,
+               fontStyle: 'bold',
+            },
+            columnStyles: columns.reduce((acc, col, index) => {
+               acc[index] = {
+                  cellWidth: col.width,
+                  halign: col.dataKey === 'descricao' ? 'left' : 'center',
+               };
+               return acc;
+            }, {}),
+            didDrawPage: function (data) {
+               drawHeader(data.pageNumber);
+               if (data.pageNumber < doc.internal.getNumberOfPages()) {
+                  doc.autoTable.previous.finalY = 30;
+               }
+            },
+         });
+
+         const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+         res.setHeader('Content-Type', 'application/pdf');
+         res.setHeader(
+            'Content-Disposition',
+            `attachment; filename=${title.replace(/ /g, '_')}.pdf`
+         );
+         res.send(pdfBuffer);
+      } else if (formato === 'excel') {
+         console.log('[EXCEL] Título da planilha:', title);
+         const workbook = new ExcelJS.Workbook();
+         const worksheet = workbook.addWorksheet(title);
+         worksheet.mergeCells(
+            `A1:${String.fromCharCode(65 + columns.length - 1)}1`
+         );
+         worksheet.getCell('A1').value = title;
+         worksheet.getCell('A1').alignment = { horizontal: 'center' };
+         worksheet.getCell('A1').font = { size: 16, bold: true };
+         worksheet.addRow([
+            `Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
+         ]);
+         worksheet.addRow(columns.map((col) => col.header)).eachCell((cell) => {
+            cell.fill = {
+               type: 'pattern',
+               pattern: 'solid',
+               fgColor: { argb: 'FF228B22' },
+            };
+            cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+            cell.alignment = { horizontal: 'center' };
+         });
+         rows.forEach((row) => {
+            worksheet.addRow(columns.map((col) => row[col.dataKey]));
+         });
+         worksheet.columns = columns.map((col) => ({ width: col.width }));
          const excelBuffer = await workbook.xlsx.writeBuffer();
          res.setHeader(
             'Content-Type',

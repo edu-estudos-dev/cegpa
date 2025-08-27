@@ -1,50 +1,6 @@
 import connection from '../../db_config/connection.js';
 
 class PesquisaModel {
-    // Método para pesquisa por similaridade na descrição (LIKE %valor%)
-    async pesquisaPorSimilaridade(valor) {
-        console.log('Valor de pesquisa recebido:', valor); // Logar dados recebidos
-
-        const queryEstoque = `
-    SELECT COUNT(*) AS quantidadeNoEstoque 
-    FROM estoqueatual 
-    WHERE descricao LIKE ?
-  `;
-
-        const queryItensPagos = `
-    SELECT COUNT(*) AS quantidadePagos 
-    FROM itenspagos 
-    WHERE descricao LIKE ?
-  `;
-
-        try {
-            const valorLike = `%${valor}%`;
-            const [resultEstoque] = await connection.execute(queryEstoque, [
-                valorLike,
-            ]);
-            const [resultPagos] = await connection.execute(queryItensPagos, [
-                valorLike,
-            ]);
-
-            console.log(
-                'Quantidade de itens no estoque com descrição similar:',
-                resultEstoque
-            );
-            console.log(
-                'Quantidade de itens pagos com descrição similar:',
-                resultPagos
-            );
-
-            const quantidadeNoEstoque =
-                resultEstoque[0].quantidadeNoEstoque || 0;
-            const quantidadePagos = resultPagos[0].quantidadePagos || 0;
-
-            return { quantidadeNoEstoque, quantidadePagos };
-        } catch (error) {
-            console.error('Erro na pesquisa por similaridade:', error);
-            throw error;
-        }
-    }
 
     // Método para obter a quantidade de itens no estoque para a categoria selecionda
     async getItensNaoPagosPorCategoria(categoria) {
